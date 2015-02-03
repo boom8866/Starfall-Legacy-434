@@ -7,7 +7,9 @@ enum Texts
     SAY_SLAY                = 1,
     SAY_ABILITY             = 2,
     SAY_ANNOUNCE_ABILITY    = 3,
-    SAY_DEATH               = 4,
+    SAY_FUSE_INTRO          = 4,
+    SAY_FUSE                = 5,
+    SAY_DEATH               = 6,
 };
 
 enum ControllerTexts
@@ -23,6 +25,8 @@ enum Spells
 
     // Feludius
     SPELL_TELEPORT_RB               = 81799,
+    SPELL_TELEPORT_WATER            = 82332,
+    SPELL_FROST_EXPLSION            = 94739,
     SPELL_WATER_BOMB                = 82699,
     SPELL_WATER_BOMB_TRIGGERED      = 82700,
     SPELL_WATERLOGGED               = 82762,
@@ -34,6 +38,8 @@ enum Spells
 
     // Ignacious
     SPELL_TELEPORT_LB               = 81800,
+    SPELL_TELEPORT_FIRE             = 82331,
+    SPELL_FIRE_EXPLOSION            = 94738,
     SPELL_AEGIS_OF_FLAME            = 82631,
     SPELL_RISING_FLAMES             = 82636,
     SPELL_INFERNO_LEAP              = 82856,
@@ -45,9 +51,16 @@ enum Spells
 
     // Arion
     SPELL_TELEPORT_LF               = 81796,
+    SPELL_TELEPORT_AIR              = 82330,
+    SPELL_CALL_WINDS                = 83491,
     
     // Terrastra
     SPELL_TELEPORT_RF               = 81798,
+    SPELL_TELEPORT_EARTH            = 82329,
+    SPELL_ELEMENTAL_STASIS          = 82285,
+
+    // Elementium Monstrosity
+    SPELL_TWILIGHT_EXPLOSION        = 95789,
 
     // Inferno Rush
     SPELL_INFERNO_RUSH_AURA         = 88579,
@@ -73,12 +86,18 @@ enum Events
     EVENT_FLAME_TORRENT,
 
     // Arion
+    EVENT_CALL_WINDS,
 
     // Terrastra
+
+    // Controller
+    EVENT_SUMMON_MONSTROSITY,
 
     // Misc Events
     EVENT_APPLY_IMMUNITY,
     EVENT_ATTACK,
+    EVENT_FACE_CONTROLLER,
+    EVENT_MOVE_FUSE,
 };
 
 enum Actions
@@ -90,9 +109,10 @@ enum Actions
     ACTION_TURN_IN,
     ACTION_SWITCH_PHASE_1,
     ACTION_SWITCH_PHASE_2,
+    ACTION_PREPARE_FUSE,
 };
 
-Position const ArionHomePos = { -1059.99f, -633.863f, 877.69f, 1.093994f};
+Position const ElementiumMonstrosityPos = { -1009.01f, -582.467f, 831.9843f, 6.265732f };
 
 class at_ascendant_council_1 : public AreaTriggerScript
 {
@@ -249,6 +269,12 @@ public:
                     me->SetReactState(REACT_PASSIVE);
                     DoCast(SPELL_TELEPORT_RB);
                     break;
+                case ACTION_PREPARE_FUSE:
+                    DoCast(me, SPELL_FROST_EXPLSION);
+                    DoCast(me, SPELL_TELEPORT_WATER);
+                    events.ScheduleEvent(EVENT_FACE_CONTROLLER, 200);
+                    events.ScheduleEvent(EVENT_MOVE_FUSE, 6000);
+                    break;
                 default:
                     break;
             }
@@ -300,6 +326,15 @@ public:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_HEART_OF_ICE);
                         events.ScheduleEvent(EVENT_HEART_OF_ICE, 22000);
+                        break;
+                    case EVENT_MOVE_FUSE:
+                        Talk(SAY_FUSE_INTRO);
+                        if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                            me->GetMotionMaster()->MovePoint(0, controller->GetPositionX(), controller->GetPositionY(), controller->GetPositionZ());
+                        break;
+                    case EVENT_FACE_CONTROLLER:
+                        if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                            me->SetFacingToObject(controller);
                         break;
                     default:
                         break;
@@ -424,6 +459,12 @@ public:
                     me->SetReactState(REACT_PASSIVE);
                     DoCast(SPELL_TELEPORT_LB);
                     break;
+                case ACTION_PREPARE_FUSE:
+                    DoCast(me, SPELL_FIRE_EXPLOSION);
+                    DoCast(me, SPELL_TELEPORT_FIRE);
+                    events.ScheduleEvent(EVENT_FACE_CONTROLLER, 200);
+                    events.ScheduleEvent(EVENT_MOVE_FUSE, 11000);
+                    break;
                 default:
                     break;
             }
@@ -531,6 +572,15 @@ public:
                         DoCast(me, SPELL_FLAME_TORRENT);
                         events.ScheduleEvent(EVENT_FLAME_TORRENT, 12000);
                         break;
+                    case EVENT_MOVE_FUSE:
+                        Talk(SAY_FUSE_INTRO);
+                        if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                            me->GetMotionMaster()->MovePoint(0, controller->GetPositionX(), controller->GetPositionY(), controller->GetPositionZ());
+                        break;
+                    case EVENT_FACE_CONTROLLER:
+                        if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                            me->SetFacingToObject(controller);
+                        break;
                     default:
                         break;
                 }
@@ -553,7 +603,10 @@ public:
     {
         boss_terrastraAI(Creature* creature) : BossAI(creature, DATA_TERRASTRA)
         {
+            _switched = false;
         }
+
+        bool _switched;
 
         void Reset()
         {
@@ -572,6 +625,7 @@ public:
             _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
+            _switched = false;
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
             summons.DespawnAll();
@@ -594,8 +648,14 @@ public:
                 Talk(SAY_SLAY);
         }
 
-        void DamageTaken(Unit* /*who*/, uint32& damage)
+        void DamageTaken(Unit* attacker, uint32& damage)
         {
+            if (me->HealthBelowPct(25) && !_switched)
+            {
+                if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                    controller->AI()->DoAction(ACTION_SWITCH_PHASE_2);
+                _switched = true;
+            }
         }
 
         void DoAction(int32 action)
@@ -607,6 +667,16 @@ public:
                     DoCast(me, SPELL_TELEPORT_RF);
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                     events.ScheduleEvent(EVENT_ATTACK, 500);
+                    break;
+                case ACTION_PREPARE_FUSE:
+                    _switched = true;
+                    me->SetReactState(REACT_PASSIVE);
+                    me->AttackStop();
+                    DoCast(me, SPELL_ELEMENTAL_STASIS);
+                    DoCast(me, SPELL_TELEPORT_EARTH);
+                    summons.DespawnAll();
+                    events.ScheduleEvent(EVENT_FACE_CONTROLLER, 200);
+                    events.ScheduleEvent(EVENT_MOVE_FUSE, 3000);
                     break;
                 default:
                     break;
@@ -632,6 +702,15 @@ public:
                     case EVENT_TALK_INTRO:
                         Talk(SAY_AGGRO);
                         break;
+                    case EVENT_MOVE_FUSE:
+                        Talk(SAY_FUSE_INTRO);
+                        if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                            me->GetMotionMaster()->MovePoint(0, controller->GetPositionX(), controller->GetPositionY(), controller->GetPositionZ());
+                        break;
+                    case EVENT_FACE_CONTROLLER:
+                        if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                            me->SetFacingToObject(controller);
+                        break;
                     default:
                         break;
                 }
@@ -653,7 +732,10 @@ public:
     {
         boss_arionAI(Creature* creature) : BossAI(creature, DATA_ARION)
         {
+            _switched = false;
         }
+
+        bool _switched;
 
         void Reset()
         {
@@ -665,6 +747,7 @@ public:
         {
             Talk(SAY_AGGRO);
             _EnterCombat();
+            events.ScheduleEvent(EVENT_CALL_WINDS, 7000);
         }
 
         void EnterEvadeMode()
@@ -672,6 +755,7 @@ public:
             _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
+            _switched = false;
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
             summons.DespawnAll();
@@ -686,6 +770,15 @@ public:
 
         void JustSummoned(Creature* summon)
         {
+            switch (summon->GetEntry())
+            {
+                case NPC_VIOLENT_CYCLONE:
+                    summon->GetMotionMaster()->MoveRandom(20.0f);
+                    break;
+                default:
+                    break;
+            }
+            summons.Summon(summon);
         }
 
         void KilledUnit(Unit* victim)
@@ -694,8 +787,14 @@ public:
                 Talk(SAY_SLAY);
         }
 
-        void DamageTaken(Unit* /*who*/, uint32& damage)
+        void DamageTaken(Unit* attacker, uint32& damage)
         {
+            if (me->HealthBelowPct(25) && !_switched)
+            {
+                if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                    controller->AI()->DoAction(ACTION_SWITCH_PHASE_2);
+                _switched = true;
+            }
         }
 
         void DoAction(int32 action)
@@ -707,6 +806,14 @@ public:
                     DoCast(me, SPELL_TELEPORT_LF);
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                     events.ScheduleEvent(EVENT_ATTACK, 500);
+                    break;
+                case ACTION_PREPARE_FUSE:
+                    _switched = true;
+                    me->SetReactState(REACT_PASSIVE);
+                    me->AttackStop();
+                    summons.DespawnAll();
+                    DoCast(me, SPELL_TELEPORT_AIR);
+                    events.ScheduleEvent(EVENT_MOVE_FUSE, 100);
                     break;
                 default:
                     break;
@@ -729,6 +836,15 @@ public:
                         if (Player* player = me->FindNearestPlayer(200.0f, true))
                             me->AI()->AttackStart(player);
                         break;
+                    case EVENT_CALL_WINDS:
+                        Talk(SAY_ABILITY);
+                        DoCast(me, SPELL_CALL_WINDS);
+                        break;
+                    case EVENT_MOVE_FUSE:
+                        Talk(SAY_FUSE_INTRO);
+                        if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                            me->GetMotionMaster()->MovePoint(0, controller->GetPositionX(), controller->GetPositionY(), controller->GetPositionZ());
+                        break;
                     default:
                         break;
                 }
@@ -738,6 +854,108 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new boss_arionAI(creature);
+    }
+};
+
+class boss_elementium_monstrosity : public CreatureScript
+{
+public:
+    boss_elementium_monstrosity() : CreatureScript("boss_elementium_monstrosity") { }
+
+    struct boss_elementium_monstrosityAI : public BossAI
+    {
+        boss_elementium_monstrosityAI(Creature* creature) : BossAI(creature, DATA_ELEMENTIUM_MONSTROSITY)
+        {
+        }
+
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            me->SetInCombatWithZone();
+        }
+
+        void Reset()
+        {
+            _Reset();
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            Talk(SAY_AGGRO);
+            _EnterCombat();
+            events.ScheduleEvent(EVENT_ATTACK, 3000);
+            DoCast(me, SPELL_TWILIGHT_EXPLOSION);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            events.Reset();
+            summons.DespawnAll();
+            me->DespawnOrUnsummon(100);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            _JustDied();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            Talk(SAY_DEATH);
+            summons.DespawnAll();
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            summons.Summon(summon);
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_SLAY);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case 0:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_ATTACK:
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    if (Player* player = me->FindNearestPlayer(200.0f, true))
+                        me->AI()->AttackStart(player);
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_elementium_monstrosityAI(creature);
     }
 };
 
@@ -823,6 +1041,26 @@ public:
                 if (Creature* terrastra = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TERRASTRA)))
                     terrastra->AI()->DoAction(ACTION_TURN_IN);
                 break;
+            case ACTION_SWITCH_PHASE_2:
+                events.ScheduleEvent(EVENT_SUMMON_MONSTROSITY, 15000);
+                if (Creature* arion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARION)))
+                {
+                    health += arion->GetHealth();
+                    arion->AI()->DoAction(ACTION_PREPARE_FUSE);
+                }
+
+                if (Creature* terrastra = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TERRASTRA)))
+                {
+                    health += terrastra->GetHealth();
+                    terrastra->AI()->DoAction(ACTION_PREPARE_FUSE);
+                }
+
+                if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
+                    feludius->AI()->DoAction(ACTION_PREPARE_FUSE);
+
+                if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
+                    ignacious->AI()->DoAction(ACTION_PREPARE_FUSE);
+                break;
             default:
                 break;
             }
@@ -831,6 +1069,43 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SUMMON_MONSTROSITY:
+                        if (Creature* monstrosity = me->SummonCreature(BOSS_ELEMENTIUM_MONSTROSITY, ElementiumMonstrosityPos, TEMPSUMMON_MANUAL_DESPAWN))
+                            monstrosity->SetHealth(health);
+                        if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
+                        {
+                            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, ignacious);
+                            ignacious->DespawnOrUnsummon(100);
+                        }
+
+                        if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
+                        {
+                            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, feludius);
+                            feludius->DespawnOrUnsummon(100);
+                        }
+
+                        if (Creature* arion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARION)))
+                        {
+                            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, arion);
+                            arion->DespawnOrUnsummon(100);
+                        }
+
+                        if (Creature* terrastra = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TERRASTRA)))
+                        {
+                            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, terrastra);
+                            terrastra->DespawnOrUnsummon(100);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     };
 
@@ -1022,6 +1297,7 @@ void AddSC_boss_ascendant_council()
     new boss_ignacious();
     new boss_terrastra();
     new boss_arion();
+    new boss_elementium_monstrosity();
     new npc_ascendant_council_controller();
     new spell_ac_water_bomb();
     new spell_ac_glaciate();

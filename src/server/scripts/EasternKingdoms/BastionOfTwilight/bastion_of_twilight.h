@@ -84,15 +84,9 @@ enum Creatures
     NPC_ASCENDANT_CONTROLLER        = 43691,
     NPC_WATER_BOMB                  = 44201,
     NPC_INFERNO_RUSH                = 47501,
+    NPC_VIOLENT_CYCLONE             = 44747,
 
-    NPC_CALL_WINDS                  = 44747, // Scripted.
-    NPC_GRAVITY_WELL                = 44824, // Scripted.
-    NPC_ERUPTION_TGT                = 44845, // Scripted on Terrastra boss script.
-    NPC_FROZEN_ORB                  = 49518, // Gets a target, goes to it casting beacon on it, casts Glaciate if reaches. // Scripted.
-    NPC_FLAME_STRIKE                = 49432, // Summ by boss on random target. Puts visual on self then after 5 secs comes damage spell. // Scripted.
-    NPC_LIQUID_ICE                  = 45452, // Scripted.
-    NPC_LAVA_SEED                   = 48538, // Scripted.
-    NPC_GRAVITY_CRUSH               = 45476, // vehicle.
+
 
     NPC_CHOGALL_HALFUS              = 46965,
     NPC_CHOGALL_DRAGONS             = 48142,
