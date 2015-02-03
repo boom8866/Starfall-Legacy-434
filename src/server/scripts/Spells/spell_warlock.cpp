@@ -1424,6 +1424,53 @@ class spell_warl_soul_link_trigger: public SpellScriptLoader
         }
 };
 
+class spell_warl_hellfire : public SpellScriptLoader
+{
+public:
+    spell_warl_hellfire() : SpellScriptLoader("spell_warl_hellfire")
+    {
+    }
+
+    class spell_warl_hellfire_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_hellfire_AuraScript);
+
+        enum spellId
+        {
+            SPELL_TALENT_INFERNO    = 85105
+        };
+
+        void HellfireApply(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetTarget())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER && caster->HasSpell(SPELL_TALENT_INFERNO))
+                    caster->AddAura(SPELL_TALENT_INFERNO, caster);
+            }
+        }
+
+        void HellfireRemove(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetTarget())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER && caster->HasAura(SPELL_TALENT_INFERNO))
+                    caster->RemoveAurasDueToSpell(SPELL_TALENT_INFERNO);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_warl_hellfire_AuraScript::HellfireApply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_warl_hellfire_AuraScript::HellfireRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warl_hellfire_AuraScript();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_bane_of_doom();
@@ -1454,4 +1501,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_hand_of_gul_dan();
     new spell_warl_shadowburn();
     new spell_warl_soul_link_trigger();
+    new spell_warl_hellfire();
 }
