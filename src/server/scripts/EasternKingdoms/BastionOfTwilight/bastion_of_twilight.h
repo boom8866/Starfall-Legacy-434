@@ -8,33 +8,34 @@
 enum DataTypes
 {
     // Encounters
-    DATA_HALFUS_WYRMBREAKER         = 1,
-    DATA_THERALION_AND_VALIONA      = 2,
-    DATA_ASCENDANT_COUNCIL          = 3,
-    DATA_CHOGALL                    = 4,
-    DATA_SINESTRA                   = 5,
+    DATA_HALFUS_WYRMBREAKER             = 1,
+    DATA_THERALION_AND_VALIONA          = 2,
+    DATA_ASCENDANT_COUNCIL              = 3,
+    DATA_CHOGALL                        = 4,
+    DATA_SINESTRA                       = 5,
 
     // NPC GUIDs
-    DATA_AC_PHASE                   = 6,
-    DATA_FELUDIUS                   = 7,
-    DATA_IGNACIOUS                  = 8,
-    DATA_ARION                      = 9,
-    DATA_TERRASTRA                  = 10,
-    DATA_ELEMENTIUM_MONSTROSITY     = 11,
+    DATA_AC_PHASE                       = 6,
+    DATA_FELUDIUS                       = 7,
+    DATA_IGNACIOUS                      = 8,
+    DATA_ARION                          = 9,
+    DATA_TERRASTRA                      = 10,
+    DATA_ELEMENTIUM_MONSTROSITY         = 11,
+    DATA_ASCENDANT_COUNCIL_CONTROLLER   = 13,
 
-    DATA_PROTO_BEHEMOTH             = 12,
-    DATA_NETHER_SCION               = 13,
-    DATA_SLATE_DRAGON               = 14,
-    DATA_TIME_WARDEN                = 15,
-    DATA_WHELPS                     = 16,
-    DATA_STORM_RIDER                = 17,
-    DATA_CAGE                       = 18,
+    DATA_PROTO_BEHEMOTH                 = 14,
+    DATA_NETHER_SCION                   = 15,
+    DATA_SLATE_DRAGON                   = 16,
+    DATA_TIME_WARDEN                    = 17,
+    DATA_WHELPS                         = 18,
+    DATA_STORM_RIDER                    = 19,
+    DATA_CAGE                           = 20,
 
-    DATA_VALIONA                    = 19,
-    DATA_THERALION                  = 20,
+    DATA_VALIONA                        = 21,
+    DATA_THERALION                      = 22,
 
-    DATA_CHOGALL_HALFUS_INTRO       = 21,
-    DATA_CHOGALL_TAV_INTRO          = 22,
+    DATA_CHOGALL_HALFUS_INTRO           = 23,
+    DATA_CHOGALL_TAV_INTRO              = 24,
 
     // Instance Datas
     DATA_DRAGONS_PICKED,

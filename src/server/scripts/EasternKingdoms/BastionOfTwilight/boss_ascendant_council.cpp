@@ -10,28 +10,47 @@ enum Texts
     SAY_DEATH               = 4,
 };
 
+enum ControllerTexts
+{
+    ANNOUNCE_QUAKE          = 1,
+    ANNOUNCE_THUNDERSHOCK   = 2,
+};
+
 enum Spells
 {
+    // General Spells
+    SPELL_CLEAR_ALL_DEBUFFS         = 34098,
+
     // Feludius
-    SPELL_WATER_BOMB            = 82699,
-    SPELL_WATER_BOMB_TRIGGERED  = 82700,
-    SPELL_WATERLOGGED           = 82762,
-    SPELL_HYDRO_LANCE           = 82752,
-    SPELL_GLACIATE              = 82746,
-    SPELL_FROZEN                = 82772,
-    SPELL_HEART_OF_ICE          = 82665,
-    SPELL_FROST_IMBUED          = 82666,
+    SPELL_TELEPORT_RB               = 81799,
+    SPELL_WATER_BOMB                = 82699,
+    SPELL_WATER_BOMB_TRIGGERED      = 82700,
+    SPELL_WATERLOGGED               = 82762,
+    SPELL_HYDRO_LANCE               = 82752,
+    SPELL_GLACIATE                  = 82746,
+    SPELL_FROZEN                    = 82772,
+    SPELL_HEART_OF_ICE              = 82665,
+    SPELL_FROST_IMBUED              = 82666,
 
     // Ignacious
-    SPELL_AEGIS_OF_FLAME        = 82631,
-    SPELL_RISING_FLAMES         = 82636,
+    SPELL_TELEPORT_LB               = 81800,
+    SPELL_AEGIS_OF_FLAME            = 82631,
+    SPELL_RISING_FLAMES             = 82636,
+    SPELL_INFERNO_LEAP              = 82856,
+    SPELL_INFERNO_LEAP_TRIGGERED    = 82857,
+    SPELL_INFERNO_RUSH_CHARGE       = 82859,
+    SPELL_BURNING_BLOOD             = 82660,
+    SPELL_FLAME_IMBUED              = 82663,
+    SPELL_FLAME_TORRENT             = 82777,
 
-    SPELL_INFERNO_LEAP          = 82856,
-    SPELL_INFERNO_LEAP_TRIGGERED = 82857,
-    SPELL_INFERNO_RUSH_CHARGE   = 82859,
+    // Arion
+    SPELL_TELEPORT_LF               = 81796,
+    
+    // Terrastra
+    SPELL_TELEPORT_RF               = 81798,
 
     // Inferno Rush
-    SPELL_INFERNO_RUSH_AURA     = 88579,
+    SPELL_INFERNO_RUSH_AURA         = 88579,
 };
 
 enum Events
@@ -50,9 +69,16 @@ enum Events
     EVENT_INFERNO_RUSH,
     EVENT_SUMMON_INFERNO_RUSH,
     EVENT_ACTIVATE_FLAMES,
+    EVENT_BURNING_BLOOD,
+    EVENT_FLAME_TORRENT,
+
+    // Arion
+
+    // Terrastra
 
     // Misc Events
     EVENT_APPLY_IMMUNITY,
+    EVENT_ATTACK,
 };
 
 enum Actions
@@ -60,7 +86,13 @@ enum Actions
     ACTION_INTRO_1 = 1,
     ACTION_INTRO_2,
     ACTION_INTRO_3,
+    ACTION_TELEPORT,
+    ACTION_TURN_IN,
+    ACTION_SWITCH_PHASE_1,
+    ACTION_SWITCH_PHASE_2,
 };
+
+Position const ArionHomePos = { -1059.99f, -633.863f, 877.69f, 1.093994f};
 
 class at_ascendant_council_1 : public AreaTriggerScript
 {
@@ -123,11 +155,15 @@ public:
     {
         boss_feludiusAI(Creature* creature) : BossAI(creature, DATA_FELUDIUS)
         {
+            _switched = false;
         }
+
+        bool _switched;
 
         void Reset()
         {
             _Reset();
+            _switched = false;
         }
 
         void EnterCombat(Unit* who)
@@ -138,7 +174,7 @@ public:
             if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
                 ignacious->AI()->AttackStart(who);
 
-            events.ScheduleEvent(EVENT_WATER_BOMB, 15000); // 33-35 seconds cooldown
+            events.ScheduleEvent(EVENT_WATER_BOMB, 15000);
             events.ScheduleEvent(EVENT_GLACIATE, 30000);
             events.ScheduleEvent(EVENT_HYDRO_LANCE, urand(6000, 10000));
             events.ScheduleEvent(EVENT_HEART_OF_ICE, 18000);
@@ -149,6 +185,8 @@ public:
             _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
+            _switched = false;
+            me->SetReactState(REACT_AGGRESSIVE);
             me->GetMotionMaster()->MoveTargetedHome();
             summons.DespawnAll();
         }
@@ -170,8 +208,18 @@ public:
                 Talk(SAY_SLAY);
         }
 
-        void DamageTaken(Unit* /*who*/, uint32& damage)
+        void DamageTaken(Unit* attacker, uint32& damage)
         {
+            if (attacker->HasAura(SPELL_FLAME_IMBUED))
+                damage = damage + (damage * 0.5f);
+
+            if (me->HealthBelowPct(25) && !_switched)
+            {
+                if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                    controller->AI()->DoAction(ACTION_SWITCH_PHASE_1);
+
+                _switched = true;
+            }
         }
 
         void MakeInterruptable(bool apply)
@@ -185,6 +233,24 @@ public:
             {
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_TELEPORT:
+                    _switched = true;
+                    me->RemoveAllAuras();
+                    me->CastStop();
+                    events.Reset();
+                    me->AttackStop();
+                    me->SetReactState(REACT_PASSIVE);
+                    DoCast(SPELL_TELEPORT_RB);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -233,11 +299,13 @@ public:
                     case EVENT_HEART_OF_ICE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_HEART_OF_ICE);
+                        events.ScheduleEvent(EVENT_HEART_OF_ICE, 22000);
                         break;
                     default:
                         break;
                 }
             }
+            DoMeleeAttackIfReady();
         }
     };
     CreatureAI* GetAI(Creature* creature) const
@@ -257,15 +325,19 @@ public:
         {
             leapTarget = NULL;
             _infernoCounter = 0;
+            _switched = false;
         }
 
         Unit* leapTarget;
         uint8 _infernoCounter;
         Position ignaciousPos;
+        Position rushPos;
+        bool _switched;
 
         void Reset()
         {
             _Reset();
+            MakeInterruptable(true);
         }
 
         void EnterCombat(Unit* who)
@@ -275,6 +347,8 @@ public:
             events.ScheduleEvent(EVENT_TALK_INTRO, 4000);
             events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, 31000);
             events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
+            events.ScheduleEvent(EVENT_BURNING_BLOOD, 28000);
+            events.ScheduleEvent(EVENT_FLAME_TORRENT, urand(6000, 10000));
 
             if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
                 feludius->AI()->AttackStart(who);
@@ -286,8 +360,10 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
+            me->SetReactState(REACT_AGGRESSIVE);
             leapTarget = NULL;
             _infernoCounter = 0;
+            _switched = false;
             summons.DespawnAll();
         }
 
@@ -308,8 +384,49 @@ public:
                 Talk(SAY_SLAY);
         }
 
-        void DamageTaken(Unit* /*who*/, uint32& damage)
+        void DamageTaken(Unit* attacker, uint32& damage)
         {
+            if (attacker->HasAura(SPELL_FROST_IMBUED))
+                damage = damage + (damage * 0.5f);
+
+            if (me->HealthBelowPct(25) && !_switched)
+            {
+                if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                    controller->AI()->DoAction(ACTION_SWITCH_PHASE_1);
+                _switched = true;
+            }
+        }
+
+        void MakeInterruptable(bool apply)
+        {
+            if (apply)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
+            }
+            else
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_TELEPORT:
+                    _switched = true;
+                    me->RemoveAllAuras();
+                    me->CastStop();
+                    events.Reset();
+                    me->AttackStop();
+                    me->SetReactState(REACT_PASSIVE);
+                    DoCast(SPELL_TELEPORT_LB);
+                    break;
+                default:
+                    break;
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -337,7 +454,7 @@ public:
                         break;
                     case EVENT_INFERNO_LEAP:
                     {
-                        std::list<Player*> targets = me->GetNearestPlayersList(400.0f, true);
+                        std::list<Player*> targets = me->GetNearestPlayersList(200.0f, true);
                         if (!targets.empty())
                         {
                             leapTarget = me->getVictim();
@@ -364,21 +481,24 @@ public:
                         events.ScheduleEvent(EVENT_SUMMON_INFERNO_RUSH, 1);
                         break;
                     case EVENT_SUMMON_INFERNO_RUSH:
-                        if (!me->IsWithinMeleeRange(leapTarget, me->GetFloatValue(UNIT_FIELD_COMBATREACH)))
+                        if (me->GetDistance2d(rushPos.GetPositionX(), rushPos.GetPositionY()) > me->GetFloatValue(UNIT_FIELD_COMBATREACH))
                         {
                             if (_infernoCounter == 0)
+                            {
                                 ignaciousPos.Relocate(me);
+                                rushPos.Relocate(leapTarget);
+                            }
 
                             _infernoCounter++;
-                            Position pos;
-                            pos.Relocate(leapTarget);
-                            float ori = me->GetAngle(&pos);
+
+                            float ori = me->GetAngle(&rushPos);
                             float dist = _infernoCounter * 6.0f;
-                            float x = ignaciousPos.GetPositionX() * cos(ori) * dist;
-                            float y = ignaciousPos.GetPositionY() * sin(ori) * dist;
+
+                            float x = ignaciousPos.GetPositionX() + cos(ori) * dist;
+                            float y = ignaciousPos.GetPositionY() + sin(ori) * dist;
                             float z = ignaciousPos.GetPositionZ();
 
-                            me->SummonCreature(NPC_INFERNO_RUSH, x, y, z, me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
+                            me->SummonCreature(NPC_INFERNO_RUSH, x, y, z, ori, TEMPSUMMON_MANUAL_DESPAWN);
                             events.ScheduleEvent(EVENT_SUMMON_INFERNO_RUSH, 250);
                         }
                         else
@@ -392,17 +512,30 @@ public:
                     {
                         std::list<Creature*> units;
                         GetCreatureListWithEntryInGrid(units, me, NPC_INFERNO_RUSH, 500.0f);
+                        if (units.empty())
+                            break;
+
                         for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                         {
                             (*itr)->AI()->DoCast(SPELL_INFERNO_RUSH_AURA);
-                            (*itr)->DespawnOrUnsummon(20000);
+                            (*itr)->DespawnOrUnsummon(31000);
                         }
                         break;
                     }
+                    case EVENT_BURNING_BLOOD:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_BURNING_BLOOD);
+                        events.ScheduleEvent(EVENT_BURNING_BLOOD, 22000);
+                        break;
+                    case EVENT_FLAME_TORRENT:
+                        DoCast(me, SPELL_FLAME_TORRENT);
+                        events.ScheduleEvent(EVENT_FLAME_TORRENT, 12000);
+                        break;
                     default:
                         break;
                 }
             }
+            DoMeleeAttackIfReady();
         }
     };
     CreatureAI* GetAI(Creature* creature) const
@@ -425,13 +558,13 @@ public:
         void Reset()
         {
             _Reset();
+            me->SetReactState(REACT_PASSIVE);
         }
 
         void EnterCombat(Unit* who)
         {
-            Talk(SAY_AGGRO);
             _EnterCombat();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            events.ScheduleEvent(EVENT_TALK_INTRO, 4000);
         }
 
         void EnterEvadeMode()
@@ -440,8 +573,8 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
+            me->SetReactState(REACT_PASSIVE);
             summons.DespawnAll();
-            _DespawnAtEvade();
         }
 
         void JustDied(Unit* /*killer*/)
@@ -465,6 +598,21 @@ public:
         {
         }
 
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_TURN_IN:
+                    me->SetInCombatWithZone();
+                    DoCast(me, SPELL_TELEPORT_RF);
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                    events.ScheduleEvent(EVENT_ATTACK, 500);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
@@ -476,6 +624,16 @@ public:
             {
                 switch (eventId)
                 {
+                    case EVENT_ATTACK:
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        if (Player* player = me->FindNearestPlayer(200.0f, true))
+                            me->AI()->AttackStart(player);
+                        break;
+                    case EVENT_TALK_INTRO:
+                        Talk(SAY_AGGRO);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -500,13 +658,13 @@ public:
         void Reset()
         {
             _Reset();
+            me->SetReactState(REACT_PASSIVE);
         }
 
         void EnterCombat(Unit* who)
         {
             Talk(SAY_AGGRO);
             _EnterCombat();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
         }
 
         void EnterEvadeMode()
@@ -515,8 +673,8 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
+            me->SetReactState(REACT_PASSIVE);
             summons.DespawnAll();
-            _DespawnAtEvade();
         }
 
         void JustDied(Unit* /*killer*/)
@@ -540,6 +698,21 @@ public:
         {
         }
 
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_TURN_IN:
+                    me->SetInCombatWithZone();
+                    DoCast(me, SPELL_TELEPORT_LF);
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                    events.ScheduleEvent(EVENT_ATTACK, 500);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
@@ -551,6 +724,13 @@ public:
             {
                 switch (eventId)
                 {
+                    case EVENT_ATTACK:
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        if (Player* player = me->FindNearestPlayer(200.0f, true))
+                            me->AI()->AttackStart(player);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -574,17 +754,20 @@ public:
             _intro1Done = false;
             _intro2Done = false;
             _intro3Done = false;
+            health = 0;
         }
 
         InstanceScript* instance;
         SummonList summons;
         EventMap events;
+        uint64 health;
         bool _intro1Done;
         bool _intro2Done;
         bool _intro3Done;
 
         void Reset()
         {
+            health = 0;
         }
 
         void JustSummoned(Creature* summon)
@@ -619,6 +802,26 @@ public:
                         chogall->AI()->TalkToMap(6);
                     _intro3Done = true;
                 }
+                break;
+            case ACTION_SWITCH_PHASE_1:
+                health = 0;
+                if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
+                {
+                    health += feludius->GetHealth();
+                    feludius->AI()->DoAction(ACTION_TELEPORT);
+                }
+
+                if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
+                {
+                    health += ignacious->GetHealth();
+                    ignacious->AI()->DoAction(ACTION_TELEPORT);
+                }
+
+                if (Creature* arion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARION)))
+                    arion->AI()->DoAction(ACTION_TURN_IN);
+
+                if (Creature* terrastra = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TERRASTRA)))
+                    terrastra->AI()->DoAction(ACTION_TURN_IN);
                 break;
             default:
                 break;
@@ -733,23 +936,80 @@ public:
                 target->CastSpell(target, SPELL_FROST_IMBUED, true);
         }
 
-        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            if (Unit* target = GetTarget())
-                target->RemoveAurasDueToSpell(SPELL_FROST_IMBUED);
-        }
-
         void Register()
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_ac_heart_of_ice_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE);
             OnEffectApply += AuraEffectApplyFn(spell_ac_heart_of_ice_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, AURA_EFFECT_HANDLE_REAL);
-            OnEffectRemove += AuraEffectRemoveFn(spell_ac_heart_of_ice_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
     AuraScript* GetAuraScript() const
     {
         return new spell_ac_heart_of_ice_AuraScript();
+    }
+};
+
+class spell_ac_inferno_rush_fire : public SpellScriptLoader
+{
+public:
+    spell_ac_inferno_rush_fire() : SpellScriptLoader("spell_ac_inferno_rush_fire") { }
+
+    class spell_ac_inferno_rush_fire_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_inferno_rush_fire_SpellScript);
+
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                if (target->HasAura(SPELL_WATERLOGGED))
+                    target->RemoveAurasDueToSpell(SPELL_WATERLOGGED);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_ac_inferno_rush_fire_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_inferno_rush_fire_SpellScript();
+    }
+};
+
+class spell_ac_burning_blood : public SpellScriptLoader
+{
+public:
+    spell_ac_burning_blood() : SpellScriptLoader("spell_ac_burning_blood") { }
+
+    class spell_ac_burning_blood_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_ac_burning_blood_AuraScript);
+
+        void OnPeriodic(AuraEffect const* aurEff)
+        {
+            uint64 damage;
+            damage = aurEff->GetBaseAmount() * aurEff->GetTickNumber();
+            GetEffect(EFFECT_0)->ChangeAmount(damage);
+        }
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+                target->CastSpell(target, SPELL_FLAME_IMBUED, true);
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_ac_burning_blood_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE);
+            OnEffectApply += AuraEffectApplyFn(spell_ac_burning_blood_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_ac_burning_blood_AuraScript();
     }
 };
 
@@ -766,4 +1026,6 @@ void AddSC_boss_ascendant_council()
     new spell_ac_water_bomb();
     new spell_ac_glaciate();
     new spell_ac_heart_of_ice();
+    new spell_ac_inferno_rush_fire();
+    new spell_ac_burning_blood();
 }

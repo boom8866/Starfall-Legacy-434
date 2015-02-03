@@ -29,6 +29,7 @@ class instance_bastion_of_twilight : public InstanceMapScript
                 _ValionaGUID = 0;
                 _TheralionGUID = 0;
                 _AscendantcouncilGUID = 0;
+                _AscendantCouncilControllerGUID = 0;
                 _FeludiusGUID = 0;
                 _IgnaciousGUID = 0;
                 _ArionGUID = 0;
@@ -74,6 +75,9 @@ class instance_bastion_of_twilight : public InstanceMapScript
                         break;
                     case NPC_ASCENDANT_COUNCIL:
                         _AscendantcouncilGUID = creature->GetGUID();
+                        break;
+                    case NPC_ASCENDANT_CONTROLLER:
+                        _AscendantCouncilControllerGUID = creature->GetGUID();
                         break;
                     case BOSS_FELUDIUS:
                         _FeludiusGUID = creature->GetGUID();
@@ -234,6 +238,9 @@ class instance_bastion_of_twilight : public InstanceMapScript
                         return _TerrastraGUID;
                         return _MonstrosityGUID;
                         break;
+                    case DATA_ASCENDANT_COUNCIL_CONTROLLER:
+                        return _AscendantCouncilControllerGUID;
+                        break;
                     case DATA_CHOGALL:
                         return _ChoGallGUID;
                         break;
@@ -336,6 +343,7 @@ class instance_bastion_of_twilight : public InstanceMapScript
             uint64 _ValionaGUID;
             uint64 _TheralionGUID;
             uint64 _AscendantcouncilGUID;
+            uint64 _AscendantCouncilControllerGUID;
             uint64 _FeludiusGUID;
             uint64 _IgnaciousGUID;
             uint64 _ArionGUID;
