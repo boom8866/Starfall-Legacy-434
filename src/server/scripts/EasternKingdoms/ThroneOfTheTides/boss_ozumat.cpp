@@ -545,7 +545,7 @@ public:
         boss_ozumatAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript())
         {
             creature->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
-            creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
             creature->SetHealth(creature->GetMaxHealth());
             SetCombatMovement(false);
         }
@@ -569,7 +569,7 @@ public:
                 case INST_ACTION_OZUMAT_START_PHASE:
                 {
                     me->GetMotionMaster()->MovePoint(1, OzumatPosition[1]);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                     if (Creature* neptulon = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_NEPTULON)))
                         me->SetFacingToObject(neptulon);
                     me->SetFloatValue(UNIT_FIELD_COMBATREACH, 100);
@@ -580,7 +580,7 @@ public:
                     me->RemoveAllAuras();
                     me->GetMotionMaster()->MovePoint(0, OzumatPosition[0]);
                     me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                     me->SetHealth(me->GetMaxHealth());
 
                     Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();

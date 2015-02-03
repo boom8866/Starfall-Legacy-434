@@ -188,8 +188,7 @@ public:
             DoCastAOE(SPELL_CALL_FOR_HELP);
             events.ScheduleEvent(EVENT_QUAKE, 13000);
             instance->SetBossState(DATA_ROMOGG_BONECRUSHER, IN_PROGRESS);
-            if (IsHeroic())
-                events.ScheduleEvent(EVENT_WOUNDING_STRIKE, 7000);
+            events.ScheduleEvent(EVENT_WOUNDING_STRIKE, 7000);
             angeredKilled = 0;
         }
 
