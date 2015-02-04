@@ -8700,7 +8700,10 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         case 5145:  // Vashj'ir
         case 4815:  // Vashj'ir
         {
-            ChatHandler(GetSession()).PSendSysMessage("|cffff0000[WARNING]: |cffffffffYou are in a non-fixed quest zone, you are not able to take quests or kill creatures!");
+            if (newZone == 16 || newZone == 357)
+                ChatHandler(GetSession()).PSendSysMessage("|cffff0000[INCOMPLETE ZONE]: |cffffffffYou are in a non-fixed quest zone, better avoid to take quests or kill mobs!");
+            else
+                ChatHandler(GetSession()).PSendSysMessage("|cffff0000[WARNING]: |cffffffffYou are in a non-fixed quest zone, you are not able to take quests or kill creatures!");
             break;
         }
         default:

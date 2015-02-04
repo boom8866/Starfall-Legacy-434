@@ -551,12 +551,12 @@ void Creature::Update(uint32 diff)
     // Temp switch to prevent quest taking and kill creatures in non-fixed zones (Zones marked with * need to specify that some npcs can give quests)
     switch (GetZoneId())
     {
-        case 16:    // Azshara (*)
+        //case 16:    // Azshara (*)
         case 405:   // Desolace
         case 618:   // Winterspring
         case 361:   // Felwood
         case 406:   // Stonetalon Mountains
-        case 357:   // Feralas (*)
+        //case 357:   // Feralas (*)
         case 5144:  // Vashj'ir
         case 5145:  // Vashj'ir
         case 4815:  // Vashj'ir

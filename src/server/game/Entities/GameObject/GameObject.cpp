@@ -1176,12 +1176,12 @@ void GameObject::Use(Unit* user)
             // Temp switch to prevent quest taking in non-fixed zones
             switch (GetZoneId())
             {
-                case 16:    // Azshara (*)
+                //case 16:    // Azshara (*)
                 case 405:   // Desolace
                 case 618:   // Winterspring
                 case 361:   // Felwood
                 case 406:   // Stonetalon Mountains
-                case 357:   // Feralas (*)
+                //case 357:   // Feralas (*)
                 case 5144:  // Vashj'ir
                 case 5145:  // Vashj'ir
                 case 4815:  // Vashj'ir
