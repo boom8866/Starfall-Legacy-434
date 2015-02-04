@@ -1314,7 +1314,7 @@ public:
         {
             if (damage > 0)
             {
-                events.ScheduleEvent(EVENT_PAUSE_KNOCKBACK, 10000);
+                events.ScheduleEvent(EVENT_PAUSE_KNOCKBACK, 2000);
                 me->SetHealth(me->GetMaxHealth());
             }
         }
