@@ -313,6 +313,13 @@ void Minion::InitStats(uint32 duration)
     setFaction(m_owner->getFaction());
 
     m_owner->SetMinion(this, true);
+
+    CreatureTemplate const* cInfo = GetCreatureTemplate();
+    if (cInfo)
+    {
+        SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((getLevel() * 5 * cInfo->ModDamage)));
+        SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((getLevel() * 10 * cInfo->ModDamage)));
+    }
 }
 
 void Minion::RemoveFromWorld()
