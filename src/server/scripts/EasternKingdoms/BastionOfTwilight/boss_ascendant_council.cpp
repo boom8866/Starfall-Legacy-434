@@ -58,15 +58,21 @@ enum Spells
     SPELL_TELEPORT_RF                   = 81798,
     SPELL_TELEPORT_EARTH                = 82329,
     SPELL_ELEMENTAL_STASIS              = 82285,
+    SPELL_ERUPTION                      = 83675,
+    SPELL_SUMMON_ERUPTION               = 83661, // casted 5 times
+    SPELL_ERUPTION_DAMAGE               = 83692,
 
     // Elementium Monstrosity
     SPELL_TWILIGHT_EXPLOSION            = 95789,
     SPELL_CRYOGENIC_AURA                = 84918,
     SPELL_LIQUID_ICE_GROWTH             = 84917,
-
-
-    SPELL_ELECTRIC_INSTABILITY          = 84529,
+    SPELL_ELECTRIC_INSTABILITY          = 84526,
+    SPELL_ELECTRIC_INSTABILITY_DAMAGE   = 84529,
     SPELL_ELECTRIC_INSTABILITY_DUMMY    = 84527,
+    SPELL_GRAVITY_CRUSH                 = 84948,
+    SPELL_GRAVITY_CRUSH_VEHICLE         = 84952,
+
+    SPELL_LAVA_SEED                     = 84913,
 
     // Inferno Rush
     SPELL_INFERNO_RUSH_AURA             = 88579,
@@ -74,6 +80,13 @@ enum Spells
     // Liquid Ice
     SPELL_LIQUID_ICE                    = 84914,
     SPELL_LIQUID_ICE_DUMMY              = 84915,
+
+    // Eruption Target
+    SPELL_ERUPTION_VISUAL               = 83662,
+
+    // Ascendant Council Plume Stalker
+    SPELL_LAVA_SEED_DUMMY               = 84911,
+    SPELL_LAVA_PLUME                    = 84912,
 };
 
 enum Events
@@ -99,6 +112,12 @@ enum Events
     EVENT_CALL_WINDS,
 
     // Terrastra
+    EVENT_ERUPTION,
+    EVENT_ERUPTION_DAMAGE,
+
+    // Elementium Monstrosity
+    EVENT_GRAVITY_CRUSH,
+    EVENT_LAVA_SEED,
 
     // Controller
     EVENT_SUMMON_MONSTROSITY,
@@ -108,6 +127,9 @@ enum Events
     EVENT_ATTACK,
     EVENT_FACE_CONTROLLER,
     EVENT_MOVE_FUSE,
+
+    // Plume Stalker
+    EVENT_LAVA_PLUME,
 };
 
 enum Actions
@@ -638,9 +660,11 @@ public:
         boss_terrastraAI(Creature* creature) : BossAI(creature, DATA_TERRASTRA)
         {
             _switched = false;
+            _eruptionCounter = 0;
         }
 
         bool _switched;
+        uint8 _eruptionCounter;
 
         void Reset()
         {
@@ -652,6 +676,7 @@ public:
         {
             _EnterCombat();
             events.ScheduleEvent(EVENT_TALK_INTRO, 4000);
+            events.ScheduleEvent(EVENT_ERUPTION, 7000);
         }
 
         void EnterEvadeMode()
@@ -660,6 +685,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
             _switched = false;
+            _eruptionCounter = 0;
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
             summons.DespawnAll();
@@ -674,6 +700,18 @@ public:
 
         void JustSummoned(Creature* summon)
         {
+            switch (summon->GetEntry())
+            {
+                case NPC_ERUPTION_TARGET:
+                    _eruptionCounter++;
+                    if (_eruptionCounter == 5)
+                        events.ScheduleEvent(EVENT_ERUPTION_DAMAGE, 3000);
+                    summon->DespawnOrUnsummon(5000);
+                    break;
+                default:
+                    break;
+            }
+            summons.Summon(summon);
         }
 
         void KilledUnit(Unit* victim)
@@ -747,6 +785,21 @@ public:
                         if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
                             me->SetFacingToObject(controller);
                         break;
+                    case EVENT_ERUPTION:
+                        _eruptionCounter = 0;
+                        DoCast(me, SPELL_ERUPTION);
+                        break;
+                    case EVENT_ERUPTION_DAMAGE:
+                    {
+                        std::list<Creature*> units;
+                        GetCreatureListWithEntryInGrid(units, me, NPC_ERUPTION_TARGET, 10.0f);
+                        if (units.empty())
+                            break;
+
+                        for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                            DoCast((*itr), SPELL_ERUPTION_DAMAGE, true);
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -926,8 +979,10 @@ public:
             Talk(SAY_AGGRO);
             _EnterCombat();
             events.ScheduleEvent(EVENT_ATTACK, 3000);
+            events.ScheduleEvent(EVENT_GRAVITY_CRUSH, 7000);
             DoCast(me, SPELL_TWILIGHT_EXPLOSION);
             DoCast(me, SPELL_CRYOGENIC_AURA);
+            DoCast(me, SPELL_ELECTRIC_INSTABILITY);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
         }
 
@@ -950,6 +1005,14 @@ public:
 
         void JustSummoned(Creature* summon)
         {
+            switch (summon->GetEntry())
+            {
+                case NPC_GRAVITY_CRUSH:
+                    summon->GetMotionMaster()->MovePoint(0, summon->GetPositionX(), summon->GetPositionY(), 862.9045f, false);
+                    break;
+                default:
+                    break;
+            }
             summons.Summon(summon);
         }
 
@@ -981,13 +1044,17 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_ATTACK:
-                    me->SetReactState(REACT_AGGRESSIVE);
-                    if (Player* player = me->FindNearestPlayer(200.0f, true))
-                        me->AI()->AttackStart(player);
-                    break;
-                default:
-                    break;
+                    case EVENT_ATTACK:
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        if (Player* player = me->FindNearestPlayer(200.0f, true))
+                            me->AI()->AttackStart(player);
+                        break;
+                    case EVENT_GRAVITY_CRUSH:
+                        Talk(SAY_ABILITY);
+                        DoCast(me, SPELL_GRAVITY_CRUSH);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -1154,6 +1221,53 @@ public:
     }
 };
 
+class npc_ac_plume_stalker : public CreatureScript
+{
+public:
+    npc_ac_plume_stalker() : CreatureScript("npc_ac_plume_stalker") { }
+
+    struct npc_ac_plume_stalkerAI : public ScriptedAI
+    {
+        npc_ac_plume_stalkerAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void SpellHit(Unit* /*target*/, SpellInfo const* spell)
+        {
+            if (spell->Id == SPELL_LAVA_SEED)
+            {
+                DoCast(me, SPELL_LAVA_SEED_DUMMY);
+                events.ScheduleEvent(EVENT_LAVA_PLUME, 2000);
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_LAVA_PLUME:
+                        DoCast(me, SPELL_LAVA_PLUME);
+                        me->RemoveAurasDueToSpell(SPELL_LAVA_SEED_DUMMY);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ac_plume_stalkerAI(creature);
+    }
+};
+
 class spell_ac_water_bomb : public SpellScriptLoader
 {
 public:
@@ -1272,7 +1386,6 @@ public:
     {
         PrepareSpellScript(spell_ac_inferno_rush_fire_SpellScript);
 
-
         void HandleHit(SpellEffIndex /*effIndex*/)
         {
             if (Unit* target = GetHitUnit())
@@ -1344,7 +1457,7 @@ public:
                     caster->SummonCreature(NPC_LIQUID_ICE, caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
 
                 if (Creature* ice = caster->FindNearestCreature(NPC_LIQUID_ICE, 200.0f, true))
-                    if (ice->GetDistance2d(caster->GetPositionX(), caster->GetPositionY()) < (5.0f * ice->GetObjectSize()))
+                    if (caster->GetDistance2d(ice->GetPositionX(), ice->GetPositionY()) < (5.0f * ice->GetObjectSize()))
                         caster->CastSpell(ice, SPELL_LIQUID_ICE_GROWTH, true);
             }
         }
@@ -1404,6 +1517,116 @@ public:
     }
 };
 
+class spell_ac_eruption : public SpellScriptLoader
+{
+public:
+    spell_ac_eruption() : SpellScriptLoader("spell_ac_eruption") { }
+
+    class spell_ac_eruption_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_eruption_SpellScript);
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                caster->CastSpell(caster, SPELL_SUMMON_ERUPTION, true);
+                caster->CastSpell(caster, SPELL_SUMMON_ERUPTION, true);
+                caster->CastSpell(caster, SPELL_SUMMON_ERUPTION, true);
+                caster->CastSpell(caster, SPELL_SUMMON_ERUPTION, true);
+                caster->CastSpell(caster, SPELL_SUMMON_ERUPTION, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_ac_eruption_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_eruption_SpellScript();
+    }
+};
+
+class spell_ac_electrical_instability : public SpellScriptLoader
+{
+public:
+    spell_ac_electrical_instability() : SpellScriptLoader("spell_ac_electrical_instability") { }
+
+    class spell_ac_electrical_instability_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_electrical_instability_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                if (Unit* caster = GetCaster())
+                    caster->CastSpell(target, SPELL_ELECTRIC_INSTABILITY_DAMAGE, false);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ac_electrical_instability_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_ac_electrical_instability_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_electrical_instability_SpellScript();
+    }
+};
+
+class spell_ac_gravity_crush : public SpellScriptLoader
+{
+public:
+    spell_ac_gravity_crush() : SpellScriptLoader("spell_ac_gravity_crush") { }
+
+    class spell_ac_gravity_crush_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_gravity_crush_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, GetCaster()->GetMap()->Is25ManRaid() ? 3 : 1);
+        }
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (Unit* target = GetHitUnit())
+                    if (Creature* crush = caster->SummonCreature(NPC_GRAVITY_CRUSH, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 6600))
+                        target->CastSpell(crush, SPELL_GRAVITY_CRUSH_VEHICLE, true);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ac_gravity_crush_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ac_gravity_crush_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ac_gravity_crush_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_ac_gravity_crush_SpellScript::HandleHit, EFFECT_2, SPELL_EFFECT_FORCE_CAST);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_gravity_crush_SpellScript();
+    }
+};
+
 void AddSC_boss_ascendant_council()
 {
     new at_ascendant_council_1();
@@ -1415,6 +1638,7 @@ void AddSC_boss_ascendant_council()
     new boss_arion();
     new boss_elementium_monstrosity();
     new npc_ascendant_council_controller();
+    new npc_ac_plume_stalker();
     new spell_ac_water_bomb();
     new spell_ac_glaciate();
     new spell_ac_heart_of_ice();
@@ -1422,4 +1646,7 @@ void AddSC_boss_ascendant_council()
     new spell_ac_burning_blood();
     new spell_ac_cryogenic_aura();
     new spell_ac_liquid_ice();
+    new spell_ac_eruption();
+    new spell_ac_electrical_instability();
+    new spell_ac_gravity_crush();
 }

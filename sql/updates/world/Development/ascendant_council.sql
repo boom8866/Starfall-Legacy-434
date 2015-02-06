@@ -12,6 +12,9 @@ UPDATE `creature_template` SET `scriptname`= 'boss_arion', `speed_walk`= 4, `Bas
 UPDATE `creature_template` SET `scriptname`= 'boss_terrastra', `speed_walk`= 4, `BaseAttackTime`= 1500 WHERE `entry`= 43689;
 UPDATE `creature_template` SET `scriptname`= 'boss_elementium_monstrosity' WHERE `entry`= 43735;
 
+DELETE FROM `creature_template_addon` WHERE `entry` IN (43686, 43687, 43688, 43689);
+
+
 -- Water Bomb
 UPDATE `creature_template` SET `minlevel`= 80, `maxlevel`= 80, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 128, `InhabitType`= 4 WHERE `entry`= 44201;
 -- Inferno Rush
@@ -22,6 +25,13 @@ UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction`= 1847, 
 UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 16, `BaseAttackTime`= 1500 WHERE `entry`= 43735;
 -- Liquid Ice
 UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 128 WHERE `entry`= 45452;
+-- Eruption target
+UPDATE `creature_template` SET `minlevel`= 70, `maxlevel`= 70, `faction`= 114, `unit_flags`= 33554432, `flags_extra`= 128 WHERE `entry`= 44845;
+-- Ascendant Council Plume Stalker
+UPDATE `creature_template` SET `minlevel`= 80, `maxlevel`= 80, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 128, `scriptname`= 'npc_ac_plume_stalker' WHERE `entry`= 45420;
+-- Gravity Crush
+UPDATE `creature_template` SET `minlevel`= 80, `maxlevel`= 80, `faction`= 14, `unit_flags`= 34079232, `flags_extra`= 128, `vehicleId`= 1110, `InhabitType`= 4 WHERE `entry`= 45476;
+
 
 REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (43324, 4, 0, 'Welcome, mortals. (Frail little children). Few have laid eyes on this inner sanctum. (They reach out to touch the fire!)', 14, 0, 100, 0, 0, 22065, 'Cho''gall - Ascendant Countil Intro'),
@@ -53,6 +63,10 @@ REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `languag
 (43689, 4, 0, '...to have made it this far.', 14, 0, 100, 0, 0, 21845, 'Terrastra - Fuse Intro'),
 -- Elementium Monstrosity
 (43735, 0, 0, 'BEHOLD YOUR DOOM!', 14, 0, 100, 0, 0, 20396, 'Elementium Monstrosity - Aggro'),
+(43735, 1, 0, 'Eradicate....', 14, 0, 100, 0, 0, 20398, 'Elementium Monstrosity - Slay 1'),
+(43735, 1, 1, 'Annihilate....', 14, 0, 100, 0, 0, 20397, 'Elementium Monstrosity - Slay 2'),
+(43735, 2, 0, 'FEEL THE POWER!', 14, 0, 100, 0, 0, 20400, 'Elementium Monstrosity - Gravity Crush'),
+(43735, 6, 0, 'Impossible....', 14, 0, 100, 0, 0, 20399, 'Elementium Monstrosity - Death'),
 
 -- Ascendant Council Controller
 (43691, 0, 0, 'The ground beneath you rumbles ominously...', 41, 0, 100, 0, 0, 0, 'Ascendant Council Controller - Quake'),
@@ -74,19 +88,28 @@ REPLACE INTO `spell_script_names` (`spell_id`, `scriptname`) VALUES
 (84915, 'spell_ac_liquid_ice'),
 (92497, 'spell_ac_liquid_ice'),
 (92498, 'spell_ac_liquid_ice'),
-(92499, 'spell_ac_liquid_ice');
+(92499, 'spell_ac_liquid_ice'),
+(83675, 'spell_ac_eruption'),
+(84527, 'spell_ac_electrical_instability'),
+(84948, 'spell_ac_gravity_crush'),
+(92486, 'spell_ac_gravity_crush'),
+(92487, 'spell_ac_gravity_crush'),
+(92488, 'spell_ac_gravity_crush');
 
-DELETE FROM `conditions` WHERE `SourceEntry` IN (82699);
+DELETE FROM `conditions` WHERE `SourceEntry` IN (82699, 84913);
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
-(13, 7, 82699, 0, 0, 31, 0, 3, 44201, 0, 0, 0, '', 'Water Bomb - Target Water Bomb');
+(13, 7, 82699, 0, 0, 31, 0, 3, 44201, 0, 0, 0, '', 'Water Bomb - Target Water Bomb'),
+(13, 7, 84913, 0, 0, 31, 0, 3, 45420, 0, 0, 0, '', 'Lava Seed - Plume Stalker');
 
 REPLACE INTO `creature_template_addon` (`entry`, `auras`) VALUES
 (44747 ,'83472'),
-(45452, '84914');
+(45452, '84914'),
+(44845, '83662');
 
 UPDATE `creature` SET `phasemask` = 1 WHERE `guid` = 779687;
 UPDATE `creature` SET `phasemask` = 1 WHERE `guid` = 779702;
 UPDATE `creature` SET `phasemask` = 1 WHERE `guid` = 779704;
 UPDATE `creature` SET `phasemask` = 1 WHERE `guid` = 779703;
 UPDATE `creature` SET `phasemask` = 1 WHERE `guid` = 779705;
-DELETE FROM `creature` WHERE `id` IN (44201, 50297, 43735);
+UPDATE `creature` SET `phasemask` = 1 WHERE `id` = 45420;
+DELETE FROM `creature` WHERE `id` IN (44201, 50297, 43735, 45476);
