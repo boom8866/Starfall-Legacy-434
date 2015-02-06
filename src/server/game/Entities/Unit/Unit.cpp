@@ -21167,10 +21167,7 @@ bool Unit::IsVisionObscured(Unit* victim)
 {
     if (victim)
     {
-        if(IsFriendlyTo(victim))
-            return false;
-
-        if(!IsFriendlyTo(victim))
+        if (!IsFriendlyTo(victim))
         {
             victim->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, GetGUID());
             victim->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0400000, 0, 0, GetGUID());

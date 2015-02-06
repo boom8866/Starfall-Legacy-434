@@ -803,6 +803,11 @@ public:
     {
         PrepareSpellScript(spell_sha_spirit_link_SpellScript);
 
+        enum spellId
+        {
+            SPELL_SMOKE_BOMB_EFFECT     = 88611
+        };
+
         bool Load()
         {
             pct = 0;
@@ -813,11 +818,16 @@ public:
         void CalculatePercentage(std::list<WorldObject*>& targets)
         {
             for (std::list<WorldObject*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
                 if (Player* player = (*itr)->ToPlayer())
                 {
+                    if (player->HasAura(SPELL_SMOKE_BOMB_EFFECT))
+                        continue;
+
                     pct = ((pct * players.size()) + (player->GetHealthPct() / 100.f)) / float(players.size() + 1);
                     players.insert(player);
                 }
+            }
         }
 
         void HandleAfterCast()
