@@ -315,7 +315,7 @@ void Minion::InitStats(uint32 duration)
     m_owner->SetMinion(this, true);
 
     // Bind this function to players only (prevent problems with boss etc...)
-    if (m_owner && m_owner->GetTypeId() == TYPEID_PLAYER)
+    if (m_owner && (m_owner->GetTypeId() == TYPEID_PLAYER || m_owner->GetTypeId() == TYPEID_UNIT && !isWorldBoss()))
     {
         CreatureTemplate const* cInfo = GetCreatureTemplate();
         if (cInfo)
