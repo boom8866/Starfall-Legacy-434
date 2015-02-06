@@ -14196,6 +14196,7 @@ void Player::AddItemToBuyBackSlot(Item* pItem)
 {
     if (pItem)
     {
+        // Test
         uint32 slot = m_currentBuybackSlot;
         // if current back slot non-empty search oldest or free
         if (m_items[slot])

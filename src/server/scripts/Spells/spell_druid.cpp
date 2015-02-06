@@ -143,7 +143,7 @@ public:
                 }
                 case SPELL_DRUID_STARFIRE:
                 {
-                    if (caster->HasAura(48517) || caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER))
+                    if (caster->HasAura(48517))
                         return;
 
                     energizeAmount = GetSpellInfo()->Effects[effIndex].BasePoints; // 20

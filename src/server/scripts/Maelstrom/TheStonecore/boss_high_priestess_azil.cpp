@@ -523,6 +523,9 @@ public:
             if (victim->GetEntry() != NPC_DEVOUT_FOLLOWER_N && victim->GetEntry() != NPC_DEVOUT_FOLLOWER_H)
                 return;
 
+            if (!victim->GetMap()->IsHeroic())
+                return;
+
             me->SetObjectScale(me->GetObjectScale() - 0.25f);
             if (me->GetObjectScale() <= 0.0f)
                 me->DespawnOrUnsummon(1000);

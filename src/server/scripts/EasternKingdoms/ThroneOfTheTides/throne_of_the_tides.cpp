@@ -542,6 +542,8 @@ public:
         void IsSummonedBy(Unit* /*who*/)
         {
             me->SetReactState(REACT_PASSIVE);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             events.ScheduleEvent(EVENT_ENTANGLING_GRASP, 1500);
         }
 

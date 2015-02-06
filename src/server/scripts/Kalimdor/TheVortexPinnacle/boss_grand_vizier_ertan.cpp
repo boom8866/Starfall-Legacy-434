@@ -428,6 +428,11 @@ public:
                 me->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
                 me->AddUnitState(UNIT_STATE_DIED);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+                me->getThreatManager().clearReferences();
+                me->getHostileRefManager().clearReferences();
+                me->ClearInCombat();
+                me->AttackStop();
+                me->CombatStop();
             }
             else
             {
