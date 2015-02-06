@@ -89,6 +89,7 @@ public:
 
         void EnterEvadeMode()
         {
+            instance->SetBossState(DATA_OZRUK, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             _EnterEvadeMode();
             enraged = false;

@@ -131,7 +131,7 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
-            instance->SetBossState(DATA_SLABHIDE, NOT_STARTED);
+            instance->SetBossState(DATA_SLABHIDE, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
