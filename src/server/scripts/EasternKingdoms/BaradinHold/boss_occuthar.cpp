@@ -22,23 +22,23 @@
 
 enum Spells
 {
-    SPELL_SEARING_SHADOWS = 96913,
-    SPEll_FOCUSED_FIRE_FIRST_DAMAGE = 97212,
-    SPEll_FOCUSED_FIRE_TRIGGER = 96872,
-    SPEll_FOCUSED_FIRE_VISUAL = 96886,
-    SPELL_FOCUSED_FIRE = 96884,
-    SPELL_EYES_OF_OCCUTHAR = 96920,
-    SPELL_GAZE_OF_OCCUTHAR = 96942,
-    SPELL_OCCUTHARS_DESTUCTION = 96968,
-    SPELL_BERSERK = 47008
+    SPELL_SEARING_SHADOWS               = 96913,
+    SPEll_FOCUSED_FIRE_FIRST_DAMAGE     = 97212,
+    SPEll_FOCUSED_FIRE_TRIGGER          = 96872,
+    SPEll_FOCUSED_FIRE_VISUAL           = 96886,
+    SPELL_FOCUSED_FIRE                  = 96884,
+    SPELL_EYES_OF_OCCUTHAR              = 96920,
+    SPELL_GAZE_OF_OCCUTHAR              = 96942,
+    SPELL_OCCUTHARS_DESTUCTION          = 96968,
+    SPELL_BERSERK                       = 47008
 };
 
 enum Events
 {
-    EVENT_SEARING_SHADOWS = 1,
-    EVENT_FOCUSED_FIRE = 2,
-    EVENT_EYES_OF_OCCUTHAR = 3,
-    EVENT_BERSERK = 4,
+    EVENT_SEARING_SHADOWS   = 1,
+    EVENT_FOCUSED_FIRE      = 2,
+    EVENT_EYES_OF_OCCUTHAR  = 3,
+    EVENT_BERSERK           = 4,
 
     EVENT_FOCUSED_FIRE_FIRST_DAMAGE = 1
 };
@@ -75,6 +75,7 @@ class boss_occuthar : public CreatureScript
             {
                 BossAI::EnterEvadeMode();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                instance->SetBossState(DATA_OCCUTHAR, FAIL);
                 events.Reset();
                 _DespawnAtEvade();
             }

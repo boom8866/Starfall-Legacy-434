@@ -133,6 +133,7 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            instance->SetBossState(DATA_FORGEMASTER_THRONGUS, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             summons.DespawnAll();
             events.Reset();

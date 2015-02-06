@@ -79,6 +79,12 @@ public:
             NPC_LAVA_POOL_TRIGGER   = 50423
         };
 
+        void JustReachedHome()
+        {
+            _JustReachedHome();
+            instance->SetBossState(DATA_KARSH_STEELBENDER, FAIL);
+        }
+
         void Reset()
         {
             _Reset();

@@ -364,6 +364,7 @@ public:
         void EnterEvadeMode()
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->SetBossState(DATA_THERALION_AND_VALIONA, FAIL);
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_AGGRESSIVE);
             me->SetDisableGravity(false);
@@ -689,6 +690,7 @@ public:
         void EnterEvadeMode()
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->SetBossState(DATA_THERALION_AND_VALIONA, FAIL);
             events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_AGGRESSIVE);

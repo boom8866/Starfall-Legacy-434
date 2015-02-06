@@ -83,6 +83,7 @@ public:
             _EnterEvadeMode();
             summons.DespawnAll();
             me->GetMotionMaster()->MoveTargetedHome();
+            instance->SetBossState(DATA_LORD_WALDEN, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             _DespawnAtEvade();
         }

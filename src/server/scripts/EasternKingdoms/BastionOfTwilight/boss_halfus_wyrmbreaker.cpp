@@ -222,6 +222,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
             {
                 _EnterEvadeMode();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                instance->SetBossState(DATA_HALFUS_WYRMBREAKER, FAIL);
                 me->GetMotionMaster()->MoveTargetedHome();
                 summons.DespawnAll();
                 events.Reset();

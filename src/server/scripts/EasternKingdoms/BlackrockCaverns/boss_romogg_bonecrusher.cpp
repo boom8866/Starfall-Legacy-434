@@ -1,48 +1,6 @@
-/*
- * Copyright (C) 2011 - 2013 TMM <https://bitbucket.org/TMM>
- *
- * THIS particular file is NOT free software.
- * You are not allowed to share or redistribute it.
- */
 
 #include "ScriptPCH.h"
 #include "blackrock_caverns.h"
-
-/* ScriptData
-SDName: blackrock_caverns
-SD%Complete: 100
-SDComment: Based script TMM
-SDCategory: Blackrock Caverns
-EndScriptData
-
-39665 Rom'ogg Bonecrusher
-Race    Ogre lord (Humanoid)
-Level    82 - 87 Elite
-Health   893,580 - 4,564,670 (heroic)
-
-Rom'ogg Bonecrusher Info:
-
-Abilities:
-Call for Help—Rom'ogg calls for nearby minions to assist him! 1.5 sec cast
-Chains of Woe—Slams the ground, causing an earthquake. 2 sec cast
-Quake 40 yd range—Slams the ground, causing an earthquake that inflicts 9000 Physical damage to all nearby enemies over 3 seconds.
-The Skullcracker—A powerful attack that inflicts 95000 to 105000 Physical damage to all enemies within 12 yards of the caster. 12 sec cast (8 sec cast Heroic
-Wounding Strike Melee range—Inflicts 125% weapon damage and leaves the target wounded, reducing the effectiveness of any healing by 25% for 6 sec. (10 sec. Heroic)
-
-Achievements:
-[Crushing Bones and Cracking Skulls] Info:
-Defeat Rom'ogg Bonecrusher after using his Skullcracker ability to kill 10 Angered Earth elementals in Blackrock Caverns on Heroic Difficulty.
-
-Quotes:
-Aggro
-    Boss Cho'gall not gonna be happy 'bout dis!
-Skullcracker:
-    Stand still! Rom'ogg crack your skulls!
-Killing a player:
-    That what you get! Nothing!
-Death:
-    Rom'ogg...sorry...
-*/
 
 enum Spells
 {
@@ -150,6 +108,12 @@ public:
             instance->SetBossState(DATA_ROMOGG_BONECRUSHER, NOT_STARTED);
             RemoveEncounterFrame();
             angeredKilled = 0;
+        }
+
+        void JustReachedHome()
+        {
+            _JustReachedHome();
+            instance->SetBossState(DATA_ROMOGG_BONECRUSHER, FAIL);
         }
 
         void DoAction(int32 action)

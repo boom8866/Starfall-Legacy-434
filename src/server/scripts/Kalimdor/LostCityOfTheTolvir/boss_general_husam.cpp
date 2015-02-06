@@ -125,6 +125,7 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            instance->SetBossState(DATA_GENERAL_HUSAM, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();

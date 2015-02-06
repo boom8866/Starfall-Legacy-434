@@ -120,6 +120,7 @@ public:
         
         void EnterEvadeMode()
         {
+            instance->SetBossState(DATA_EARTHRAGER_PTAH, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             me->DespawnCreaturesInArea(NPC_TOMULTOUS_EARTHSTORM, 500.0f);

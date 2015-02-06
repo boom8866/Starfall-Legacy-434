@@ -123,6 +123,7 @@ public:
             _DespawnAtEvade();
             me->DespawnCreaturesInArea(NPC_LURKING_TEMPEST, 120.0f);
             me->DespawnCreaturesInArea(NPC_CYCLONE_SHIELD, 120.0f);
+            instance->SetBossState(DATA_GRAND_VIZIER_ERTAN, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 

@@ -170,6 +170,7 @@ public:
             _EnterEvadeMode();
             events.Reset();
             events.SetPhase(PHASE_ONE);
+            instance->SetBossState(DATA_SIAMAT, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             _servantCounter = 0;

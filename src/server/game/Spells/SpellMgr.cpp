@@ -5120,6 +5120,13 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92881:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 break;
+            // * Ascendant Council
+            case 84948:
+            case 92486:
+            case 92487:
+            case 92488:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_OTHER_CASTS;
+                break;
             // Throne of the four Winds
             //  * Conclave of Wind
             case 85422: // Anshal - Nurture (due to some visual bugs)

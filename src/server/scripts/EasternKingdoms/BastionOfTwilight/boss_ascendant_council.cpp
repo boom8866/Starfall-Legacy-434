@@ -990,6 +990,7 @@ public:
         {
             _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->SetBossState(DATA_ELEMENTIUM_MONSTROSITY, FAIL);
             events.Reset();
             summons.DespawnAll();
             me->DespawnOrUnsummon(100);

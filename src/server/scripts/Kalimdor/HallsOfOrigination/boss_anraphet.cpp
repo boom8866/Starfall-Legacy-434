@@ -181,6 +181,7 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            instance->SetBossState(DATA_ANRAPHET, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CRUMBLING_RUIN);
             me->GetMotionMaster()->MoveTargetedHome();

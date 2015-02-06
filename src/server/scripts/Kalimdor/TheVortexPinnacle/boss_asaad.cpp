@@ -85,6 +85,7 @@ public:
             _EnterEvadeMode();
             events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
+            instance->SetBossState(DATA_ASAAD, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
             std::list<Creature*> units;

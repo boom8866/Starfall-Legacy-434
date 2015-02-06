@@ -90,6 +90,7 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
+            instance->SetBossState(DATA_GLUBTOK, FAIL);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
             me->RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);

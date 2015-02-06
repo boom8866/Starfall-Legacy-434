@@ -98,6 +98,7 @@ public:
             _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             me->RemoveFlag(UNIT_FIELD_FLAGS, 34375744);
+            instance->SetBossState(DATA_ISISET, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             _astralRain = true;
             _celestialCall = true;

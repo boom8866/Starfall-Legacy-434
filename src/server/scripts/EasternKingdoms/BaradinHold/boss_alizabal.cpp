@@ -124,6 +124,7 @@ class boss_alizabal : public CreatureScript
             void EnterEvadeMode()
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                instance->SetBossState(DATA_ALIZABAL, FAIL);
                 me->GetMotionMaster()->MoveTargetedHome();
                 _DespawnAtEvade();
                 events.Reset();

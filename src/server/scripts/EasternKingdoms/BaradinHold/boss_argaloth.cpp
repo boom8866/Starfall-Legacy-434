@@ -75,6 +75,7 @@ public:
             _EnterEvadeMode();
             events.Reset();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->SetBossState(DATA_ARGALOTH, FAIL);
             me->GetMotionMaster()->MoveTargetedHome();
             _DespawnAtEvade();
         }

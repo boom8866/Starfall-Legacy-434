@@ -118,6 +118,7 @@ class boss_setesh : public CreatureScript
             void EnterEvadeMode()
             {
                 _EnterEvadeMode();
+                instance->SetBossState(DATA_SETESH, FAIL);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 me->GetMotionMaster()->MoveTargetedHome();
                 SetCombatMovement(false);
