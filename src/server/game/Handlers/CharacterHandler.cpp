@@ -29,6 +29,7 @@
 #include "Guild.h"
 #include "GuildFinderMgr.h"
 #include "GuildMgr.h"
+#include "GameEventMgr.h"
 #include "Language.h"
 #include "LFGMgr.h"
 #include "Log.h"
@@ -1109,6 +1110,15 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
             sLog->outError(LOG_FILTER_GENERAL, "Player %s (GUID: %u) marked as member of not existing guild (id: %u), removing guild membership for player.", pCurrChar->GetName().c_str(), pCurrChar->GetGUIDLow(), pCurrChar->GetGuildId());
             pCurrChar->SetInGuild(0);
         }
+    }
+
+    // Darkmoon Faire
+    if (!sGameEventMgr->IsActiveEvent(67) && pCurrChar->GetMapId() == 974)
+    {
+        if (pCurrChar->getRaceMask() & RACEMASK_ALLIANCE)
+            pCurrChar->CastSpell(pCurrChar, 101260, true);
+        else
+            pCurrChar->CastSpell(pCurrChar, 103582, true);
     }
 
     m_playerLoading = false;

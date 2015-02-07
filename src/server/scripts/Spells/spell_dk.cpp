@@ -1932,22 +1932,29 @@ public:
     {
         PrepareAuraScript(spell_dk_runic_corruption_AuraScript);
 
-        void HandleEffect(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        void HandleApplyRunicCorruption(AuraEffect const* aurEff, AuraEffectHandleModes mode)
         {
             if (Player* player = GetCaster()->ToPlayer())
             {
+                player->ApplyCombatSpeedPctMod(CTYPE_RUNE, (float)aurEff->GetAmount(), true);
                 for (uint32 i = 0; i < MAX_RUNES; ++i)
                 {
-                    if (player->GetRuneCooldown(i))
-                        player->SetRuneCooldown(i, 0);
+                    if (player->GetRuneCooldown(i) > 0)
+                        player->SetRuneCooldown(i, player->GetRuneBaseCooldown(i));
                 }
             }
         }
 
+        void HandleRemoveRunicCorruption(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        {
+            if (Player* player = GetCaster()->ToPlayer())
+                player->ApplyCombatSpeedPctMod(CTYPE_RUNE, (float)aurEff->GetAmount(), false);
+        }
+
         void Register()
         {
-            OnEffectApply += AuraEffectApplyFn(spell_dk_runic_corruption_AuraScript::HandleEffect, EFFECT_0, SPELL_AURA_MOD_MELEE_HASTE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
-            OnEffectRemove += AuraEffectApplyFn(spell_dk_runic_corruption_AuraScript::HandleEffect, EFFECT_0, SPELL_AURA_MOD_MELEE_HASTE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            OnEffectApply += AuraEffectApplyFn(spell_dk_runic_corruption_AuraScript::HandleApplyRunicCorruption, EFFECT_0, SPELL_AURA_MOD_POWER_REGEN_PERCENT, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            OnEffectRemove += AuraEffectRemoveFn(spell_dk_runic_corruption_AuraScript::HandleRemoveRunicCorruption, EFFECT_0, SPELL_AURA_MOD_POWER_REGEN_PERCENT, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
         }
     };
 

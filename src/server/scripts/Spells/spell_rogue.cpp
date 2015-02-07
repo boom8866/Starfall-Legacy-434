@@ -1164,6 +1164,41 @@ public:
     }
 };
 
+class spell_rog_smoke_bomb : public SpellScriptLoader
+{
+public:
+    spell_rog_smoke_bomb() : SpellScriptLoader("spell_rog_smoke_bomb")
+    {
+    }
+
+    class spell_rog_smoke_bomb_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_smoke_bomb_AuraScript);
+
+        void ApplySmoke(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (target->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                        target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_rog_smoke_bomb_AuraScript::ApplySmoke, EFFECT_0, SPELL_AURA_INTERFERE_TARGETTING, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_rog_smoke_bomb_AuraScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_cheat_death();
@@ -1186,4 +1221,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_vanish_secondary();
     new spell_rog_revealing_strike();
     new spell_rog_bandits_guile();
+    new spell_rog_smoke_bomb();
 }
