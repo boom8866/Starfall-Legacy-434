@@ -14,8 +14,8 @@ enum Texts
 
 enum ControllerTexts
 {
-    ANNOUNCE_QUAKE          = 1,
-    ANNOUNCE_THUNDERSHOCK   = 2,
+    ANNOUNCE_QUAKE          = 0,
+    ANNOUNCE_THUNDERSHOCK   = 1,
 };
 
 enum Spells
@@ -142,6 +142,7 @@ enum Actions
     ACTION_SWITCH_PHASE_1,
     ACTION_SWITCH_PHASE_2,
     ACTION_PREPARE_FUSE,
+    ACTION_RESET_COUNCIL,
 };
 
 Position const ElementiumMonstrosityPos = { -1009.01f, -582.467f, 831.9843f, 6.265732f };
@@ -1104,72 +1105,72 @@ public:
         {
             switch (action)
             {
-            case ACTION_INTRO_1:
-                if (!_intro1Done)
-                {
-                    if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
-                        chogall->AI()->TalkToMap(4);
-                    _intro1Done = true;
-                }
-                break;
-            case ACTION_INTRO_2:
-                if (!_intro2Done)
-                {
-                    if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
-                        chogall->AI()->TalkToMap(5);
-                    _intro2Done = true;
-                }
-                break;
-            case ACTION_INTRO_3:
-                if (!_intro3Done)
-                {
-                    if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
-                        chogall->AI()->TalkToMap(6);
-                    _intro3Done = true;
-                }
-                break;
-            case ACTION_SWITCH_PHASE_1:
-                health = 0;
-                if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
-                {
-                    health += feludius->GetHealth();
-                    feludius->AI()->DoAction(ACTION_TELEPORT);
-                }
+                case ACTION_INTRO_1:
+                    if (!_intro1Done)
+                    {
+                        if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
+                            chogall->AI()->TalkToMap(4);
+                        _intro1Done = true;
+                    }
+                    break;
+                case ACTION_INTRO_2:
+                    if (!_intro2Done)
+                    {
+                        if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
+                            chogall->AI()->TalkToMap(5);
+                        _intro2Done = true;
+                    }
+                    break;
+                case ACTION_INTRO_3:
+                    if (!_intro3Done)
+                    {
+                        if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
+                            chogall->AI()->TalkToMap(6);
+                        _intro3Done = true;
+                    }
+                    break;
+                case ACTION_SWITCH_PHASE_1:
+                    health = 0;
+                    if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
+                    {
+                        health += feludius->GetHealth();
+                        feludius->AI()->DoAction(ACTION_TELEPORT);
+                    }
 
-                if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
-                {
-                    health += ignacious->GetHealth();
-                    ignacious->AI()->DoAction(ACTION_TELEPORT);
-                }
+                    if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
+                    {
+                        health += ignacious->GetHealth();
+                        ignacious->AI()->DoAction(ACTION_TELEPORT);
+                    }
 
-                if (Creature* arion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARION)))
-                    arion->AI()->DoAction(ACTION_TURN_IN);
+                    if (Creature* arion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARION)))
+                        arion->AI()->DoAction(ACTION_TURN_IN);
 
-                if (Creature* terrastra = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TERRASTRA)))
-                    terrastra->AI()->DoAction(ACTION_TURN_IN);
-                break;
-            case ACTION_SWITCH_PHASE_2:
-                events.ScheduleEvent(EVENT_SUMMON_MONSTROSITY, 15000);
-                if (Creature* arion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARION)))
-                {
-                    health += arion->GetHealth();
-                    arion->AI()->DoAction(ACTION_PREPARE_FUSE);
-                }
+                    if (Creature* terrastra = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TERRASTRA)))
+                        terrastra->AI()->DoAction(ACTION_TURN_IN);
+                    break;
+                case ACTION_SWITCH_PHASE_2:
+                    events.ScheduleEvent(EVENT_SUMMON_MONSTROSITY, 15000);
+                    if (Creature* arion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARION)))
+                    {
+                        health += arion->GetHealth();
+                        arion->AI()->DoAction(ACTION_PREPARE_FUSE);
+                    }
 
-                if (Creature* terrastra = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TERRASTRA)))
-                {
-                    health += terrastra->GetHealth();
-                    terrastra->AI()->DoAction(ACTION_PREPARE_FUSE);
-                }
+                    if (Creature* terrastra = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TERRASTRA)))
+                    {
+                        health += terrastra->GetHealth();
+                        terrastra->AI()->DoAction(ACTION_PREPARE_FUSE);
+                    }
 
-                if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
-                    feludius->AI()->DoAction(ACTION_PREPARE_FUSE);
+                    if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
+                        feludius->AI()->DoAction(ACTION_PREPARE_FUSE);
 
-                if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
-                    ignacious->AI()->DoAction(ACTION_PREPARE_FUSE);
-                break;
-            default:
-                break;
+                    if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
+                        ignacious->AI()->DoAction(ACTION_PREPARE_FUSE);
+                    break;
+                default:
+                    break;
             }
         }
 
