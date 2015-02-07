@@ -125,6 +125,7 @@ public:
             _shieldCount  = 0;
             _beacons = 0;
             _achievement = true;
+            instance->SetBossState(DATA_TEMPLE_GUARDIAN_ANHUUR, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();

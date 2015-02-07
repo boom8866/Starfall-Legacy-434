@@ -122,6 +122,7 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
+            instance->SetBossState(DATA_ERUDAX, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             summons.DespawnAll();
             Cleanup();

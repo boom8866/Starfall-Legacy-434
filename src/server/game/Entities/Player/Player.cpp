@@ -26132,8 +26132,9 @@ uint32 Player::GetRuneTypeBaseCooldown(RuneType runeType) const
     float regenMod = 1.0f;
 
     AuraEffectList const& regenAura = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for (AuraEffectList::const_iterator i = regenAura.begin();i != regenAura.end(); ++i)
-        if ((*i)->GetMiscValue() == POWER_RUNES && (*i)->GetMiscValueB() == runeType)
+    for (AuraEffectList::const_iterator i = regenAura.begin(); i != regenAura.end(); ++i)
+    {
+        if ((*i)->GetMiscValue() == POWER_RUNES && (*i)->GetMiscValueB() == runeType || (*i)->GetSpellInfo()->Id == 51460)
         {
             int32 amount = (*i)->GetAmount();
             if (amount > 0)
@@ -26141,8 +26142,10 @@ uint32 Player::GetRuneTypeBaseCooldown(RuneType runeType) const
             else
                 ApplyPercentModFloatVar(cooldown, !amount, true);
         }
+    }
 
     cooldown *= GetTotalCombatSpeedMod(CTYPE_RUNE);
+
     return cooldown;
 }
 

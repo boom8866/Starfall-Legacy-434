@@ -126,15 +126,14 @@ public:
                     }
 
                     // If we are set to fill the lunar side or we've just logged in with 0 power..
-                    if ((!caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER))
-                        || caster->GetPower(POWER_ECLIPSE) == 0)
+                    if ((!caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER)))
                     {
                         // If the energize was due to 0 power, cast the eclipse marker aura
                         if (!caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER))
                             caster->CastSpell(caster, SPELL_DRUID_LUNAR_ECLIPSE_MARKER, true);
                     }
                     // The energizing effect brought us out of the solar eclipse, remove the aura
-                    if (caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE) && caster->GetPower(POWER_ECLIPSE) <= 0)
+                    if (caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE) && caster->GetPower(POWER_ECLIPSE) < 0)
                     {
                         caster->RemoveAurasDueToSpell(SPELL_DRUID_SOLAR_ECLIPSE);
                         caster->RemoveAura(94338);
@@ -159,8 +158,7 @@ public:
                     }
 
                     // If we are set to fill the solar side or we've just logged in with 0 power..
-                    if ((!caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER))
-                        || caster->GetPower(POWER_ECLIPSE) == 0)
+                    if ((!caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER)) || caster->GetPower(POWER_ECLIPSE) == 0)
                     {
                         caster->CastCustomSpell(caster, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, &energizeAmount, 0, 0, true);
                         // If the energize was due to 0 power, cast the eclipse marker aura
@@ -168,7 +166,7 @@ public:
                             caster->CastSpell(caster, SPELL_DRUID_SOLAR_ECLIPSE_MARKER, true);
                     }
                     // The energizing effect brought us out of the lunar eclipse, remove the aura
-                    if (caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE) && caster->GetPower(POWER_ECLIPSE) >= 0)
+                    if (caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE) && caster->GetPower(POWER_ECLIPSE) > 0)
                         caster->RemoveAura(SPELL_DRUID_LUNAR_ECLIPSE);
 
                     // Operation done the the Druid reaches 100 Solar Energy with starfire

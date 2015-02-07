@@ -109,6 +109,7 @@ class boss_ammunae : public CreatureScript
 
             void EnterEvadeMode()
             {
+                instance->SetBossState(DATA_AMMUNAE, FAIL);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 me->GetMotionMaster()->MoveTargetedHome();
                 MakeInterruptable(false);

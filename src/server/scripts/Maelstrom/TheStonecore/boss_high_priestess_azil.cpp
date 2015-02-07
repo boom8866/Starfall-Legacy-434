@@ -179,6 +179,12 @@ public:
             }
         }
 
+        void JustReachedHome()
+        {
+            instance->SetBossState(DATA_HIGH_PRIESTESS_AZIL, FAIL);
+            _JustReachedHome();
+        }
+
         void Reset()
         {
             _Reset();
@@ -232,20 +238,15 @@ public:
             switch (id)
             {
                 case POINT_INTRO_MOVE:
-                {
                     me->RemoveAurasDueToSpell(SPELL_ENERGY_SHIELD);
                     me->SetReactState(REACT_AGGRESSIVE);
                     break;
-                }
                 case POINT_FLY_UP:
-                {
                     me->SetCanFly(true);
                     me->SetDisableGravity(true);
                     events.ScheduleEvent(EVENT_EARTH_FURY_FLY_ABOVE_PLATFORM, 850);
                     break;
-                }
                 case POINT_ABOVE_PLATFORM:
-                {
                     me->SetFacingTo(5.218534f);
                     DoCast(SPELL_EARTH_FURY_CASTING_VISUAL);
                     DoCast(SPELL_SEISMIC_SHARD_SUMMON_1);
@@ -253,9 +254,7 @@ public:
                     DoCast(SPELL_SEISMIC_SHARD_SUMMON_3);
                     events.ScheduleEvent(EVENT_EARTH_FURY_CHECK_SEAT0, 6700);
                     break;
-                }
                 case POINT_GROUND:
-                {
                     DoCast(SPELL_EJECT_ALL_PASSENGERS);
                     me->SetCanFly(false);
                     me->SetDisableGravity(false);
@@ -265,7 +264,6 @@ public:
                     events.ScheduleEvent(EVENT_FORCE_GRIP, urand(8000, 10000), EVENT_GROUP_PHASE_ONE);
                     events.ScheduleEvent(EVENT_SUMMON_GRAVITY_WELL, 7000, EVENT_GROUP_PHASE_ONE);
                     break;
-                }
                 default:
                     break;
             }
@@ -286,56 +284,42 @@ public:
                 switch (eventId)
                 {
                     case EVENT_INTRO_MOVE:
-                    {
                         me->GetMotionMaster()->MoveJump(GroundPos, 8.5f, 12.5f, POINT_INTRO_MOVE);
                         break;
-                    }
                     case EVENT_CURSE_OF_BLOOD:
-                    {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_CURSE_OF_BLOOD);
                         events.ScheduleEvent(EVENT_CURSE_OF_BLOOD, urand(13000, 15000), EVENT_GROUP_PHASE_ONE);
                         break;
-                    }
                     case EVENT_FORCE_GRIP:
-                    {
                         DoCastVictim(SPELL_FORCE_GRIP);
                         me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
                         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
                         events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 6500);
                         events.ScheduleEvent(EVENT_CURSE_OF_BLOOD, urand(13000, 15000), EVENT_GROUP_PHASE_ONE);
                         break;
-                    }
                     case EVENT_APPLY_IMMUNITY:
-                    {
                         me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                         break;
-                    }
                     case EVENT_SUMMON_GRAVITY_WELL:
-                    {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_SUMMON_GRAVITY_WELL);
                         events.ScheduleEvent(EVENT_SUMMON_GRAVITY_WELL, urand(8000, 12500), EVENT_GROUP_PHASE_ONE);
                         break;
-                    }
+
                     case EVENT_ENERGY_SHIELD:
-                    {
                         events.CancelEventGroup(EVENT_GROUP_PHASE_ONE);
                         DoCast(SPELL_EARTH_FURY_ENERGY_SHIELD_N);
                         events.ScheduleEvent(EVENT_EARTH_FURY, 0);
                         break;
-                    }
                     case EVENT_EARTH_FURY:
-                    {
                         countSeismicShard = 3;
                         me->SetReactState(REACT_PASSIVE);
                         me->SetFacingTo(5.862942f);
                         events.ScheduleEvent(EVENT_EARTH_FURY_FLY_UP, 1600);
                         break;
-                    }
                     case EVENT_EARTH_FURY_FLY_UP:
-                    {
                         Talk(SAY_PHASE_TWO);
                         me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 8, 12.5f, 8.0f, POINT_FLY_UP);
                         me->SetReactState(REACT_PASSIVE);
@@ -343,21 +327,15 @@ public:
                         events.CancelEvent(EVENT_SUMMON_GRAVITY_WELL);
                         events.CancelEvent(EVENT_CURSE_OF_BLOOD);
                         break;
-                    }
                     case EVENT_EARTH_FURY_FLY_ABOVE_PLATFORM:
-                    {
                         me->GetMotionMaster()->MoveJump(AbovePlatformPos, 15.0f, 8.5f, POINT_ABOVE_PLATFORM);
                         break;
-                    }
                     case EVENT_EARTH_FURY_CHECK_SEAT0:
-                    {
                         if (!vehicle->GetPassenger(0))
                             DoCast(SPELL_SEISMIC_SHARD_PREPARE);
                         events.ScheduleEvent(EVENT_EARTH_FURY_LAUNCH_SHARD, 1800);
                         break;
-                    }
                     case EVENT_EARTH_FURY_LAUNCH_SHARD:
-                    {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 500.0f, true))
                         {
                             me->SetFacingToObject(target);
@@ -367,9 +345,7 @@ public:
                         }
                         events.ScheduleEvent(countSeismicShard > 0 ? EVENT_EARTH_FURY_CHECK_SEAT0 : EVENT_EARTH_FURY_FLY_DOWN, 6000);
                         break;
-                    }
                     case EVENT_EARTH_FURY_FLY_DOWN:
-                    {
                         me->RemoveAurasDueToSpell(SPELL_EARTH_FURY_CASTING_VISUAL);
                         me->RemoveAurasDueToSpell(SPELL_EARTH_FURY_ENERGY_SHIELD_N);
                         me->RemoveAurasDueToSpell(SPELL_EARTH_FURY_ENERGY_SHIELD_H);
@@ -379,29 +355,21 @@ public:
                         events.ScheduleEvent(EVENT_ENERGY_SHIELD, urand(45000, 60000));
                         me->SetReactState(REACT_AGGRESSIVE);
                         break;
-                    }
                     case EVENT_SUMMON_WAVE_SOUTH:
-                    {
                         if (Creature* worldtrigger = me->FindNearestCreature(NPC_WORLDTRIGGER, 300.0f))
                             worldtrigger->CastSpell(worldtrigger, SPELL_SUMMON_WAVE_SOUTH);
                         events.ScheduleEvent(EVENT_SUMMON_WAVE_SOUTH, 12000);
                         break;
-                    }
                     case EVENT_SUMMON_WAVE_WEST:
-                    {
                         if (Creature* worldtrigger = me->FindNearestCreature(NPC_WORLDTRIGGER, 300.0f))
                             worldtrigger->CastSpell(worldtrigger, SPELL_SUMMON_WAVE_WEST);
                         events.ScheduleEvent(EVENT_SUMMON_WAVE_WEST, 20000);
                         break;
-                    }
                     case EVENT_START_TIMED_ACHIEVEMENT:
-                    {
                         events.ScheduleEvent(EVENT_STOP_TIMED_ACHIEVEMENT, 10000);
                         events.CancelEvent(EVENT_START_TIMED_ACHIEVEMENT);
                         break;
-                    }
                     case EVENT_STOP_TIMED_ACHIEVEMENT:
-                    {
                         if (countDevoutKills >= 60)
                         {
                             if (instance && IsHeroic())
@@ -409,7 +377,6 @@ public:
                         }
                         events.CancelEvent(EVENT_STOP_TIMED_ACHIEVEMENT);
                         break;
-                    }
                     default:
                         break;
                 }
@@ -423,10 +390,8 @@ public:
             switch (action)
             {
                 case ACTION_HANDLE_ACHIEVEMENT:
-                {
                     countDevoutKills++;
                     break;
-                }
                 default:
                     break;
             }
@@ -482,10 +447,8 @@ public:
         void JustDied(Unit* /*victim*/)
         {
             if (Creature* azil = me->FindNearestCreature(NPC_HIGH_PRIESTESS_AZIL, 300.0f, true))
-            {
                 if (azil->isInCombat())
                     azil->AI()->DoAction(ACTION_HANDLE_ACHIEVEMENT);
-            }
         }
     };
 
@@ -540,16 +503,12 @@ public:
                 switch (eventId)
                 {
                     case EVENT_GRAVITY_WELL_AURA_DAMAGE:
-                    {
                         me->RemoveAurasDueToSpell(SPELL_GRAVITY_WELL_VISUAL);
                         DoCast(SPELL_GRAVITY_WELL_AURA_DAMAGE);
                         break;
-                    }
                     case EVENT_GRAVITY_WELL_AURA_PULL:
-                    {
                         DoCast(SPELL_GRAVITY_WELL_AURA_PULL);
                         break;
-                    }
                     default:
                         break;
                 }
@@ -601,14 +560,10 @@ public:
                 switch (eventId)
                 {
                     case EVENT_SEISMIC_SHARD_MOUNT:
-                    {
                         if (Creature* highPriestAzil = me->FindNearestCreature(NPC_HIGH_PRIESTESS_AZIL, 300.0f, true))
-                        {
                             if (Vehicle* vehicle = highPriestAzil->GetVehicleKit())
                                 me->EnterVehicle(highPriestAzil, vehicle->GetNextEmptySeat(0, false)->first);
-                        }
                         break;
-                    }
                     default:
                         break;
                 }
@@ -669,10 +624,8 @@ public:
         void HandleScript(SpellEffIndex /*effIndex*/)
         {
             if (Unit* caster = GetCaster())
-            {
                 for (uint8 i = 0; i < 3; i++)
                     caster->CastSpell(caster, SPELL_SUMMON_ADD_SOUTH, true);
-            }
         }
 
         void Register()
@@ -709,10 +662,8 @@ public:
         void HandleScript(SpellEffIndex /*effIndex*/)
         {
             if (Unit* caster = GetCaster())
-            {
                 for (uint8 i = 0; i < 10; i++)
                     caster->CastSpell(caster, SPELL_SUMMON_ADD_WEST, true);
-            }
         }
 
         void Register()
@@ -766,10 +717,8 @@ public:
             if (Unit* caster = GetCaster())
             {
                 if (Unit* target = GetHitUnit())
-                {
                     if (target->GetEntry() != NPC_HIGH_PRIESTESS_AZIL && target->GetEntry() != 49624)
                         caster->CastSpell(target, SPELL_GRAVITY_WELL_DAMAGE, true);
-                }
             }
         }
 
@@ -914,10 +863,8 @@ public:
         void SetTarget(WorldObject*& target)
         {
             if (Unit* caster = GetCaster())
-            {
                 if (Creature* azil = caster->FindNearestCreature(NPC_HIGH_PRIESTESS_AZIL, 300.0f, true))
                     target = azil;
-            }
         }
 
         void ChangeSeat(SpellEffIndex /*effIndex*/)
@@ -926,10 +873,8 @@ public:
             {
                 caster->ExitVehicle();
                 if (Unit* target = GetHitUnit())
-                {
                     if (target->IsVehicle())
                         caster->EnterVehicle(target, 0);
-                }
             }
         }
 
@@ -998,10 +943,8 @@ public:
         void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
-            {
                 if (Unit* player = GetOwner()->ToUnit())
                     player->EnterVehicle(caster, 3);
-            }
         }
 
         void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)

@@ -84,6 +84,7 @@ public:
             _EnterEvadeMode();
             events.Reset();
             ActivateTwisters(false);
+            instance->SetBossState(DATA_ALTAIRUS, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
         }

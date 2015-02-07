@@ -86,7 +86,8 @@ enum Creatures
     NPC_INFERNO_RUSH                = 47501,
     NPC_VIOLENT_CYCLONE             = 44747,
     NPC_LIQUID_ICE                  = 45452,
-
+    NPC_ERUPTION_TARGET             = 44845,
+    NPC_GRAVITY_CRUSH               = 45476,
 
     NPC_CHOGALL_HALFUS              = 46965,
     NPC_CHOGALL_DRAGONS             = 48142,

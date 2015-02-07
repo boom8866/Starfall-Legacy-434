@@ -4187,8 +4187,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 break;
             case 51460: // Runic Corruption
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_POWER_REGEN_PERCENT;
+                spellInfo->Effects[EFFECT_0].MiscValueB = 4;
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_NONE;
-                spellInfo->Effects[EFFECT_0].MiscValueB = 2;
                 break;
             case 62758: // Wild Hunt
             case 62762:
@@ -5119,6 +5120,13 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92880:
             case 92881:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+                break;
+            // * Ascendant Council
+            case 84948:
+            case 92486:
+            case 92487:
+            case 92488:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_OTHER_CASTS;
                 break;
             // Throne of the four Winds
             //  * Conclave of Wind

@@ -156,6 +156,7 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            instance->SetBossState(DATA_HELIX_GEARBREAKER, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_HELIX_RIDE);
             summons.DespawnAll();

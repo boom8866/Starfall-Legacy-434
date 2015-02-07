@@ -120,6 +120,7 @@ public:
             summons.DespawnAll();
             events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
+            instance->SetBossState(DATA_COMMANDER_SPRINGVALE, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WORD_OF_SHAME);
             _DespawnAtEvade();

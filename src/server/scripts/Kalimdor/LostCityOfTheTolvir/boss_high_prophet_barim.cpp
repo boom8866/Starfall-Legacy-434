@@ -155,6 +155,7 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
+            instance->SetBossState(DATA_HIGH_PROPHET_BARIM, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             me->DespawnCreaturesInArea(NPC_BLAZE_FIRE_DUMMY, 500.0f);

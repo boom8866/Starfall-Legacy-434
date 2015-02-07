@@ -58,7 +58,9 @@ public:
 
     struct boss_ascendant_lord_obsidiusAI : public BossAI
     {
-        boss_ascendant_lord_obsidiusAI(Creature* creature) : BossAI(creature, DATA_ASCENDANT_LORD_OBSIDIUS) {}
+        boss_ascendant_lord_obsidiusAI(Creature* creature) : BossAI(creature, DATA_ASCENDANT_LORD_OBSIDIUS)
+        {
+        }
 
         void Reset()
         {
@@ -86,6 +88,12 @@ public:
 
             for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
                 (*iter)->ToCreature()->AI()->DoAction(1);
+        }
+
+        void JustReachedHome()
+        {
+            _JustReachedHome();
+            instance->SetBossState(DATA_ASCENDANT_LORD_OBSIDIUS, FAIL);
         }
 
         void EnterCombat(Unit* /*who*/)

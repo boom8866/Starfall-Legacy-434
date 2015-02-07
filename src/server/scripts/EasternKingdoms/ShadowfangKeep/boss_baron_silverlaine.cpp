@@ -115,6 +115,7 @@ public:
             summons.DespawnAll();
             _worgenCounter = 0;
             me->GetMotionMaster()->MoveTargetedHome();
+            instance->SetBossState(DATA_BARON_SILVERLAINE, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             DespawnWorgenSpirits();
             events.Reset();

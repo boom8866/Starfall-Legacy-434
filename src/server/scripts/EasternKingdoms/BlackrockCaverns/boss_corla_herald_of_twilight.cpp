@@ -107,11 +107,13 @@ public:
         void JustReachedHome()
         {
             me->CastSpell(me, SPELL_DRAIN_ESSENCE_CHANNELING, true);
+            instance->SetBossState(DATA_CORLA_HERALD_OF_TWILIGHT, FAIL);
             RehandleZealots();
         }
 
         void Reset()
         {
+            _Reset();
             events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
             me->RemoveAllAuras();

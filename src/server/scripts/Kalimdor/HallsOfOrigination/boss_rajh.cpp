@@ -141,6 +141,7 @@ public:
             _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+            instance->SetBossState(DATA_RAJH, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
             summons.DespawnAll();
