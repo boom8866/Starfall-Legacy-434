@@ -1112,6 +1112,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         }
     }
 
+    // Undead Start: Rigor Mortis!
+    if (pCurrChar->getRace() == RACE_UNDEAD_PLAYER && pCurrChar->getLevel() == 1 && !pCurrChar->HasAura(73523))
+        if (pCurrChar->GetQuestStatus(24959) != QUEST_STATUS_REWARDED && pCurrChar->GetAreaId() == 5692)
+            pCurrChar->CastSpell(pCurrChar, 73523, true);
+
     // Darkmoon Faire
     if (!sGameEventMgr->IsActiveEvent(67) && pCurrChar->GetMapId() == 974)
     {
