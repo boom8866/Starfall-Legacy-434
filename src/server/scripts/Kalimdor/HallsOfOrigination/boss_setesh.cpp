@@ -254,7 +254,7 @@ class boss_setesh : public CreatureScript
                             events.ScheduleEvent(EVENT_CHAOS_BLAST, 32000);
                             break;
                         case EVENT_SUMMON_SEED_OF_CHAOS:
-                            DoCastAOE(SPELL_SUMMON_SEED_OF_CHAOS);
+                            DoCast(me, SPELL_SUMMON_SEED_OF_CHAOS, true);
                             events.ScheduleEvent(EVENT_SUMMON_SEED_OF_CHAOS, 32000);
                             break;
                         default:
