@@ -502,6 +502,14 @@ public:
     {
         PrepareSpellScript(spell_hoo_consume_life_energy_SpellScript);
 
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
         void HandleScriptEffect(SpellEffIndex /*effIndex*/)
         {
             if (Unit* caster = GetCaster())
@@ -517,6 +525,7 @@ public:
         void Register()
         {
             OnEffectHitTarget += SpellEffectFn(spell_hoo_consume_life_energy_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hoo_consume_life_energy_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         }
     };
 
