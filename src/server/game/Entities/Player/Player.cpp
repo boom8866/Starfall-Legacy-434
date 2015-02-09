@@ -8693,14 +8693,14 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         case 16:    // Azshara (*)
         case 405:   // Desolace
         case 618:   // Winterspring
-        case 361:   // Felwood
+        case 361:   // Felwood (*)
         case 406:   // Stonetalon Mountains
-        case 357:   // Feralas (*)
+        case 357:   // Feralas
         case 5144:  // Vashj'ir
         case 5145:  // Vashj'ir
         case 4815:  // Vashj'ir
         {
-            if (newZone == 16 || newZone == 357)
+            if (newZone == 16 || newZone == 361)
                 ChatHandler(GetSession()).PSendSysMessage("|cffff0000[INCOMPLETE ZONE]: |cffffffffYou are in a non-fixed quest zone, better avoid to take quests or kill mobs!");
             else
                 ChatHandler(GetSession()).PSendSysMessage("|cffff0000[WARNING]: |cffffffffYou are in a non-fixed quest zone, you are not able to take quests or kill creatures!");

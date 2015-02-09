@@ -1741,6 +1741,26 @@ class go_twilight_portal_deepholm : public GameObjectScript
         }
 };
 
+class go_vashjir_portal : public GameObjectScript
+{
+public:
+    go_vashjir_portal() : GameObjectScript("go_vashjir_portal")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_TELEPORT_TO_VASHJIR   = 85040
+    };
+
+    bool OnGossipHello(Player* player, GameObject* /*go*/)
+    {
+        if (player->getLevel() >= 85)
+            player->CastSpell(player, SPELL_TELEPORT_TO_VASHJIR, true);
+        return false;
+    }
+};
+
 void AddSC_go_scripts()
 {
     new go_cat_figurine;
@@ -1794,4 +1814,5 @@ void AddSC_go_scripts()
     new go_ball_and_chain;
     new go_waygate_controller;
     new go_twilight_portal_deepholm;
+    new go_vashjir_portal;
 }
