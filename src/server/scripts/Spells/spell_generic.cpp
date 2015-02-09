@@ -3638,7 +3638,11 @@ class spell_gen_armor_specialization : public SpellScriptLoader
 
                 SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
                 if (spellInfo && player->HasItemFitToSpellRequirements(spellInfo))
+                {
+                    if (player->HasAura(spellId))
+                        player->RemoveAurasDueToSpell(spellId);
                     player->CastSpell(player, spellId, TRIGGERED_FULL_MASK);
+                }
             }
 
             void Register()
