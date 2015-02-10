@@ -87,7 +87,7 @@ enum Creatures
     NPC_TEMPLE_FIRESHAPER           = 48143,
     NPC_VENOMOUS_SKITTERER          = 39440,
 
-    NPC_WATER_BOMB                  = 41264,
+    NPC_AQUA_BOMB                   = 41264,
     NPC_WATER_BUBBLE                = 41257,
     NPC_WHIRLING_WINDS              = 41245,
     NPC_OMEGA_STANCE                = 41194,

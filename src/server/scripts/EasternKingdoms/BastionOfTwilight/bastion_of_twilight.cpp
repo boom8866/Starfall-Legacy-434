@@ -299,6 +299,9 @@ public:
 
             targets.remove_if(PhasedBurnCheck());
 
+            if (targets.empty())
+                return;
+
             Trinity::Containers::RandomResizeList(targets, 1);
         }
 
