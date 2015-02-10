@@ -118,6 +118,7 @@ enum Events
     // Elementium Monstrosity
     EVENT_GRAVITY_CRUSH,
     EVENT_LAVA_SEED,
+    EVENT_INCREASE_INSTABILITY_COUNTER,
 
     // Controller
     EVENT_SUMMON_MONSTROSITY,
@@ -142,7 +143,9 @@ enum Actions
     ACTION_SWITCH_PHASE_1,
     ACTION_SWITCH_PHASE_2,
     ACTION_PREPARE_FUSE,
+    ACTION_ENCOUNTER_START,
     ACTION_RESET_COUNCIL,
+    ACTION_ENCOUNTER_DONE,
 };
 
 Position const ElementiumMonstrosityPos = { -1009.01f, -582.467f, 831.9843f, 6.265732f };
@@ -251,6 +254,9 @@ public:
             if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
                 ignacious->AI()->AttackStart(who);
 
+            if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                controller->AI()->DoAction(ACTION_ENCOUNTER_START);
+
             events.ScheduleEvent(EVENT_WATER_BOMB, 15000);
             events.ScheduleEvent(EVENT_GLACIATE, 30000);
             events.ScheduleEvent(EVENT_HYDRO_LANCE, urand(6000, 10000));
@@ -261,11 +267,16 @@ public:
         {
             _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+            if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                controller->AI()->DoAction(ACTION_RESET_COUNCIL);
+
             events.Reset();
             _switched = false;
             me->SetReactState(REACT_AGGRESSIVE);
             me->GetMotionMaster()->MoveTargetedHome();
             summons.DespawnAll();
+            _DespawnAtEvade();
         }
 
         void JustDied(Unit* /*killer*/)
@@ -457,6 +468,7 @@ public:
             _infernoCounter = 0;
             _switched = false;
             summons.DespawnAll();
+            _DespawnAtEvade();
         }
 
         void JustDied(Unit* /*killer*/)
@@ -690,6 +702,7 @@ public:
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
             summons.DespawnAll();
+            _DespawnAtEvade();
         }
 
         void JustDied(Unit* /*killer*/)
@@ -849,6 +862,7 @@ public:
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
             summons.DespawnAll();
+            _DespawnAtEvade();
         }
 
         void JustDied(Unit* /*killer*/)
@@ -991,7 +1005,10 @@ public:
         {
             _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            instance->SetBossState(DATA_ELEMENTIUM_MONSTROSITY, FAIL);
+
+            if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                controller->AI()->DoAction(ACTION_RESET_COUNCIL);
+
             events.Reset();
             summons.DespawnAll();
             me->DespawnOrUnsummon(100);
@@ -1059,6 +1076,7 @@ public:
                         break;
                 }
             }
+            DoMeleeAttackIfReady();
         }
     };
     CreatureAI* GetAI(Creature* creature) const
@@ -1168,6 +1186,41 @@ public:
 
                     if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
                         ignacious->AI()->DoAction(ACTION_PREPARE_FUSE);
+                    break;
+                case ACTION_ENCOUNTER_START:
+                    instance->SetBossState(DATA_ASCENDANT_COUNCIL, IN_PROGRESS);
+                    break;
+                case ACTION_RESET_COUNCIL:
+                    health = 0;
+                    instance->SetBossState(DATA_ASCENDANT_COUNCIL, NOT_STARTED);
+                    instance->SetBossState(DATA_FELUDIUS, FAIL);
+                    instance->SetBossState(DATA_IGNACIOUS, FAIL);
+                    instance->SetBossState(DATA_ARION, FAIL);
+                    instance->SetBossState(DATA_TERRASTRA, FAIL);
+                    instance->SetBossState(DATA_ELEMENTIUM_MONSTROSITY, FAIL);
+                    if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
+                    {
+                        feludius->Respawn();
+                        feludius->AI()->EnterEvadeMode();
+                    }
+                    if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
+                    {
+                        ignacious->Respawn();
+                        ignacious->AI()->EnterEvadeMode();
+                    }
+                    if (Creature* arion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARION)))
+                    {
+                        arion->Respawn();
+                        arion->AI()->EnterEvadeMode();
+                    }
+                    if (Creature* terrastra = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TERRASTRA)))
+                    {
+                        terrastra->Respawn();
+                        terrastra->AI()->EnterEvadeMode();
+                    }
+                    break;
+                case ACTION_ENCOUNTER_DONE:
+                    instance->SetBossState(DATA_ASCENDANT_COUNCIL, DONE);
                     break;
                 default:
                     break;

@@ -6,7 +6,7 @@ DoorData const doorData[] =
     {GO_HALFUS_ENTRANCE,                DATA_HALFUS_WYRMBREAKER,        DOOR_TYPE_ROOM,         BOUNDARY_N      },
     {GO_HALFUS_ESCAPE,                  DATA_HALFUS_WYRMBREAKER,        DOOR_TYPE_PASSAGE,      BOUNDARY_NONE   },
     {GO_TAV_ENTRANCE,                   DATA_THERALION_AND_VALIONA,     DOOR_TYPE_ROOM,         BOUNDARY_N      },
-    //{GO_TAV_ESCAPE,                     DATA_THERALION_AND_VALIONA,     DOOR_TYPE_PASSAGE,      BOUNDARY_NONE   },
+    {GO_TAV_ESCAPE,                     DATA_THERALION_AND_VALIONA,     DOOR_TYPE_PASSAGE,      BOUNDARY_NONE   },
     {GO_COA_ENTRANCE,                   DATA_ASCENDANT_COUNCIL,         DOOR_TYPE_ROOM,         BOUNDARY_N      },
     {GO_COA_ESCAPE,                     DATA_ASCENDANT_COUNCIL,         DOOR_TYPE_PASSAGE,      BOUNDARY_NONE   },
     {GO_CHOGALL_ENTRANCE,               DATA_CHOGALL,                   DOOR_TYPE_ROOM,         BOUNDARY_N      },
