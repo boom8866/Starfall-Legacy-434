@@ -294,33 +294,6 @@ public:
     }
 };
 
-class npc_omega_stance : public CreatureScript
-{
-    public:
-        npc_omega_stance() : CreatureScript("npc_omega_stance") { }
-
-        struct npc_omega_stanceAI : public ScriptedAI
-        {
-            npc_omega_stanceAI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
-
-            void IsSummonedBy(Unit* /*who*/)
-            {
-                DoCast(me, SPELL_OMEGA_STANCE_SPIDER_TRIGGER, true);
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_omega_stanceAI(creature);
-        }
-};
-
 class npc_alpha_beam : public CreatureScript
 {
     public:
@@ -330,13 +303,6 @@ class npc_alpha_beam : public CreatureScript
         {
             npc_alpha_beamAI(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
             {
-            }
-
-            void InitializeAI()
-            {
-                me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
-                me->setFaction(14);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
@@ -536,9 +502,7 @@ public:
             if (targets.empty())
                 return;
 
-            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
-            targets.clear();
-            targets.push_back(target);
+            Trinity::Containers::RandomResizeList(targets, 1);
         }
 
         void Register()
@@ -600,7 +564,7 @@ public:
 
             float x = caster->GetPositionX() + dist * std::cos(angle);
             float y = caster->GetPositionY() + dist * std::sin(angle);
-            float z = caster->GetMap()->GetHeight(x, y, caster->GetPositionZ());
+            float z = caster->GetPositionZ();
 
             const_cast<WorldLocation*>(GetExplTargetDest())->Relocate(x, y, z);
             GetHitDest()->Relocate(x, y, z);
@@ -621,10 +585,9 @@ public:
 void AddSC_boss_anraphet()
 {
     new boss_anraphet();
-    new spell_anraphet_alpha_beams();
     new npc_brann_bronzebeard_anraphet();
     new npc_alpha_beam();
+    new spell_anraphet_alpha_beams();
     new spell_anraphet_omega_stance_summon();
     new spell_omega_stance_spider_effect();
-    new npc_omega_stance();
 }
