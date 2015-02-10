@@ -260,8 +260,8 @@ public:
                         Talk(SAY_BLESSING_OF_THE_SUN);
                         break;
                     case EVENT_SUMMON_SUN_ORB:
-                        me->GetMotionMaster()->MovementExpired();
                         MakeInterruptable(true);
+                        me->StopMoving();
                         DoCast(SPELL_SUMMON_SUN_ORB);
                         events.ScheduleEvent(EVENT_MOVE_TO_CENTER, 3500);
                         events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 3000);
