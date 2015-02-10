@@ -6266,12 +6266,20 @@ void Player::UpdateRating(CombatRating cr)
                 UpdateCritPercentage(BASE_ATTACK);
                 UpdateCritPercentage(OFF_ATTACK);
             }
+
+            // Update Pet Scaling Auras
+            if (Pet* pet = GetPet())
+                pet->PetBonuses();
             break;
         }
         case CR_CRIT_RANGED:
         {
             if (affectStats)
                 UpdateCritPercentage(RANGED_ATTACK);
+
+            // Update Pet Scaling Auras
+            if (Pet* pet = GetPet())
+                pet->PetBonuses();
             break;
         }
         case CR_CRIT_SPELL:
@@ -7391,7 +7399,7 @@ void Player::RewardOnKill(Unit* victim, float rate)
             if (victim->GetTypeId() != TYPEID_PLAYER)
                 if (map->IsDungeon())
                     // Killing a Trash unit that is not a tempoary summon
-                    if (victim->ToCreature()->GetCreatureTemplate()->expansion == 3 && !victim->ToCreature()->IsDungeonBoss() && !victim->isSummon())
+                    if (victim->ToCreature()->GetCreatureTemplate()->expansion == 3 && !victim->ToCreature()->IsDungeonBoss() && !victim->isSummon() && !victim->ToTempSummon())
                     {
                         if (!map->IsHeroic())
                             Rew = sObjectMgr->GetRewardOnKillEntry(42696);
