@@ -5112,7 +5112,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 {
                     if (int32 num = (needCast ? 0 : 1))
                         aur->ModStackAmount(num);
-                    fixed_bonus += fixed_bonus * aur->GetStackAmount();
                 }
             }
 
