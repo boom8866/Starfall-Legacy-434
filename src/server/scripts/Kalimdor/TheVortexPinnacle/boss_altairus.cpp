@@ -74,7 +74,8 @@ public:
         void JustDied(Unit* /*Killer*/)
         {
             _JustDied();
-            ActivateTwisters(false);
+            if (IsHeroic())
+                ActivateTwisters(false);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->DespawnCreaturesInArea(NPC_INVISIBLE_STALKER, 100.0f);
         }
