@@ -106,6 +106,11 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
+            if (Creature* chief = me->FindNearestCreature(NPC_CHIEF_ENGINEER, 10.0f, true))
+            {
+                chief->AI()->DoAction(1);
+                chief->AI()->DoAction(2);
+            }
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -139,17 +144,6 @@ public:
 
                                 if (caster->GetTypeId() == TYPEID_PLAYER)
                                     caster->ToPlayer()->KilledMonsterCredit(42674);
-
-                                chief->AI()->TalkWithDelay(1000, 5);
-                                chief->AI()->TalkWithDelay(7000, 6);
-                                chief->AI()->TalkWithDelay(14000, 7);
-                                chief->AI()->TalkWithDelay(21000, 8);
-                                chief->AI()->TalkWithDelay(28000, 9);
-                                chief->AI()->TalkWithDelay(35000, 10);
-                                chief->AI()->TalkWithDelay(42000, 11);
-                                chief->AI()->TalkWithDelay(49000, 12);
-                                chief->AI()->DoAction(1);
-                                chief->AI()->DoAction(2);
                                 break;
                             }
                             default:
@@ -238,14 +232,30 @@ public:
             switch(action)
             {
                 case ACTION_EVADE_TIMER:
+                {
+                    me->AI()->TalkWithDelay(1000, 5);
+                    me->AI()->TalkWithDelay(7000, 6);
+                    me->AI()->TalkWithDelay(14000, 7);
+                    me->AI()->TalkWithDelay(21000, 8);
+                    me->AI()->TalkWithDelay(28000, 9);
+                    me->AI()->TalkWithDelay(35000, 10);
+                    me->AI()->TalkWithDelay(42000, 11);
+                    me->AI()->TalkWithDelay(49000, 12);
                     events.ScheduleEvent(EVENT_CHECK_FOR_EVADE, 60000);
                     break;
+                }
                 case ACTION_ENABLE_DISCIPLINE:
                     events.ScheduleEvent(EVENT_CAN_BE_DISCIPLINED, 18000);
                     break;
                 default:
                     break;
             }
+        }
+
+        void Reset()
+        {
+            events.Reset();
+            me->m_Events.KillAllEvents(true);
         }
 
         void SpellHit(Unit* caster, SpellInfo const* spell)
@@ -273,6 +283,9 @@ public:
                             (*itr)->ToCreature()->AI()->TalkWithDelay(1500, 0);
                         }
                     }
+                    events.Reset();
+                    me->m_Events.KillAllEvents(true);
+                    me->DespawnOrUnsummon(4000);
                     break;
                 }
                 default:
@@ -294,6 +307,9 @@ public:
                         me->SetWalk(false);
                         me->GetMotionMaster()->MovePoint(0, 2352.27f, -4736.54f, 120.82f);
                         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        me->DespawnOrUnsummon(5000);
+                        events.Reset();
+                        me->m_Events.KillAllEvents(true);
                         events.CancelEvent(EVENT_CHECK_FOR_EVADE);
                         break;
                     }
