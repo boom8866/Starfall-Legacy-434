@@ -972,7 +972,10 @@ public:
     {
         boss_elementium_monstrosityAI(Creature* creature) : BossAI(creature, DATA_ELEMENTIUM_MONSTROSITY)
         {
+            _instabilityCharges = 1;
         }
+
+        uint8 _instabilityCharges;
 
         void InitializeAI()
         {
@@ -997,7 +1000,6 @@ public:
             events.ScheduleEvent(EVENT_GRAVITY_CRUSH, 7000);
             DoCast(me, SPELL_TWILIGHT_EXPLOSION);
             DoCast(me, SPELL_CRYOGENIC_AURA);
-            DoCast(me, SPELL_ELECTRIC_INSTABILITY);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
         }
 
@@ -1005,6 +1007,7 @@ public:
         {
             _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->SetData(DATA_ELECTRICAL_INSTABILITY_CHARGES, 1);
 
             if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
                 controller->AI()->DoAction(ACTION_RESET_COUNCIL);
@@ -1065,12 +1068,21 @@ public:
                 {
                     case EVENT_ATTACK:
                         me->SetReactState(REACT_AGGRESSIVE);
+                        DoCast(me, SPELL_ELECTRIC_INSTABILITY);
                         if (Player* player = me->FindNearestPlayer(200.0f, true))
                             me->AI()->AttackStart(player);
+                        events.ScheduleEvent(EVENT_INCREASE_INSTABILITY_COUNTER, 10000);
                         break;
                     case EVENT_GRAVITY_CRUSH:
                         Talk(SAY_ABILITY);
                         DoCast(me, SPELL_GRAVITY_CRUSH);
+                        break;
+                    case EVENT_INCREASE_INSTABILITY_COUNTER:
+                        _instabilityCharges++;
+                        if (_instabilityCharges > 10)
+                            _instabilityCharges = 10;
+                        instance->SetData(DATA_ELECTRICAL_INSTABILITY_CHARGES, _instabilityCharges);
+                        events.ScheduleEvent(EVENT_INCREASE_INSTABILITY_COUNTER, 10000);
                         break;
                     default:
                         break;
@@ -1619,7 +1631,12 @@ public:
             if (targets.empty())
                 return;
 
-            Trinity::Containers::RandomResizeList(targets, 1);
+            uint32 size = GetCaster()->GetInstanceScript()->GetData(DATA_ELECTRICAL_INSTABILITY_CHARGES);
+
+            if (size == 0)
+                size = 1;
+
+            Trinity::Containers::RandomResizeList(targets, size);
         }
 
         void HandleHit(SpellEffIndex /*effIndex*/)

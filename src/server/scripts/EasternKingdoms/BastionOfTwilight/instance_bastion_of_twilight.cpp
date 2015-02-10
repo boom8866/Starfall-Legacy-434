@@ -189,6 +189,9 @@ class instance_bastion_of_twilight : public InstanceMapScript
                         sLog->outError(LOG_FILTER_MAPSCRIPTS, "Bastion of Twilight -> Halfus Setup: combination %u picked", data);
                         SaveToDB();
                         break;
+                    case DATA_ELECTRICAL_INSTABILITY_CHARGES:
+                        _instabilityCharges = data;
+                        break;
                     default:
                         break;
                 }
@@ -200,6 +203,8 @@ class instance_bastion_of_twilight : public InstanceMapScript
                 {
                     case DATA_DRAGONS_PICKED:
                         return _dragonsPicked;
+                    case DATA_ELECTRICAL_INSTABILITY_CHARGES:
+                        return _instabilityCharges;
                     default:
                         break;
                 }
@@ -369,7 +374,7 @@ class instance_bastion_of_twilight : public InstanceMapScript
             uint64 _chogallTAVGUID;
             uint64 chogallCouncil;
             uint32 _dragonsPicked;
-            uint8 data_phase; 
+            uint8 _instabilityCharges;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const
