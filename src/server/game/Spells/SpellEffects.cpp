@@ -787,7 +787,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         break;
                     }
                     case 89751: // Felstorm
-                    case 7814:  // Lash of Pain
                     case 30213: // Legion Strike
                     case 3716:  // Torment
                     case 6360:  // Whiplash
@@ -802,12 +801,13 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
+                    case 7814: // Lash of Pain
                     case 54049: // Shadow Bite
                     {
                         if (m_caster->GetCharmerOrOwner())
                         {
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
-                            damage += int32((spellpower * 1.2280f));
+                            damage += int32((spellpower * 0.4290f));
                         }
                         break;
                     }

@@ -438,6 +438,127 @@ public:
     }
 };
 
+class npc_hoo_venomous_skitterer : public CreatureScript
+{
+public:
+    npc_hoo_venomous_skitterer() : CreatureScript("npc_hoo_venomous_skitterer")
+    {
+    }
+
+    struct npc_hoo_venomous_skittererAI : public ScriptedAI
+    {
+        npc_hoo_venomous_skittererAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_BLINDING_TOXIN        = 73963,
+            SPELL_DEBILITATING_VENOM    = 74121,
+            SPELL_SURGE                 = 75158
+        };
+
+        enum eventId
+        {
+            EVENT_SUBMERGE = 1,
+            EVENT_MAKE_ATTACKABLE,
+            EVENT_BLINDING_TOXIN,
+            EVENT_SURGE,
+            EVENT_DEBILITATING_VENOM
+        };
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_SUBMERGE, 1);
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            me->RemoveFlag(UNIT_FIELD_BYTES_1, 9);
+            events.ScheduleEvent(EVENT_MAKE_ATTACKABLE, 2000);
+            events.ScheduleEvent(EVENT_BLINDING_TOXIN, 10000);
+            events.ScheduleEvent(EVENT_SURGE, 7000);
+            events.ScheduleEvent(EVENT_DEBILITATING_VENOM, urand(8000, 15000));
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+            events.ScheduleEvent(EVENT_SUBMERGE, 2000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SUBMERGE:
+                    {
+                        if (!me->isInCombat() && !me->IsInEvadeMode() && !me->isMoving())
+                        {
+                            me->SetFlag(UNIT_FIELD_BYTES_1, 9);
+                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE);
+                            me->SetControlled(true, UNIT_STATE_ROOT);
+                            events.CancelEvent(EVENT_SUBMERGE);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_SUBMERGE, 1000);
+                        break;
+                    }
+                    case EVENT_SURGE:
+                    {
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_SURGE);
+                        events.RescheduleEvent(EVENT_SURGE, urand(10000, 12500));
+                        break;
+                    }
+                    case EVENT_BLINDING_TOXIN:
+                    {
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_BLINDING_TOXIN);
+                        events.RescheduleEvent(EVENT_BLINDING_TOXIN, urand(15000, 20000));
+                        break;
+                    }
+                    case EVENT_DEBILITATING_VENOM:
+                    {
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_DEBILITATING_VENOM);
+                        events.RescheduleEvent(EVENT_DEBILITATING_VENOM, urand(5000, 7500));
+                        break;
+                    }
+                    case EVENT_MAKE_ATTACKABLE:
+                    {
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE);
+                        me->SetControlled(false, UNIT_STATE_ROOT);
+                        events.CancelEvent(EVENT_MAKE_ATTACKABLE);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_hoo_venomous_skittererAI(creature);
+    }
+};
+
 void AddSC_halls_of_origination()
 {
     new go_hoo_lift_console();
@@ -446,4 +567,5 @@ void AddSC_halls_of_origination()
     new npc_hoo_sun_touched_speaker();
     new spell_hoo_flame_ring_script();
     new npc_hoo_dustbone_horror();
+    new npc_hoo_venomous_skitterer();
 }
