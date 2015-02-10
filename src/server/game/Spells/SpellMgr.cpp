@@ -3853,6 +3853,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 77347: // Aqua Bomb
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(38);
                 break;
+            // * Anraphet
+            case 75609: // Crumbling Ruin
+            case 91206: // Crumbling Ruin
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_50000_YARDS);
+                break;
             // * Ammunae
             case 75657: // Ammunaes Buff should only target himself
             case 94970:

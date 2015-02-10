@@ -7399,7 +7399,7 @@ void Player::RewardOnKill(Unit* victim, float rate)
             if (victim->GetTypeId() != TYPEID_PLAYER)
                 if (map->IsDungeon())
                     // Killing a Trash unit that is not a tempoary summon
-                    if (victim->ToCreature()->GetCreatureTemplate()->expansion == 3 && !victim->ToCreature()->IsDungeonBoss() && !victim->isSummon())
+                    if (victim->ToCreature()->GetCreatureTemplate()->expansion == 3 && !victim->ToCreature()->IsDungeonBoss() && !victim->isSummon() && !victim->ToTempSummon())
                     {
                         if (!map->IsHeroic())
                             Rew = sObjectMgr->GetRewardOnKillEntry(42696);
