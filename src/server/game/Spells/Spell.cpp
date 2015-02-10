@@ -3249,7 +3249,7 @@ void Spell::cast(bool skipCheck)
         // Hunter: Improved Steady Shot
         if (m_caster->getClass() == CLASS_HUNTER)
         {
-            if (m_spellInfo->Id != 56641 && m_spellInfo->Id != 75 && m_spellInfo->Id != 90916 && m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER)
+            if (m_spellInfo->Id != 56641 && m_spellInfo->Id != 75 && m_spellInfo->Id != 90916 && m_spellInfo->Id != 76663 && m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_RANGED)
                 m_caster->SetLastSpell(0);
         }
 
