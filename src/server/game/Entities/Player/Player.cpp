@@ -6266,12 +6266,20 @@ void Player::UpdateRating(CombatRating cr)
                 UpdateCritPercentage(BASE_ATTACK);
                 UpdateCritPercentage(OFF_ATTACK);
             }
+
+            // Update Pet Scaling Auras
+            if (Pet* pet = GetPet())
+                pet->PetBonuses();
             break;
         }
         case CR_CRIT_RANGED:
         {
             if (affectStats)
                 UpdateCritPercentage(RANGED_ATTACK);
+
+            // Update Pet Scaling Auras
+            if (Pet* pet = GetPet())
+                pet->PetBonuses();
             break;
         }
         case CR_CRIT_SPELL:

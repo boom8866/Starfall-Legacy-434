@@ -4037,6 +4037,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 34433: // Shadowfiend
                 spellInfo->Effects[EFFECT_0].MiscValueB = 67;
                 break;
+            case 20243: // Devastate
+                spellInfo->Effects[EFFECT_0].BasePoints = 150;
+                break;
             // Hunter
             case 19263: // Deterrence
                 spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_MOD_PACIFY;

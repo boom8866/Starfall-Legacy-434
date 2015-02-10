@@ -5112,7 +5112,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 {
                     if (int32 num = (needCast ? 0 : 1))
                         aur->ModStackAmount(num);
-                    fixed_bonus += (aur->GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
+                    fixed_bonus += fixed_bonus * aur->GetStackAmount();
                 }
             }
 
@@ -5138,6 +5138,17 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                         if (GetCaster()->HasAura(76856))
                             totalDamagePercentMod += totalDamagePercentMod * (0.110f + (0.0560f * masteryPoints));
                     }
+                    break;
+                }
+                // Devastate
+                case 20243:
+                {
+                    if (!unitTarget || !m_caster)
+                        break;
+
+                    // Sunder Armor
+                    if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
+                        totalDamagePercentMod += totalDamagePercentMod * aur->GetStackAmount();
                     break;
                 }
             }
