@@ -1256,6 +1256,7 @@ public:
                         float y = caster->GetPositionY() + sin(ori) * dist;
                         float z = caster->GetPositionZ();
                         target->NearTeleportTo(x, y, z, ori);
+                        caster->SetFacingToObject(target);
                     }
                 }
         }
