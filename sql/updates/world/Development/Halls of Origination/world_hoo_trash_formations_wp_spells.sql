@@ -965,3 +965,4 @@ UPDATE `creature_template` SET `ScriptName`='npc_hoo_jeweled_scarab' WHERE `entr
 UPDATE `creature_template` SET `ScriptName`='npc_hoo_blistering_scarab' WHERE `entry`=40310;
 UPDATE `creature_template` SET `modelid2`=11686 WHERE `entry`=40790;
 UPDATE `creature_template` SET `mechanic_immune_mask`=617299839 WHERE `entry` IN (48715, 39731);
+UPDATE `creature` SET `spawntimesecs`=120 WHERE `id` IN (40252, 40251, 39804);

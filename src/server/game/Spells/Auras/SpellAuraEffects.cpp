@@ -2776,6 +2776,8 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
         if (mode & AURA_EFFECT_HANDLE_REAL)
             if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(GetAmount()))
                 target->CastSpell(target, mountCapability->SpeedModSpell, true);
+
+        target->SetStandState(UNIT_STAND_STATE_STAND);
     }
     else
     {
