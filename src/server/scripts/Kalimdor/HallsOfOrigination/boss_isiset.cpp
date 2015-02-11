@@ -277,7 +277,7 @@ public:
                         case EVENT_VEIL_SKY_PHASE_ONE:
                         {
                             DoCast(me, SPELL_VEIL_OF_SKY_FIRST);
-                            events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_ONE, 75000);
+                            events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_ONE, 40000);
                             break;
                         }
                         case EVENT_ASTRAL_RAIN_PHASE_ONE:
@@ -288,8 +288,11 @@ public:
                         }
                         case EVENT_SUPERNOVA:
                         {
-                            Talk(SAY_SUPERNOVA);
-                            Talk(SAY_SUPERNOVA_WARNING);
+                            if (isPhased == false)
+                            {
+                                Talk(SAY_SUPERNOVA);
+                                Talk(SAY_SUPERNOVA_WARNING);
+                            }
                             if (Unit* victim = me->getVictim())
                                 DoCast(victim, SPELL_SUPERNOVA);
                             events.RescheduleEvent(EVENT_SUPERNOVA, 42000);
@@ -328,7 +331,8 @@ public:
                             case EVENT_VEIL_SKY_PHASE_TWO:
                             {
                                 DoCast(me, SPELL_VEIL_OF_SKY_SECOND);
-                                events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_TWO, 75000);
+                                events.CancelEvent(EVENT_VEIL_SKY_PHASE_ONE);
+                                events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_TWO, 40000);
                                 break;
                             }
                             case EVENT_ASTRAL_RAIN_PHASE_TWO:
@@ -339,8 +343,11 @@ public:
                             }
                             case EVENT_SUPERNOVA:
                             {
-                                Talk(SAY_SUPERNOVA);
-                                Talk(SAY_SUPERNOVA_WARNING);
+                                if (isPhased == false)
+                                {
+                                    Talk(SAY_SUPERNOVA);
+                                    Talk(SAY_SUPERNOVA_WARNING);
+                                }
                                 if (Unit* victim = me->getVictim())
                                     DoCast(victim, SPELL_SUPERNOVA);
                                 events.RescheduleEvent(EVENT_SUPERNOVA, 42000);
@@ -388,8 +395,11 @@ public:
                             }
                             case EVENT_SUPERNOVA:
                             {
-                                Talk(SAY_SUPERNOVA);
-                                Talk(SAY_SUPERNOVA_WARNING);
+                                if (isPhased == false)
+                                {
+                                    Talk(SAY_SUPERNOVA);
+                                    Talk(SAY_SUPERNOVA_WARNING);
+                                }
                                 if (Unit* victim = me->getVictim())
                                     DoCast(victim, SPELL_SUPERNOVA);
                                 events.RescheduleEvent(EVENT_SUPERNOVA, 42000);
@@ -432,13 +442,16 @@ public:
                             case EVENT_VEIL_SKY_PHASE_TWO:
                             {
                                 DoCast(SPELL_VEIL_OF_SKY_SECOND);
-                                events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_TWO, 75000);
+                                events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_TWO, 40000);
                                 break;
                             }
                             case EVENT_SUPERNOVA:
                             {
-                                Talk(SAY_SUPERNOVA);
-                                Talk(SAY_SUPERNOVA_WARNING);
+                                if (isPhased == false)
+                                {
+                                    Talk(SAY_SUPERNOVA);
+                                    Talk(SAY_SUPERNOVA_WARNING);
+                                }
                                 if (Unit* victim = me->getVictim())
                                     DoCast(victim, SPELL_SUPERNOVA);
                                 events.RescheduleEvent(EVENT_SUPERNOVA, 42000);
@@ -478,7 +491,9 @@ public:
                             case EVENT_VEIL_SKY_PHASE_THREE:
                             {
                                 DoCast(me, SPELL_VEIL_OF_SKY_THIRD);
-                                events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_THREE, 75000);
+                                events.CancelEvent(EVENT_VEIL_SKY_PHASE_ONE);
+                                events.CancelEvent(EVENT_VEIL_SKY_PHASE_TWO);
+                                events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_THREE, 40000);
                                 break;
                             }
                             case EVENT_ASTRAL_RAIN_PHASE_THREE:
@@ -489,8 +504,11 @@ public:
                             }
                             case EVENT_SUPERNOVA:
                             {
-                                Talk(SAY_SUPERNOVA);
-                                Talk(SAY_SUPERNOVA_WARNING);
+                                if (isPhased == false)
+                                {
+                                    Talk(SAY_SUPERNOVA);
+                                    Talk(SAY_SUPERNOVA_WARNING);
+                                }
                                 if (Unit* victim = me->getVictim())
                                     DoCast(victim, SPELL_SUPERNOVA);
                                 events.RescheduleEvent(EVENT_SUPERNOVA, 42000);
@@ -538,8 +556,11 @@ public:
                             }
                             case EVENT_SUPERNOVA:
                             {
-                                Talk(SAY_SUPERNOVA);
-                                Talk(SAY_SUPERNOVA_WARNING);
+                                if (isPhased == false)
+                                {
+                                    Talk(SAY_SUPERNOVA);
+                                    Talk(SAY_SUPERNOVA_WARNING);
+                                }
                                 if (Unit* victim = me->getVictim())
                                     DoCast(victim, SPELL_SUPERNOVA);
                                 events.RescheduleEvent(EVENT_SUPERNOVA, 42000);
@@ -582,13 +603,16 @@ public:
                             case EVENT_VEIL_SKY_PHASE_THREE:
                             {
                                 DoCast(me, SPELL_VEIL_OF_SKY_THIRD);
-                                events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_THREE, 75000);
+                                events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_THREE, 40000);
                                 break;
                             }
                             case EVENT_SUPERNOVA:
                             {
-                                Talk(SAY_SUPERNOVA);
-                                Talk(SAY_SUPERNOVA_WARNING);
+                                if (isPhased == false)
+                                {
+                                    Talk(SAY_SUPERNOVA);
+                                    Talk(SAY_SUPERNOVA_WARNING);
+                                }
                                 if (Unit* victim = me->getVictim())
                                     DoCast(victim, SPELL_SUPERNOVA);
                                 events.RescheduleEvent(EVENT_SUPERNOVA, 42000);

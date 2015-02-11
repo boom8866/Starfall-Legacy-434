@@ -3899,7 +3899,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 74108: // Solar Fire Damage Aura
             case 89130:
-            case 89133: //Solar Fire Damage Aura
+            case 89133: // Solar Fire Damage Aura
             case 89878:
                 spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
                 spellInfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
