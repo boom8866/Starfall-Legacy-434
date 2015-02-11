@@ -70,7 +70,6 @@ enum Events
     EVENT_ANRAPHET_OMEGA_STANCE     = 17,
     EVENT_ANRAPHET_CRUMBLING_RUIN   = 18,
     EVENT_ANRAPHET_ACTIVATE_OMEGA   = 19,
-    EVENT_ANRAPHET_INTRO_DONE       = 20,
 };
 
 enum Spells
@@ -129,10 +128,7 @@ public:
     {
         boss_anraphetAI(Creature* creature) : BossAI(creature, DATA_ANRAPHET)
         {
-            _introDone = false;
         }
-
-        bool _introDone;
 
         void Reset()
         {
@@ -147,15 +143,12 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            if (_introDone)
-            {
-                _EnterCombat();
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
-                Talk(ANRAPHET_SAY_AGGRO);
-                events.ScheduleEvent(EVENT_ANRAPHET_NEMESIS_STRIKE, 8000, 0, PHASE_COMBAT);
-                events.ScheduleEvent(EVENT_ANRAPHET_ALPHA_BEAMS, 10000, 0, PHASE_COMBAT);
-                events.ScheduleEvent(EVENT_ANRAPHET_OMEGA_STANCE, 35000, 0, PHASE_COMBAT);
-            }
+            _EnterCombat();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
+            Talk(ANRAPHET_SAY_AGGRO);
+            events.ScheduleEvent(EVENT_ANRAPHET_NEMESIS_STRIKE, 8000, 0, PHASE_COMBAT);
+            events.ScheduleEvent(EVENT_ANRAPHET_ALPHA_BEAMS, 10000, 0, PHASE_COMBAT);
+            events.ScheduleEvent(EVENT_ANRAPHET_OMEGA_STANCE, 35000, 0, PHASE_COMBAT);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -251,10 +244,6 @@ public:
                     case EVENT_ANRAPHET_DESTROY:
                         DoCastAOE(SPELL_DESTRUCTION_PROTOCOL);
                         events.ScheduleEvent(EVENT_ANRAPHET_READY, 6000, 0, PHASE_INTRO);
-                        events.ScheduleEvent(EVENT_ANRAPHET_INTRO_DONE, 5900, 0, PHASE_INTRO);
-                        break;
-                    case EVENT_ANRAPHET_INTRO_DONE:
-                        _introDone = true;
                         break;
                     case EVENT_ANRAPHET_READY:
                         events.SetPhase(PHASE_COMBAT);
@@ -582,6 +571,44 @@ public:
     }
 };
 
+class spell_anraphet_destruction_protocol : public SpellScriptLoader
+{
+public:
+    spell_anraphet_destruction_protocol() : SpellScriptLoader("spell_anraphet_destruction_protocol") { }
+
+    class spell_anraphet_destruction_protocol_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_anraphet_destruction_protocol_SpellScript);
+
+        void CalculateDamage(SpellEffIndex /*effIndex*/)
+        {
+            uint64 damage;
+            if (Unit* target = GetHitPlayer())
+            {
+                damage = (target->GetHealth() * 0.9f);
+                SetHitDamage(damage);
+            }
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Creature* target = GetHitCreature())
+                target->SetRespawnTime(600000);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_anraphet_destruction_protocol_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            OnEffectHitTarget += SpellEffectFn(spell_anraphet_destruction_protocol_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_anraphet_destruction_protocol_SpellScript();
+    }
+};
+
 void AddSC_boss_anraphet()
 {
     new boss_anraphet();
@@ -590,4 +617,5 @@ void AddSC_boss_anraphet()
     new spell_anraphet_alpha_beams();
     new spell_anraphet_omega_stance_summon();
     new spell_omega_stance_spider_effect();
+    new spell_anraphet_destruction_protocol();
 }

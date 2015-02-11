@@ -2,3 +2,6 @@ UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction`= 16, `u
 
 REPLACE INTO `creature_template_addon` (`entry`, `auras`) VALUES
 (41194 ,'77121');
+
+REPLACE INTO `spell_script_names` (`spell_id`, `scriptname`) VALUES
+(77437, 'spell_anraphet_destruction_protocol');

@@ -3858,6 +3858,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 91206: // Crumbling Ruin
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_50000_YARDS);
                 break;
+            case 77437: // Destruction Protocol
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+                break;
             // * Ammunae
             case 75657: // Ammunaes Buff should only target himself
             case 94970:
