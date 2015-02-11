@@ -2863,6 +2863,7 @@ void SpellMgr::LoadSpellCustomAttr()
             case 73788: // Pain and Suffering
             case 73789: // Pain and Suffering
             case 73790: // Pain and Suffering
+            case 77234: // Rockwave
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
                 break;
             case 24340: // Meteor
@@ -3849,6 +3850,17 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
                 break;
+            case 77347: // Aqua Bomb
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(38);
+                break;
+            // * Anraphet
+            case 75609: // Crumbling Ruin
+            case 91206: // Crumbling Ruin
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_50000_YARDS);
+                break;
+            case 77437: // Destruction Protocol
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+                break;
             // * Ammunae
             case 75657: // Ammunaes Buff should only target himself
             case 94970:
@@ -3881,6 +3893,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 87653: // Inferno Leap
                  spellInfo->Effects[0].Effect = SPELL_EFFECT_JUMP;
                  spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_NONE;
+                break;
+            case 76888: // Seed of Chaos
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
                 break;
             case 74108: // Solar Fire Damage Aura
             case 89130:
@@ -4036,6 +4051,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 34433: // Shadowfiend
                 spellInfo->Effects[EFFECT_0].MiscValueB = 67;
+                break;
+            case 20243: // Devastate
+                spellInfo->Effects[EFFECT_0].BasePoints = 150;
                 break;
             // Hunter
             case 19263: // Deterrence

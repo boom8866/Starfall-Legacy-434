@@ -431,7 +431,18 @@ public:
             if (owner && !isRetribution)
                 UnableToAttack();
             if (me->GetEntry() == GUARDIAN_RETRIBUTION)
-                events.ScheduleEvent(EVENT_DO_EXPLODE, 29000);
+            {
+                if (Unit* owner = me->GetCharmerOrOwner())
+                {
+                    if (owner->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        uint32 ownerAP = owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.50f;
+                        events.ScheduleEvent(EVENT_DO_EXPLODE, 29000);
+                        me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 5 + ownerAP)));
+                        me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 10 + ownerAP)));
+                    }
+                }
+            }
         }
 
         void UnableToAttack()

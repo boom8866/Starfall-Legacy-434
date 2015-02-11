@@ -787,7 +787,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         break;
                     }
                     case 89751: // Felstorm
-                    case 7814:  // Lash of Pain
                     case 30213: // Legion Strike
                     case 3716:  // Torment
                     case 6360:  // Whiplash
@@ -802,12 +801,13 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
+                    case 7814: // Lash of Pain
                     case 54049: // Shadow Bite
                     {
                         if (m_caster->GetCharmerOrOwner())
                         {
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
-                            damage += int32((spellpower * 1.2280f));
+                            damage += int32((spellpower * 0.4290f));
                         }
                         break;
                     }
@@ -5112,7 +5112,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 {
                     if (int32 num = (needCast ? 0 : 1))
                         aur->ModStackAmount(num);
-                    fixed_bonus += (aur->GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
                 }
             }
 
@@ -5138,6 +5137,17 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                         if (GetCaster()->HasAura(76856))
                             totalDamagePercentMod += totalDamagePercentMod * (0.110f + (0.0560f * masteryPoints));
                     }
+                    break;
+                }
+                // Devastate
+                case 20243:
+                {
+                    if (!unitTarget || !m_caster)
+                        break;
+
+                    // Sunder Armor
+                    if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
+                        totalDamagePercentMod += totalDamagePercentMod * aur->GetStackAmount();
                     break;
                 }
             }
