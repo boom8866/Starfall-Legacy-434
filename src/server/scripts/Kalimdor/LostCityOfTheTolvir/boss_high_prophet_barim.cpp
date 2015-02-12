@@ -241,6 +241,7 @@ public:
                         break;
                     case EVENT_FIFTY_LASHINGS:
                         DoCast(me, SPELL_FIFTY_LASHINGS);
+                        events.ScheduleEvent(EVENT_FIFTY_LASHINGS, 11000);
                         break;
                     case EVENT_SUMMON_BLAZE_OF_THE_HEAVENS:
                         if (!me->FindNearestCreature(NPC_BLAZE_OF_HEAVENS, 500.0, true))
