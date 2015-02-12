@@ -85,7 +85,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            _EnterCombat();
+            instance->SetBossState(DATA_ISISET, IN_PROGRESS);
             Talk(SAY_AGGRO);
 
             // Init events for phase one
@@ -112,18 +112,20 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
-        void Reset()
+        void EnterEvadeMode()
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SetBossState(DATA_ISISET, FAIL);
             RemoveSummons();
-            events.Reset();
             isPhased = false;
             astralRain = false;
             veilSky = false;
             celestialCall = false;
             Phase = 0;
-            me->SetPhaseMask(1, true);
+            _EnterEvadeMode();
+            _DespawnAtEvade();
+            me->SetVisible(true);
+            events.Reset();
         }
 
         void SummonedCreatureDespawn(Creature* summon)
@@ -199,10 +201,11 @@ public:
             if (isPhased == false)
             {
                 me->SetVisible(true);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                if (me->isInCombat())
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             }
 
-            if ((me->GetHealth() * 100 / me->GetMaxHealth() <= 66) && Phase == 0)
+            if ((me->GetHealth() * 100 / me->GetMaxHealth() <= 66) && Phase == 0 && me->isInCombat())
             {
                 me->SetPhaseMask(3, true);
                 Phase = 1;

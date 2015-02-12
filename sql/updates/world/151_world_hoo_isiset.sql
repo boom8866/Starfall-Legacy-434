@@ -42,7 +42,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (39587,2,1,'The glimmer of your life, extinguished.',14,0,100,0,0,18846,'Comment'),
 (39587,3,0,'Eons of darkness... by your hand.',14,0,100,0,0,18842,'Comment'),
 (39587,3,1,'My luster... wanes.',14,0,100,0,0,18844,'Comment'),
-(39587,4,0,'Isiset begins to channel a Supernova. Look away!',41,0,100,0,0,0,'Comment');
+(39587,4,0,'%s begins to channel a Supernova. Look away!',41,0,100,0,0,0,'Comment');
 
 UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry`=39787;
 UPDATE `creature_template` SET `ScriptName`='npc_hoo_spatial_flux' WHERE `entry`=48707;
