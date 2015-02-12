@@ -4055,6 +4055,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 20243: // Devastate
                 spellInfo->Effects[EFFECT_0].BasePoints = 150;
                 break;
+            case 85107: // Impending Doom
+            case 85108:
+                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
+                break;
             // Hunter
             case 19263: // Deterrence
                 spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_MOD_PACIFY;

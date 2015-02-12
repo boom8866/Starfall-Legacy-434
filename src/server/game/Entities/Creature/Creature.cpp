@@ -683,6 +683,7 @@ void Creature::Update(uint32 diff)
 
 void Creature::RegenerateMana()
 {
+    bool isWarlockOrMagePet = false;
     uint32 curValue = GetPower(POWER_MANA);
     uint32 maxValue = GetMaxPower(POWER_MANA);
 
@@ -702,6 +703,17 @@ void Creature::RegenerateMana()
     else
         addvalue = maxValue / 3;
 
+
+    // Pet regen depends only from their scaling aura
+    if (isPet())
+    {
+        if (GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (GetOwner()->getClass() == CLASS_MAGE || GetOwner()->getClass() == CLASS_WARLOCK)
+                isWarlockOrMagePet = true;
+        }
+    }
+
     // Apply modifiers (if any).
     AuraEffectList const& ModPowerRegenPCTAuras = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for (AuraEffectList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
@@ -709,6 +721,10 @@ void Creature::RegenerateMana()
             AddPct(addvalue, (*i)->GetAmount());
 
     addvalue += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) * CREATURE_REGEN_INTERVAL / (5 * IN_MILLISECONDS);
+
+    // Check for mage/warlock pet
+    if (isWarlockOrMagePet)
+        isInCombat() ? addvalue /= 10 : addvalue /= 7;
 
     ModifyPower(POWER_MANA, addvalue);
 }
