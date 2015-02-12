@@ -174,7 +174,7 @@ public:
             me->SetCanFly(true);
             me->SetDisableGravity(false);
             me->SetHover(false);
-            events.ScheduleEvent(EVENT_ASK_FOR_HELP, urand(7500, 18500));
+            events.ScheduleEvent(EVENT_ASK_FOR_HELP, urand(30000, 75000));
             events.ScheduleEvent(EVENT_CHECK_FOR_NET, 2000);
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
@@ -220,7 +220,7 @@ public:
                         if (me->HasAura(SPELL_NET))
                         {
                             Talk(1);
-                            events.RescheduleEvent(EVENT_ASK_FOR_HELP, urand(15000, 25000));
+                            events.RescheduleEvent(EVENT_ASK_FOR_HELP, urand(30000, 75000));
                         }
                         else
                             events.CancelEvent(EVENT_ASK_FOR_HELP);
