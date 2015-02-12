@@ -926,6 +926,8 @@ public:
                         break;
                 }
             }
+
+            DoMeleeAttackIfReady();
         }
     };
 
