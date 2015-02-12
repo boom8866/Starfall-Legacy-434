@@ -803,7 +803,7 @@ public:
                     case EVENT_WIND_SHEAR:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 125.0f, true))
-                            me->GetMotionMaster()->MoveChase(target, 0.0f, urand(1, 4));
+                            DoCast(target, SPELL_WIND_SHEAR);
                         events.RescheduleEvent(EVENT_WIND_SHEAR, 12000);
                         break;
                     }
@@ -1120,6 +1120,7 @@ public:
         void EnterCombat(Unit* who)
         {
             me->RemoveFlag(UNIT_FIELD_BYTES_1, 9);
+            DoCast(me, SPELL_EMERGE, true);
             events.ScheduleEvent(EVENT_MAKE_ATTACKABLE, 2500);
             events.ScheduleEvent(EVENT_SURGE, 3000);
         }
@@ -1147,7 +1148,7 @@ public:
                     {
                         if (!me->isInCombat() && !me->IsInEvadeMode() && !me->isMoving())
                         {
-                            DoCast(SPELL_SUBMERGE);
+                            me->SetFlag(UNIT_FIELD_BYTES_1, 9);
                             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE);
                             me->SetControlled(true, UNIT_STATE_ROOT);
                             events.CancelEvent(EVENT_SUBMERGE);
@@ -1165,7 +1166,8 @@ public:
                     }
                     case EVENT_MAKE_ATTACKABLE:
                     {
-                        me->RemoveAurasDueToSpell(SPELL_SUBMERGE);
+                        DoCast(me, SPELL_EMERGE, true);
+                        me->RemoveFlag(UNIT_FIELD_BYTES_1, 9);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE);
                         me->SetControlled(false, UNIT_STATE_ROOT);
                         events.CancelEvent(EVENT_MAKE_ATTACKABLE);
@@ -1253,7 +1255,7 @@ public:
                     {
                         if (!me->isInCombat() && !me->IsInEvadeMode() && !me->isMoving())
                         {
-                            DoCast(me, SPELL_SUBMERGE);
+                            me->SetFlag(UNIT_FIELD_BYTES_1, 9);
                             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE);
                             me->SetControlled(true, UNIT_STATE_ROOT);
                             events.CancelEvent(EVENT_SUBMERGE);
@@ -1278,6 +1280,7 @@ public:
                     case EVENT_MAKE_ATTACKABLE:
                     {
                         DoCast(SPELL_CORROSIVE_SPRAY);
+                        DoCast(me, SPELL_EMERGE, true);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE);
                         me->SetControlled(false, UNIT_STATE_ROOT);
                         events.ScheduleEvent(EVENT_CORROSIVE_SPRAY, 5000);
@@ -1319,12 +1322,13 @@ public:
         enum spellId
         {
             SPELL_CURSE_OF_EXHAUSTION   = 77357,
-            SPELL_SHADOW_BOLT           = 77570
+            SPELL_SHADOW_BOLT           = 77570,
+            SPELL_EMERGE                = 75764
         };
 
         enum eventId
         {
-            EVENT_SUBMERGE = 1,
+            EVENT_SUBMERGE              = 1,
             EVENT_MAKE_ATTACKABLE,
             EVENT_SHADOWBOLT,
             EVENT_CURSE_OF_EXHAUSTION
@@ -1338,6 +1342,7 @@ public:
         void EnterCombat(Unit* who)
         {
             me->RemoveFlag(UNIT_FIELD_BYTES_1, 9);
+            DoCast(me, SPELL_EMERGE, true);
             events.ScheduleEvent(EVENT_MAKE_ATTACKABLE, 6000);
             events.ScheduleEvent(EVENT_SHADOWBOLT, 3000);
             events.ScheduleEvent(EVENT_CURSE_OF_EXHAUSTION, 1000);

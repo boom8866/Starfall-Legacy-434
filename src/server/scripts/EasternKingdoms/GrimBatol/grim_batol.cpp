@@ -174,7 +174,7 @@ public:
             me->SetCanFly(true);
             me->SetDisableGravity(false);
             me->SetHover(false);
-            events.ScheduleEvent(EVENT_ASK_FOR_HELP, urand(7500, 18500));
+            events.ScheduleEvent(EVENT_ASK_FOR_HELP, urand(30000, 75000));
             events.ScheduleEvent(EVENT_CHECK_FOR_NET, 2000);
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
@@ -220,7 +220,7 @@ public:
                         if (me->HasAura(SPELL_NET))
                         {
                             Talk(1);
-                            events.RescheduleEvent(EVENT_ASK_FOR_HELP, urand(15000, 25000));
+                            events.RescheduleEvent(EVENT_ASK_FOR_HELP, urand(30000, 75000));
                         }
                         else
                             events.CancelEvent(EVENT_ASK_FOR_HELP);
@@ -318,20 +318,42 @@ public:
     }
 };
 
-class ResetCreature : public BasicEvent
+// 74040 Engulfing Flames
+class spell_gb_engulfing_flames : public SpellScriptLoader
 {
 public:
-    ResetCreature(Creature* _me) : me(_me) { }
-
-    bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
+    spell_gb_engulfing_flames() : SpellScriptLoader("spell_gb_engulfing_flames")
     {
-        me->CombatStop();
-        me->getHostileRefManager().deleteReferences();
-        return true;
     }
 
-private:
-    Creature* me;
+    class spell_gb_engulfing_flames_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gb_engulfing_flames_SpellScript);
+
+        void HandleBlockReset(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* victim = GetHitUnit())
+            {
+                if (victim->ToCreature() && victim->ToCreature()->GetAIName() == "SmartAI")
+                {
+                    victim->getThreatManager().clearReferences();
+                    victim->AttackStop();
+                    victim->ClearInCombat();
+                    victim->ToCreature()->setRegeneratingHealth(false);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_gb_engulfing_flames_SpellScript::HandleBlockReset, EFFECT_1, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gb_engulfing_flames_SpellScript();
+    }
 };
 
 void AddSC_grim_batol()
@@ -339,4 +361,5 @@ void AddSC_grim_batol()
     new npc_gb_flying_drake();
     new npc_battered_red_drake_event();
     new npc_gb_net();
+    new spell_gb_engulfing_flames();
 }

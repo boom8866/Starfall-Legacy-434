@@ -629,6 +629,13 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             damage *= aur->GetStackAmount();
                         break;
                     }
+                    case 76370: // Warped Twilight
+                    case 97300:
+                    {
+                        if (unitTarget)
+                            damage = damage * unitTarget->GetMaxHealth() / 100;
+                        break;
+                    }
                     default:
                         break;
                 }
