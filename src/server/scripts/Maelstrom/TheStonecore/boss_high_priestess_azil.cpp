@@ -292,6 +292,7 @@ public:
                         events.ScheduleEvent(EVENT_CURSE_OF_BLOOD, urand(13000, 15000), EVENT_GROUP_PHASE_ONE);
                         break;
                     case EVENT_FORCE_GRIP:
+                        me->StopMoving();
                         DoCastVictim(SPELL_FORCE_GRIP);
                         me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
                         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
