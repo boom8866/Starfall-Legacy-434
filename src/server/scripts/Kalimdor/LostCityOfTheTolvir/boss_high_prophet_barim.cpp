@@ -232,15 +232,16 @@ public:
                     case EVENT_HEAVENS_FURY:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_HEAVENS_FURY_SUMMON, true);
-                        events.ScheduleEvent(EVENT_HEAVENS_FURY, 64000);
+                        events.ScheduleEvent(EVENT_HEAVENS_FURY, 24000);
                         break;
                     case EVENT_PLAGUE_OF_AGES:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_PLAGUE_OF_AGES);
-                        events.ScheduleEvent(EVENT_PLAGUE_OF_AGES, 62000);
+                        events.ScheduleEvent(EVENT_PLAGUE_OF_AGES, 24000);
                         break;
                     case EVENT_FIFTY_LASHINGS:
                         DoCast(me, SPELL_FIFTY_LASHINGS);
+                        events.ScheduleEvent(EVENT_FIFTY_LASHINGS, 11000);
                         break;
                     case EVENT_SUMMON_BLAZE_OF_THE_HEAVENS:
                         if (!me->FindNearestCreature(NPC_BLAZE_OF_HEAVENS, 500.0, true))
