@@ -410,7 +410,7 @@ public:
                     case EVENT_FEED_PET:
                     {
                         std::list<Creature*> creatures;
-                        GetCreatureListWithEntryInGrid(creatures, me, NPC_TWILIGHT_DRAKE, 25.0f);
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_TWILIGHT_DRAKE_CALLED, 25.0f);
                         if (!creatures.empty())
                         {
                             for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
