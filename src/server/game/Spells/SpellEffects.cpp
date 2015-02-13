@@ -2617,6 +2617,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     break;
                 }
                 case 33763: // Lifebloom
+                case 94447: // Lifebloom (Tree of Life)
                 {
                     // Revitalize add Replenishment effect
                     if (m_caster->HasAura(48539) || m_caster->HasAura(48544))
