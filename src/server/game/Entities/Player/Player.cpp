@@ -24426,16 +24426,6 @@ void Player::SendInitialPacketsAfterAddToMap()
     phaseMgr.AddUpdateFlag(PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED);
     phaseMgr.Update();
 
-    // Unstuck Player
-    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-    {
-        if (i != MOVE_TURN_RATE && i != MOVE_PITCH_RATE)
-        {
-            SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
-            UpdateSpeed(UnitMoveType(i), true);
-        }
-    }
-
     // Remove all kinds of shapeshift to prevent exploits (Druids Only)
     if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_DRUID)
     {
@@ -24475,6 +24465,13 @@ void Player::SendInitialPacketsAfterAddToMap()
                 SetMaxPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY) + 10);
             break;
         }
+    }
+
+    // Unstuck Player
+    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
+    {
+        SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
+        UpdateSpeed(UnitMoveType(i), true);
     }
 }
 
