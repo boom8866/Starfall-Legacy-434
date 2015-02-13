@@ -174,7 +174,7 @@ public:
             me->SetCanFly(true);
             me->SetDisableGravity(false);
             me->SetHover(false);
-            events.ScheduleEvent(EVENT_ASK_FOR_HELP, urand(7500, 18500));
+            events.ScheduleEvent(EVENT_ASK_FOR_HELP, urand(30000, 75000));
             events.ScheduleEvent(EVENT_CHECK_FOR_NET, 2000);
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
@@ -220,7 +220,7 @@ public:
                         if (me->HasAura(SPELL_NET))
                         {
                             Talk(1);
-                            events.RescheduleEvent(EVENT_ASK_FOR_HELP, urand(15000, 25000));
+                            events.RescheduleEvent(EVENT_ASK_FOR_HELP, urand(30000, 75000));
                         }
                         else
                             events.CancelEvent(EVENT_ASK_FOR_HELP);
@@ -318,20 +318,207 @@ public:
     }
 };
 
-class ResetCreature : public BasicEvent
+// 74040 Engulfing Flames
+class spell_gb_engulfing_flames : public SpellScriptLoader
 {
 public:
-    ResetCreature(Creature* _me) : me(_me) { }
-
-    bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
+    spell_gb_engulfing_flames() : SpellScriptLoader("spell_gb_engulfing_flames")
     {
-        me->CombatStop();
-        me->getHostileRefManager().deleteReferences();
-        return true;
     }
 
-private:
-    Creature* me;
+    class spell_gb_engulfing_flames_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gb_engulfing_flames_SpellScript);
+
+        void HandleBlockReset(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* victim = GetHitUnit())
+            {
+                if (victim->ToCreature() && victim->ToCreature()->GetAIName() == "SmartAI")
+                {
+                    victim->getThreatManager().clearReferences();
+                    victim->AttackStop();
+                    victim->ClearInCombat();
+                    victim->ToCreature()->setRegeneratingHealth(false);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_gb_engulfing_flames_SpellScript::HandleBlockReset, EFFECT_1, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gb_engulfing_flames_SpellScript();
+    }
+};
+
+class npc_gb_twilight_wyrmcaller : public CreatureScript
+{
+public:
+    npc_gb_twilight_wyrmcaller() : CreatureScript("npc_gb_twilight_wyrmcaller")
+    {
+    }
+
+    enum Spells
+    {
+        SPELL_FEED_PET_H    = 90872,
+        SPELL_FEED_PET_N    = 76816
+    };
+
+    enum eventId
+    {
+        EVENT_FEED_PET  = 1
+    };
+
+    struct npc_gb_twilight_wyrmcallerAI : public ScriptedAI
+    {
+        npc_gb_twilight_wyrmcallerAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            events.Reset();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            Talk(0);
+            events.ScheduleEvent(EVENT_FEED_PET, 2000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_FEED_PET:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_TWILIGHT_DRAKE_CALLED, 25.0f);
+                        if (!creatures.empty())
+                        {
+                            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                            {
+                                if ((*iter))
+                                {
+                                    DoCast((*iter), IsHeroic() ? SPELL_FEED_PET_H : SPELL_FEED_PET_N, true);
+                                    events.RescheduleEvent(EVENT_FEED_PET, 10000);
+                                }
+                            }
+                        }
+                        else
+                            events.RescheduleEvent(EVENT_FEED_PET, 3000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gb_twilight_wyrmcallerAI(creature);
+    }
+};
+
+class npc_gb_twilight_drake : public CreatureScript
+{
+public:
+    npc_gb_twilight_drake() : CreatureScript("npc_gb_twilight_drake")
+    {
+    }
+
+    enum Spells
+    {
+        SPELL_TWILIGHT_FLAMES   = 75931,
+        SPELL_TWILIGHT_BREATH   = 90875
+    };
+
+    enum eventId
+    {
+        EVENT_TWILIGHT_FLAMES   = 1,
+        EVENT_TWILIGHT_BREATH
+    };
+
+    struct npc_gb_twilight_drakeAI : public ScriptedAI
+    {
+        npc_gb_twilight_drakeAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            events.Reset();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_TWILIGHT_FLAMES, 4000);
+            events.ScheduleEvent(EVENT_TWILIGHT_BREATH, 9000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_TWILIGHT_FLAMES:
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
+                            DoCast(target, SPELL_TWILIGHT_FLAMES);
+
+                        events.RescheduleEvent(EVENT_TWILIGHT_FLAMES, 9000);
+                        break;
+                    }
+                    case EVENT_TWILIGHT_BREATH:
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 200, true))
+                            DoCast(target, SPELL_TWILIGHT_BREATH);
+
+                        events.RescheduleEvent(EVENT_TWILIGHT_BREATH, 9000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gb_twilight_drakeAI(creature);
+    }
 };
 
 void AddSC_grim_batol()
@@ -339,4 +526,7 @@ void AddSC_grim_batol()
     new npc_gb_flying_drake();
     new npc_battered_red_drake_event();
     new npc_gb_net();
+    new spell_gb_engulfing_flames();
+    new npc_gb_twilight_wyrmcaller();
+    new npc_gb_twilight_drake();
 }

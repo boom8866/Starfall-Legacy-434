@@ -362,6 +362,17 @@ void Guardian::InitStats(uint32 duration)
         m_charmInfo->InitCharmCreateSpells();
 
     SetReactState(REACT_AGGRESSIVE);
+
+    // Bind this function to players only (prevent problems with boss etc...)
+    if (m_owner && (m_owner->GetTypeId() == TYPEID_PLAYER || m_owner->GetTypeId() == TYPEID_UNIT && !isWorldBoss()))
+    {
+        CreatureTemplate const* cInfo = GetCreatureTemplate();
+        if (cInfo)
+        {
+            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((getLevel() * 5 * cInfo->ModDamage)));
+            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((getLevel() * 10 * cInfo->ModDamage)));
+        }
+    }
 }
 
 void Guardian::InitSummon()

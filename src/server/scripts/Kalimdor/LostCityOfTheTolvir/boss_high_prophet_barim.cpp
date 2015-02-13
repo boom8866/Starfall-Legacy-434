@@ -131,7 +131,7 @@ public:
             Talk(SAY_AGGRO);
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-            events.ScheduleEvent(EVENT_HEAVENS_FURY, 8000);
+            events.ScheduleEvent(EVENT_HEAVENS_FURY, 7500);
             events.ScheduleEvent(EVENT_PLAGUE_OF_AGES, 8000);
             events.ScheduleEvent(EVENT_FIFTY_LASHINGS, 9500);
             if (IsHeroic())
@@ -231,16 +231,17 @@ public:
                 {
                     case EVENT_HEAVENS_FURY:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                            DoCast(target, SPELL_HEAVENS_FURY_SUMMON);
-                        events.ScheduleEvent(EVENT_HEAVENS_FURY, 75000);
+                            DoCast(target, SPELL_HEAVENS_FURY_SUMMON, true);
+                        events.ScheduleEvent(EVENT_HEAVENS_FURY, 24000);
                         break;
                     case EVENT_PLAGUE_OF_AGES:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_PLAGUE_OF_AGES);
-                        events.ScheduleEvent(EVENT_PLAGUE_OF_AGES, 75000);
+                        events.ScheduleEvent(EVENT_PLAGUE_OF_AGES, 24000);
                         break;
                     case EVENT_FIFTY_LASHINGS:
-                        DoCastAOE(SPELL_FIFTY_LASHINGS);
+                        DoCast(me, SPELL_FIFTY_LASHINGS);
+                        events.ScheduleEvent(EVENT_FIFTY_LASHINGS, 11000);
                         break;
                     case EVENT_SUMMON_BLAZE_OF_THE_HEAVENS:
                         if (!me->FindNearestCreature(NPC_BLAZE_OF_HEAVENS, 500.0, true))
@@ -251,12 +252,12 @@ public:
                         events.Reset();
                         if (Creature* blaze = me->FindNearestCreature(NPC_BLAZE_OF_HEAVENS, 500.0f, true))
                             blaze->AI()->DoAction(ACTION_STOP_ATTACKING);
-                        me->GetMotionMaster()->MovementExpired();
-                        DoCastAOE(SPELL_REPENTEANCE_GROUND);
+                        me->StopMoving();
+                        DoCast(me, SPELL_REPENTEANCE_GROUND);
                         events.ScheduleEvent(EVENT_REPENTANCE_PULL, 3000);
                         break;
                     case EVENT_REPENTANCE_PULL:
-                        DoCastAOE(SPELL_REPENTEANCE_PULL);
+                        DoCast(me, SPELL_REPENTEANCE_PULL);
                         events.ScheduleEvent(EVENT_REPENTANCE_TALK, 200);
                         events.ScheduleEvent(EVENT_REPENTANCE_STUN, 1200);
                         break;

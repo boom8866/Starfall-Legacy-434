@@ -982,6 +982,7 @@ class spell_rog_hemorrhage : public SpellScriptLoader
 
             void CalculateDamage(SpellEffIndex /*effIndex*/)
             {
+                damage = 0;
                 if (Unit* caster = GetCaster())
                 {
                     if (Unit* target = GetHitUnit())
@@ -990,15 +991,27 @@ class spell_rog_hemorrhage : public SpellScriptLoader
                         if (!caster->HasAura(SPELL_ROGUE_GLYPH_OF_HEMORRHAGE))
                             return;
 
-                        int32 damage = GetHitDamage() * 0.40f / 8;
-                        caster->CastCustomSpell(target, SPELL_ROGUE_GLYPH_OF_HEMORRHAGE_TRIGGERED, &damage, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                        damage = (GetHitDamage() * 0.40f) / 8;
                     }
                 }
             }
 
+            void HandleGlyph()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetHitUnit())
+                        caster->CastCustomSpell(target, SPELL_ROGUE_GLYPH_OF_HEMORRHAGE_TRIGGERED, &damage, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                }
+            }
+
+            protected:
+                int32 damage;
+
             void Register()
             {
-                OnEffectHitTarget += SpellEffectFn(spell_rog_hemorrhage_SpellScript::CalculateDamage, EFFECT_1, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+                OnEffectHitTarget += SpellEffectFn(spell_rog_hemorrhage_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_NORMALIZED_WEAPON_DMG);
+                AfterHit += SpellHitFn(spell_rog_hemorrhage_SpellScript::HandleGlyph);
             }
         };
 

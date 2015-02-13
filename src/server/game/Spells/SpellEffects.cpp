@@ -629,6 +629,13 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             damage *= aur->GetStackAmount();
                         break;
                     }
+                    case 76370: // Warped Twilight
+                    case 97300:
+                    {
+                        if (unitTarget)
+                            damage = damage * unitTarget->GetMaxHealth() / 100;
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -2610,6 +2617,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     break;
                 }
                 case 33763: // Lifebloom
+                case 94447: // Lifebloom (Tree of Life)
                 {
                     // Revitalize add Replenishment effect
                     if (m_caster->HasAura(48539) || m_caster->HasAura(48544))

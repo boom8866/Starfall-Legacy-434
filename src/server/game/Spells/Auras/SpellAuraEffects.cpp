@@ -7440,6 +7440,7 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
             break;
         }
         case 33763: // Lifebloom
+        case 94447: // Lifebloom (Tree of Life)
         {
             if (caster->GetTypeId() != TYPEID_PLAYER)
                 break;
