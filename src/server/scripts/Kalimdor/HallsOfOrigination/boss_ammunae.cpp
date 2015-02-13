@@ -2,6 +2,9 @@
 #include "ScriptedCreature.h"
 #include "halls_of_origination.h"
 
+/* Automatic rescheduling if creature is already casting */
+#define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
+
 enum Spells
 {
     //Ammunae
@@ -691,16 +694,151 @@ public:
     }
 };
 
+class npc_hoo_seed_pod_trash : public CreatureScript
+{
+public:
+    npc_hoo_seed_pod_trash() : CreatureScript("npc_hoo_seed_pod_trash")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_SUMMON_BLOODPETAL_SPROUT  = 75795
+    };
+
+    struct npc_hoo_seed_pod_trashAI : public ScriptedAI
+    {
+        npc_hoo_seed_pod_trashAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetControlled(true, UNIT_STATE_ROOT);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            me->DespawnOrUnsummon(1);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            DoCast(me, SPELL_FLOURISH, true);       // Not the correct one, we need sth else for that
+            me->DespawnOrUnsummon(1000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_hoo_seed_pod_trashAI(creature);
+    }
+};
+
+class npc_hoo_lifewarden_nynph : public CreatureScript
+{
+public:
+    npc_hoo_lifewarden_nynph() : CreatureScript("npc_hoo_lifewarden_nynph")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_ENTANGLING_SHOT   = 75961,
+        SPELL_TRANQUILLITY      = 75940
+    };
+
+    enum eventId
+    {
+        EVENT_ENTANGLING_SHOT   = 1,
+        EVENT_TRANQUILLITY
+    };
+
+    struct npc_hoo_lifewarden_nynphAI : public ScriptedAI
+    {
+        npc_hoo_lifewarden_nynphAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_AGGRESSIVE);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_ENTANGLING_SHOT, 1000);
+            events.ScheduleEvent(EVENT_TRANQUILLITY, 15000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ENTANGLING_SHOT:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        me->StopMoving();
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 125.0f, true))
+                            DoCast(target, SPELL_ENTANGLING_SHOT);
+                        break;
+                    }
+                    case EVENT_TRANQUILLITY:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        me->StopMoving();
+                        DoCast(SPELL_TRANQUILLITY);
+                        events.RescheduleEvent(EVENT_TRANQUILLITY, urand(35000, 40000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_hoo_lifewarden_nynphAI(creature);
+    }
+};
+
 void AddSC_boss_ammunae()
 {
-    new boss_ammunae;
-    new npc_hoo_seed_pod;
-    new npc_hoo_bloodpetal_sprout;
-    new npc_hoo_bloodpetal_blossom;
-    new npc_hoo_spore;
-    new spell_hoo_consume_life_energy;
-    new spell_hoo_rampant_growth;
-    new spell_hoo_fixate;
-    new spell_hoo_summon_bloodpetal_blossom;
-    new spell_hoo_noxious_spores;
+    new boss_ammunae();
+    new npc_hoo_seed_pod();
+    new npc_hoo_bloodpetal_sprout();
+    new npc_hoo_bloodpetal_blossom();
+    new npc_hoo_spore();
+    new spell_hoo_consume_life_energy();
+    new spell_hoo_rampant_growth();
+    new spell_hoo_fixate();
+    new spell_hoo_summon_bloodpetal_blossom();
+    new spell_hoo_noxious_spores();
+    new npc_hoo_seed_pod_trash();
+    new npc_hoo_lifewarden_nynph();
 }
