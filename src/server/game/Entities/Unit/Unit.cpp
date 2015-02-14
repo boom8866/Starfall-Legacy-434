@@ -11478,7 +11478,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                         else
                         {
                             // Each points of Mastery increases damage by an additional 2.5%
-                            if (GetTypeId() == TYPEID_PLAYER)
+                            if (GetTypeId() == TYPEID_PLAYER && spellProto->Id != 60103)
                             {
                                 float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                                 if (HasAura(77223, GetGUID()))
