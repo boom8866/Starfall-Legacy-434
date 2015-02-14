@@ -6235,22 +6235,16 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         Unit::AuraEffectList const& dotList = stunned->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
                         for (Unit::AuraEffectList::const_iterator itr = dotList.begin(); itr != dotList.end(); ++itr)
                         {
-                            if (!(*itr)->GetId())
-                                continue;
-
-                            if ((*itr)->GetId() == NULL)
-                                continue;
-
                             if (!(*itr)->GetBase())
                                 continue;
 
-                            if (!(*itr)->GetSpellInfo())
+                            if (!(*itr)->GetBase()->GetSpellInfo())
                                 continue;
 
                             if (!(*itr)->GetBase()->GetCasterGUID())
                                 continue;
 
-                            if ((*itr)->GetId() == 2120)
+                            if ((*itr)->GetBase()->GetId() == 2120)
                                 continue;
 
                             if ((*itr)->GetBase()->GetCasterGUID() != m_caster->GetGUID())
