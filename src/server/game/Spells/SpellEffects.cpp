@@ -6233,6 +6233,9 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                     if (Unit* stunned = m_targets.GetUnitTarget())
                     {
                         Unit::AuraEffectList const& dotList = stunned->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                        if (dotList.empty())
+                            return;
+
                         for (Unit::AuraEffectList::const_iterator itr = dotList.begin(); itr != dotList.end(); ++itr)
                         {
                             if (!(*itr)->GetBase())
