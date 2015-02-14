@@ -11478,7 +11478,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                         else
                         {
                             // Each points of Mastery increases damage by an additional 2.5%
-                            if (GetTypeId() == TYPEID_PLAYER)
+                            if (GetTypeId() == TYPEID_PLAYER && spellProto->Id != 60103)
                             {
                                 float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                                 if (HasAura(77223, GetGUID()))
@@ -15252,6 +15252,21 @@ void Unit::SetLevel(uint8 lvl)
                 ToPlayer()->removeSpell(89964);
             if (!ToPlayer()->HasSpell(90647))
                 ToPlayer()->learnSpell(90647, true);
+        }
+
+        /* TEMP: This is needed to send a custom mail when level 85 is reached for imported players */
+        if (lvl >= 85)
+        {
+            MailSender sender(MAIL_CREATURE, 46202 /* Dark Assassin */);
+            MailDraft draft("A strange coin...", "If the day comes when you would find me again, give that coin to any merchant, and say these words: Valar Morghulis");
+            SQLTransaction trans = CharacterDatabase.BeginTransaction();
+            if (Item* item = Item::CreateItem(100000, 1, 0))
+            {
+                item->SaveToDB(trans);
+                draft.AddItem(item);
+            }
+            draft.SendMailTo(trans, ToPlayer(), sender);
+            CharacterDatabase.CommitTransaction(trans);
         }
     }
 }

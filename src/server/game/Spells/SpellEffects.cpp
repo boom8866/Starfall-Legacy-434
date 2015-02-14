@@ -5205,7 +5205,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                         if (m_caster->HasAura(77223, m_caster->GetGUID()))
-                            totalDamagePercentMod += totalDamagePercentMod * (0.20f + (0.025f * masteryPoints));
+                            totalDamagePercentMod += 0.025f * masteryPoints;
                     }
 
                     // Improved Lava Lash
