@@ -75,8 +75,7 @@ public:
         void JustDied(Unit* /*Killer*/)
         {
             _JustDied();
-            if (IsHeroic())
-                ActivateTwisters(false);
+            ActivateTwisters(false);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->DespawnCreaturesInArea(NPC_INVISIBLE_STALKER, 100.0f);
         }
@@ -85,8 +84,7 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
-            if (IsHeroic())
-                ActivateTwisters(false);
+            ActivateTwisters(false);
             instance->SetBossState(DATA_ALTAIRUS, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();

@@ -379,6 +379,8 @@ public:
                     events.Reset();
                     events.ScheduleEvent(EVENT_UMBRAL_MENDING, 2000);
                     break;
+                default:
+                    break;
             }
         }
     };
