@@ -993,23 +993,46 @@ public:
 
         enum
         {
-            GLYPH_EXORCISM  = 54934
+            GLYPH_OF_EXORCISM           = 54934,
+            SPELL_EXORCISM_TRIGGERED    = 879
         };
 
-        void CheckGlyph()
+        void CalculateDamage(SpellEffIndex /*effIndex*/)
         {
-            Unit *caster = GetCaster();
-
-            if (!caster)
+            Unit* caster = GetCaster();
+            if (!caster || !GetHitUnit())
                 return;
 
-            if (!caster->HasAura(GLYPH_EXORCISM))
-                PreventHitAura();
+            PreventHitAura();
+
+            damageAmount = (GetHitDamage() * 0.20f) / 3;
         }
+
+        void HandleGlyphOfExorcism()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    if (caster->HasAura(GLYPH_OF_EXORCISM) && damageAmount > 0)
+                    {
+                        caster->AddAura(SPELL_EXORCISM_TRIGGERED, target);
+
+                        // Set pre-calculated amount
+                        if (Aura* glyphOfExorcism = target->GetAura(SPELL_EXORCISM_TRIGGERED, caster->GetGUID()))
+                            glyphOfExorcism->GetEffect(EFFECT_1)->SetAmount(damageAmount);
+                    }
+                }
+            }
+        }
+
+    protected:
+        int32 damageAmount;
 
         void Register()
         {
-            AfterHit += SpellHitFn(spell_pal_exorcism_SpellScript::CheckGlyph);
+            OnEffectHitTarget += SpellEffectFn(spell_pal_exorcism_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            AfterHit += SpellHitFn(spell_pal_exorcism_SpellScript::HandleGlyphOfExorcism);
         }
     };
 
