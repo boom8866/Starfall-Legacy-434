@@ -160,7 +160,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
             switch (spellid)
             {
                 case COMMAND_STAY:                          //flat=1792  //STAY
-                    pet->StopMoving();
+                    pet->GetMotionMaster()->MovementExpired(false);
                     pet->GetMotionMaster()->Clear(false);
                     pet->GetMotionMaster()->MoveIdle();
                     charmInfo->SetCommandState(COMMAND_STAY);
@@ -199,10 +199,6 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                     // only place where pet can be player
                     Unit* TargetUnit = ObjectAccessor::GetUnit(*_player, guid2);
                     if (!TargetUnit)
-                        return;
-
-                    // Not let attack through obstructions
-                    if (!pet->IsWithinLOSInMap(TargetUnit))
                         return;
 
                     if (Unit* owner = pet->GetOwner())
