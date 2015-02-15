@@ -30,7 +30,7 @@ enum Spells
     SPELL_RIDE_VEHICLE              = 43671, // hits blazing inferno
 
     // Blazing Inferno
-    SPELL_BLAZING_INFERNO          = 76195, // Hit orb of the sun
+    SPELL_BLAZING_INFERNO           = 76195, // Hit orb of the sun
 };
 
 enum Texts
