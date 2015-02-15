@@ -64,6 +64,18 @@ public:
         uint8 phase;
         uint8 spoutCount;
 
+        void InitializeAI()
+        {
+            if (me->isDead())
+            {
+                if (Creature* ulthok = me->FindNearestCreature(BOSS_COMMANDER_ULTHOK, 500.0f, true))
+                    ulthok->SetVisible(true);
+            }
+            else
+                if (Creature* ulthok = me->FindNearestCreature(BOSS_COMMANDER_ULTHOK, 500.0f, true))
+                    ulthok->SetVisible(false);
+        }
+
         void Reset()
         {
             _Reset();
@@ -73,12 +85,9 @@ public:
             spoutCount = 0;
             DespawnMinions();
 
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1|UNIT_FIELD_FLAGS|UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_PACIFIED);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FIELD_FLAGS | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
             me->SetReactState(REACT_AGGRESSIVE);
             RemoveEncounterFrame();
-
-            if (GameObject* ladyDoor = me->FindNearestGameObject(GO_LADY_NAZJAR_DOOR, 150.0f))
-                ladyDoor->SetGoState(GO_STATE_ACTIVE);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -271,12 +280,14 @@ public:
         {
             Talk(SAY_DEATH);
             RemoveEncounterFrame();
-            if (GameObject* ladyDoor = me->FindNearestGameObject(GO_LADY_NAZJAR_DOOR, 200.0f))
-                ladyDoor->SetGoState(GO_STATE_READY);
             if (GameObject* console = me->FindNearestGameObject(GO_CONTROL_SYSTEM, 150.0f))
                 console->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+            if (Creature* ulthok = me->FindNearestCreature(BOSS_COMMANDER_ULTHOK, 500.0f, true))
+                ulthok->SetVisible(true);
             DespawnMinions();
             _JustDied();
+            if (GameObject* ladyDoor = me->FindNearestGameObject(GO_LADY_NAZJAR_DOOR, 500.0f))
+                ladyDoor->SetGoState(GO_STATE_READY);
         }
 
         void DespawnMinions()

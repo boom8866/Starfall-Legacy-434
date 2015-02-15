@@ -2247,14 +2247,14 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     else
         sLog->outDebug(LOG_FILTER_MAPS, "Player %s is being teleported to map %u", GetName().c_str(), mapid);
 
-    if (m_vehicle && (!(options & TELE_NOT_LEAVE_VEHICLE)))
+    if (m_vehicle)
         ExitVehicle();
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
-    SetUnitMovementFlags(0);
+    SetUnitMovementFlags(GetUnitMovementFlags() & MOVEMENTFLAG_MASK_HAS_PLAYER_STATUS_OPCODE);
     DisableSpline();
 
-    if (m_transport)
+    if (Transport* transport = GetTransport())
     {
         if (!(options & TELE_TO_NOT_LEAVE_TRANSPORT))
         {
@@ -2279,7 +2279,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         SetSemaphoreTeleportFar(false);
         //setup delayed teleport flag
         SetDelayedTeleportFlag(IsCanDelayTeleport());
-        //if teleport spell is casted in Unit::Update() func
+        //if teleport spell is cast in Unit::Update() func
         //then we need to delay it until update process will be finished
         if (IsHasDelayedTeleport())
         {
@@ -2312,6 +2312,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         {
             Position oldPos;
             GetPosition(&oldPos);
+            if (HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
+                z += GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
             Relocate(x, y, z, orientation);
             SendTeleportPacket(oldPos); // this automatically relocates to oldPos in order to broadcast the packet in the right place
         }
@@ -2340,7 +2342,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             SetSemaphoreTeleportNear(false);
             //setup delayed teleport flag
             SetDelayedTeleportFlag(IsCanDelayTeleport());
-            //if teleport spell is casted in Unit::Update() func
+            //if teleport spell is cast in Unit::Update() func
             //then we need to delay it until update process will be finished
             if (IsHasDelayedTeleport())
             {
@@ -2397,10 +2399,10 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 // send transfer packets
                 WorldPacket data(SMSG_TRANSFER_PENDING, 4 + 4 + 4);
                 data.WriteBit(0);       // unknown
-                if (m_transport)
+                if (Transport* transport = GetTransport())
                 {
                     data.WriteBit(1);   // has transport
-                    data << GetMapId() << m_transport->GetEntry();
+                    data << GetMapId() << transport->GetEntry();
                 }
                 else
                     data.WriteBit(0);   // has transport
@@ -2413,22 +2415,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (oldmap)
                 oldmap->RemovePlayerFromMap(this, false);
 
-            // new final coordinates
-            float final_x = x;
-            float final_y = y;
-            float final_z = z;
-            float final_o = orientation;
-
-            if (m_transport)
-            {
-                final_x += m_movementInfo.t_pos.GetPositionX();
-                final_y += m_movementInfo.t_pos.GetPositionY();
-                final_z += m_movementInfo.t_pos.GetPositionZ();
-                final_o += m_movementInfo.t_pos.GetOrientation();
-            }
-
-            m_teleport_dest = WorldLocation(mapid, final_x, final_y, final_z, final_o);
-            SetFallInformation(0, final_z);
+            m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
+            SetFallInformation(0, z);
             // if the player is saved before worldportack (at logout for example)
             // this will be used instead of the current location in SaveToDB
 
@@ -2453,8 +2441,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         //    return false;
     }
     return true;
-
-    GetSession()->HandleMoveWorldportAckOpcode();
 }
 
 bool Player::TeleportToBGEntryPoint()
@@ -24426,16 +24412,6 @@ void Player::SendInitialPacketsAfterAddToMap()
     phaseMgr.AddUpdateFlag(PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED);
     phaseMgr.Update();
 
-    // Unstuck Player
-    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-    {
-        if (i != MOVE_TURN_RATE && i != MOVE_PITCH_RATE)
-        {
-            SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
-            UpdateSpeed(UnitMoveType(i), true);
-        }
-    }
-
     // Remove all kinds of shapeshift to prevent exploits (Druids Only)
     if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_DRUID)
     {
@@ -24475,6 +24451,13 @@ void Player::SendInitialPacketsAfterAddToMap()
                 SetMaxPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY) + 10);
             break;
         }
+    }
+
+    // Unstuck Player
+    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
+    {
+        SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
+        UpdateSpeed(UnitMoveType(i), true);
     }
 }
 

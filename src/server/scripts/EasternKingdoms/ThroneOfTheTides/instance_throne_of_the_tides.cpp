@@ -134,12 +134,7 @@ public:
             switch(creature->GetEntry())
             {
                 case BOSS_LADY_NAZJAR:          uiLadyNazjar = creature->GetGUID(); break;
-                case BOSS_COMMANDER_ULTHOK:
-                {
-                    creature->SetPhaseMask(2, true);
-                    uiCommanderUlthok = creature->GetGUID();
-                    break;
-                }
+                case BOSS_COMMANDER_ULTHOK:     uiCommanderUlthok = creature->GetGUID(); break;
                 case NPC_ERUNAK_STONESPEAKER:   uiErunakStonespeaker = creature->GetGUID(); break;
                 case BOSS_MINDBENDER_GHURSHA:   uiMindbenderGhursha = creature->GetGUID(); break;
                 case BOSS_OZUMAT:               uiOzumat = creature->GetGUID(); break;

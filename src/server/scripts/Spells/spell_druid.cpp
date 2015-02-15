@@ -403,16 +403,8 @@ class spell_dru_lifebloom : public SpellScriptLoader
                 // final heal
                 int32 stack = GetStackAmount();
                 int32 healAmount = aurEff->GetAmount();
-                if (Unit* caster = GetCaster())
-                {
-                    healAmount = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), healAmount, HEAL, stack);
-                    healAmount = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, stack);
-
-                    GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
-                    return;
-                }
-
-                GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
+                if (Unit* target = GetTarget())
+                    target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
             }
 
             void HandleDispel(DispelInfo* dispelInfo)
@@ -423,18 +415,6 @@ class spell_dru_lifebloom : public SpellScriptLoader
                     {
                         // final heal
                         int32 healAmount = aurEff->GetAmount();
-                        if (Unit* caster = GetCaster())
-                        {
-                            healAmount = caster->SpellHealingBonusDone(target, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
-                            healAmount = target->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
-                            target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
-
-                            // restore mana
-                            int32 returnMana = CalculatePct(caster->GetCreateMana(), GetSpellInfo()->ManaCostPercentage) * dispelInfo->GetRemovedCharges() / 2;
-                            caster->CastCustomSpell(caster, SPELL_DRUID_LIFEBLOOM_ENERGIZE, &returnMana, NULL, NULL, true, NULL, NULL, GetCasterGUID());
-                            return;
-                        }
-
                         target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
                     }
                 }
@@ -1787,6 +1767,55 @@ public:
     }
 };
 
+class spell_dru_lifebloom_tol : public SpellScriptLoader
+{
+public:
+    spell_dru_lifebloom_tol() : SpellScriptLoader("spell_dru_lifebloom_tol")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_NORMAL_LIFEBLOOM  = 33763
+    };
+
+    class spell_dru_lifebloom_tol_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_lifebloom_tol_AuraScript);
+
+        void CheckForLB(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetTarget())
+                {
+                    if (Aura* normalLifeBloom = target->GetAura(SPELL_NORMAL_LIFEBLOOM, caster->GetGUID()))
+                    {
+                        target->RemoveAurasDueToSpell(GetSpellInfo()->Id);
+                        if (normalLifeBloom->GetStackAmount() < 3)
+                        {
+                            normalLifeBloom->SetStackAmount(normalLifeBloom->GetStackAmount() + 1);
+                            normalLifeBloom->RefreshDuration();
+                        }
+                        else
+                            normalLifeBloom->RefreshDuration();
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_dru_lifebloom_tol_AuraScript::CheckForLB, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dru_lifebloom_tol_AuraScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1823,4 +1852,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_cyclone();
     new spell_dru_mangle_cat();
     new spell_dru_rejuvenation();
+    new spell_dru_lifebloom_tol();
 }

@@ -457,7 +457,8 @@ public:
         {
             SPELL_BLINDING_TOXIN        = 73963,
             SPELL_DEBILITATING_VENOM    = 74121,
-            SPELL_SURGE                 = 75158
+            SPELL_SURGE                 = 75158,
+            SPELL_EMERGE                = 75764
         };
 
         enum eventId
@@ -477,9 +478,9 @@ public:
         void EnterCombat(Unit* who)
         {
             me->RemoveFlag(UNIT_FIELD_BYTES_1, 9);
+            me->CastWithDelay(500, me, SPELL_EMERGE, true);
             events.ScheduleEvent(EVENT_MAKE_ATTACKABLE, 1500);
             events.ScheduleEvent(EVENT_BLINDING_TOXIN, 10000);
-            events.ScheduleEvent(EVENT_SURGE, 7000);
             events.ScheduleEvent(EVENT_DEBILITATING_VENOM, urand(8000, 15000));
         }
 
@@ -517,9 +518,9 @@ public:
                     }
                     case EVENT_SURGE:
                     {
-                        if (Unit* victim = me->getVictim())
-                            DoCast(victim, SPELL_SURGE);
-                        events.RescheduleEvent(EVENT_SURGE, urand(10000, 12500));
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 65.0f, true))
+                            DoCast(target, SPELL_SURGE);
+                        events.RescheduleEvent(EVENT_SURGE, 25000);
                         break;
                     }
                     case EVENT_BLINDING_TOXIN:
@@ -541,6 +542,7 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE);
                         me->SetControlled(false, UNIT_STATE_ROOT);
                         events.CancelEvent(EVENT_MAKE_ATTACKABLE);
+                        events.ScheduleEvent(EVENT_SURGE, 2000);
                         break;
                     }
                     default:
@@ -1120,7 +1122,7 @@ public:
         void EnterCombat(Unit* who)
         {
             me->RemoveFlag(UNIT_FIELD_BYTES_1, 9);
-            DoCast(me, SPELL_EMERGE, true);
+            me->CastWithDelay(500, me, SPELL_EMERGE, true);
             events.ScheduleEvent(EVENT_MAKE_ATTACKABLE, 2500);
             events.ScheduleEvent(EVENT_SURGE, 3000);
         }
@@ -1166,7 +1168,6 @@ public:
                     }
                     case EVENT_MAKE_ATTACKABLE:
                     {
-                        DoCast(me, SPELL_EMERGE, true);
                         me->RemoveFlag(UNIT_FIELD_BYTES_1, 9);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE);
                         me->SetControlled(false, UNIT_STATE_ROOT);
@@ -1225,10 +1226,10 @@ public:
             events.ScheduleEvent(EVENT_SUBMERGE, 1);
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit* /*who*/)
         {
-            me->RemoveAurasDueToSpell(SPELL_SUBMERGE);
-            DoCast(SPELL_EMERGE);
+            me->RemoveFlag(UNIT_FIELD_BYTES_1, 9);
+            me->CastWithDelay(500, me, SPELL_EMERGE, true);
             events.ScheduleEvent(EVENT_MAKE_ATTACKABLE, 1500);
         }
 
@@ -1280,7 +1281,6 @@ public:
                     case EVENT_MAKE_ATTACKABLE:
                     {
                         DoCast(SPELL_CORROSIVE_SPRAY);
-                        DoCast(me, SPELL_EMERGE, true);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE);
                         me->SetControlled(false, UNIT_STATE_ROOT);
                         events.ScheduleEvent(EVENT_CORROSIVE_SPRAY, 5000);
@@ -1436,4 +1436,5 @@ void AddSC_halls_of_origination()
     new npc_hoo_earth_warden();
     new npc_hoo_jeweled_scarab();
     new npc_hoo_blistering_scarab();
+    new npc_hoo_dustbone_tormentor();
 }

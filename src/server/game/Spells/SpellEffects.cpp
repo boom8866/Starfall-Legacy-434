@@ -2617,6 +2617,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     break;
                 }
                 case 33763: // Lifebloom
+                case 94447: // Lifebloom (Tree of Life)
                 {
                     // Revitalize add Replenishment effect
                     if (m_caster->HasAura(48539) || m_caster->HasAura(48544))
@@ -5195,16 +5196,12 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     if (m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
                         totalDamagePercentMod += totalDamagePercentMod * 0.40f;
 
-                    // Glyph of Lava Lash
-                    if (m_caster->HasAura(55444))
-                        totalDamagePercentMod += totalDamagePercentMod * 0.20f;
-
                     // Each points of Mastery increases damage by an additional 2.5%
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                         if (m_caster->HasAura(77223, m_caster->GetGUID()))
-                            totalDamagePercentMod += totalDamagePercentMod * (0.20f + (0.025f * masteryPoints));
+                            totalDamagePercentMod += 0.025f * masteryPoints;
                     }
 
                     // Improved Lava Lash
@@ -6232,24 +6229,21 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                     if (Unit* stunned = m_targets.GetUnitTarget())
                     {
                         Unit::AuraEffectList const& dotList = stunned->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                        if (dotList.empty())
+                            return;
+
                         for (Unit::AuraEffectList::const_iterator itr = dotList.begin(); itr != dotList.end(); ++itr)
                         {
-                            if (!(*itr)->GetId())
-                                continue;
-
-                            if ((*itr)->GetId() == NULL)
-                                continue;
-
                             if (!(*itr)->GetBase())
                                 continue;
 
-                            if (!(*itr)->GetSpellInfo())
+                            if (!(*itr)->GetBase()->GetSpellInfo())
                                 continue;
 
                             if (!(*itr)->GetBase()->GetCasterGUID())
                                 continue;
 
-                            if ((*itr)->GetId() == 2120)
+                            if ((*itr)->GetBase()->GetId() == 2120)
                                 continue;
 
                             if ((*itr)->GetBase()->GetCasterGUID() != m_caster->GetGUID())

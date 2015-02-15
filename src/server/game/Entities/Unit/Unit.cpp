@@ -11478,7 +11478,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                         else
                         {
                             // Each points of Mastery increases damage by an additional 2.5%
-                            if (GetTypeId() == TYPEID_PLAYER)
+                            if (GetTypeId() == TYPEID_PLAYER && spellProto->Id != 60103)
                             {
                                 float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                                 if (HasAura(77223, GetGUID()))
@@ -11669,9 +11669,9 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
     {  
         for (Unit::AuraEffectList::const_iterator i = overrideSPAuras.begin(); i != overrideSPAuras.end(); ++i)
             if (schoolMask & (*i)->GetMiscValue())
-                DoneAdvertisedBenefit += (*i)->GetAmount();
+                DoneAdvertisedBenefit = (*i)->GetAmount();
 
-        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + DoneAdvertisedBenefit) / 100.0f);
+        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (DoneAdvertisedBenefit / 100.0f));
     }
 
     // ..done
@@ -12466,9 +12466,9 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
     {
         for (AuraEffectList::const_iterator i = overrideSPAuras.begin(); i != overrideSPAuras.end(); ++i)
             if (schoolMask & (*i)->GetMiscValue())
-                AdvertisedBenefit += (*i)->GetAmount();
+                AdvertisedBenefit = (*i)->GetAmount();
 
-        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + AdvertisedBenefit) / 100.0f);
+        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (AdvertisedBenefit / 100.0f));
     }
 
     AuraEffectList const& mHealingDone = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE);

@@ -120,7 +120,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (@OGUID+116, 180036, 0, 1, 65535, -9600.74, 21.1644, 63.1988, 5.11239, 0, 0, 0.552531, -0.833492, 300, 0, 1),
 (@OGUID+117, 209538, 0, 1, 65535, -9547.84, 85.0556, 60.1021, 6.23083, 0, 0, -0.0261765, 0.999657, 300, 255, 1),
 (@OGUID+118, 180034, 0, 1, 65535, -9540.84, 71.3507, 59.374, 2.37364, 0, 0, 0.927183, 0.374608, 300, 255, 1),
-(@OGUID+119, 210177, 0, 1, 65535, -9548.62, 84.9566, 58.6569, 0.0349062, 0, 0, 0.0174522, 0.999848, 300, 255, 1),
+(@OGUID+119, 210177, 0, 1, 65535, -9548.62, 84.9566, 58.6569, 0.0349062, 0, 0, 0.0174522, 0.999848, 300, 255, 1);
 
 DELETE FROM `gameobject` WHERE `guid` IN (781680, 781678, 781771, 781688, 781697, 781692, 781694, 781695, 781682, 781768, 781780);
 UPDATE `creature_template` SET `ScriptName`='npc_df_fire_juggler' WHERE `entry` IN (55397, 55089);
@@ -187,7 +187,7 @@ UPDATE `creature` SET `id`=55342 WHERE `guid`=158273;
 
 DELETE FROM `gameobject` WHERE `guid` = '781785';
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
-(184477, 209544, 0, 1, 65535, -9524.58, 87.0694, 58.881, 3.01941, 0, 0, 0.998135, 0.0610516, 300, 255, 1);
+(781785, 209544, 0, 1, 65535, -9524.58, 87.0694, 58.881, 3.01941, 0, 0, 0.998135, 0.0610516, 300, 255, 1);
 
 UPDATE `creature` SET `id`=55089 WHERE `guid`=158051;
 
