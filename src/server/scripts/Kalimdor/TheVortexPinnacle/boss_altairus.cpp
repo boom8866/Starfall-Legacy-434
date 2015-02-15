@@ -62,7 +62,8 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
-            ActivateTwisters(true);
+            if (IsHeroic())
+                ActivateTwisters(true);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_CHILLING_BREATH, 12000);
             events.ScheduleEvent(EVENT_CALL_THE_WIND, 6000);
@@ -84,7 +85,8 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
-            ActivateTwisters(false);
+            if (IsHeroic())
+                ActivateTwisters(false);
             instance->SetBossState(DATA_ALTAIRUS, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
