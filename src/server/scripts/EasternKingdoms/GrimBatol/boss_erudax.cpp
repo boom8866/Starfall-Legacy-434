@@ -401,6 +401,11 @@ public:
             instance = creature->GetInstanceScript();
         }
 
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+        }
+
         InstanceScript* instance;
         EventMap events;
 

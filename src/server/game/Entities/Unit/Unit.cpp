@@ -11669,9 +11669,9 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
     {  
         for (Unit::AuraEffectList::const_iterator i = overrideSPAuras.begin(); i != overrideSPAuras.end(); ++i)
             if (schoolMask & (*i)->GetMiscValue())
-                DoneAdvertisedBenefit += (*i)->GetAmount();
+                DoneAdvertisedBenefit = (*i)->GetAmount();
 
-        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + DoneAdvertisedBenefit) / 100.0f);
+        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (DoneAdvertisedBenefit / 100.0f));
     }
 
     // ..done
@@ -12466,9 +12466,9 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
     {
         for (AuraEffectList::const_iterator i = overrideSPAuras.begin(); i != overrideSPAuras.end(); ++i)
             if (schoolMask & (*i)->GetMiscValue())
-                AdvertisedBenefit += (*i)->GetAmount();
+                AdvertisedBenefit = (*i)->GetAmount();
 
-        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + AdvertisedBenefit) / 100.0f);
+        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (AdvertisedBenefit / 100.0f));
     }
 
     AuraEffectList const& mHealingDone = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE);

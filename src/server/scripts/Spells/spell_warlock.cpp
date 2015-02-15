@@ -92,6 +92,11 @@ class spell_warl_banish : public SpellScriptLoader
     public:
         spell_warl_banish() : SpellScriptLoader("spell_warl_banish") { }
 
+        enum spellId
+        {
+            SPELL_BANISH    = 710
+        };
+
         class spell_warl_banish_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_warl_banish_SpellScript);
@@ -100,6 +105,19 @@ class spell_warl_banish : public SpellScriptLoader
             {
                 _removed = false;
                 return true;
+            }
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetExplTargetUnit())
+                    {
+                        if (target->HasAura(SPELL_BANISH))
+                            return SPELL_FAILED_ALREADY_HAVE_CHARM;
+                    }
+                }
+                return SPELL_CAST_OK;
             }
 
             void HandleBanish()
@@ -127,6 +145,7 @@ class spell_warl_banish : public SpellScriptLoader
 
             void Register()
             {
+                OnCheckCast += SpellCheckCastFn(spell_warl_banish_SpellScript::CheckCast);
                 BeforeHit += SpellHitFn(spell_warl_banish_SpellScript::HandleBanish);
                 AfterHit += SpellHitFn(spell_warl_banish_SpellScript::RemoveAura);
             }

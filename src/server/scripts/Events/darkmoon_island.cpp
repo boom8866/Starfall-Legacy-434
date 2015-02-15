@@ -245,6 +245,16 @@ public:
     {
         PrepareSpellScript(spell_df_put_up_darkmoon_banner_SpellScript);
 
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (GameObject* banner = caster->FindNearestGameObject(GO_DARKMOON_BANNER, 8.0f))
+                    return SPELL_FAILED_NOT_HERE;
+            }
+            return SPELL_CAST_OK;
+        }
+
         void HandleBanner()
         {
             if (Unit* caster = GetCaster())
@@ -264,6 +274,7 @@ public:
 
         void Register()
         {
+            OnCheckCast += SpellCheckCastFn(spell_df_put_up_darkmoon_banner_SpellScript::CheckCast);
             AfterCast += SpellCastFn(spell_df_put_up_darkmoon_banner_SpellScript::HandleBanner);
         }
     };

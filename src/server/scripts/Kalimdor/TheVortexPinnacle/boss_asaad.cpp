@@ -181,7 +181,7 @@ public:
                         break;
                     case EVENT_SUMMON_SKYFALL_STAR:
                         DoCast(SPELL_SUMMON_SKYFALL_STAR);
-                        events.ScheduleEvent(EVENT_SUMMON_SKYFALL_STAR, urand(10000, 12500));
+                        events.ScheduleEvent(EVENT_SUMMON_SKYFALL_STAR, 25000);
                         break;
                     case EVENT_STATIC_CLING:
                         me->GetMotionMaster()->Clear();
