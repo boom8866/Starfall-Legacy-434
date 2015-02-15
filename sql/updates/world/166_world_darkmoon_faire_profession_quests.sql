@@ -1,0 +1,1 @@
+UPDATE `quest_template` SET `RequiredSkillPoints`= '1' WHERE `RequiredSkillId` > '0' AND `RequiredSkillPoints` = '0';
