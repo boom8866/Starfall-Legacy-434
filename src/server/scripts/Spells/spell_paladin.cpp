@@ -1297,14 +1297,22 @@ public:
             Unit* caster = GetCaster();
             Unit* target = GetHitUnit();
 
-            if (!target)
+            if (!target || !caster)
                 return;
 
             if (GetCaster()->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
             {
                 totHeal = GetHitHeal() * 3;
-                totHeal += CalculatePct(GetCaster()->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_MAGIC), 21);
-                totHeal += CalculatePct(int32(GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK)), 20);
+                totHeal += CalculatePct(caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_MAGIC), 21);
+                totHeal += CalculatePct(int32(caster->GetTotalAttackPowerValue(BASE_ATTACK)), 20);
+
+                // Selfless Healer
+                if (AuraEffect const* auraEff = caster->GetDummyAuraEffect(SPELLFAMILY_PALADIN, 3924, EFFECT_0))
+                {
+                    if (target != caster)
+                        totHeal = totHeal + (totHeal * auraEff->GetAmount()) / 100;
+                }
+
                 SetHitHeal(totHeal);
                 return;
             }
@@ -1326,36 +1334,43 @@ public:
                 default:
                     break;
             }
+
+            totHeal += CalculatePct(caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_MAGIC), 21);
+            totHeal += CalculatePct(int32(caster->GetTotalAttackPowerValue(BASE_ATTACK)), 20);
+
             // Selfless Healer
             if (AuraEffect const* auraEff = caster->GetDummyAuraEffect(SPELLFAMILY_PALADIN, 3924, EFFECT_0))
             {
                 if (target != caster)
-                    totHeal += totHeal + (totHeal * auraEff->GetAmount()) / 100;
+                    totHeal = totHeal + (totHeal * auraEff->GetAmount()) / 100;
             }
-
-            totHeal += CalculatePct(GetCaster()->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_MAGIC), 21);
-            totHeal += CalculatePct(int32(GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK)), 20);
 
             SetHitHeal(totHeal);
         }
 
         void HandlePeriodic()
         {
-            Aura *aura = GetCaster()->GetAura(SPELL_GLYPH_OF_THE_LONG_WORD);
-            if (!aura)
-                PreventHitAura();
-            else if (AuraEffect *aurEff = aura->GetEffect(EFFECT_0))
-                aurEff->SetAmount(CalculatePct(GetHitHeal(),aurEff->GetAmount()));
+            if (Unit* caster = GetCaster())
+            {
+                Aura *aura = caster->GetAura(SPELL_GLYPH_OF_THE_LONG_WORD);
+                if (!aura)
+                    PreventHitAura();
+                else if (AuraEffect *aurEff = aura->GetEffect(EFFECT_0))
+                    aurEff->SetAmount(CalculatePct(GetHitHeal(), aurEff->GetAmount()));
+            }
         }
 
         void HandleAfterCast()
         {
-            // Eternal Glory
-            if (AuraEffect* aurEff = GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 2944, 0))
+            if (Unit* caster = GetCaster())
             {
-                int32 chance = aurEff->GetAmount();
-                if (roll_chance_i(chance))
-                    GetCaster()->CastCustomSpell(GetCaster(), SPELL_EFFECT_ETERNAL_GLORY, &powerCost, NULL, NULL, true);
+                // Eternal Glory
+                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 2944, 0))
+                {
+                    int32 chance = aurEff->GetAmount();
+                    if (roll_chance_i(chance))
+                        caster->CastCustomSpell(caster, SPELL_EFFECT_ETERNAL_GLORY, &powerCost, NULL, NULL, true);
+                }
             }
         }
 
