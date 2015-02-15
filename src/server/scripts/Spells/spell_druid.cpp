@@ -1482,7 +1482,7 @@ class spell_dru_maul : public SpellScriptLoader
 
                 // Bleed effect damage taken increased
                 if (target->HasAuraTypeWithMiscvalue(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT, 15))
-                    SetHitDamage(GetHitDamage() + GetHitDamage() * 0.20f);
+                    SetHitDamage(GetHitDamage() + GetHitDamage() * 0.30f);
             }
 
             void Register()
