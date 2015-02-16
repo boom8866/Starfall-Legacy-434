@@ -26099,7 +26099,7 @@ uint32 Player::GetRuneTypeBaseCooldown(RuneType runeType) const
     AuraEffectList const& regenAura = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for (AuraEffectList::const_iterator i = regenAura.begin(); i != regenAura.end(); ++i)
     {
-        if ((*i)->GetMiscValue() == POWER_RUNES && (*i)->GetMiscValueB() == runeType || (*i)->GetSpellInfo()->Id == 51460)
+        if (((*i)->GetMiscValue() == POWER_RUNES && (*i)->GetMiscValueB() == runeType) || (*i)->GetSpellInfo()->Id == 51460)
         {
             int32 amount = (*i)->GetAmount();
             if (amount > 0)
