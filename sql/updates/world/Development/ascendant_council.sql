@@ -10,7 +10,7 @@ UPDATE `creature_template` SET `scriptname`= 'boss_feludius', `speed_walk`= 4, `
 UPDATE `creature_template` SET `scriptname`= 'boss_ignacious', `speed_walk`= 4, `BaseAttackTime`= 1500, `AIName`= '' WHERE `entry`= 43686;
 UPDATE `creature_template` SET `scriptname`= 'boss_arion', `speed_walk`= 4, `BaseAttackTime`= 1500, `AIName`= '' WHERE `entry`= 43688;
 UPDATE `creature_template` SET `scriptname`= 'boss_terrastra', `speed_walk`= 4, `BaseAttackTime`= 1500, `AIName`= '' WHERE `entry`= 43689;
-UPDATE `creature_template` SET `scriptname`= 'boss_elementium_monstrosity', `AIName`= '' WHERE `entry`= 43735;
+UPDATE `creature_template` SET `scriptname`= 'boss_elementium_monstrosity', `difficulty_entry_1`= 49619, `difficulty_entry_2`= 49620, `difficulty_entry_3`= 49621, `AIName`= '' WHERE `entry`= 43735;
 
 DELETE FROM `creature_template_addon` WHERE `entry` IN (43686, 43687, 43688, 43689);
 
@@ -66,7 +66,6 @@ REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `languag
 (43735, 1, 1, 'Annihilate....', 14, 0, 100, 0, 0, 20397, 'Elementium Monstrosity - Slay 2'),
 (43735, 2, 0, 'FEEL THE POWER!', 14, 0, 100, 0, 0, 20400, 'Elementium Monstrosity - Gravity Crush'),
 (43735, 6, 0, 'Impossible....', 14, 0, 100, 0, 0, 20399, 'Elementium Monstrosity - Death'),
-
 -- Ascendant Council Controller
 (43691, 0, 0, 'The ground beneath you rumbles ominously...', 41, 0, 100, 0, 0, 0, 'Ascendant Council Controller - Quake'),
 (43691, 1, 0, 'The air around you crackles with energy...', 41, 0, 100, 0, 0, 0, 'Ascendant Council Controller - Thundershock');
