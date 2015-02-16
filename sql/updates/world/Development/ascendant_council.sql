@@ -6,11 +6,11 @@ REPLACE INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
 
 
 UPDATE `creature_template` SET `scriptname`= 'npc_ascendant_council_controller' WHERE `entry`= 43691;
-UPDATE `creature_template` SET `scriptname`= 'boss_feludius', `speed_walk`= 4, `BaseAttackTime`= 1500 WHERE `entry`= 43687;
-UPDATE `creature_template` SET `scriptname`= 'boss_ignacious', `speed_walk`= 4, `BaseAttackTime`= 1500 WHERE `entry`= 43686;
-UPDATE `creature_template` SET `scriptname`= 'boss_arion', `speed_walk`= 4, `BaseAttackTime`= 1500 WHERE `entry`= 43688;
-UPDATE `creature_template` SET `scriptname`= 'boss_terrastra', `speed_walk`= 4, `BaseAttackTime`= 1500 WHERE `entry`= 43689;
-UPDATE `creature_template` SET `scriptname`= 'boss_elementium_monstrosity' WHERE `entry`= 43735;
+UPDATE `creature_template` SET `scriptname`= 'boss_feludius', `speed_walk`= 4, `BaseAttackTime`= 1500, `AIName`= '' WHERE `entry`= 43687;
+UPDATE `creature_template` SET `scriptname`= 'boss_ignacious', `speed_walk`= 4, `BaseAttackTime`= 1500, `AIName`= '' WHERE `entry`= 43686;
+UPDATE `creature_template` SET `scriptname`= 'boss_arion', `speed_walk`= 4, `BaseAttackTime`= 1500, `AIName`= '' WHERE `entry`= 43688;
+UPDATE `creature_template` SET `scriptname`= 'boss_terrastra', `speed_walk`= 4, `BaseAttackTime`= 1500, `AIName`= '' WHERE `entry`= 43689;
+UPDATE `creature_template` SET `scriptname`= 'boss_elementium_monstrosity', `AIName`= '' WHERE `entry`= 43735;
 
 DELETE FROM `creature_template_addon` WHERE `entry` IN (43686, 43687, 43688, 43689);
 
