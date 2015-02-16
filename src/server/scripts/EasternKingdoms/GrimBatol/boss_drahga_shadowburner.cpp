@@ -27,6 +27,8 @@ enum Spells
    SPELL_DEVOURING_FLAMES_AOE       = 90945,
    SPELL_DEVOURING_FLAMES           = 90950,
 
+   SPELL_VALIONAS_FLAME             = 75321,
+
    // Seeping Twilight Visual
    SPELL_SEEPING_TWILIGHT_VISUAL    = 75318,
    SPELL_SEEPING_TWILIGHT_AURA      = 75274,
@@ -69,6 +71,7 @@ enum Events
     EVENT_SHREDDING_SWIPE,
     EVENT_DEVOURING_FLAMES,
     EVENT_DEVOURING_FLAMES_CAST,
+    EVENT_VALIONAS_FLAME,
     EVENT_CLEAR_CAST,
     EVENT_MOVE_OUT,
     EVENT_DESPAWN,
@@ -418,8 +421,15 @@ public:
                         events.ScheduleEvent(EVENT_SHREDDING_SWIPE, 25000);
                         break;
                     case EVENT_DEVOURING_FLAMES:
-                        DoCast(SPELL_DEVOURING_FLAMES_AOE);
-                        events.ScheduleEvent(EVENT_DEVOURING_FLAMES_CAST, 400);
+                        if (IsHeroic())
+                        {
+                            DoCast(me, SPELL_DEVOURING_FLAMES_AOE);
+                            events.ScheduleEvent(EVENT_DEVOURING_FLAMES_CAST, 400);
+                        }
+                        else
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                                DoCast(target, SPELL_VALIONAS_FLAME);
+
                         events.ScheduleEvent(EVENT_DEVOURING_FLAMES, 25000);
                         break;
                     case EVENT_DEVOURING_FLAMES_CAST:

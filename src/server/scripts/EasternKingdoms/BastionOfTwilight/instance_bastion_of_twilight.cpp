@@ -243,14 +243,6 @@ class instance_bastion_of_twilight : public InstanceMapScript
                         return _ValionaGUID;
                         return _TheralionGUID;
                         break;
-                    case DATA_ASCENDANT_COUNCIL:
-                        return _AscendantcouncilGUID;
-                        return _FeludiusGUID;
-                        return _IgnaciousGUID;
-                        return _ArionGUID;
-                        return _TerrastraGUID;
-                        return _MonstrosityGUID;
-                        break;
                     case DATA_ASCENDANT_COUNCIL_CONTROLLER:
                         return _AscendantCouncilControllerGUID;
                         break;

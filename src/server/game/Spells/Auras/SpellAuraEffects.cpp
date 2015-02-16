@@ -4746,7 +4746,7 @@ void AuraEffect::HandleModMeleeSpeedPct(AuraApplication const* aurApp, uint8 mod
     //! ToDo: Haste auras with the same handler _CAN'T_ stack together
     Unit* target = aurApp->GetTarget();
     int32 spellGroupVal = target->GetHighestExclusiveSameEffectSpellGroupValue(this, SPELL_AURA_MOD_MELEE_HASTE);
-    if (abs(spellGroupVal) >= abs(GetAmount()))
+    if (abs(spellGroupVal) >= abs(GetAmount()) && GetId() != 63611)
         return;
 
     if (spellGroupVal)
@@ -4759,11 +4759,8 @@ void AuraEffect::HandleModMeleeSpeedPct(AuraApplication const* aurApp, uint8 mod
     {
         case 63611: // Improved Blood Presence
         {
-            if (GetEffIndex() == EFFECT_0)
-            {
-                if (AuraEffect* ibp = target->GetAuraEffectOfRankedSpell(50365, EFFECT_2, target->GetGUID()))
-                    target->ApplyCombatSpeedPctMod(CTYPE_RUNE, (float)ibp->GetAmount(), apply);
-            }
+            if (AuraEffect* ibp = target->GetAuraEffectOfRankedSpell(50365, EFFECT_2, target->GetGUID()))
+                target->ApplyCombatSpeedPctMod(CTYPE_RUNE, (float)ibp->GetAmount(), apply);
             break;
         }
         case 48265: // Unholy Presence

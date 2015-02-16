@@ -1153,21 +1153,21 @@ public:
             if (!caster)
                 return;
 
-            int32 bp0 = 0;
+            int32 bp0 = 1;
             if (Unit* target = GetTarget())
             {
                 // Improved Serpent Sting
-                if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 536, EFFECT_0))
+                if (AuraEffect const* iss = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 536, EFFECT_0))
                 {
                     // Serpent Sting
                     if (AuraEffect* serpentSting = target->GetAuraEffect(GetSpellInfo()->Id, EFFECT_0, caster->GetGUID()))
                     {
-                        bp0 = serpentSting->GetAmount() * serpentSting->GetTotalTicks() * aurEff->GetAmount() / 100;
+                        bp0 += (serpentSting->GetAmount() * serpentSting->GetTotalTicks()) * iss->GetAmount() / 100;
                         bp0 += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.4f / serpentSting->GetTotalTicks();
-                    }
 
-                    if (bp0 > 0)
-                        caster->CastCustomSpell(target, 83077, &bp0, NULL, NULL, true, NULL, GetAura()->GetEffect(EFFECT_0));
+                        if (bp0 > 0)
+                            caster->CastCustomSpell(target, 83077, &bp0, NULL, NULL, true, NULL, serpentSting->GetBase()->GetEffect(EFFECT_0));
+                    }
                 }
             }
         }
@@ -1947,54 +1947,6 @@ public:
     }
 };
 
-class spell_hun_serpent_spread : public SpellScriptLoader
-{
-public:
-    spell_hun_serpent_spread() : SpellScriptLoader("spell_hun_serpent_spread")
-    {
-    }
-
-    class spell_hun_serpent_spread_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_hun_serpent_spread_SpellScript)
-
-        void HandleSerpentSting()
-        {
-            Unit* caster = GetCaster();
-            if (!caster)
-                return;
-
-            if (Unit* target = GetHitUnit())
-            {
-                int32 bp0 = 0;
-                // Improved Serpent Sting
-                if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 536, EFFECT_0))
-                {
-                    // Serpent Sting
-                    if (AuraEffect* serpentSting = target->GetAuraEffect(GetSpellInfo()->Id, EFFECT_0, caster->GetGUID()))
-                    {
-                        bp0 = serpentSting->GetAmount() * serpentSting->GetTotalTicks() * aurEff->GetAmount() / 100;
-                        bp0 += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.4f / serpentSting->GetTotalTicks();
-                    }
-
-                    if (bp0 > 0)
-                        caster->CastCustomSpell(target, 83077, &bp0, NULL, NULL, true, NULL);
-                }
-            }
-        }
-
-        void Register()
-        {
-            AfterHit += SpellHitFn(spell_hun_serpent_spread_SpellScript::HandleSerpentSting);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_hun_serpent_spread_SpellScript();
-    }
-};
-
 class spell_hun_explosive_trap : public SpellScriptLoader
 {
 public:
@@ -2080,6 +2032,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_snake_trap();
     new spell_hun_lock_and_load();
     new spell_hun_attack_basic();
-    new spell_hun_serpent_spread();
     new spell_hun_explosive_trap();
 }

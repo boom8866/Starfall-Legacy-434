@@ -287,7 +287,6 @@ public:
 
     bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* /*quest*/, uint32 /*opt*/)
     {
-        player->CLOSE_GOSSIP_MENU();
         player->SaveToDB();
         return true;
     }
@@ -1056,7 +1055,6 @@ public:
     {
         if (quest->GetQuestId() == QUEST_OLD_DIVISIONS)
         {
-            player->CLOSE_GOSSIP_MENU();
             Psc new_psc;
             new_psc.uiPersonalTimer = 5000;
             new_psc.uiPlayerGUID = player->GetGUID();
@@ -1496,7 +1494,6 @@ public:
                 josiah->SetSeerGUID(player->GetGUID());
                 creature->DespawnOrUnsummon(1);
             }
-            player->CLOSE_GOSSIP_MENU();
         }
 
         return true;
@@ -1574,7 +1571,6 @@ public:
     {
         if (quest->GetQuestId() == QUEST_FROM_THE_SHADOWS)
         {
-            player->CLOSE_GOSSIP_MENU();
             if(player->getClass() == CLASS_HUNTER)
                 player->TemporaryUnsummonPet();
 
@@ -1586,8 +1582,6 @@ public:
 
     bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
     {
-        player->CLOSE_GOSSIP_MENU();
-
         if (quest->GetQuestId() == QUEST_FROM_THE_SHADOWS)
             if (Unit* charm = Unit::GetCreature(*creature, player->GetMinionGUID()))
                 if (charm->GetEntry() == NPC_GILNEAS_MASTIFF)
@@ -1912,6 +1906,8 @@ public:
                     me->SetSpeed(MOVE_WALK, 1.0f, true);
                     me->SetSpeed(MOVE_RUN, 1.3f, true);
                 }
+                else
+                    me->DespawnOrUnsummon(1);
             }
         }
 
@@ -1921,78 +1917,92 @@ public:
 
             switch(i)
             {
-            case 1:
-                if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                case 1:
                 {
-                    if (Vehicle* vehicle = me->GetVehicleKit())
-                            if (Unit* passenger = vehicle->GetPassenger(0))
-                                if (Player* player = passenger->ToPlayer())
-                                    player->SetClientControl(me, 0);
-                }
-                break;
-            case 17:
-                if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
-                {
-                    if (Creature* aranas = passenger->FindNearestCreature(NPC_KRENNAN_ARANAS, 50.0f))
+                    if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                    {
                         if (Vehicle* vehicle = me->GetVehicleKit())
-                            if (Unit* passenger = vehicle->GetPassenger(0))
-                                if (Player* player = passenger->ToPlayer())
-                                    aranas->AI()->Talk(0);
-
-                    me->MonsterWhisper("Rescue Krennan Aranas by using your vehicle's ability.", passenger->GetGUID(), true);
-                    me->GetMotionMaster()->MoveJump(-1673.04f, 1344.91f, 15.1353f, 25.0f, 15.0f);
+                                if (Unit* passenger = vehicle->GetPassenger(0))
+                                    if (Player* player = passenger->ToPlayer())
+                                        player->SetClientControl(me, 0);
+                    }
+                    break;
                 }
-                break;
-            case 40:
-                if (Vehicle* vehicle = me->GetVehicleKit())
-                    if (Unit* passenger = vehicle->GetPassenger(0))
-                        if (Player* player = passenger->ToPlayer())
-                        {
-                            std::list<Creature*> lGuards;
-                            me->GetCreatureListWithEntryInGrid(lGuards, NPC_GUARD_QSKA, 90.0f);
+                case 17:
+                {
+                    if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                    {
+                        if (Creature* aranas = passenger->FindNearestCreature(NPC_KRENNAN_ARANAS, 50.0f))
+                            if (Vehicle* vehicle = me->GetVehicleKit())
+                                if (Unit* passenger = vehicle->GetPassenger(0))
+                                    if (Player* player = passenger->ToPlayer())
+                                        aranas->AI()->Talk(0);
 
-                            if (!lGuards.empty())
-                                for (std::list<Creature*>::const_iterator itr = lGuards.begin(); itr != lGuards.end(); ++itr)
-                                    if ((*itr)->isAlive())
-                                        if (Creature* worgen = (*itr)->FindNearestCreature(NPC_WORGEN_QSKA, 90.0f))
-                                            (*itr)->CastSpell(worgen, SPELL_SHOOT_QSKA, false);
-                        }
-                        break;
-            case 41:
-                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
-                me->CombatStop();
-                break;
-            case 42:
-                if (Vehicle* vehicle = me->GetVehicleKit())
-                    if (Unit* passenger = vehicle->GetPassenger(0))
-                        if (Player* player = passenger->ToPlayer())
-                        {
-                            player->KilledMonsterCredit(NPC_QSKA_KILL_CREDIT, 0);
-
-                            if (Unit* passenger_2 = vehicle->GetPassenger(1))
-                                if (Creature* aranas = passenger_2->ToCreature())
-                                    aranas->AI()->Talk(0);
-                        }
-                        break;
-            case 44:
-                if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                        me->MonsterWhisper("Rescue Krennan Aranas by using your vehicle's ability.", passenger->GetGUID(), true);
+                        me->GetMotionMaster()->MoveJump(-1673.04f, 1344.91f, 15.1353f, 25.0f, 15.0f);
+                    }
+                    break;
+                }
+                case 40:
                 {
                     if (Vehicle* vehicle = me->GetVehicleKit())
                     {
                         if (Unit* passenger = vehicle->GetPassenger(0))
+                        {
                             if (Player* player = passenger->ToPlayer())
-                                player->SetClientControl(me, 1);
-
-                        if (Unit* passenger = vehicle->GetPassenger(1))
-                            if (Creature* aranas = passenger->ToCreature())
-                                aranas->DespawnOrUnsummon();
-
-                        vehicle->RemoveAllPassengers();
+                            {
+                                std::list<Creature*> lGuards;
+                                me->GetCreatureListWithEntryInGrid(lGuards, NPC_GUARD_QSKA, 90.0f);
+                                if (!lGuards.empty())
+                                    for (std::list<Creature*>::const_iterator itr = lGuards.begin(); itr != lGuards.end(); ++itr)
+                                        if ((*itr)->isAlive())
+                                            if (Creature* worgen = (*itr)->FindNearestCreature(NPC_WORGEN_QSKA, 90.0f))
+                                                (*itr)->CastSpell(worgen, SPELL_SHOOT_QSKA, false);
+                            }
+                        }
                     }
+                    break;
                 }
+                case 41:
+                {
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->CombatStop();
+                    break;
+                }
+                case 42:
+                {
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(0))
+                            if (Player* player = passenger->ToPlayer())
+                            {
+                        player->KilledMonsterCredit(NPC_QSKA_KILL_CREDIT, 0);
 
-                me->DespawnOrUnsummon();
-                break;
+                        if (Unit* passenger_2 = vehicle->GetPassenger(1))
+                            if (Creature* aranas = passenger_2->ToCreature())
+                                aranas->AI()->Talk(0);
+                            }
+                    break;
+                }
+                case 44:
+                {
+                    if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                    {
+                        if (Vehicle* vehicle = me->GetVehicleKit())
+                        {
+                            if (Unit* passenger = vehicle->GetPassenger(0))
+                                if (Player* player = passenger->ToPlayer())
+                                    player->SetClientControl(me, 1);
+
+                            if (Unit* passenger = vehicle->GetPassenger(1))
+                                if (Creature* aranas = passenger->ToCreature())
+                                    aranas->DespawnOrUnsummon();
+
+                            vehicle->RemoveAllPassengers();
+                        }
+                    }
+                    me->DespawnOrUnsummon(1);
+                    break;
+                }
             }
         }
 
@@ -2257,7 +2267,6 @@ public:
     {
         if (quest->GetQuestId() == QUEST_TIME_TO_REGROUP)
         {
-            player->CLOSE_GOSSIP_MENU();
             creature->AI()->Talk(0);
             Psc_qtr new_psc;
             new_psc.uiSpeachId = 0;
@@ -2574,10 +2583,7 @@ public:
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
         if (quest->GetQuestId() == 14222)
-        {
-            player->CLOSE_GOSSIP_MENU();
             player->CastSpell(player, SPELL_PHASE_1024, true);
-        }
         return true;
     }
 
@@ -2859,7 +2865,7 @@ enum Quest14348
 
     // Liam Greymane
     NPC_LIAM_QUEST_14348                = 36140,
-    SPELL_SHOOT_1                       = 68559,
+    SPELL_SHOOT_1                       = 68559
 };
 
 class npc_horrid_abbomination : public CreatureScript
@@ -2887,52 +2893,74 @@ public:
         {
             _blownUp = false;
             playerGUID = 0;
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
         }
 
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->RemoveAllAuras();
+            _blownUp = false;
+            playerGUID = 0;
             events.Reset();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (me->HasAura(SPELL_KEG_PLACED))
+            {
+                events.ScheduleEvent(EVENT_HIT_ME, 1500);
+                Talk(SAY_KEG_PLACED);
+                me->AttackStop();
+                me->SetReactState(REACT_PASSIVE);
+            }
         }
 
         void SpellHit(Unit* caster, SpellInfo const* spell)
         {
             switch (spell->Id)
             {
+                case SPELL_KEG_PLACED:
+                {
+                    events.ScheduleEvent(EVENT_HIT_ME, 1500);
+                    Talk(SAY_KEG_PLACED);
+                    me->AttackStop();
+                    me->SetReactState(REACT_PASSIVE);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    break;
+                }
                 case SPELL_TOSS_KEG:
+                {
                     if (!_blownUp)
                     {
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         playerGUID = caster->GetGUID();
                         me->AI()->AttackStart(caster);
                         _blownUp = true;
-                        events.ScheduleEvent(EVENT_HIT_ME, 1000);
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE);
-                        me->GetMotionMaster()->MovementExpired();
                     }
                     break;
+                }
                 case SPELL_SHOOT_1:
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                {
                     if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
                     {
-                        if (player->IsInWorld())
-                        {
-                            me->RemoveAurasDueToSpell(SPELL_KEG_PLACED);
-                            player->KilledMonsterCredit(QUEST_HORRID_ABOMINATION_CREDIT);
-                            DoCast(SPELL_BLOW_UP_ABOMINATION);
-                            for (uint8 i = 0; i < 11; i++)
-                                DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_POISON, true);
+                        me->RemoveAurasDueToSpell(SPELL_KEG_PLACED);
+                        player->KilledMonsterCredit(QUEST_HORRID_ABOMINATION_CREDIT);
+                        DoCast(SPELL_BLOW_UP_ABOMINATION);
+                        for (uint8 i = 0; i < 11; i++)
+                            DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_POISON, true);
 
-                            for (uint8 i = 0; i < 6; i++)
-                                DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_BONES_1, true);
+                        for (uint8 i = 0; i < 6; i++)
+                            DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_BONES_1, true);
 
-                            for (uint8 i = 0; i < 4; i++)
-                                DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_BONES_2, true);
+                        for (uint8 i = 0; i < 4; i++)
+                            DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_BONES_2, true);
 
-                            me->DespawnOrUnsummon(1500);
-                        }
+                        me->DespawnOrUnsummon(1500);
                     }
                     break;
+                }
                 default:
                     break;
             }
@@ -2940,7 +2968,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() && !_blownUp) 
+            if (!UpdateVictim() && !_blownUp && !me->isInCombat())
                 return;
 
             events.Update(diff);
@@ -2950,13 +2978,16 @@ public:
                 switch(eventId)
                 {
                     case EVENT_HIT_ME:
+                    {
                         if (Creature* liam = me->FindNearestCreature(NPC_LIAM_QUEST_14348, 500.0f, true))
                             liam->CastSpell(me, SPELL_SHOOT_1, true);
                         break;
+                    }
                     default:
                         break;
                 }
             }
+
             DoMeleeAttackIfReady();
         }
     };

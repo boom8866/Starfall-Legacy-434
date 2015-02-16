@@ -135,6 +135,7 @@ public:
             _EnterEvadeMode();
             instance->SetBossState(DATA_FORGEMASTER_THRONGUS, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->SetReactState(REACT_AGGRESSIVE);
             summons.DespawnAll();
             events.Reset();
             _mace = false;
@@ -184,12 +185,14 @@ public:
                 case ACTION_CHOOSE_SHIELD:
                     if (!_shield)
                     {
-                        me->GetMotionMaster()->MovementExpired();
+                        me->StopMoving();
                         DoCast(SPELL_SHIELD_VISUAL);
+                        me->AttackStop();
+                        me->SetReactState(REACT_PASSIVE);
                         me->AddAura(SPELL_PERSONAL_PHALANX, me);
                         me->AddAura(SPELL_FLAME_ARROWS_TRIGGER, me);
                         if (IsHeroic())
-                            me->CastWithDelay(1200, me, SPELL_FLAMING_SHIELD); // According to sniffs. Dunno what's wrong with Blizz
+                            me->CastWithDelay(1200, me, SPELL_FLAMING_SHIELD);
                         events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 1200);
                         events.ScheduleEvent(EVENT_CLEAR_PHALANX, 30100);
                         Talk(SAY_SHIELD);
@@ -260,13 +263,12 @@ public:
                         events.ScheduleEvent(EVENT_PICK_WEAPON, 35000);
                         break;
                     case EVENT_PERSONAL_PHALANX:
-                        DoCast(SPELL_PERSONAL_PHALANX_FIXATE_AOE);
+                        DoCast(me, SPELL_PERSONAL_PHALANX_FIXATE_AOE);
                         events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 8550);
                         events.ScheduleEvent(EVENT_CLEAR_FACING, 8400);
                         break;
                     case EVENT_CLEAR_FACING:
                         me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
-                        me->SetReactState(REACT_AGGRESSIVE);
                         break;
                     case EVENT_CLEAR_PHALANX:
                         me->CastStop();

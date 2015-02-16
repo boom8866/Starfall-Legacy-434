@@ -193,7 +193,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 events.ScheduleEvent(EVENT_BERSERK, 360000);
                 if (me->HasAura(SPELL_SHADOW_WRAPPED))
-                    events.ScheduleEvent(EVENT_SHADOW_NOVA, urand(7000, 10000));
+                    events.ScheduleEvent(EVENT_SHADOW_NOVA, 12000);
 
                 if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
                     behemoth->SetInCombatWithZone();
@@ -424,21 +424,23 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                                 events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 500);
                             else
                                 events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 2500);
-                            events.ScheduleEvent(EVENT_SHADOW_NOVA, urand(10000, 17000));
+                            events.ScheduleEvent(EVENT_SHADOW_NOVA, 16000);
                             break;
                         case EVENT_FURIOUS_ROAR:
+                            if (_roarCasts == 0)
+                                events.ScheduleEvent(EVENT_TALK_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR));
+
                             if (_roarCasts != 2)
                             {
                                 _roarCasts++;
                                 DoCastAOE(SPELL_FURIOUS_ROAR);
-                                events.ScheduleEvent(EVENT_TALK_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR));
                                 events.ScheduleEvent(EVENT_FURIOUS_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR) + 100);
                             }
                             else
                             {
                                 DoCastAOE(SPELL_FURIOUS_ROAR);
                                 events.ScheduleEvent(EVENT_TALK_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR));
-                                events.ScheduleEvent(EVENT_FURIOUS_ROAR, 30000);
+                                events.ScheduleEvent(EVENT_FURIOUS_ROAR, 33000);
                             }
                             break;
                         case EVENT_TALK_ROAR:
@@ -497,12 +499,12 @@ class npc_proto_behemoth : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 if (!me->HasAura(SPELL_DANCING_FLAMES))
-                    events.ScheduleEvent(EVENT_FIREBALL, 16000);
+                    events.ScheduleEvent(EVENT_FIREBALL, 6000);
                 else
-                    events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, 16000);
+                    events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, 6000);
 
                 if (me->HasAura(SPELL_SUPERHEATED_BREATH))
-                    events.ScheduleEvent(EVENT_SCORCHING_BREATH, urand(3000, 7000));
+                    events.ScheduleEvent(EVENT_SCORCHING_BREATH, 14000);
             }
 
             void SetupBuffs()
@@ -537,7 +539,7 @@ class npc_proto_behemoth : public CreatureScript
                             break;
                         case EVENT_SCORCHING_BREATH:
                             DoCast(me, SPELL_SCORCHING_BREATH);
-                            events.ScheduleEvent(EVENT_SCORCHING_BREATH, 15000);
+                            events.ScheduleEvent(EVENT_SCORCHING_BREATH, 24000);
                             break;
                         default:
                             break;
