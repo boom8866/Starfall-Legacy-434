@@ -1912,87 +1912,132 @@ public:
                     me->SetSpeed(MOVE_WALK, 1.0f, true);
                     me->SetSpeed(MOVE_RUN, 1.3f, true);
                 }
+                else
+                    me->DespawnOrUnsummon(1);
             }
         }
 
         void WaypointReached(uint32 i)
         {
             Player* player = GetPlayerForEscort();
+            if (!player)
+                me->DespawnOrUnsummon(1);
 
-            switch(i)
+            switch (i)
             {
-            case 1:
-                if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                case 1:
                 {
-                    if (Vehicle* vehicle = me->GetVehicleKit())
+                    if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                    {
+                        if (Vehicle* vehicle = me->GetVehicleKit())
+                        {
                             if (Unit* passenger = vehicle->GetPassenger(0))
+                            {
                                 if (Player* player = passenger->ToPlayer())
                                     player->SetClientControl(me, 0);
+                            }
+                        }
+                    }
+                    break;
                 }
-                break;
-            case 17:
-                if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                case 17:
                 {
-                    if (Creature* aranas = passenger->FindNearestCreature(NPC_KRENNAN_ARANAS, 50.0f))
-                        if (Vehicle* vehicle = me->GetVehicleKit())
-                            if (Unit* passenger = vehicle->GetPassenger(0))
-                                if (Player* player = passenger->ToPlayer())
-                                    aranas->AI()->Talk(0);
-
-                    me->MonsterWhisper("Rescue Krennan Aranas by using your vehicle's ability.", passenger->GetGUID(), true);
-                    me->GetMotionMaster()->MoveJump(-1673.04f, 1344.91f, 15.1353f, 25.0f, 15.0f);
+                    if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                    {
+                        if (Creature* aranas = passenger->FindNearestCreature(NPC_KRENNAN_ARANAS, 50.0f))
+                        {
+                            if (Vehicle* vehicle = me->GetVehicleKit())
+                            {
+                                if (Unit* passenger = vehicle->GetPassenger(0))
+                                {
+                                    if (Player* player = passenger->ToPlayer())
+                                        aranas->AI()->Talk(0);
+                                }
+                            }
+                        }
+                        me->MonsterWhisper("Rescue Krennan Aranas by using your vehicle's ability.", passenger->GetGUID(), true);
+                        me->GetMotionMaster()->MoveJump(-1673.04f, 1344.91f, 15.1353f, 25.0f, 15.0f);
+                    }
+                    break;
                 }
-                break;
-            case 40:
-                if (Vehicle* vehicle = me->GetVehicleKit())
-                    if (Unit* passenger = vehicle->GetPassenger(0))
-                        if (Player* player = passenger->ToPlayer())
-                        {
-                            std::list<Creature*> lGuards;
-                            me->GetCreatureListWithEntryInGrid(lGuards, NPC_GUARD_QSKA, 90.0f);
-
-                            if (!lGuards.empty())
-                                for (std::list<Creature*>::const_iterator itr = lGuards.begin(); itr != lGuards.end(); ++itr)
-                                    if ((*itr)->isAlive())
-                                        if (Creature* worgen = (*itr)->FindNearestCreature(NPC_WORGEN_QSKA, 90.0f))
-                                            (*itr)->CastSpell(worgen, SPELL_SHOOT_QSKA, false);
-                        }
-                        break;
-            case 41:
-                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
-                me->CombatStop();
-                break;
-            case 42:
-                if (Vehicle* vehicle = me->GetVehicleKit())
-                    if (Unit* passenger = vehicle->GetPassenger(0))
-                        if (Player* player = passenger->ToPlayer())
-                        {
-                            player->KilledMonsterCredit(NPC_QSKA_KILL_CREDIT, 0);
-
-                            if (Unit* passenger_2 = vehicle->GetPassenger(1))
-                                if (Creature* aranas = passenger_2->ToCreature())
-                                    aranas->AI()->Talk(0);
-                        }
-                        break;
-            case 44:
-                if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                case 40:
                 {
                     if (Vehicle* vehicle = me->GetVehicleKit())
                     {
                         if (Unit* passenger = vehicle->GetPassenger(0))
+                        {
                             if (Player* player = passenger->ToPlayer())
-                                player->SetClientControl(me, 1);
+                            {
+                                std::list<Creature*> lGuards;
+                                me->GetCreatureListWithEntryInGrid(lGuards, NPC_GUARD_QSKA, 90.0f);
 
-                        if (Unit* passenger = vehicle->GetPassenger(1))
-                            if (Creature* aranas = passenger->ToCreature())
-                                aranas->DespawnOrUnsummon();
-
-                        vehicle->RemoveAllPassengers();
+                                if (!lGuards.empty())
+                                {
+                                    for (std::list<Creature*>::const_iterator itr = lGuards.begin(); itr != lGuards.end(); ++itr)
+                                    {
+                                        if ((*itr)->isAlive())
+                                        {
+                                            if (Creature* worgen = (*itr)->FindNearestCreature(NPC_WORGEN_QSKA, 90.0f))
+                                                (*itr)->CastSpell(worgen, SPELL_SHOOT_QSKA, false);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
+                    break;
                 }
+                case 41:
+                {
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->CombatStop();
+                    break;
+                }
+                case 42:
+                {
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                    {
+                        if (Unit* passenger = vehicle->GetPassenger(0))
+                        {
+                            if (Player* player = passenger->ToPlayer())
+                            {
+                                player->KilledMonsterCredit(NPC_QSKA_KILL_CREDIT, 0);
 
-                me->DespawnOrUnsummon();
-                break;
+                                if (Unit* passenger_2 = vehicle->GetPassenger(1))
+                                {
+                                    if (Creature* aranas = passenger_2->ToCreature())
+                                        aranas->AI()->Talk(0);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
+                case 44:
+                {
+                    if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                    {
+                        if (Vehicle* vehicle = me->GetVehicleKit())
+                        {
+                            if (Unit* passenger = vehicle->GetPassenger(0))
+                            {
+                                if (Player* player = passenger->ToPlayer())
+                                    player->SetClientControl(me, 1);
+                            }
+
+                            if (Unit* passenger = vehicle->GetPassenger(1))
+                            {
+                                if (Creature* aranas = passenger->ToCreature())
+                                    aranas->DespawnOrUnsummon();
+                            }
+                            vehicle->RemoveAllPassengers();
+                        }
+                    }
+
+                    SetEscortPaused(true);
+                    me->DespawnOrUnsummon(1);
+                    break;
+                }
             }
         }
 

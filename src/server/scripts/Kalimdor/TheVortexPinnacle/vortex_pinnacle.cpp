@@ -31,7 +31,50 @@ public:
     enum slipstreamGUID
     {
         SLIPSTREAM_ERTAN    = 778156,
-        SLIPSTREAM_ALTAIRUS = 778186
+        SLIPSTREAM_ALTAIRUS = 778186,
+        SLIPSTREAM_ENTER_L  = 778154,
+        SLIPSTREAM_ENTER_R  = 778187
+    };
+
+    enum spellId
+    {
+        SPELL_FADE_TO_BLACK     = 89092
+    };
+
+    class eventTeleportErtan : public BasicEvent
+    {
+    public:
+        explicit eventTeleportErtan(Player* player) : player(player)
+        {
+        }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            if (player && player->IsInWorld())
+                player->NearTeleportTo(-902.08f, -178.86f, 664.55f, 2.82f);
+            return true;
+        }
+
+    private:
+        Player* player;
+    };
+
+    class eventTeleportAltairus : public BasicEvent
+    {
+    public:
+        explicit eventTeleportAltairus(Player* player) : player(player)
+        {
+        }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            if (player && player->IsInWorld())
+                player->NearTeleportTo(-1189.68f, 475.43f, 634.78f, 0.45f);
+            return true;
+        }
+
+    private:
+        Player* player;
     };
 
     bool OnGossipHello(Player* player, Creature* creature)
@@ -56,6 +99,21 @@ public:
                     {
                         Count = 3;
                         creature->AddAura(85063, player);
+                    }
+                    break;
+                }
+                case SLIPSTREAM_ENTER_L:
+                case SLIPSTREAM_ENTER_R:
+                {
+                    if (instance->GetBossState(DATA_GRAND_VIZIER_ERTAN) == DONE && instance->GetBossState(DATA_ALTAIRUS) != DONE)
+                    {
+                        player->CastSpell(player, SPELL_FADE_TO_BLACK, true);
+                        player->m_Events.AddEvent(new eventTeleportErtan(player), (player)->m_Events.CalculateTime(1000));
+                    }
+                    if (instance->GetBossState(DATA_GRAND_VIZIER_ERTAN) == DONE && instance->GetBossState(DATA_ALTAIRUS) == DONE)
+                    {
+                        player->CastSpell(player, SPELL_FADE_TO_BLACK, true);
+                        player->m_Events.AddEvent(new eventTeleportAltairus(player), (player)->m_Events.CalculateTime(1000));
                     }
                     break;
                 }

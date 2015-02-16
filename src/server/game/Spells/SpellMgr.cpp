@@ -4217,6 +4217,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].MiscValueB = 4;
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_NONE;
                 break;
+            case 63611: // Improved Blood Presence
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+                break;
             case 62758: // Wild Hunt
             case 62762:
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
