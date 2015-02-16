@@ -102,7 +102,11 @@ REPLACE INTO `spell_script_names` (`spell_id`, `scriptname`) VALUES
 (92544, 'spell_ac_quake'),
 (92545, 'spell_ac_quake'),
 (92546, 'spell_ac_quake'),
-(83581, 'spell_ac_grounded');
+(83581, 'spell_ac_grounded'),
+(83067, 'spell_ac_thundershock'),
+(92469, 'spell_ac_thundershock'),
+(92470, 'spell_ac_thundershock'),
+(92471, 'spell_ac_thundershock');
 
 DELETE FROM `conditions` WHERE `SourceEntry` IN (82699, 84913);
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES

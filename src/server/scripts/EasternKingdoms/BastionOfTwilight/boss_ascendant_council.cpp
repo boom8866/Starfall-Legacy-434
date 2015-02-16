@@ -99,6 +99,7 @@ enum Spells
     SPELL_GRAVITY_WELL_PRE_VISUAL       = 95760,
     SPELL_MAGNETIC_PULL                 = 83579,
     SPELL_MAGNETIC_PULL_SLOW            = 83587,
+    SPELL_MAGNETIC_PULL_GRAB            = 83583,
     SPELL_GROUNDED                      = 83581,
 };
 
@@ -311,7 +312,6 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
             _switched = false;
             me->SetReactState(REACT_AGGRESSIVE);
@@ -388,6 +388,7 @@ public:
                     events.ScheduleEvent(EVENT_MOVE_FUSE, 6000);
                     break;
                 case ACTION_DESPAWN:
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     _DespawnAtEvade();
                     break;
                 default:
@@ -507,7 +508,6 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_AGGRESSIVE);
@@ -582,6 +582,7 @@ public:
                     events.ScheduleEvent(EVENT_MOVE_FUSE, 10000);
                     break;
                 case ACTION_DESPAWN:
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     _DespawnAtEvade();
                     break;
                 default:
@@ -747,7 +748,6 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
             _switched = false;
             _eruptionCounter = 0;
@@ -774,7 +774,7 @@ public:
                         events.ScheduleEvent(EVENT_ERUPTION_DAMAGE, 3000);
 
                     float ori = (((M_PI * 2) / 5 ) * _eruptionCounter);
-                    float dist = me->GetFloatValue(UNIT_FIELD_COMBATREACH);
+                    float dist = me->GetFloatValue(UNIT_FIELD_COMBATREACH) + 2.0f;
                     summon->NearTeleportTo(me->GetPositionX() + cos(ori) * dist, me->GetPositionY() + sin(ori) * dist, me->GetPositionZ(), me->GetOrientation());
 
                     summon->DespawnOrUnsummon(5000);
@@ -829,6 +829,7 @@ public:
                     break;
                 case ACTION_DESPAWN:
                     _DespawnAtEvade();
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     break;
                 default:
                     break;
@@ -881,10 +882,17 @@ public:
                     case EVENT_QUAKE:
                         Talk(SAY_ANNOUNCE_ABILITY);
                         DoCast(me, SPELL_QUAKE);
+                        events.ScheduleEvent(EVENT_QUAKE, 66000);
+                        events.ScheduleEvent(EVENT_QUAKE, 58000);
+                        break;
+                    case EVENT_QUAKE_EMOTE:
+                        if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                            controller->AI()->Talk(ANNOUNCE_QUAKE);
                         break;
                     case EVENT_GRAVITY_WELL:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                            DoCast(target, SPELL_GRAVITY_WELL);
+                            DoCast(target, SPELL_GRAVITY_WELL, true);
+                        events.ScheduleEvent(EVENT_GRAVITY_WELL, 15000);
                         break;
                     default:
                         break;
@@ -925,12 +933,12 @@ public:
             _EnterCombat();
             events.ScheduleEvent(EVENT_CALL_WINDS, 5000);
             events.ScheduleEvent(EVENT_THUNDERSHOCK, 66000);
+            events.ScheduleEvent(EVENT_THUNDERSHOCK_EMOTE, 58000);
         }
 
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
             _switched = false;
             me->GetMotionMaster()->MoveTargetedHome();
@@ -995,6 +1003,7 @@ public:
                     events.ScheduleEvent(EVENT_MOVE_FUSE, 100);
                     break;
                 case ACTION_DESPAWN:
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     _DespawnAtEvade();
                     break;
                 default:
@@ -1030,6 +1039,12 @@ public:
                     case EVENT_THUNDERSHOCK:
                         Talk(SAY_ANNOUNCE_ABILITY);
                         DoCast(me, SPELL_THUNDERSHOCK);
+                        events.ScheduleEvent(EVENT_THUNDERSHOCK, 66000);
+                        events.ScheduleEvent(EVENT_THUNDERSHOCK_EMOTE, 58000);
+                        break;
+                    case EVENT_THUNDERSHOCK_EMOTE:
+                        if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                            controller->AI()->Talk(ANNOUNCE_THUNDERSHOCK);
                         break;
                     default:
                         break;
@@ -1689,8 +1704,12 @@ public:
         void HandleHit(SpellEffIndex /*effIndex*/)
         {
             if (Unit* target = GetHitUnit())
+            {
                 if (target->HasAura(SPELL_SWIRLING_WINDS))
                     target->RemoveAurasDueToSpell(SPELL_SWIRLING_WINDS);
+
+                GetCaster()->CastSpell(target, SPELL_MAGNETIC_PULL_GRAB, true);
+            }
         }
 
         void Register()
