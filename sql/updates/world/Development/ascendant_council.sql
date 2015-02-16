@@ -14,7 +14,6 @@ UPDATE `creature_template` SET `scriptname`= 'boss_elementium_monstrosity', `AIN
 
 DELETE FROM `creature_template_addon` WHERE `entry` IN (43686, 43687, 43688, 43689);
 
-
 -- Water Bomb
 UPDATE `creature_template` SET `minlevel`= 80, `maxlevel`= 80, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 128, `InhabitType`= 4 WHERE `entry`= 44201;
 -- Inferno Rush
@@ -113,3 +112,15 @@ UPDATE `creature` SET `phasemask` = 1 WHERE `guid` = 779703;
 UPDATE `creature` SET `phasemask` = 1 WHERE `guid` = 779705;
 UPDATE `creature` SET `phasemask` = 1 WHERE `id` = 45420;
 DELETE FROM `creature` WHERE `id` IN (44201, 50297, 43735, 45476);
+
+
+-- Pre Trash Group
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (49825, 49817, 49826, 49821);
+UPDATE `creature` SET `MovementType`= 1, `spawndist`= 15 WHERE `id` IN (49825, 49817, 49826, 49821);
+-- General Updates
+UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction`= 16, `unit_flags`= 32832, `AIName`= '' WHERE `entry`IN (49825, 49817, 49826, 49821);
+
+REPLACE INTO `creature_template_addon` (`entry`, `auras`) VALUES
+(49825, '93335'),
+(49821, '87906'),
+(49817, '93336');

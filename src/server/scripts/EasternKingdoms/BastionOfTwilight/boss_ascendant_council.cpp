@@ -53,6 +53,7 @@ enum Spells
     SPELL_TELEPORT_LF                   = 81796,
     SPELL_TELEPORT_AIR                  = 82330,
     SPELL_CALL_WINDS                    = 83491,
+    SPELL_THUNDERSHOCK                  = 83067,
     
     // Terrastra
     SPELL_TELEPORT_RF                   = 81798,
@@ -116,6 +117,7 @@ enum Events
     EVENT_ERUPTION_DAMAGE,
 
     // Elementium Monstrosity
+    EVENT_CRYOGENIC_AURA,
     EVENT_GRAVITY_CRUSH,
     EVENT_LAVA_SEED,
     EVENT_INCREASE_INSTABILITY_COUNTER,
@@ -334,7 +336,8 @@ public:
                     events.Reset();
                     me->AttackStop();
                     me->SetReactState(REACT_PASSIVE);
-                    DoCast(SPELL_TELEPORT_RB);
+                    DoCast(me, SPELL_FROST_EXPLSION);
+                    DoCast(me, SPELL_TELEPORT_RB);
                     break;
                 case ACTION_PREPARE_FUSE:
                     DoCast(me, SPELL_FROST_EXPLSION);
@@ -527,7 +530,8 @@ public:
                     events.Reset();
                     me->AttackStop();
                     me->SetReactState(REACT_PASSIVE);
-                    DoCast(SPELL_TELEPORT_LB);
+                    DoCast(me, SPELL_FIRE_EXPLOSION);
+                    DoCast(me, SPELL_TELEPORT_LB);
                     break;
                 case ACTION_PREPARE_FUSE:
                     DoCast(me, SPELL_FIRE_EXPLOSION);
@@ -720,11 +724,18 @@ public:
             switch (summon->GetEntry())
             {
                 case NPC_ERUPTION_TARGET:
+                {
                     _eruptionCounter++;
                     if (_eruptionCounter == 5)
                         events.ScheduleEvent(EVENT_ERUPTION_DAMAGE, 3000);
+
+                    float ori = (((M_PI * 2) / 5 ) * _eruptionCounter);
+                    float dist = me->GetFloatValue(UNIT_FIELD_COMBATREACH);
+                    summon->NearTeleportTo(me->GetPositionX() + cos(ori) * dist, me->GetPositionY() + sin(ori) * dist, me->GetPositionZ(), me->GetOrientation());
+
                     summon->DespawnOrUnsummon(5000);
                     break;
+                }
                 default:
                     break;
             }
@@ -1004,10 +1015,11 @@ public:
         {
             Talk(SAY_AGGRO);
             _EnterCombat();
-            events.ScheduleEvent(EVENT_ATTACK, 3000);
-            events.ScheduleEvent(EVENT_GRAVITY_CRUSH, 7000);
+            events.ScheduleEvent(EVENT_ATTACK, 3500);
+            events.ScheduleEvent(EVENT_CRYOGENIC_AURA, 1000);
+            events.ScheduleEvent(EVENT_GRAVITY_CRUSH, 28000);
+            events.ScheduleEvent(EVENT_LAVA_SEED, 18000);
             DoCast(me, SPELL_TWILIGHT_EXPLOSION);
-            DoCast(me, SPELL_CRYOGENIC_AURA);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
         }
 
@@ -1081,9 +1093,12 @@ public:
                             me->AI()->AttackStart(player);
                         events.ScheduleEvent(EVENT_INCREASE_INSTABILITY_COUNTER, 10000);
                         break;
+                    case EVENT_CRYOGENIC_AURA:
+                        DoCast(me, SPELL_CRYOGENIC_AURA, true);
+                        break;
                     case EVENT_GRAVITY_CRUSH:
-                        Talk(SAY_ABILITY);
                         DoCast(me, SPELL_GRAVITY_CRUSH);
+                        events.ScheduleEvent(EVENT_GRAVITY_CRUSH, urand(24000, 28000));
                         break;
                     case EVENT_INCREASE_INSTABILITY_COUNTER:
                         _instabilityCharges++;
@@ -1091,6 +1106,11 @@ public:
                             _instabilityCharges = 10;
                         instance->SetData(DATA_ELECTRICAL_INSTABILITY_CHARGES, _instabilityCharges);
                         events.ScheduleEvent(EVENT_INCREASE_INSTABILITY_COUNTER, 10000);
+                        break;
+                    case EVENT_LAVA_SEED:
+                        Talk(SAY_ABILITY);
+                        DoCast(me, SPELL_LAVA_SEED);
+                        events.ScheduleEvent(EVENT_LAVA_SEED, 23000);
                         break;
                     default:
                         break;
@@ -1318,7 +1338,7 @@ public:
             if (spell->Id == SPELL_LAVA_SEED)
             {
                 DoCast(me, SPELL_LAVA_SEED_DUMMY);
-                events.ScheduleEvent(EVENT_LAVA_PLUME, 2000);
+                events.ScheduleEvent(EVENT_LAVA_PLUME, 3000);
             }
         }
 
@@ -1655,7 +1675,7 @@ public:
         {
             if (Unit* target = GetHitUnit())
                 if (Unit* caster = GetCaster())
-                    caster->CastSpell(target, SPELL_ELECTRIC_INSTABILITY_DAMAGE, false);
+                    caster->CastSpell(target, SPELL_ELECTRIC_INSTABILITY_DAMAGE, true);
         }
 
         void Register()
