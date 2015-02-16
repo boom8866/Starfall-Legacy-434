@@ -1046,6 +1046,7 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
         switch (Target->GetBase()->GetEntry())
         {
             case 35905: // King's Greymane Horse
+            case 44427:
             {
                 if (!Passenger->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                     Passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
