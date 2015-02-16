@@ -5274,7 +5274,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            spell_bonus += spell_bonus * uint32(hunterMark->GetAmount());
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
                     }
                     break;
                 }
@@ -5286,7 +5286,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            spell_bonus += spell_bonus * uint32(hunterMark->GetAmount());
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
                     }
                     break;
                 }
@@ -5304,7 +5304,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            spell_bonus += spell_bonus * uint32(hunterMark->GetAmount());
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
                     }
                     break;
                 }
@@ -5316,7 +5316,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            spell_bonus += spell_bonus * uint32(hunterMark->GetAmount());
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
                     }
                     break;
                 }
@@ -5340,7 +5340,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            spell_bonus += spell_bonus * uint32(hunterMark->GetAmount());
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
                     }
                     break;
                 }
