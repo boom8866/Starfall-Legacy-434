@@ -30,7 +30,8 @@ UPDATE `creature_template` SET `minlevel`= 70, `maxlevel`= 70, `faction`= 114, `
 UPDATE `creature_template` SET `minlevel`= 80, `maxlevel`= 80, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 128, `scriptname`= 'npc_ac_plume_stalker' WHERE `entry`= 45420;
 -- Gravity Crush
 UPDATE `creature_template` SET `minlevel`= 80, `maxlevel`= 80, `faction`= 14, `unit_flags`= 34079232, `flags_extra`= 128, `vehicleId`= 1110, `InhabitType`= 4 WHERE `entry`= 45476;
-
+-- Gravity Well
+UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 128, `scriptname`= 'npc_ac_gravity_well' WHERE `entry`= 44824;
 
 REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (43324, 4, 0, 'Welcome, mortals. (Frail little children). Few have laid eyes on this inner sanctum. (They reach out to touch the fire!)', 14, 0, 100, 0, 0, 22065, 'Cho''gall - Ascendant Countil Intro'),
@@ -92,7 +93,16 @@ REPLACE INTO `spell_script_names` (`spell_id`, `scriptname`) VALUES
 (84948, 'spell_ac_gravity_crush'),
 (92486, 'spell_ac_gravity_crush'),
 (92487, 'spell_ac_gravity_crush'),
-(92488, 'spell_ac_gravity_crush');
+(92488, 'spell_ac_gravity_crush'),
+(83498, 'spell_ac_lashing_winds'),
+(92476, 'spell_ac_lashing_winds'),
+(92477, 'spell_ac_lashing_winds'),
+(92478, 'spell_ac_lashing_winds'),
+(83565, 'spell_ac_quake'),
+(92544, 'spell_ac_quake'),
+(92545, 'spell_ac_quake'),
+(92546, 'spell_ac_quake'),
+(83581, 'spell_ac_grounded');
 
 DELETE FROM `conditions` WHERE `SourceEntry` IN (82699, 84913);
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES

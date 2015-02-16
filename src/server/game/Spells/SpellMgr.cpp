@@ -5158,6 +5158,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
                 break;
+            case 83581: // Grounded
+            case 83587: // Grounded Slow Effect
+            case 83578: // Gravity Well
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_7_YARDS);
+                break;
             case 84948: // Gravity Crush
             case 92486:
             case 92487:
