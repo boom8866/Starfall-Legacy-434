@@ -2865,7 +2865,7 @@ enum Quest14348
 
     // Liam Greymane
     NPC_LIAM_QUEST_14348                = 36140,
-    SPELL_SHOOT_1                       = 68559,
+    SPELL_SHOOT_1                       = 68559
 };
 
 class npc_horrid_abbomination : public CreatureScript
@@ -2893,52 +2893,74 @@ public:
         {
             _blownUp = false;
             playerGUID = 0;
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
         }
 
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->RemoveAllAuras();
+            _blownUp = false;
+            playerGUID = 0;
             events.Reset();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (me->HasAura(SPELL_KEG_PLACED))
+            {
+                events.ScheduleEvent(EVENT_HIT_ME, 1500);
+                Talk(SAY_KEG_PLACED);
+                me->AttackStop();
+                me->SetReactState(REACT_PASSIVE);
+            }
         }
 
         void SpellHit(Unit* caster, SpellInfo const* spell)
         {
             switch (spell->Id)
             {
+                case SPELL_KEG_PLACED:
+                {
+                    events.ScheduleEvent(EVENT_HIT_ME, 1500);
+                    Talk(SAY_KEG_PLACED);
+                    me->AttackStop();
+                    me->SetReactState(REACT_PASSIVE);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    break;
+                }
                 case SPELL_TOSS_KEG:
+                {
                     if (!_blownUp)
                     {
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         playerGUID = caster->GetGUID();
                         me->AI()->AttackStart(caster);
                         _blownUp = true;
-                        events.ScheduleEvent(EVENT_HIT_ME, 1000);
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE);
-                        me->GetMotionMaster()->MovementExpired();
                     }
                     break;
+                }
                 case SPELL_SHOOT_1:
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                {
                     if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
                     {
-                        if (player->IsInWorld())
-                        {
-                            me->RemoveAurasDueToSpell(SPELL_KEG_PLACED);
-                            player->KilledMonsterCredit(QUEST_HORRID_ABOMINATION_CREDIT);
-                            DoCast(SPELL_BLOW_UP_ABOMINATION);
-                            for (uint8 i = 0; i < 11; i++)
-                                DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_POISON, true);
+                        me->RemoveAurasDueToSpell(SPELL_KEG_PLACED);
+                        player->KilledMonsterCredit(QUEST_HORRID_ABOMINATION_CREDIT);
+                        DoCast(SPELL_BLOW_UP_ABOMINATION);
+                        for (uint8 i = 0; i < 11; i++)
+                            DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_POISON, true);
 
-                            for (uint8 i = 0; i < 6; i++)
-                                DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_BONES_1, true);
+                        for (uint8 i = 0; i < 6; i++)
+                            DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_BONES_1, true);
 
-                            for (uint8 i = 0; i < 4; i++)
-                                DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_BONES_2, true);
+                        for (uint8 i = 0; i < 4; i++)
+                            DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_BONES_2, true);
 
-                            me->DespawnOrUnsummon(1500);
-                        }
+                        me->DespawnOrUnsummon(1500);
                     }
                     break;
+                }
                 default:
                     break;
             }
@@ -2946,7 +2968,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() && !_blownUp) 
+            if (!UpdateVictim() && !_blownUp && !me->isInCombat())
                 return;
 
             events.Update(diff);
@@ -2956,13 +2978,16 @@ public:
                 switch(eventId)
                 {
                     case EVENT_HIT_ME:
+                    {
                         if (Creature* liam = me->FindNearestCreature(NPC_LIAM_QUEST_14348, 500.0f, true))
                             liam->CastSpell(me, SPELL_SHOOT_1, true);
                         break;
+                    }
                     default:
                         break;
                 }
             }
+
             DoMeleeAttackIfReady();
         }
     };
