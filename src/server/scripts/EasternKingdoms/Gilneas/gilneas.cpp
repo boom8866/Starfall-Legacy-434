@@ -287,7 +287,6 @@ public:
 
     bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* /*quest*/, uint32 /*opt*/)
     {
-        player->CLOSE_GOSSIP_MENU();
         player->SaveToDB();
         return true;
     }
@@ -1056,7 +1055,6 @@ public:
     {
         if (quest->GetQuestId() == QUEST_OLD_DIVISIONS)
         {
-            player->CLOSE_GOSSIP_MENU();
             Psc new_psc;
             new_psc.uiPersonalTimer = 5000;
             new_psc.uiPlayerGUID = player->GetGUID();
@@ -1496,7 +1494,6 @@ public:
                 josiah->SetSeerGUID(player->GetGUID());
                 creature->DespawnOrUnsummon(1);
             }
-            player->CLOSE_GOSSIP_MENU();
         }
 
         return true;
@@ -1574,7 +1571,6 @@ public:
     {
         if (quest->GetQuestId() == QUEST_FROM_THE_SHADOWS)
         {
-            player->CLOSE_GOSSIP_MENU();
             if(player->getClass() == CLASS_HUNTER)
                 player->TemporaryUnsummonPet();
 
@@ -1586,8 +1582,6 @@ public:
 
     bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
     {
-        player->CLOSE_GOSSIP_MENU();
-
         if (quest->GetQuestId() == QUEST_FROM_THE_SHADOWS)
             if (Unit* charm = Unit::GetCreature(*creature, player->GetMinionGUID()))
                 if (charm->GetEntry() == NPC_GILNEAS_MASTIFF)
@@ -1920,23 +1914,17 @@ public:
         void WaypointReached(uint32 i)
         {
             Player* player = GetPlayerForEscort();
-            if (!player)
-                me->DespawnOrUnsummon(1);
 
-            switch (i)
+            switch(i)
             {
                 case 1:
                 {
                     if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
                     {
                         if (Vehicle* vehicle = me->GetVehicleKit())
-                        {
-                            if (Unit* passenger = vehicle->GetPassenger(0))
-                            {
-                                if (Player* player = passenger->ToPlayer())
-                                    player->SetClientControl(me, 0);
-                            }
-                        }
+                                if (Unit* passenger = vehicle->GetPassenger(0))
+                                    if (Player* player = passenger->ToPlayer())
+                                        player->SetClientControl(me, 0);
                     }
                     break;
                 }
@@ -1945,16 +1933,11 @@ public:
                     if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
                     {
                         if (Creature* aranas = passenger->FindNearestCreature(NPC_KRENNAN_ARANAS, 50.0f))
-                        {
                             if (Vehicle* vehicle = me->GetVehicleKit())
-                            {
                                 if (Unit* passenger = vehicle->GetPassenger(0))
-                                {
                                     if (Player* player = passenger->ToPlayer())
                                         aranas->AI()->Talk(0);
-                                }
-                            }
-                        }
+
                         me->MonsterWhisper("Rescue Krennan Aranas by using your vehicle's ability.", passenger->GetGUID(), true);
                         me->GetMotionMaster()->MoveJump(-1673.04f, 1344.91f, 15.1353f, 25.0f, 15.0f);
                     }
@@ -1970,18 +1953,11 @@ public:
                             {
                                 std::list<Creature*> lGuards;
                                 me->GetCreatureListWithEntryInGrid(lGuards, NPC_GUARD_QSKA, 90.0f);
-
                                 if (!lGuards.empty())
-                                {
                                     for (std::list<Creature*>::const_iterator itr = lGuards.begin(); itr != lGuards.end(); ++itr)
-                                    {
                                         if ((*itr)->isAlive())
-                                        {
                                             if (Creature* worgen = (*itr)->FindNearestCreature(NPC_WORGEN_QSKA, 90.0f))
                                                 (*itr)->CastSpell(worgen, SPELL_SHOOT_QSKA, false);
-                                        }
-                                    }
-                                }
                             }
                         }
                     }
@@ -1996,21 +1972,15 @@ public:
                 case 42:
                 {
                     if (Vehicle* vehicle = me->GetVehicleKit())
-                    {
                         if (Unit* passenger = vehicle->GetPassenger(0))
-                        {
                             if (Player* player = passenger->ToPlayer())
                             {
-                                player->KilledMonsterCredit(NPC_QSKA_KILL_CREDIT, 0);
+                        player->KilledMonsterCredit(NPC_QSKA_KILL_CREDIT, 0);
 
-                                if (Unit* passenger_2 = vehicle->GetPassenger(1))
-                                {
-                                    if (Creature* aranas = passenger_2->ToCreature())
-                                        aranas->AI()->Talk(0);
-                                }
+                        if (Unit* passenger_2 = vehicle->GetPassenger(1))
+                            if (Creature* aranas = passenger_2->ToCreature())
+                                aranas->AI()->Talk(0);
                             }
-                        }
-                    }
                     break;
                 }
                 case 44:
@@ -2020,21 +1990,16 @@ public:
                         if (Vehicle* vehicle = me->GetVehicleKit())
                         {
                             if (Unit* passenger = vehicle->GetPassenger(0))
-                            {
                                 if (Player* player = passenger->ToPlayer())
                                     player->SetClientControl(me, 1);
-                            }
 
                             if (Unit* passenger = vehicle->GetPassenger(1))
-                            {
                                 if (Creature* aranas = passenger->ToCreature())
                                     aranas->DespawnOrUnsummon();
-                            }
+
                             vehicle->RemoveAllPassengers();
                         }
                     }
-
-                    SetEscortPaused(true);
                     me->DespawnOrUnsummon(1);
                     break;
                 }
@@ -2302,7 +2267,6 @@ public:
     {
         if (quest->GetQuestId() == QUEST_TIME_TO_REGROUP)
         {
-            player->CLOSE_GOSSIP_MENU();
             creature->AI()->Talk(0);
             Psc_qtr new_psc;
             new_psc.uiSpeachId = 0;
@@ -2619,10 +2583,7 @@ public:
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
         if (quest->GetQuestId() == 14222)
-        {
-            player->CLOSE_GOSSIP_MENU();
             player->CastSpell(player, SPELL_PHASE_1024, true);
-        }
         return true;
     }
 
