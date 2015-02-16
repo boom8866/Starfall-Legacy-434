@@ -18,7 +18,7 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 
 DELETE FROM `creature_formations` WHERE `leaderGUID` = '221536';
 INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
-(221536, 221537, 4, 90, 2, 5, 2),
+(221536, 221537, 6, 90, 2, 5, 2),
 (221536, 221536, 0, 0, 2, 0, 0);
 
 -- Adds Waypoint Movement to Neferset Torturer (guid: 221536, entry: 44977)

@@ -20015,6 +20015,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     break;
                 }
                 case 35905: // King's Greymane Horse
+                case 44427:
                 {
                     if (player)
                     {
