@@ -5151,7 +5151,14 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 break;
             // * Ascendant Council
-            case 84948:
+            case 83692: // Eruption
+            case 92534:
+            case 92535:
+            case 92536:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
+                break;
+            case 84948: // Gravity Crush
             case 92486:
             case 92487:
             case 92488:
