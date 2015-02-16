@@ -62,6 +62,9 @@ enum Spells
     SPELL_ERUPTION                      = 83675,
     SPELL_SUMMON_ERUPTION               = 83661, // casted 5 times
     SPELL_ERUPTION_DAMAGE               = 83692,
+    SPELL_HARDEN_SKIN                   = 83718,
+    SPELL_QUAKE                         = 83565,
+    SPELL_GRAVITY_WELL                  = 83572,
 
     // Elementium Monstrosity
     SPELL_TWILIGHT_EXPLOSION            = 95789,
@@ -88,6 +91,15 @@ enum Spells
     // Ascendant Council Plume Stalker
     SPELL_LAVA_SEED_DUMMY               = 84911,
     SPELL_LAVA_PLUME                    = 84912,
+
+    // Violent Cyclone
+    SPELL_SWIRLING_WINDS                = 83500,
+
+    // Gravity Well
+    SPELL_GRAVITY_WELL_PRE_VISUAL       = 95760,
+    SPELL_MAGNETIC_PULL                 = 83579,
+    SPELL_MAGNETIC_PULL_SLOW            = 83587,
+    SPELL_GROUNDED                      = 83581,
 };
 
 enum Events
@@ -111,10 +123,15 @@ enum Events
 
     // Arion
     EVENT_CALL_WINDS,
+    EVENT_THUNDERSHOCK_EMOTE,
+    EVENT_THUNDERSHOCK,
 
     // Terrastra
     EVENT_ERUPTION,
     EVENT_ERUPTION_DAMAGE,
+    EVENT_QUAKE_EMOTE,
+    EVENT_QUAKE,
+    EVENT_GRAVITY_WELL,
 
     // Elementium Monstrosity
     EVENT_CRYOGENIC_AURA,
@@ -133,6 +150,9 @@ enum Events
 
     // Plume Stalker
     EVENT_LAVA_PLUME,
+
+    // Gravity Well
+    EVENT_MAGNETIC_PULL,
 };
 
 enum Actions
@@ -227,6 +247,28 @@ public:
     }
 private:
     Unit* caster;
+};
+
+class SwirlingWindsCheck
+{
+public:
+    SwirlingWindsCheck() { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->ToUnit()->HasAura(SPELL_SWIRLING_WINDS));
+    }
+};
+
+class GroundedCheck
+{
+public:
+    GroundedCheck() { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->ToUnit()->HasAura(SPELL_GROUNDED));
+    }
 };
 
 class boss_feludius : public CreatureScript
@@ -698,6 +740,8 @@ public:
             _EnterCombat();
             events.ScheduleEvent(EVENT_TALK_INTRO, 4000);
             events.ScheduleEvent(EVENT_ERUPTION, 7000);
+            events.ScheduleEvent(EVENT_QUAKE, 33000);
+            events.ScheduleEvent(EVENT_GRAVITY_WELL, 5000);
         }
 
         void EnterEvadeMode()
@@ -750,6 +794,9 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
+            if (me->HasAura(SPELL_HARDEN_SKIN))
+                damage = (damage / 2);
+
             if (me->HealthBelowPct(25) && !_switched)
             {
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
@@ -819,22 +866,31 @@ public:
                     case EVENT_ERUPTION:
                         _eruptionCounter = 0;
                         DoCast(me, SPELL_ERUPTION);
+                        events.ScheduleEvent(EVENT_ERUPTION, 15000);
                         break;
                     case EVENT_ERUPTION_DAMAGE:
                     {
                         std::list<Creature*> units;
-                        GetCreatureListWithEntryInGrid(units, me, NPC_ERUPTION_TARGET, 10.0f);
+                        GetCreatureListWithEntryInGrid(units, me, NPC_ERUPTION_TARGET, 200.0f);
                         if (units.empty())
                             break;
-
                         for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                             DoCast((*itr), SPELL_ERUPTION_DAMAGE, true);
                         break;
                     }
+                    case EVENT_QUAKE:
+                        Talk(SAY_ANNOUNCE_ABILITY);
+                        DoCast(me, SPELL_QUAKE);
+                        break;
+                    case EVENT_GRAVITY_WELL:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_GRAVITY_WELL);
+                        break;
                     default:
                         break;
                 }
             }
+            DoMeleeAttackIfReady();
         }
     };
     CreatureAI* GetAI(Creature* creature) const
@@ -867,7 +923,8 @@ public:
         {
             Talk(SAY_AGGRO);
             _EnterCombat();
-            events.ScheduleEvent(EVENT_CALL_WINDS, 7000);
+            events.ScheduleEvent(EVENT_CALL_WINDS, 5000);
+            events.ScheduleEvent(EVENT_THUNDERSHOCK, 66000);
         }
 
         void EnterEvadeMode()
@@ -969,6 +1026,10 @@ public:
                         Talk(SAY_FUSE_INTRO);
                         if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
                             me->GetMotionMaster()->MovePoint(0, controller->GetPositionX(), controller->GetPositionY(), controller->GetPositionZ());
+                        break;
+                    case EVENT_THUNDERSHOCK:
+                        Talk(SAY_ANNOUNCE_ABILITY);
+                        DoCast(me, SPELL_THUNDERSHOCK);
                         break;
                     default:
                         break;
@@ -1367,6 +1428,51 @@ public:
     }
 };
 
+class npc_ac_gravity_well : public CreatureScript
+{
+public:
+    npc_ac_gravity_well() : CreatureScript("npc_ac_gravity_well") { }
+
+    struct npc_ac_gravity_wellAI : public ScriptedAI
+    {
+        npc_ac_gravity_wellAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            DoCast(me, SPELL_GRAVITY_WELL_PRE_VISUAL);
+            events.ScheduleEvent(EVENT_MAGNETIC_PULL, 3000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MAGNETIC_PULL:
+                        me->RemoveAurasDueToSpell(SPELL_GRAVITY_WELL_PRE_VISUAL);
+                        DoCast(me, SPELL_MAGNETIC_PULL, true);
+                        DoCast(me, SPELL_MAGNETIC_PULL_SLOW, true);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ac_gravity_wellAI(creature);
+    }
+};
+
 class spell_ac_water_bomb : public SpellScriptLoader
 {
 public:
@@ -1536,6 +1642,124 @@ public:
     AuraScript* GetAuraScript() const
     {
         return new spell_ac_burning_blood_AuraScript();
+    }
+};
+
+class spell_ac_lashing_winds : public SpellScriptLoader
+{
+public:
+    spell_ac_lashing_winds() : SpellScriptLoader("spell_ac_lashing_winds") { }
+
+    class spell_ac_lashing_winds_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_lashing_winds_SpellScript);
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+            {
+                if (target->HasAura(SPELL_GROUNDED))
+                    target->RemoveAurasDueToSpell(SPELL_GROUNDED);
+
+                target->CastSpell(target, SPELL_SWIRLING_WINDS, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_ac_lashing_winds_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_lashing_winds_SpellScript();
+    }
+};
+
+class spell_ac_grounded : public SpellScriptLoader
+{
+public:
+    spell_ac_grounded() : SpellScriptLoader("spell_ac_grounded") { }
+
+    class spell_ac_grounded_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_grounded_SpellScript);
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                if (target->HasAura(SPELL_SWIRLING_WINDS))
+                    target->RemoveAurasDueToSpell(SPELL_SWIRLING_WINDS);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_ac_grounded_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_grounded_SpellScript();
+    }
+};
+
+class spell_ac_quake : public SpellScriptLoader
+{
+public:
+    spell_ac_quake() : SpellScriptLoader("spell_ac_quake") { }
+
+    class spell_ac_quake_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_quake_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(SwirlingWindsCheck());
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ac_quake_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_quake_SpellScript();
+    }
+};
+
+class spell_ac_thundershock : public SpellScriptLoader
+{
+public:
+    spell_ac_thundershock() : SpellScriptLoader("spell_ac_thundershock") { }
+
+    class spell_ac_thundershock_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_thundershock_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(GroundedCheck());
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ac_thundershock_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_thundershock_SpellScript();
     }
 };
 
@@ -1741,11 +1965,16 @@ void AddSC_boss_ascendant_council()
     new boss_elementium_monstrosity();
     new npc_ascendant_council_controller();
     new npc_ac_plume_stalker();
+    new npc_ac_gravity_well();
     new spell_ac_water_bomb();
     new spell_ac_glaciate();
     new spell_ac_heart_of_ice();
     new spell_ac_inferno_rush_fire();
     new spell_ac_burning_blood();
+    new spell_ac_lashing_winds();
+    new spell_ac_grounded();
+    new spell_ac_quake();
+    new spell_ac_thundershock();
     new spell_ac_cryogenic_aura();
     new spell_ac_liquid_ice();
     new spell_ac_eruption();
