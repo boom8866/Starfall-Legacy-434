@@ -20017,6 +20017,9 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                 case 35905: // King's Greymane Horse
                 case 44427:
                 {
+                    // Immuned to Daze
+                    AddAura(57416, this);
+
                     if (player)
                     {
                         if (player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))

@@ -3396,7 +3396,7 @@ public:
                         Unit* passenger1 = me->GetVehicleKit()->GetPassenger(0);
                         Unit* passenger2 = me->GetVehicleKit()->GetPassenger(1);
                         if (!passenger1 && !passenger2)
-                            me->DespawnOrUnsummon(1);
+                            me->DisappearAndDie();
                         else
                             events.RescheduleEvent(EVENT_DESPAWN_CATAPULT, 2000);
                         break;
@@ -3895,11 +3895,13 @@ class spell_load_catapult_boulder : public SpellScriptLoader
                                 passenger->EnterVehicle(target, 0);
                             else
                             {
-                                passenger->ExitVehicle();
                                 float x, y, z;
                                 targets.GetDstPos()->GetPosition(x, y, z);
+                                passenger->ExitVehicle();
                                 passenger->GetMotionMaster()->MoveJump(x, y, z, targets.GetSpeedXY(), targets.GetSpeedZ());
                                 passenger->AddAura(66251, passenger);
+                                if (vehicle->GetBase()->ToCreature())
+                                    vehicle->GetBase()->ToCreature()->DisappearAndDie();
                             }
                         }
                     }
