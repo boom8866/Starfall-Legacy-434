@@ -4360,6 +4360,120 @@ public:
     }
 };
 
+class npc_gilneas_swamp_crocolisk : public CreatureScript
+{
+public:
+    npc_gilneas_swamp_crocolisk() : CreatureScript("npc_gilneas_swamp_crocolisk")
+    {
+    }
+
+    struct npc_gilneas_swamp_crocoliskAI : public ScriptedAI
+    {
+        npc_gilneas_swamp_crocoliskAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_SEARCH_FOR_ENEMY = 1,
+            EVENT_TENDON_RIP
+        };
+
+        enum spellId
+        {
+            SPELL_TENDON_RIP    = 3604
+        };
+
+        enum npcId
+        {
+            NPC_SURVIVOR    = 37067
+        };
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 1000);
+            events.CancelEvent(EVENT_TENDON_RIP);
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            events.CancelEvent(EVENT_SEARCH_FOR_ENEMY);
+            if (who->GetTypeId() == TYPEID_PLAYER)
+                events.ScheduleEvent(EVENT_TENDON_RIP, 2500);
+        }
+
+        void JustDied(Unit* killer)
+        {
+            if (killer->GetTypeId() == TYPEID_PLAYER)
+            {
+                killer->ToPlayer()->KilledMonsterCredit(37078);
+                if (Creature* survivor = me->FindNearestCreature(NPC_SURVIVOR, 8.0f, true))
+                {
+                    survivor->AI()->Talk(0);
+                    survivor->HandleEmoteCommand(EMOTE_ONESHOT_BEG);
+                }
+            }
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_FOR_ENEMY:
+                    {
+                        if (Unit* victim = me->SelectNearestTarget(7.5f))
+                        {
+                            AttackStart(victim);
+                            events.CancelEvent(EVENT_SEARCH_FOR_ENEMY);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_SEARCH_FOR_ENEMY, 2000);
+                        break;
+                    }
+                    case EVENT_TENDON_RIP:
+                    {
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_TENDON_RIP);
+                        events.RescheduleEvent(EVENT_TENDON_RIP, urand(8000, 12500));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gilneas_swamp_crocoliskAI(creature);
+    }
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -4448,4 +4562,5 @@ void AddSC_gilneas()
     new spell_gilneas_test_telescope();
     new npc_stagecoach_carriage_exodus();
     new npc_stagecoach_harness();
+    new npc_gilneas_swamp_crocolisk();
 }
