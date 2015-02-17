@@ -2894,6 +2894,7 @@ public:
             _blownUp = false;
             playerGUID = 0;
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->SetControlled(false, UNIT_STATE_ROOT);
         }
 
         void EnterEvadeMode()
@@ -2903,6 +2904,7 @@ public:
             me->RemoveAllAuras();
             _blownUp = false;
             playerGUID = 0;
+            me->SetControlled(false, UNIT_STATE_ROOT);
             events.Reset();
         }
 
@@ -2928,6 +2930,7 @@ public:
                     me->AttackStop();
                     me->SetReactState(REACT_PASSIVE);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    me->SetControlled(true, UNIT_STATE_ROOT);
                     break;
                 }
                 case SPELL_TOSS_KEG:
@@ -4474,6 +4477,47 @@ public:
     }
 };
 
+class spell_toss_keg : public SpellScriptLoader
+{
+public:
+    spell_toss_keg() : SpellScriptLoader("spell_toss_keg")
+    {
+    }
+
+    class spell_toss_keg_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_toss_keg_SpellScript);
+
+        enum questId
+        {
+            NPC_HORRID_ABOMINATION  = 36231
+        };
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* target = GetExplTargetUnit())
+            {
+                if (target->ToPlayer())
+                    return SPELL_FAILED_BAD_TARGETS;
+                if (target->ToCreature() && target->ToCreature()->GetEntry() == NPC_HORRID_ABOMINATION)
+                    return SPELL_CAST_OK;
+            }
+
+            return SPELL_FAILED_BAD_TARGETS;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_toss_keg_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_toss_keg_SpellScript();
+    }
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -4563,4 +4607,5 @@ void AddSC_gilneas()
     new npc_stagecoach_carriage_exodus();
     new npc_stagecoach_harness();
     new npc_gilneas_swamp_crocolisk();
+    new spell_toss_keg();
 }
