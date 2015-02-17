@@ -3429,15 +3429,30 @@ public:
     }
 };
 
-class spell_catapult_boulder : public SpellScriptLoader
+class BoulderTargetCheck
 {
 public:
-    spell_catapult_boulder() : SpellScriptLoader("spell_catapult_boulder") { }
+    BoulderTargetCheck()
+    {
+    }
 
-    enum npcID
+    enum npcId
     {
         NPC_CATAPULT_BOULDER_TRIGGER    = 36286
     };
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->ToPlayer() || (object->ToUnit() && (object->ToUnit()->GetEntry() != NPC_CATAPULT_BOULDER_TRIGGER || object->GetPositionZ() > 3.48f)));
+    }
+};
+
+class spell_catapult_boulder : public SpellScriptLoader
+{
+public:
+    spell_catapult_boulder() : SpellScriptLoader("spell_catapult_boulder")
+    {
+    }
 
     class spell_catapult_boulder_SpellScript : public SpellScript
     {
@@ -3448,26 +3463,7 @@ public:
             if (targets.empty())
                 return;
 
-            std::list<WorldObject*>::iterator it = targets.begin();
-            while(it != targets.end())
-            {
-                if (!GetCaster())
-                    return;
-
-                WorldObject* unit = *it;
-                if (!unit)
-                    continue;
-
-                if (unit->GetTypeId() == TYPEID_UNIT)
-                {
-                    if (unit->GetEntry() != NPC_CATAPULT_BOULDER_TRIGGER || !GetCaster()->isInFront(unit) || unit->GetPositionZ() > 3.48f)
-                        it = targets.erase(it);
-                    else
-                        it++;
-                }
-            }
-
-            Trinity::Containers::RandomResizeList(targets, 1);
+            targets.remove_if(BoulderTargetCheck());
         }
 
         void Register()
