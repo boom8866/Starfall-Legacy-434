@@ -292,6 +292,7 @@ class instance_bastion_of_twilight : public InstanceMapScript
                 if (!InstanceScript::SetBossState(data, state))
                     return false;
 
+                SaveToDB();
                 return true;
             }
 
