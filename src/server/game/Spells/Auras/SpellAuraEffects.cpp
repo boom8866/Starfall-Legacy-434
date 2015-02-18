@@ -6417,9 +6417,9 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     if (caster && target)
                     {
                         if (caster->HasAura(18179)) // Jinx rank 1
-                            caster->CastSpell(target, 85547, true);
+                            caster->CastSpell(caster, 85547, true);
                         if (caster->HasAura(85479)) // Jinx rank 2
-                            caster->CastSpell(target, 86105, true);
+                            caster->CastSpell(caster, 86105, true);
                     }
                     break;
                 }

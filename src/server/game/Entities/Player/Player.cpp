@@ -24481,6 +24481,9 @@ void Player::SendInitialPacketsAfterAddToMap()
         SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
         UpdateSpeed(UnitMoveType(i), true);
     }
+
+    SendMovementSetWaterWalking(false);
+    SetRooted(false);
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()

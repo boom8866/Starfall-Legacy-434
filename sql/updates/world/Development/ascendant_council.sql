@@ -102,12 +102,23 @@ REPLACE INTO `spell_script_names` (`spell_id`, `scriptname`) VALUES
 (92544, 'spell_ac_quake'),
 (92545, 'spell_ac_quake'),
 (92546, 'spell_ac_quake'),
-(83581, 'spell_ac_grounded');
+(83581, 'spell_ac_grounded'),
+(83067, 'spell_ac_thundershock'),
+(92469, 'spell_ac_thundershock'),
+(92470, 'spell_ac_thundershock'),
+(92471, 'spell_ac_thundershock'),
+(83099, 'spell_ac_lightning_rod'),
+(83087, 'spell_ac_disperse'),
+(83718, 'spell_ac_harden_skin'),
+(92541, 'spell_ac_harden_skin'),
+(92542, 'spell_ac_harden_skin'),
+(92543, 'spell_ac_harden_skin');
 
-DELETE FROM `conditions` WHERE `SourceEntry` IN (82699, 84913);
+DELETE FROM `conditions` WHERE `SourceEntry` IN (82699, 84913, 83087);
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
 (13, 7, 82699, 0, 0, 31, 0, 3, 44201, 0, 0, 0, '', 'Water Bomb - Target Water Bomb'),
-(13, 7, 84913, 0, 0, 31, 0, 3, 45420, 0, 0, 0, '', 'Lava Seed - Plume Stalker');
+(13, 7, 84913, 0, 0, 31, 0, 3, 45420, 0, 0, 0, '', 'Lava Seed - Target Plume Stalker'),
+(13, 7, 83087, 0, 0, 31, 0, 3, 44553, 0, 0, 0, '', 'Disperse - Target Target Stalker');
 
 REPLACE INTO `creature_template_addon` (`entry`, `auras`) VALUES
 (44747 ,'83472'),
@@ -119,16 +130,14 @@ UPDATE `creature` SET `phasemask` = 1 WHERE `guid` = 779702;
 UPDATE `creature` SET `phasemask` = 1 WHERE `guid` = 779704;
 UPDATE `creature` SET `phasemask` = 1 WHERE `guid` = 779703;
 UPDATE `creature` SET `phasemask` = 1 WHERE `guid` = 779705;
-UPDATE `creature` SET `phasemask` = 1 WHERE `id` = 45420;
+UPDATE `creature` SET `phasemask` = 1 WHERE `id` IN (45420, 44553);
 DELETE FROM `creature` WHERE `id` IN (44201, 50297, 43735, 45476);
-
 
 -- Pre Trash Group
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (49825, 49817, 49826, 49821);
 UPDATE `creature` SET `MovementType`= 1, `spawndist`= 15 WHERE `id` IN (49825, 49817, 49826, 49821);
 -- General Updates
 UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction`= 16, `unit_flags`= 32832, `AIName`= '' WHERE `entry`IN (49825, 49817, 49826, 49821);
-
 REPLACE INTO `creature_template_addon` (`entry`, `auras`) VALUES
 (49825, '93335'),
 (49821, '87906'),

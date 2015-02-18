@@ -54,7 +54,10 @@ enum Spells
     SPELL_TELEPORT_AIR                  = 82330,
     SPELL_CALL_WINDS                    = 83491,
     SPELL_THUNDERSHOCK                  = 83067,
-    
+    SPELL_LIGHTNING_ROD                 = 83099,
+    SPELL_CHAIN_LIGHTNING               = 83282,
+    SPELL_DISPERSE                      = 83087,
+
     // Terrastra
     SPELL_TELEPORT_RF                   = 81798,
     SPELL_TELEPORT_EARTH                = 82329,
@@ -65,6 +68,7 @@ enum Spells
     SPELL_HARDEN_SKIN                   = 83718,
     SPELL_QUAKE                         = 83565,
     SPELL_GRAVITY_WELL                  = 83572,
+    SPELL_SHATTER                       = 83760,
 
     // Elementium Monstrosity
     SPELL_TWILIGHT_EXPLOSION            = 95789,
@@ -99,6 +103,7 @@ enum Spells
     SPELL_GRAVITY_WELL_PRE_VISUAL       = 95760,
     SPELL_MAGNETIC_PULL                 = 83579,
     SPELL_MAGNETIC_PULL_SLOW            = 83587,
+    SPELL_MAGNETIC_PULL_GRAB            = 83583,
     SPELL_GROUNDED                      = 83581,
 };
 
@@ -125,6 +130,9 @@ enum Events
     EVENT_CALL_WINDS,
     EVENT_THUNDERSHOCK_EMOTE,
     EVENT_THUNDERSHOCK,
+    EVENT_LIGHTNING_ROD,
+    EVENT_DISPERSE,
+    EVENT_LIGHTNING_BLAST,
 
     // Terrastra
     EVENT_ERUPTION,
@@ -132,6 +140,7 @@ enum Events
     EVENT_QUAKE_EMOTE,
     EVENT_QUAKE,
     EVENT_GRAVITY_WELL,
+    EVENT_HARDEN_SKIN,
 
     // Elementium Monstrosity
     EVENT_CRYOGENIC_AURA,
@@ -311,7 +320,6 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
             _switched = false;
             me->SetReactState(REACT_AGGRESSIVE);
@@ -388,6 +396,7 @@ public:
                     events.ScheduleEvent(EVENT_MOVE_FUSE, 6000);
                     break;
                 case ACTION_DESPAWN:
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     _DespawnAtEvade();
                     break;
                 default:
@@ -507,7 +516,6 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_AGGRESSIVE);
@@ -582,6 +590,7 @@ public:
                     events.ScheduleEvent(EVENT_MOVE_FUSE, 10000);
                     break;
                 case ACTION_DESPAWN:
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     _DespawnAtEvade();
                     break;
                 default:
@@ -742,12 +751,12 @@ public:
             events.ScheduleEvent(EVENT_ERUPTION, 7000);
             events.ScheduleEvent(EVENT_QUAKE, 33000);
             events.ScheduleEvent(EVENT_GRAVITY_WELL, 5000);
+            events.ScheduleEvent(EVENT_HARDEN_SKIN, 1000);
         }
 
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
             _switched = false;
             _eruptionCounter = 0;
@@ -774,7 +783,7 @@ public:
                         events.ScheduleEvent(EVENT_ERUPTION_DAMAGE, 3000);
 
                     float ori = (((M_PI * 2) / 5 ) * _eruptionCounter);
-                    float dist = me->GetFloatValue(UNIT_FIELD_COMBATREACH);
+                    float dist = me->GetFloatValue(UNIT_FIELD_COMBATREACH) + 2.0f;
                     summon->NearTeleportTo(me->GetPositionX() + cos(ori) * dist, me->GetPositionY() + sin(ori) * dist, me->GetPositionZ(), me->GetOrientation());
 
                     summon->DespawnOrUnsummon(5000);
@@ -794,15 +803,18 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (me->HasAura(SPELL_HARDEN_SKIN))
-                damage = (damage / 2);
-
             if (me->HealthBelowPct(25) && !_switched)
             {
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
                     controller->AI()->DoAction(ACTION_SWITCH_PHASE_2);
                 _switched = true;
             }
+        }
+
+        void CastShatter(int32 damage)
+        {
+            me->RemoveAurasDueToSpell(SPELL_HARDEN_SKIN);
+            me->CastCustomSpell(me, SPELL_SHATTER, &damage, 0, 0, true);
         }
 
         void DoAction(int32 action)
@@ -829,6 +841,7 @@ public:
                     break;
                 case ACTION_DESPAWN:
                     _DespawnAtEvade();
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     break;
                 default:
                     break;
@@ -881,10 +894,20 @@ public:
                     case EVENT_QUAKE:
                         Talk(SAY_ANNOUNCE_ABILITY);
                         DoCast(me, SPELL_QUAKE);
+                        events.ScheduleEvent(EVENT_QUAKE, 66000);
+                        events.ScheduleEvent(EVENT_QUAKE, 58000);
+                        break;
+                    case EVENT_QUAKE_EMOTE:
+                        if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                            controller->AI()->Talk(ANNOUNCE_QUAKE);
                         break;
                     case EVENT_GRAVITY_WELL:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                            DoCast(target, SPELL_GRAVITY_WELL);
+                            DoCast(target, SPELL_GRAVITY_WELL, true);
+                        events.ScheduleEvent(EVENT_GRAVITY_WELL, 15000);
+                        break;
+                    case EVENT_HARDEN_SKIN:
+                        DoCast(me, SPELL_HARDEN_SKIN);
                         break;
                     default:
                         break;
@@ -925,12 +948,12 @@ public:
             _EnterCombat();
             events.ScheduleEvent(EVENT_CALL_WINDS, 5000);
             events.ScheduleEvent(EVENT_THUNDERSHOCK, 66000);
+            events.ScheduleEvent(EVENT_THUNDERSHOCK_EMOTE, 58000);
         }
 
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
             _switched = false;
             me->GetMotionMaster()->MoveTargetedHome();
@@ -995,6 +1018,7 @@ public:
                     events.ScheduleEvent(EVENT_MOVE_FUSE, 100);
                     break;
                 case ACTION_DESPAWN:
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     _DespawnAtEvade();
                     break;
                 default:
@@ -1030,6 +1054,12 @@ public:
                     case EVENT_THUNDERSHOCK:
                         Talk(SAY_ANNOUNCE_ABILITY);
                         DoCast(me, SPELL_THUNDERSHOCK);
+                        events.ScheduleEvent(EVENT_THUNDERSHOCK, 66000);
+                        events.ScheduleEvent(EVENT_THUNDERSHOCK_EMOTE, 58000);
+                        break;
+                    case EVENT_THUNDERSHOCK_EMOTE:
+                        if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                            controller->AI()->Talk(ANNOUNCE_THUNDERSHOCK);
                         break;
                     default:
                         break;
@@ -1689,8 +1719,12 @@ public:
         void HandleHit(SpellEffIndex /*effIndex*/)
         {
             if (Unit* target = GetHitUnit())
+            {
                 if (target->HasAura(SPELL_SWIRLING_WINDS))
                     target->RemoveAurasDueToSpell(SPELL_SWIRLING_WINDS);
+
+                GetCaster()->CastSpell(target, SPELL_MAGNETIC_PULL_GRAB, true);
+            }
         }
 
         void Register()
@@ -1760,6 +1794,135 @@ public:
     SpellScript* GetSpellScript() const
     {
         return new spell_ac_thundershock_SpellScript();
+    }
+};
+
+class spell_ac_lightning_rod : public SpellScriptLoader
+{
+public:
+    spell_ac_lightning_rod() : SpellScriptLoader("spell_ac_lightning_rod") { }
+
+    class spell_ac_lightning_rod_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_lightning_rod_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ac_lightning_rod_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    class spell_ac_lightning_rod_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_ac_lightning_rod_AuraScript);
+
+        void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+                caster->CastSpell(GetOwner()->ToUnit(), SPELL_CHAIN_LIGHTNING, true);
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_ac_lightning_rod_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_ac_lightning_rod_AuraScript();
+    }
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_lightning_rod_SpellScript();
+    }
+};
+
+class spell_ac_disperse : public SpellScriptLoader 
+{
+public:
+    spell_ac_disperse() : SpellScriptLoader("spell_ac_disperse") { }
+
+    class spell_ac_disperse_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_disperse_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                if (Unit* caster = GetCaster())
+                    caster->CastSpell(target, GetSpellInfo()->Effects[EFFECT_0].BasePoints, true);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ac_disperse_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnEffectHitTarget += SpellEffectFn(spell_ac_disperse_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_disperse_SpellScript();
+    }
+};
+
+class spell_ac_harden_skin : public SpellScriptLoader
+{
+public:
+    spell_ac_harden_skin() : SpellScriptLoader("spell_ac_harden_skin") { }
+
+    class spell_ac_harden_skin_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_ac_harden_skin_AuraScript);
+
+        int32 absorbedDamage = 0;
+
+        void HandleOnEffectAbsorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+        {
+            int32 newdamage = (dmgInfo.GetDamage() / 2);
+            newdamage *= -1;
+            dmgInfo.ModifyDamage(newdamage);
+            absorbAmount = (dmgInfo.GetDamage());
+        }
+
+        void HandleAfterEffectAbsorb(AuraEffect* aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                absorbedDamage += absorbAmount;
+                if (absorbedDamage >= GetSpellInfo()->Effects[EFFECT_1].BasePoints)
+                    CAST_AI(boss_terrastra::boss_terrastraAI, caster->ToCreature()->AI())->CastShatter(absorbedDamage);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectAbsorb += AuraEffectAbsorbFn(spell_ac_harden_skin_AuraScript::HandleOnEffectAbsorb, EFFECT_1);
+            AfterEffectAbsorb += AuraEffectAbsorbFn(spell_ac_harden_skin_AuraScript::HandleAfterEffectAbsorb, EFFECT_1);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_ac_harden_skin_AuraScript();
     }
 };
 
@@ -1975,6 +2138,9 @@ void AddSC_boss_ascendant_council()
     new spell_ac_grounded();
     new spell_ac_quake();
     new spell_ac_thundershock();
+    new spell_ac_lightning_rod();
+    new spell_ac_disperse();
+    new spell_ac_harden_skin();
     new spell_ac_cryogenic_aura();
     new spell_ac_liquid_ice();
     new spell_ac_eruption();

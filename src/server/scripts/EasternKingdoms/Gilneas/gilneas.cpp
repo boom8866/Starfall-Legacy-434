@@ -2894,6 +2894,7 @@ public:
             _blownUp = false;
             playerGUID = 0;
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->SetControlled(false, UNIT_STATE_ROOT);
         }
 
         void EnterEvadeMode()
@@ -2903,6 +2904,7 @@ public:
             me->RemoveAllAuras();
             _blownUp = false;
             playerGUID = 0;
+            me->SetControlled(false, UNIT_STATE_ROOT);
             events.Reset();
         }
 
@@ -2928,6 +2930,7 @@ public:
                     me->AttackStop();
                     me->SetReactState(REACT_PASSIVE);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    me->SetControlled(true, UNIT_STATE_ROOT);
                     break;
                 }
                 case SPELL_TOSS_KEG:
@@ -3396,7 +3399,7 @@ public:
                         Unit* passenger1 = me->GetVehicleKit()->GetPassenger(0);
                         Unit* passenger2 = me->GetVehicleKit()->GetPassenger(1);
                         if (!passenger1 && !passenger2)
-                            me->DespawnOrUnsummon(1);
+                            me->DisappearAndDie();
                         else
                             events.RescheduleEvent(EVENT_DESPAWN_CATAPULT, 2000);
                         break;
@@ -3895,11 +3898,13 @@ class spell_load_catapult_boulder : public SpellScriptLoader
                                 passenger->EnterVehicle(target, 0);
                             else
                             {
-                                passenger->ExitVehicle();
                                 float x, y, z;
                                 targets.GetDstPos()->GetPosition(x, y, z);
+                                passenger->ExitVehicle();
                                 passenger->GetMotionMaster()->MoveJump(x, y, z, targets.GetSpeedXY(), targets.GetSpeedZ());
                                 passenger->AddAura(66251, passenger);
+                                if (vehicle->GetBase()->ToCreature())
+                                    vehicle->GetBase()->ToCreature()->DisappearAndDie();
                             }
                         }
                     }
@@ -4358,6 +4363,161 @@ public:
     }
 };
 
+class npc_gilneas_swamp_crocolisk : public CreatureScript
+{
+public:
+    npc_gilneas_swamp_crocolisk() : CreatureScript("npc_gilneas_swamp_crocolisk")
+    {
+    }
+
+    struct npc_gilneas_swamp_crocoliskAI : public ScriptedAI
+    {
+        npc_gilneas_swamp_crocoliskAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_SEARCH_FOR_ENEMY = 1,
+            EVENT_TENDON_RIP
+        };
+
+        enum spellId
+        {
+            SPELL_TENDON_RIP    = 3604
+        };
+
+        enum npcId
+        {
+            NPC_SURVIVOR    = 37067
+        };
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 1000);
+            events.CancelEvent(EVENT_TENDON_RIP);
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            events.CancelEvent(EVENT_SEARCH_FOR_ENEMY);
+            if (who->GetTypeId() == TYPEID_PLAYER)
+                events.ScheduleEvent(EVENT_TENDON_RIP, 2500);
+        }
+
+        void JustDied(Unit* killer)
+        {
+            if (killer->GetTypeId() == TYPEID_PLAYER)
+            {
+                killer->ToPlayer()->KilledMonsterCredit(37078);
+                if (Creature* survivor = me->FindNearestCreature(NPC_SURVIVOR, 8.0f, true))
+                {
+                    survivor->AI()->Talk(0);
+                    survivor->HandleEmoteCommand(EMOTE_ONESHOT_BEG);
+                }
+            }
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_FOR_ENEMY:
+                    {
+                        if (Unit* victim = me->SelectNearestTarget(7.5f))
+                        {
+                            AttackStart(victim);
+                            events.CancelEvent(EVENT_SEARCH_FOR_ENEMY);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_SEARCH_FOR_ENEMY, 2000);
+                        break;
+                    }
+                    case EVENT_TENDON_RIP:
+                    {
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_TENDON_RIP);
+                        events.RescheduleEvent(EVENT_TENDON_RIP, urand(8000, 12500));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gilneas_swamp_crocoliskAI(creature);
+    }
+};
+
+class spell_toss_keg : public SpellScriptLoader
+{
+public:
+    spell_toss_keg() : SpellScriptLoader("spell_toss_keg")
+    {
+    }
+
+    class spell_toss_keg_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_toss_keg_SpellScript);
+
+        enum questId
+        {
+            NPC_HORRID_ABOMINATION  = 36231
+        };
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* target = GetExplTargetUnit())
+            {
+                if (target->ToPlayer())
+                    return SPELL_FAILED_BAD_TARGETS;
+                if (target->ToCreature() && target->ToCreature()->GetEntry() == NPC_HORRID_ABOMINATION)
+                    return SPELL_CAST_OK;
+            }
+
+            return SPELL_FAILED_BAD_TARGETS;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_toss_keg_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_toss_keg_SpellScript();
+    }
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -4446,4 +4606,6 @@ void AddSC_gilneas()
     new spell_gilneas_test_telescope();
     new npc_stagecoach_carriage_exodus();
     new npc_stagecoach_harness();
+    new npc_gilneas_swamp_crocolisk();
+    new spell_toss_keg();
 }
