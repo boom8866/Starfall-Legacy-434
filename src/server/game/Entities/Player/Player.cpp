@@ -3740,12 +3740,11 @@ bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
         // do character spell book cleanup (all characters)
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Non-existed in SpellStore spell #%u request, deleting for all characters in `character_spell`.", spellId);
-
-            DeleteSpellFromAllPlayers(spellId);
+            sLog->outError(LOG_FILTER_SPELLS_AURAS, "[OUTDATED SPELL] ID: [%u] Spell deleted from player.", spellId);
+            removeSpell(spellId, false, false);
         }
         else
-            sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Non-existed in SpellStore spell #%u request.", spellId);
+            sLog->outError(LOG_FILTER_SPELLS_AURAS, "[OUTDATED SPELL] ID: [%u] Spell deleted from player.", spellId);
 
         return false;
     }
@@ -3756,8 +3755,7 @@ bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
         if (!IsInWorld() && !learning)                       // spell load case
         {
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addTalent: Broken spell #%u learning not allowed, deleting for all characters in `character_talent`.", spellId);
-
-            DeleteSpellFromAllPlayers(spellId);
+            removeSpell(spellId, false, false);
         }
         else
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addTalent: Broken spell #%u learning not allowed.", spellId);
@@ -3805,12 +3803,11 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
         // do character spell book cleanup (all characters)
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Non-existed in SpellStore spell #%u request, deleting for all characters in `character_spell`.", spellId);
-
-            DeleteSpellFromAllPlayers(spellId);
+            sLog->outError(LOG_FILTER_SPELLS_AURAS, "[OUTDATED SPELL] ID: [%u] Spell deleted from player.", spellId);
+            removeSpell(spellId, false, false);
         }
         else
-            sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Non-existed in SpellStore spell #%u request.", spellId);
+            sLog->outError(LOG_FILTER_SPELLS_AURAS, "[OUTDATED SPELL] ID: [%u] Spell deleted from player.", spellId);
 
         return false;
     }
@@ -3821,8 +3818,7 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
         if (!IsInWorld() && !learning)                       // spell load case
         {
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Broken spell #%u learning not allowed, deleting for all characters in `character_spell`.", spellId);
-
-            DeleteSpellFromAllPlayers(spellId);
+            removeSpell(spellId, false, false);
         }
         else
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Broken spell #%u learning not allowed.", spellId);
