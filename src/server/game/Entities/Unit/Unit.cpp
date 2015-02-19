@@ -8845,6 +8845,21 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             {
                 switch (auraSpellInfo->Id)
                 {
+                    // Efflorescence
+                    case 34151:
+                    case 81274:
+                    case 81275:
+                    {
+                        if (victim)
+                        {
+                            if (SpellInfo const* efflorescence = sSpellMgr->GetSpellInfo(81262))
+                            {
+                                int32 heal = damage * triggerAmount / 100;
+                                CastCustomSpell(victim, 81262, &heal, NULL, NULL, true);
+                            }
+                        }
+                        break;
+                    }
                     // Druid Forms Trinket
                     case 37336:
                     {
@@ -12321,6 +12336,24 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
                     float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                     float healtPct = victim->GetHealthPct() / 100;
                     DoneTotalMod *= 1.0f + ((1 - healtPct) * (3.0f * masteryPoints)) / 100;
+                }
+            }
+            break;
+        }
+        case SPELLFAMILY_DRUID:
+        {
+            switch (spellProto->Id)
+            {
+                case 81269: // Efflorescence
+                {
+                    if (victim)
+                    {
+                        if (DynamicObject* dynObj = GetDynObject(81262))
+                            if (Aura* aur = dynObj->GetAura())
+                                if (AuraEffect* aurEff = aur->GetEffect(EFFECT_0))
+                                    DoneTotal += aurEff->GetAmount();
+                    }
+                    break;
                 }
             }
             break;

@@ -3927,6 +3927,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 94338: // Eclipse (Solar)
                 spellInfo->Effects[EFFECT_0].BasePoints = 93402;
                 break;
+            case 34151: // Efflorescence
+            case 81274:
+            case 81275:
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
+                break;
             case 16870: // Omen of Clarity
                 spellInfo->ProcChance = 5.0f;
                 break;
