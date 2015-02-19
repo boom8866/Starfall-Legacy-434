@@ -1231,28 +1231,25 @@ class spell_dru_efflorescence: public SpellScriptLoader
 public:
     spell_dru_efflorescence() :  SpellScriptLoader("spell_dru_efflorescence") { }
 
-    enum spellId
-    {
-        SPELL_DRUID_EFFLORESCENCE_DYN           = 81262,
-        SPELL_DRUID_EFFLORESCENCE_TRIGGERED     = 81269
-    };
-
     class spell_dru_efflorescence_AuraScript: public AuraScript
     {
         PrepareAuraScript(spell_dru_efflorescence_AuraScript);
 
-        void HandleDynObject(AuraEffect const* /*aurEff*/)
+        void OnTick(AuraEffect const* aurEff)
         {
-            if (Unit* caster = GetCaster())
+            if (DynamicObject* dynObj = GetCaster()->GetDynObject(81262))
             {
-                if (DynamicObject* dynObj = GetCaster()->GetDynObject(SPELL_DRUID_EFFLORESCENCE_DYN))
-                    caster->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_DRUID_EFFLORESCENCE_TRIGGERED, true);
+                float x,y,z;
+                dynObj->GetPosition(x, y, z);
+
+                if (GetCaster()->GetMapId() == dynObj->GetMapId())
+                    GetCaster()->CastSpell(x, y, z, 81269, true);
             }
         }
 
         void Register()
         {
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_dru_efflorescence_AuraScript::HandleDynObject, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_dru_efflorescence_AuraScript::OnTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
         }
     };
 

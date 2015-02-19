@@ -3254,6 +3254,10 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 if (caster->GetTypeId() != TYPEID_PLAYER)
                     break;
 
+                // Need Mastery
+                if (!caster->HasAura(86470))
+                    break;
+
                 // Increase direct healing by 10% and 1.25% bonus per mastery points
                 float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                 addhealth += addhealth * (0.10f + (0.0125f * masteryPoints));
