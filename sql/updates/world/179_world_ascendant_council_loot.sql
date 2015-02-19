@@ -10,7 +10,7 @@ INSERT INTO `creature_loot_template` (`entry`, `ChanceOrQuestChance`, `lootmode`
 (49619, 100, 1, -437350, 4);
 
 DELETE FROM `reference_loot_template` WHERE `entry`= 437350;
-INSERT INTO reference_loot_template (entry, item, ChanceOrQuestChance, lootmode, groupid, mincountOrRef, maxcount) VALUES
+INSERT INTO `reference_loot_template` (entry, item, ChanceOrQuestChance, lootmode, groupid, mincountOrRef, maxcount) VALUES
 -- 10/25 Player Normal Mode
 (437350, 59514, 0, 1, 1, 1, 1), -- Heart of Ignacious
 (437350, 59506, 0, 1, 1, 1, 1), -- Crushing Weight
