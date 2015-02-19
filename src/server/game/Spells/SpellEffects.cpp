@@ -6226,16 +6226,13 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                             if (!(*itr)->GetBase())
                                 continue;
 
-                            if (!(*itr)->GetBase()->GetSpellInfo())
-                                continue;
-
                             if (!(*itr)->GetBase()->GetCasterGUID())
                                 continue;
 
-                            if ((*itr)->GetBase()->GetId() == 2120)
+                            if ((*itr)->GetBase()->GetCasterGUID() != m_caster->GetGUID())
                                 continue;
 
-                            if ((*itr)->GetBase()->GetCasterGUID() != m_caster->GetGUID())
+                            if ((*itr)->GetBase()->GetId() == 2120)
                                 continue;
 
                             uint32 duration = (*itr)->GetBase()->GetDuration();
@@ -6250,8 +6247,8 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                             if (unitTarget->GetAura(spellId))
                                 unitTarget->GetAura(spellId)->SetDuration(duration);
                         }
-                        break;
                     }
+                    break;
                 }
                 case 62482:          // Grab Crate
                 {
