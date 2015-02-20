@@ -1282,8 +1282,8 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
     SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, stats->AttackPower);
     SetModifierValue(UNIT_MOD_ATTACK_POWER_NEG, BASE_VALUE, 0);
 
-    SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED_POS, BASE_VALUE, stats->AttackPower);
-    SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED_NEG, BASE_VALUE, stats->RangedAttackPower);
+    SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED_POS, BASE_VALUE, stats->RangedAttackPower);
+    SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED_NEG, BASE_VALUE, 0);
 }
 
 float Creature::_GetHealthMod(int32 Rank)

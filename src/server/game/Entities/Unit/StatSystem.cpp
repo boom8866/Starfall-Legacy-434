@@ -66,19 +66,20 @@ void Unit::UpdateDamagePhysical(WeaponAttackType attType)
 
     switch (attType)
     {
-    case BASE_ATTACK:
-    default:
-        SetStatFloatValue(UNIT_FIELD_MINDAMAGE, minDamage);
-        SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, maxDamage);
-        break;
-    case OFF_ATTACK:
-        SetStatFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, minDamage);
-        SetStatFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, maxDamage);
-        break;
-    case RANGED_ATTACK:
-        SetStatFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, minDamage);
-        SetStatFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, maxDamage);
-        break;
+        case BASE_ATTACK:
+            SetStatFloatValue(UNIT_FIELD_MINDAMAGE, minDamage);
+            SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, maxDamage);
+            break;
+        case OFF_ATTACK:
+            SetStatFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, minDamage);
+            SetStatFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, maxDamage);
+            break;
+        case RANGED_ATTACK:
+            SetStatFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, minDamage);
+            SetStatFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, maxDamage);
+            break;
+        default:
+            break;
     }
 }
 
