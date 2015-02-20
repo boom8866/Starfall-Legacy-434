@@ -981,19 +981,20 @@ void Creature::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, 
     UnitMods unitMod;
     switch (attType)
     {
-    case BASE_ATTACK:
-    default:
-        variance = GetCreatureTemplate()->BaseVariance;
-        unitMod = UNIT_MOD_DAMAGE_MAINHAND;
-        break;
-    case OFF_ATTACK:
-        variance = GetCreatureTemplate()->BaseVariance;
-        unitMod = UNIT_MOD_DAMAGE_OFFHAND;
-        break;
-    case RANGED_ATTACK:
-        variance = GetCreatureTemplate()->RangeVariance;
-        unitMod = UNIT_MOD_DAMAGE_RANGED;
-        break;
+        case BASE_ATTACK:
+            variance = GetCreatureTemplate()->BaseVariance;
+            unitMod = UNIT_MOD_DAMAGE_MAINHAND;
+            break;
+        case OFF_ATTACK:
+            variance = GetCreatureTemplate()->BaseVariance;
+            unitMod = UNIT_MOD_DAMAGE_OFFHAND;
+            break;
+        case RANGED_ATTACK:
+            variance = GetCreatureTemplate()->RangeVariance;
+            unitMod = UNIT_MOD_DAMAGE_RANGED;
+            break;
+        default:
+            break;
     }
 
     if (attType == OFF_ATTACK && !haveOffhandWeapon())
