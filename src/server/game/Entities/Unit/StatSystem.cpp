@@ -66,19 +66,20 @@ void Unit::UpdateDamagePhysical(WeaponAttackType attType)
 
     switch (attType)
     {
-    case BASE_ATTACK:
-    default:
-        SetStatFloatValue(UNIT_FIELD_MINDAMAGE, minDamage);
-        SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, maxDamage);
-        break;
-    case OFF_ATTACK:
-        SetStatFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, minDamage);
-        SetStatFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, maxDamage);
-        break;
-    case RANGED_ATTACK:
-        SetStatFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, minDamage);
-        SetStatFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, maxDamage);
-        break;
+        case BASE_ATTACK:
+            SetStatFloatValue(UNIT_FIELD_MINDAMAGE, minDamage);
+            SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, maxDamage);
+            break;
+        case OFF_ATTACK:
+            SetStatFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, minDamage);
+            SetStatFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, maxDamage);
+            break;
+        case RANGED_ATTACK:
+            SetStatFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, minDamage);
+            SetStatFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, maxDamage);
+            break;
+        default:
+            break;
     }
 }
 
@@ -981,19 +982,20 @@ void Creature::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, 
     UnitMods unitMod;
     switch (attType)
     {
-    case BASE_ATTACK:
-    default:
-        variance = GetCreatureTemplate()->BaseVariance;
-        unitMod = UNIT_MOD_DAMAGE_MAINHAND;
-        break;
-    case OFF_ATTACK:
-        variance = GetCreatureTemplate()->BaseVariance;
-        unitMod = UNIT_MOD_DAMAGE_OFFHAND;
-        break;
-    case RANGED_ATTACK:
-        variance = GetCreatureTemplate()->RangeVariance;
-        unitMod = UNIT_MOD_DAMAGE_RANGED;
-        break;
+        case BASE_ATTACK:
+            variance = GetCreatureTemplate()->BaseVariance;
+            unitMod = UNIT_MOD_DAMAGE_MAINHAND;
+            break;
+        case OFF_ATTACK:
+            variance = GetCreatureTemplate()->BaseVariance;
+            unitMod = UNIT_MOD_DAMAGE_OFFHAND;
+            break;
+        case RANGED_ATTACK:
+            variance = GetCreatureTemplate()->RangeVariance;
+            unitMod = UNIT_MOD_DAMAGE_RANGED;
+            break;
+        default:
+            break;
     }
 
     if (attType == OFF_ATTACK && !haveOffhandWeapon())

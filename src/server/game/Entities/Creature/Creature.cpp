@@ -1287,27 +1287,50 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
     SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)health);
     SetModifierValue(UNIT_MOD_MANA, BASE_VALUE, (float)mana);
 
-    // damage
-
+    // Damage Handler
     float basedamage = stats->GenerateBaseDamage(cinfo);
-
+    float damageModifier = cinfo->ModDamage;
     float weaponBaseMinDamage = basedamage;
     float weaponBaseMaxDamage = basedamage * 1.5;
+
+    uint32 attackPower = stats->AttackPower;
+    uint32 rangedAttackPower = stats->RangedAttackPower;
+
+    if (!GetInstanceId())
+    {
+        attackPower /= damageModifier;
+        rangedAttackPower /= damageModifier;
+    }
 
     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, weaponBaseMinDamage);
     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, weaponBaseMaxDamage);
 
-    SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, weaponBaseMinDamage);
-    SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, weaponBaseMaxDamage);
-
     SetBaseWeaponDamage(RANGED_ATTACK, MINDAMAGE, weaponBaseMinDamage);
     SetBaseWeaponDamage(RANGED_ATTACK, MAXDAMAGE, weaponBaseMaxDamage);
 
-    SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, stats->AttackPower);
-    SetModifierValue(UNIT_MOD_ATTACK_POWER_NEG, BASE_VALUE, 0);
-
-    SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED_POS, BASE_VALUE, stats->AttackPower);
-    SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED_NEG, BASE_VALUE, stats->RangedAttackPower);
+    // Melee classes should benefits from attack power while casters already take AP/RAP values from class_levelstats
+    switch (getClass())
+    {
+        case CLASS_PALADIN:
+        case CLASS_WARRIOR:
+        case CLASS_ROGUE:
+        case CLASS_DEATH_KNIGHT:
+        {
+            SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, attackPower);
+            SetModifierValue(UNIT_MOD_ATTACK_POWER_NEG, BASE_VALUE, 0);
+            break;
+        }
+        case CLASS_HUNTER:
+        {
+            SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, attackPower);
+            SetModifierValue(UNIT_MOD_ATTACK_POWER_NEG, BASE_VALUE, 0);
+            SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED_POS, BASE_VALUE, rangedAttackPower);
+            SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED_NEG, BASE_VALUE, 0);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 float Creature::_GetHealthMod(int32 Rank)

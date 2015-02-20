@@ -3046,9 +3046,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 49838: // Stop Time
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                 break;
-            case 45529: // Blood Tap
-                spellInfo->Effects[EFFECT_0].MiscValue = 0;
-                break;
             case 61407: // Energize Cores
             case 62136: // Energize Cores
             case 54069: // Energize Cores
@@ -3926,6 +3923,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 94338: // Eclipse (Solar)
                 spellInfo->Effects[EFFECT_0].BasePoints = 93402;
+                break;
+            case 34151: // Efflorescence
+            case 81274:
+            case 81275:
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
                 break;
             case 16870: // Omen of Clarity
                 spellInfo->ProcChance = 5.0f;

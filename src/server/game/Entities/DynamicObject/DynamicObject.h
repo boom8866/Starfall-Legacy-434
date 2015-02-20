@@ -53,6 +53,7 @@ class DynamicObject : public WorldObject, public GridObject<DynamicObject>
         void SetCasterViewpoint();
         void RemoveCasterViewpoint();
         Unit* GetCaster() const { return _caster; }
+        Aura* GetAura() { return _aura; }
         void BindToCaster();
         void UnbindFromCaster();
         uint32 GetSpellId() const {  return GetUInt32Value(DYNAMICOBJECT_SPELLID); }
