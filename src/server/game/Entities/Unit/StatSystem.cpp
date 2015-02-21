@@ -961,10 +961,10 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
     float attackPowerModNeg = GetModifierValue(unitModNeg, TOTAL_VALUE);
     float attackPowerMultiplier = (GetModifierValue(unitModPos, TOTAL_PCT) + (1 - GetModifierValue(unitModNeg, TOTAL_PCT)))- 1.0f;
 
-    SetInt32Value(index, int32(baseAttackPower));             //UNIT_FIELD_(RANGED)_ATTACK_POWER field
-    SetInt32Value(indexModPos, int32(attackPowerModPos));   //UNIT_FIELD_(RANGED)_ATTACK_POWER_MOD_POS field
-    SetInt32Value(indexModNeg, int32(attackPowerModNeg));   //UNIT_FIELD_(RANGED)_ATTACK_POWER_MOD_NEG field
-    SetFloatValue(indexMulti, int32(attackPowerMultiplier));   //UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
+    SetInt32Value(index, int32(baseAttackPower));               //UNIT_FIELD_(RANGED)_ATTACK_POWER field
+    SetInt32Value(indexModPos, int32(attackPowerModPos));       //UNIT_FIELD_(RANGED)_ATTACK_POWER_MOD_POS field
+    SetInt32Value(indexModNeg, int32(attackPowerModNeg));       //UNIT_FIELD_(RANGED)_ATTACK_POWER_MOD_NEG field
+    SetFloatValue(indexMulti, int32(attackPowerMultiplier));    //UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
 
     // automatically update weapon damage after attack power modification
     if (ranged)

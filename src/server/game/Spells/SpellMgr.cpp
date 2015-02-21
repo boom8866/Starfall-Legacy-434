@@ -5153,6 +5153,13 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 break;
             // * Ascendant Council
+            case 82772: // Frozen
+            case 92503:
+            case 92504:
+            case 92505:
+                spellInfo->AuraInterruptFlags = 0;
+                spellInfo->ProcFlags = 0;
+                break;
             case 83692: // Eruption
             case 92534:
             case 92535:
