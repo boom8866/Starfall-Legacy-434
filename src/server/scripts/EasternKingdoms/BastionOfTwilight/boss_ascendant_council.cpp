@@ -1132,6 +1132,8 @@ public:
         {
             _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                controller->AI()->DoAction(ACTION_ENCOUNTER_DONE);
             Talk(SAY_DEATH);
             summons.DespawnAll();
         }
