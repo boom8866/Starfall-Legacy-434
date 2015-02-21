@@ -73,6 +73,7 @@ enum Spells
     // Collapsing Twilight Portal
     SPELL_COLLAPSING_TWILIGHT_PORTAL_SCRIPT = 86296,
     SPELL_COLLAPSING_TWILIGHT_PORTAL        = 86291,
+    SPELL_TWILIGHT_SHIFT_SCRIPT             = 86293,
 
     // Unstable Twilight
     SPELL_UNSTABLE_TWILIGHT                 = 86302,
@@ -365,6 +366,7 @@ public:
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SetBossState(DATA_THERALION_AND_VALIONA, FAIL);
+            instance->DoCastSpellOnPlayers(SPELL_TWILIGHT_SHIFT_SCRIPT);
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_AGGRESSIVE);
             me->SetDisableGravity(false);
@@ -389,6 +391,7 @@ public:
             if (Creature* theralion = me->FindNearestCreature(BOSS_THERALION, 500.0f, true))
                 me->Kill(theralion);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->DoCastSpellOnPlayers(SPELL_TWILIGHT_SHIFT_SCRIPT);
             summons.DespawnAll();
             _JustDied();
         }
