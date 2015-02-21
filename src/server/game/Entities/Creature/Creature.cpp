@@ -554,22 +554,25 @@ void Creature::Update(uint32 diff)
         case 16:    // Azshara (*)
         case 405:   // Desolace
         case 618:   // Winterspring
-        case 361:   // Felwood (*)
+        case 361:   // Felwood
         case 406:   // Stonetalon Mountains
-        case 357:   // Feralas
+        case 357:   // Feralas (*)
         case 5144:  // Vashj'ir
         case 5145:  // Vashj'ir
         case 4815:  // Vashj'ir
         {
-            // Exception for Azshara and Felwood
-            if (GetZoneId() == 16 || GetZoneId() == 361)
+            // Exception for Azshara
+            if (GetZoneId() == 16 && GetCreatureTemplate()->expansion == 3)
+                break;
+
+            // Exception for Feralas
+            if (GetZoneId() == 357)
             {
-                if (GetCreatureTemplate()->expansion == 3)
+                switch (GetCreatureTemplate()->Entry)
                 {
-                    if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED))
-                        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
-                    if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
-                        RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                    //TODO
+                    // Add creatures id template
+                    break;
                 }
             }
 
