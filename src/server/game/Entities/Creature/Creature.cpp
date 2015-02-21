@@ -561,6 +561,18 @@ void Creature::Update(uint32 diff)
         case 5145:  // Vashj'ir
         case 4815:  // Vashj'ir
         {
+            // Exception for Azshara and Felwood
+            if (GetZoneId() == 16 || GetZoneId() == 361)
+            {
+                if (GetCreatureTemplate()->expansion == 3)
+                {
+                    if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED))
+                        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+                    if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
+                        RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                }
+            }
+
             // Make immune to all and remove questgiver flag
             if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED))
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
