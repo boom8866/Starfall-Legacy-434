@@ -103,22 +103,30 @@ void Archaeology::UseSite()
         while (angle > 2 * M_PI)
             angle -= 2 * M_PI;
 
-        float x = _player->GetPositionX() + cos(angle) * 3.0f;
-        float y = _player->GetPositionY() + sin(angle) * 3.0f;
-        float z = _player->GetPositionZ() + 500.0f;
-        float ground = _player->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
+        float x = _player->GetPositionX() + cos(angle) * 1.5f;
+        float y = _player->GetPositionY() + sin(angle) * 1.5f;
+        float z = _player->GetPositionZ();
+        float ground = _player->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground, false, true);
 
-        _player->SummonGameObject(goID, x, y, ground, angle, 0, 0, 0, 0, 4);
-        return;
+        if (abs(z - ground) < 1.5f)
+        {
+            _player->SummonGameObject(goID, x, y, ground, angle, 0, 0, 0, 0, 4);
+            return;
+        }
+        else
+        {
+            _player->GetSession()->SendNotification("You can't use that here");
+            return;
+        }
     }
 
     // Spawn the correct Find Object Here
     uint32 goId = sArchaeologyMgr->GetSiteType(_site[position].entry);
 
-    float x = _player->GetPositionX() + cos(_player->GetOrientation()) * 3.0f;
-    float y = _player->GetPositionY() + sin(_player->GetOrientation()) * 3.0f;
-    float z = _player->GetPositionZ() + 500.0f;
-    float ground = _player->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
+    float x = _player->GetPositionX() + cos(_player->GetOrientation()) * 1.5f;
+    float y = _player->GetPositionY() + sin(_player->GetOrientation()) * 1.5f;
+    float z = _player->GetPositionZ();
+    float ground = _player->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground, false, true);
 
     _player->SummonGameObject(goId, x, y, ground, 0, 0, 0, 0, 0, 60);
 
