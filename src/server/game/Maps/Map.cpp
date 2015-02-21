@@ -1623,7 +1623,7 @@ inline GridMap* Map::GetGrid(float x, float y)
     return GridMaps[gx][gy];
 }
 
-float Map::GetWaterOrGroundLevel(float x, float y, float z, float* ground /*= NULL*/, bool /*swim = false*/) const
+float Map::GetWaterOrGroundLevel(float x, float y, float z, float* ground /*= NULL*/, bool /*swim = false*/, bool forcedGround /*= false*/) const
 {
     if (const_cast<Map*>(this)->GetGrid(x, y))
     {
@@ -1635,7 +1635,14 @@ float Map::GetWaterOrGroundLevel(float x, float y, float z, float* ground /*= NU
         LiquidData liquid_status;
 
         ZLiquidStatus res = getLiquidStatus(x, y, ground_z, MAP_ALL_LIQUIDS, &liquid_status);
-        return res ? liquid_status.level : ground_z;
+        if (forcedGround)
+        {
+            if (!IsInWater(x, y, z) && !IsUnderWater(x, y, z) && abs(z - ground_z) > 1.5f)
+                return z;
+            else
+                return ground_z;
+        }
+        else return res ? liquid_status.level : ground_z;
     }
 
     return VMAP_INVALID_HEIGHT_VALUE;
