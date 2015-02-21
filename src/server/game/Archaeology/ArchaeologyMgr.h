@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include "SitePolygonGraph.h"
 
 #define CONTINENT_SITES 4
 #define MAX_PROJECTS 16
@@ -39,7 +40,7 @@ enum FindObject
     FIND_OBJECT_VRYKUL      = 207189,
 };
 
-class SitePolygon
+/*class SitePolygon
 {
 public:
     float _x[POINT_PER_POLYGON];
@@ -73,7 +74,7 @@ public:
             y += diff * _y[i];
         }
     }
-};
+};*/
 
 struct SiteEntry
 {
@@ -144,7 +145,7 @@ private:
     bool isSiteValid(SiteData *sites, uint16 entry);
 
     std::map<uint32, std::vector<SiteEntry> > _siteMap;
-    std::map<uint16, SitePolygon* > _polygonMap;
+    std::map<uint16, SitePolygonGraph<float>* > _polygonMap;
     std::map<uint16, uint32> _objectMap;
 
     std::map<uint32, uint8> _currencyMap;       // currencyId -> branchId
