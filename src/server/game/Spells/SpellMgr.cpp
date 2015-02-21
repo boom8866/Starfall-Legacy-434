@@ -3046,9 +3046,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 49838: // Stop Time
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                 break;
-            case 45529: // Blood Tap
-                spellInfo->Effects[EFFECT_0].MiscValue = 0;
-                break;
             case 61407: // Energize Cores
             case 62136: // Energize Cores
             case 54069: // Energize Cores

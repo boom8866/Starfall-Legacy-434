@@ -305,7 +305,7 @@ public:
                     {
                         me->MonsterTextEmote("Chief Engineer takes off running.", 0, false);
                         me->SetWalk(false);
-                        me->GetMotionMaster()->MovePoint(0, 2352.27f, -4736.54f, 120.82f);
+                        me->GetMotionMaster()->MovePoint(50, 2352.27f, -4736.54f, 120.82f);
                         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         me->DespawnOrUnsummon(5000);
                         events.Reset();
