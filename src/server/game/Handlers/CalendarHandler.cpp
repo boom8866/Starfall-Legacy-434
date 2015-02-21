@@ -640,9 +640,13 @@ void WorldSession::HandleCalendarGetNumPending(WorldPacket& /*recvData*/)
 
 void WorldSession::HandleSetSavedInstanceExtend(WorldPacket& recvData)
 {
-    uint32 mapId, difficulty;
-    uint8 toggleExtend;
-    recvData >> mapId >> difficulty>> toggleExtend;
+    uint32 mapId;
+    uint32 difficulty;
+    bool toggleExtend;
+    recvData >> mapId;
+    recvData >> difficulty;
+    recvData >> toggleExtend;
+
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_SET_SAVED_INSTANCE_EXTEND - MapId: %u, Difficulty: %u, ToggleExtend: %s", mapId, difficulty, toggleExtend ? "On" : "Off");
 
     /*
