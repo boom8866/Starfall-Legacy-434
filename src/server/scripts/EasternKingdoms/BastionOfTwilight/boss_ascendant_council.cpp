@@ -1100,7 +1100,7 @@ public:
                             float ground = me->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
                             me->SummonCreature(NPC_TARGET_STALKER, x, y, ground, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 10000);
                             DoCast(me, SPELL_DISPERSE);
-                            events.ScheduleEvent(EVENT_LIGHTNING_BLAST, 5000);
+                            events.ScheduleEvent(EVENT_LIGHTNING_BLAST, 3000);
                         }
                         events.ScheduleEvent(EVENT_DISPERSE, 25000);
                         break;
