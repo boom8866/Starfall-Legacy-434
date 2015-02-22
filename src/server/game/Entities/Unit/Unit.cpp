@@ -13169,6 +13169,7 @@ void Unit::Dismount()
         else
             player->ResummonTemporaryUnsummonedPet();
     }
+    SetObjectScale(GetObjectScale());
 }
 
 MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
