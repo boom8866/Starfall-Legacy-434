@@ -57,6 +57,7 @@ enum Spells
     SPELL_LIGHTNING_ROD                 = 83099,
     SPELL_CHAIN_LIGHTNING               = 83282,
     SPELL_DISPERSE                      = 83087,
+    SPELL_LIGHTNING_BLAST               = 83070,
 
     // Terrastra
     SPELL_TELEPORT_RF                   = 81798,
@@ -253,6 +254,19 @@ public:
     bool operator()(WorldObject* object)
     {
         return (object->GetDistance2d(caster) <= 20.0f);
+    }
+private:
+    Unit* caster;
+};
+
+class VictimCheck
+{
+public:
+    VictimCheck(Unit* caster) : caster(caster) { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (caster->getVictim() != object);
     }
 private:
     Unit* caster;
@@ -947,6 +961,8 @@ public:
             Talk(SAY_AGGRO);
             _EnterCombat();
             events.ScheduleEvent(EVENT_CALL_WINDS, 5000);
+            events.ScheduleEvent(EVENT_LIGHTNING_ROD, 25000);
+            events.ScheduleEvent(EVENT_DISPERSE, 17000);
             events.ScheduleEvent(EVENT_THUNDERSHOCK, 66000);
             events.ScheduleEvent(EVENT_THUNDERSHOCK_EMOTE, 58000);
         }
@@ -1060,6 +1076,28 @@ public:
                     case EVENT_THUNDERSHOCK_EMOTE:
                         if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
                             controller->AI()->Talk(ANNOUNCE_THUNDERSHOCK);
+                        break;
+                    case EVENT_DISPERSE:
+                        if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
+                        {
+                            float ori = frand(0.0f, M_PI * 2);
+                            float dist = frand(10.0f, 40.0f);
+                            float x = controller->GetPositionX() + cos(ori) * dist;
+                            float y = controller->GetPositionY() + sin(ori) * dist;
+                            float z = controller->GetPositionZ();
+                            float ground = me->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
+                            me->SummonCreature(NPC_TARGET_STALKER, x, y, ground, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 10000);
+                            DoCast(me, SPELL_DISPERSE);
+                            events.ScheduleEvent(EVENT_LIGHTNING_BLAST, 1600);
+                        }
+                        events.ScheduleEvent(EVENT_DISPERSE, 30000);
+                        break;
+                    case EVENT_LIGHTNING_BLAST:
+                        DoCast(me, SPELL_LIGHTNING_BLAST);
+                        break;
+                    case EVENT_LIGHTNING_ROD:
+                        DoCast(me, SPELL_LIGHTNING_ROD);
+                        events.ScheduleEvent(EVENT_LIGHTNING_ROD, 25000);
                         break;
                     default:
                         break;
@@ -1813,7 +1851,9 @@ public:
             if (targets.empty())
                 return;
 
-            Trinity::Containers::RandomResizeList(targets, 1);
+            uint32 size = GetCaster()->GetMap()->Is25ManRaid() ? 3 : 1;
+
+            Trinity::Containers::RandomResizeList(targets, size);
         }
 
         void Register()
@@ -1885,6 +1925,66 @@ public:
         return new spell_ac_disperse_SpellScript();
     }
 };
+
+class spell_ac_lightning_blast : public SpellScriptLoader
+{
+public:
+    spell_ac_lightning_blast() : SpellScriptLoader("spell_ac_lightning_blast") { }
+
+    class spell_ac_lightning_blast_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_lightning_blast_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(VictimCheck(GetCaster()));
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ac_lightning_blast_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ac_lightning_blast_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_lightning_blast_SpellScript();
+    }
+};
+
+class spell_ac_lightning_blast_triggered : public SpellScriptLoader
+{
+public:
+    spell_ac_lightning_blast_triggered() : SpellScriptLoader("spell_ac_lightning_blast_triggered") { }
+
+    class spell_ac_lightning_blast_triggered_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_lightning_blast_triggered_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(VictimCheck(GetCaster()));
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ac_lightning_blast_triggered_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_lightning_blast_triggered_SpellScript();
+    }
+};
+
 
 class spell_ac_harden_skin : public SpellScriptLoader
 {
@@ -2057,6 +2157,9 @@ public:
             if (size == 0)
                 size = 1;
 
+            if (size >= targets.size())
+                size = targets.size();
+
             Trinity::Containers::RandomResizeList(targets, size);
         }
 
@@ -2094,7 +2197,9 @@ public:
             if (targets.empty())
                 return;
 
-            Trinity::Containers::RandomResizeList(targets, GetCaster()->GetMap()->Is25ManRaid() ? 3 : 1);
+            uint32 size = GetCaster()->GetMap()->Is25ManRaid() ? 3 : 1;
+
+            Trinity::Containers::RandomResizeList(targets, size);
         }
 
         void HandleHit(SpellEffIndex /*effIndex*/)
@@ -2142,6 +2247,8 @@ void AddSC_boss_ascendant_council()
     new spell_ac_thundershock();
     new spell_ac_lightning_rod();
     new spell_ac_disperse();
+    new spell_ac_lightning_blast();
+    new spell_ac_lightning_blast_triggered();
     new spell_ac_harden_skin();
     new spell_ac_cryogenic_aura();
     new spell_ac_liquid_ice();

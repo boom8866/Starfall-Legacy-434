@@ -88,6 +88,7 @@ enum Creatures
     NPC_ERUPTION_TARGET             = 44845,
     NPC_GRAVITY_CRUSH               = 45476,
     NPC_GRAVITY_WELL                = 44824,
+    NPC_TARGET_STALKER              = 44553,
 
     NPC_CHOGALL_HALFUS              = 46965,
     NPC_CHOGALL_DRAGONS             = 48142,
