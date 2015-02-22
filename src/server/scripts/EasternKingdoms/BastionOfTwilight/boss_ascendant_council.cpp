@@ -635,9 +635,11 @@ public:
                     case EVENT_AEGIS_OF_FLAME:
                         me->StopMoving();
                         DoCast(me, SPELL_AEGIS_OF_FLAME);
+                        events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, urand(33000, 35000));
                         events.ScheduleEvent(EVENT_RISING_FLAMES, 2000);
                         break;
                     case EVENT_RISING_FLAMES:
+                        me->StopMoving();
                         Talk(SAY_ANNOUNCE_ABILITY);
                         Talk(SAY_ABILITY);
                         DoCast(me, SPELL_RISING_FLAMES);
@@ -682,7 +684,7 @@ public:
                             _infernoCounter++;
 
                             float ori = me->GetAngle(&rushPos);
-                            float dist = _infernoCounter * 6.0f;
+                            float dist = _infernoCounter * 5.0f;
 
                             float x = ignaciousPos.GetPositionX() + cos(ori) * dist;
                             float y = ignaciousPos.GetPositionY() + sin(ori) * dist;
@@ -718,6 +720,7 @@ public:
                         events.ScheduleEvent(EVENT_BURNING_BLOOD, 22000);
                         break;
                     case EVENT_FLAME_TORRENT:
+                        me->StopMoving();
                         DoCast(me, SPELL_FLAME_TORRENT);
                         events.ScheduleEvent(EVENT_FLAME_TORRENT, 12000);
                         break;
