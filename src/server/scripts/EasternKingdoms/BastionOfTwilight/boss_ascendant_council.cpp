@@ -522,11 +522,11 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             MakeInterruptable(false);
 
-            events.ScheduleEvent(EVENT_TALK_INTRO, 4000);
+            events.ScheduleEvent(EVENT_TALK_INTRO, 5000);
             events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, 31000);
             events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
             events.ScheduleEvent(EVENT_BURNING_BLOOD, 28000);
-            events.ScheduleEvent(EVENT_FLAME_TORRENT, urand(6000, 10000));
+            events.ScheduleEvent(EVENT_FLAME_TORRENT, 9000);
 
             if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
                 feludius->AI()->AttackStart(who);
@@ -722,7 +722,7 @@ public:
                     case EVENT_FLAME_TORRENT:
                         me->StopMoving();
                         DoCast(me, SPELL_FLAME_TORRENT);
-                        events.ScheduleEvent(EVENT_FLAME_TORRENT, 12000);
+                        events.ScheduleEvent(EVENT_FLAME_TORRENT, 13000);
                         break;
                     case EVENT_MOVE_FUSE:
                         Talk(SAY_FUSE_INTRO);
@@ -772,10 +772,10 @@ public:
         {
             _EnterCombat();
             events.ScheduleEvent(EVENT_TALK_INTRO, 4000);
-            events.ScheduleEvent(EVENT_ERUPTION, 7000);
+            events.ScheduleEvent(EVENT_ERUPTION, 15000);
             events.ScheduleEvent(EVENT_QUAKE, 33000);
-            events.ScheduleEvent(EVENT_GRAVITY_WELL, 5000);
-            events.ScheduleEvent(EVENT_HARDEN_SKIN, 1000);
+            events.ScheduleEvent(EVENT_GRAVITY_WELL, 12000);
+            events.ScheduleEvent(EVENT_HARDEN_SKIN, 20000);
         }
 
         void EnterEvadeMode()
@@ -928,10 +928,11 @@ public:
                     case EVENT_GRAVITY_WELL:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_GRAVITY_WELL, true);
-                        events.ScheduleEvent(EVENT_GRAVITY_WELL, 15000);
+                        events.ScheduleEvent(EVENT_GRAVITY_WELL, 32000);
                         break;
                     case EVENT_HARDEN_SKIN:
                         DoCast(me, SPELL_HARDEN_SKIN);
+                        events.ScheduleEvent(EVENT_HARDEN_SKIN, 42000);
                         break;
                     default:
                         break;
@@ -970,11 +971,11 @@ public:
         {
             Talk(SAY_AGGRO);
             _EnterCombat();
-            events.ScheduleEvent(EVENT_CALL_WINDS, 5000);
-            events.ScheduleEvent(EVENT_LIGHTNING_ROD, 25000);
-            events.ScheduleEvent(EVENT_DISPERSE, 17000);
+            events.ScheduleEvent(EVENT_CALL_WINDS, 15000);
+            events.ScheduleEvent(EVENT_LIGHTNING_ROD, 32000);
+            events.ScheduleEvent(EVENT_DISPERSE, 24000);
             events.ScheduleEvent(EVENT_THUNDERSHOCK, 66000);
-            events.ScheduleEvent(EVENT_THUNDERSHOCK_EMOTE, 58000);
+            events.ScheduleEvent(EVENT_THUNDERSHOCK_EMOTE, 56000);
         }
 
         void EnterEvadeMode()
@@ -1071,6 +1072,7 @@ public:
                     case EVENT_CALL_WINDS:
                         Talk(SAY_ABILITY);
                         DoCast(me, SPELL_CALL_WINDS);
+                        events.ScheduleEvent(EVENT_CALL_WINDS, 32000);
                         break;
                     case EVENT_MOVE_FUSE:
                         Talk(SAY_FUSE_INTRO);
@@ -1081,7 +1083,7 @@ public:
                         Talk(SAY_ANNOUNCE_ABILITY);
                         DoCast(me, SPELL_THUNDERSHOCK);
                         events.ScheduleEvent(EVENT_THUNDERSHOCK, 66000);
-                        events.ScheduleEvent(EVENT_THUNDERSHOCK_EMOTE, 58000);
+                        events.ScheduleEvent(EVENT_THUNDERSHOCK_EMOTE, 56000);
                         break;
                     case EVENT_THUNDERSHOCK_EMOTE:
                         if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
@@ -1098,9 +1100,9 @@ public:
                             float ground = me->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
                             me->SummonCreature(NPC_TARGET_STALKER, x, y, ground, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 10000);
                             DoCast(me, SPELL_DISPERSE);
-                            events.ScheduleEvent(EVENT_LIGHTNING_BLAST, 1600);
+                            events.ScheduleEvent(EVENT_LIGHTNING_BLAST, 5000);
                         }
-                        events.ScheduleEvent(EVENT_DISPERSE, 30000);
+                        events.ScheduleEvent(EVENT_DISPERSE, 25000);
                         break;
                     case EVENT_LIGHTNING_BLAST:
                         DoCast(me, SPELL_LIGHTNING_BLAST);
