@@ -1565,9 +1565,20 @@ public:
                 switch (eventId)
                 {
                     case EVENT_MAGNETIC_PULL:
-                        me->RemoveAurasDueToSpell(SPELL_GRAVITY_WELL_PRE_VISUAL);
-                        DoCast(me, SPELL_MAGNETIC_PULL, true);
-                        DoCast(me, SPELL_MAGNETIC_PULL_SLOW, true);
+                        if (me->HasAura(SPELL_GRAVITY_WELL_PRE_VISUAL))
+                        {
+                            me->RemoveAurasDueToSpell(SPELL_GRAVITY_WELL_PRE_VISUAL);
+                            DoCast(me, SPELL_MAGNETIC_PULL, true);
+                            DoCast(me, SPELL_MAGNETIC_PULL_SLOW, true);
+                        }
+                        else
+                        {
+                            std::list<Player*> targets = me->GetNearestPlayersList(7.0f, true);
+                            if (!targets.empty())
+                                for (std::list<Player*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                                    DoCast((*itr), SPELL_MAGNETIC_PULL_GRAB);
+                        }
+                        events.ScheduleEvent(EVENT_MAGNETIC_PULL, 3000);
                         break;
                     default:
                         break;
