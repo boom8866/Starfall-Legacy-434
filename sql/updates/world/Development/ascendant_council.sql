@@ -18,10 +18,10 @@ UPDATE `creature_template` SET `minlevel`= 80, `maxlevel`= 80, `faction`= 14, `u
 UPDATE `creature_template` SET `minlevel`= 80, `maxlevel`= 80, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 128, `InhabitType`= 4 WHERE `entry`= 47501;
 -- Violent Cyclone
 UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction`= 1847, `unit_flags`= 33554432, `flags_extra`= 128 WHERE `entry`= 44747;
--- Feludius and Ignacious
-UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 16, `BaseAttackTime`= 1500, `speed_walk`= 4, `mechanic_immune_mask`= 617299839, `exp`= 3 WHERE `entry` IN (49612, 49613, 49614, 49615, 49616, 49617, 43686, 43687);
--- Arion and Terrastra
-UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 16, `BaseAttackTime`= 1500, `speed_walk`= 4, `mechanic_immune_mask`= 650854399, `exp`= 3 WHERE `entry` IN (49606, 49607, 49608, 49609, 49610, 49611, 43688, 43689);
+-- Feludius and Ignacious and Terrastra
+UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 16, `BaseAttackTime`= 1500, `speed_walk`= 4, `mechanic_immune_mask`= 617299839, `exp`= 3 WHERE `entry` IN (49612, 49613, 49614, 49615, 49616, 49617, 43686, 43687, 43689, 49609, 49610, 49611);
+-- Arion
+UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 16, `BaseAttackTime`= 1500, `speed_walk`= 4, `mechanic_immune_mask`= 650854399, `exp`= 3 WHERE `entry` IN (49606, 49607, 49608, 43688);
 -- Elementium Monstrosity
 UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 16, `BaseAttackTime`= 1500, `mechanic_immune_mask`= 650854399, `exp`= 3 WHERE `entry` IN (43735, 49619, 49620, 49621);
 -- Liquid Ice

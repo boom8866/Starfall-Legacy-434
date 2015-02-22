@@ -151,6 +151,7 @@ enum Events
 
     // Controller
     EVENT_SUMMON_MONSTROSITY,
+    EVENT_RESET_COUNCIL,
 
     // Misc Events
     EVENT_APPLY_IMMUNITY,
@@ -521,7 +522,6 @@ public:
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             MakeInterruptable(false);
-
             events.ScheduleEvent(EVENT_TALK_INTRO, 5000);
             events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, 31000);
             events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
@@ -604,8 +604,8 @@ public:
                     DoCast(me, SPELL_TELEPORT_LB);
                     break;
                 case ACTION_PREPARE_FUSE:
-                    DoCast(me, SPELL_FIRE_EXPLOSION);
-                    DoCast(me, SPELL_TELEPORT_FIRE);
+                    DoCast(me, SPELL_FIRE_EXPLOSION, true);
+                    DoCast(me, SPELL_TELEPORT_FIRE, true);
                     events.ScheduleEvent(EVENT_FACE_CONTROLLER, 200);
                     events.ScheduleEvent(EVENT_MOVE_FUSE, 10000);
                     break;
@@ -766,6 +766,7 @@ public:
         {
             _Reset();
             me->SetReactState(REACT_PASSIVE);
+            MakeInterruptable(false);
         }
 
         void EnterCombat(Unit* who)
@@ -783,6 +784,7 @@ public:
             _EnterEvadeMode();
             events.Reset();
             _switched = false;
+            MakeInterruptable(false);
             _eruptionCounter = 0;
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
@@ -835,6 +837,20 @@ public:
             }
         }
 
+        void MakeInterruptable(bool apply)
+        {
+            if (apply)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
+            }
+            else
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            }
+        }
+
         void CastShatter(int32 damage)
         {
             me->RemoveAurasDueToSpell(SPELL_HARDEN_SKIN);
@@ -856,8 +872,8 @@ public:
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
                     me->CastStop();
-                    DoCast(me, SPELL_ELEMENTAL_STASIS);
-                    DoCast(me, SPELL_TELEPORT_EARTH);
+                    DoCast(me, SPELL_ELEMENTAL_STASIS, true);
+                    DoCast(me, SPELL_TELEPORT_EARTH, true);
                     events.Reset();
                     summons.DespawnAll();
                     events.ScheduleEvent(EVENT_FACE_CONTROLLER, 200);
@@ -932,7 +948,12 @@ public:
                         break;
                     case EVENT_HARDEN_SKIN:
                         DoCast(me, SPELL_HARDEN_SKIN);
+                        MakeInterruptable(true);
+                        events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 1000);
                         events.ScheduleEvent(EVENT_HARDEN_SKIN, 42000);
+                        break;
+                    case EVENT_APPLY_IMMUNITY:
+                        MakeInterruptable(false);
                         break;
                     default:
                         break;
@@ -1041,7 +1062,7 @@ public:
                     me->CastStop();
                     summons.DespawnAll();
                     events.Reset();
-                    DoCast(me, SPELL_TELEPORT_AIR);
+                    DoCast(me, SPELL_TELEPORT_AIR, true);
                     events.ScheduleEvent(EVENT_MOVE_FUSE, 100);
                     break;
                 case ACTION_DESPAWN:
@@ -1098,8 +1119,9 @@ public:
                             float y = controller->GetPositionY() + sin(ori) * dist;
                             float z = controller->GetPositionZ();
                             float ground = me->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
-                            me->SummonCreature(NPC_TARGET_STALKER, x, y, ground, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 10000);
-                            DoCast(me, SPELL_DISPERSE);
+                            if (me->SummonCreature(NPC_TARGET_STALKER, x, y, ground, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 10000))
+                                DoCast(me, SPELL_DISPERSE);
+
                             events.ScheduleEvent(EVENT_LIGHTNING_BLAST, 3000);
                         }
                         events.ScheduleEvent(EVENT_DISPERSE, 25000);
@@ -1375,36 +1397,13 @@ public:
                     break;
                 case ACTION_RESET_COUNCIL:
                     health = 0;
+                    events.ScheduleEvent(EVENT_RESET_COUNCIL, 200);
                     instance->SetBossState(DATA_ASCENDANT_COUNCIL, NOT_STARTED);
                     instance->SetBossState(DATA_FELUDIUS, FAIL);
                     instance->SetBossState(DATA_IGNACIOUS, FAIL);
                     instance->SetBossState(DATA_ARION, FAIL);
                     instance->SetBossState(DATA_TERRASTRA, FAIL);
                     instance->SetBossState(DATA_ELEMENTIUM_MONSTROSITY, FAIL);
-
-                    if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
-                        if (feludius->isDead())
-                            feludius->Respawn();
-                        else
-                            feludius->AI()->DoAction(ACTION_DESPAWN);
-
-                    if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
-                        if (ignacious->isDead())
-                            ignacious->Respawn();
-                        else
-                            ignacious->AI()->DoAction(ACTION_DESPAWN);
-
-                    if (Creature* arion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARION)))
-                        if (arion->isDead())
-                            arion->Respawn();
-                        else
-                            arion->AI()->DoAction(ACTION_DESPAWN);
-
-                    if (Creature* terrastra = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TERRASTRA)))
-                        if (terrastra->isDead())
-                            terrastra->Respawn();
-                        else
-                            terrastra->AI()->DoAction(ACTION_DESPAWN);
                     break;
                 case ACTION_ENCOUNTER_DONE:
                     instance->SetBossState(DATA_ASCENDANT_COUNCIL, DONE);
@@ -1450,6 +1449,33 @@ public:
                             terrastra->DespawnOrUnsummon(100);
                         }
                         break;
+                    case EVENT_RESET_COUNCIL:
+                    {
+                        if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
+                            if (feludius->isDead())
+                                feludius->Respawn();
+                            else
+                                feludius->AI()->DoAction(ACTION_DESPAWN);
+
+                        if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
+                            if (ignacious->isDead())
+                                ignacious->Respawn();
+                            else
+                                ignacious->AI()->DoAction(ACTION_DESPAWN);
+
+                        if (Creature* arion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARION)))
+                            if (arion->isDead())
+                                arion->Respawn();
+                            else
+                                arion->AI()->DoAction(ACTION_DESPAWN);
+
+                        if (Creature* terrastra = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TERRASTRA)))
+                            if (terrastra->isDead())
+                                terrastra->Respawn();
+                            else
+                                terrastra->AI()->DoAction(ACTION_DESPAWN);
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -2168,9 +2194,6 @@ public:
 
             if (size == 0)
                 size = 1;
-
-            if (size >= targets.size())
-                size = targets.size();
 
             Trinity::Containers::RandomResizeList(targets, size);
         }
