@@ -112,7 +112,12 @@ REPLACE INTO `spell_script_names` (`spell_id`, `scriptname`) VALUES
 (83718, 'spell_ac_harden_skin'),
 (92541, 'spell_ac_harden_skin'),
 (92542, 'spell_ac_harden_skin'),
-(92543, 'spell_ac_harden_skin');
+(92543, 'spell_ac_harden_skin'),
+(83070, 'spell_ac_lightning_blast'),
+(92454, 'spell_ac_lightning_blast'),
+(92455, 'spell_ac_lightning_blast'),
+(92456, 'spell_ac_lightning_blast'),
+(94731, 'spell_ac_lightning_blast_triggered');
 
 DELETE FROM `conditions` WHERE `SourceEntry` IN (82699, 84913, 83087);
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
