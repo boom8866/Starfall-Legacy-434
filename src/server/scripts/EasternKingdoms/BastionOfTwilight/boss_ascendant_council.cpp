@@ -2157,6 +2157,9 @@ public:
             if (size == 0)
                 size = 1;
 
+            if (size >= targets.size())
+                size = targets.size();
+
             Trinity::Containers::RandomResizeList(targets, size);
         }
 
@@ -2194,7 +2197,9 @@ public:
             if (targets.empty())
                 return;
 
-            Trinity::Containers::RandomResizeList(targets, GetCaster()->GetMap()->Is25ManRaid() ? 3 : 1);
+            uint32 size = GetCaster()->GetMap()->Is25ManRaid() ? 3 : 1;
+
+            Trinity::Containers::RandomResizeList(targets, size);
         }
 
         void HandleHit(SpellEffIndex /*effIndex*/)
