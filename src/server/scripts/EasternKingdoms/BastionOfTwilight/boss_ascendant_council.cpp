@@ -2009,7 +2009,7 @@ public:
             if (targets.empty())
                 return;
 
-            targets.remove_if(VictimCheck(GetCaster()));
+            targets.clear();
         }
 
         void Register()
