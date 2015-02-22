@@ -4066,7 +4066,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 19263: // Deterrence
                 spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_MOD_PACIFY;
                 break;
-            // SPELLS GENERETIC
+            // SPELLS GENERIC
             case 73701: // Vashj'ir - Sea Legs (due to buggy liquid level calculation in vashjir)
                 spellInfo->AuraInterruptFlags         = 0;
                 spellInfo->SpellCastingRequirementsId = 0;
