@@ -705,12 +705,14 @@ class spell_mage_living_bomb : public SpellScriptLoader
                             if (Aura* livingBomb = (*itr)->GetAura(SPELL_MAGE_LIVING_BOMB, caster->GetGUID()))
                             {
                                 if ((*itr) != target)
-                                    livingTargets++;
-
-                                if (livingTargets > 3)
                                 {
-                                    livingBomb->Remove(AURA_REMOVE_BY_DEFAULT);
-                                    return;
+                                    if (livingTargets < 3)
+                                        livingTargets++;
+                                    else
+                                    {
+                                        livingBomb->Remove(AURA_REMOVE_BY_CANCEL);
+                                        livingTargets--;
+                                    }
                                 }
                             }
                         }
@@ -735,7 +737,7 @@ class spell_mage_living_bomb : public SpellScriptLoader
             }
 
         protected:
-            uint8 livingTargets;
+            uint16 livingTargets;
         };
 
         AuraScript* GetAuraScript() const
