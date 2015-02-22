@@ -570,10 +570,25 @@ void Creature::Update(uint32 diff)
             {
                 switch (GetCreatureTemplate()->Entry)
                 {
-                    //TODO
-                    // Add creatures id template
-                    break;
+                    case 39972:
+                    case 39949:
+                    case 39946:
+                    case 39893:
+                    case 39895:
+                    case 40369:
+                    case 39992:
+                        break;
+                    default:
+                    {
+                        // Make immune to all and remove questgiver flag
+                        if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED))
+                            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+                        if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
+                            RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                        break;
+                    }
                 }
+                break;
             }
 
             // Make immune to all and remove questgiver flag
