@@ -11313,6 +11313,35 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // Custom scripted damage
     switch (spellProto->SpellFamilyName)
     {
+        case SPELLFAMILY_HUNTER:
+        {
+            if (isPet())
+            {
+                if (Unit* owner = GetCharmerOrOwner())
+                {
+                    int32 ownerRAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK);
+                    switch (spellProto->Id)
+                    {
+                        case 16827:    // Claw
+                        case 17253:    // Bite
+                        case 49966:    // Smack
+                        {
+                            DoneTotal += ownerRAP * 0.168f;
+                            // Spiked Collar
+                            if (AuraEffect* spikedCollar = GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2934, EFFECT_0))
+                                AddPct(DoneTotalMod, spikedCollar->GetAmount());
+
+                            // Wild Hunt
+                            if (AuraEffect* wildHunt = GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_0))
+                                if (GetPower(POWER_FOCUS) + spellProto->CalcPowerCost(this, spellProto->GetSchoolMask()) >= 50)
+                                    AddPct(DoneTotalMod, wildHunt->GetAmount());
+                            break;
+                        }
+                    }
+                }
+            }
+            break;
+        }
         case SPELLFAMILY_MAGE:
         {
             if (spellProto && GetTypeId() == TYPEID_PLAYER)
