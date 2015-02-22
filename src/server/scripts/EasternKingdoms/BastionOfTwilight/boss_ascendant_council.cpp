@@ -312,6 +312,7 @@ public:
         {
             _Reset();
             _switched = false;
+            MakeInterruptable(false);
         }
 
         void EnterCombat(Unit* who)
@@ -319,6 +320,8 @@ public:
             Talk(SAY_AGGRO);
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            MakeInterruptable(false);
+
             if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
                 ignacious->AI()->AttackStart(who);
 
@@ -510,13 +513,15 @@ public:
         void Reset()
         {
             _Reset();
-            MakeInterruptable(true);
+            MakeInterruptable(false);
         }
 
         void EnterCombat(Unit* who)
         {
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            MakeInterruptable(false);
+
             events.ScheduleEvent(EVENT_TALK_INTRO, 4000);
             events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, 31000);
             events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
@@ -537,6 +542,7 @@ public:
             _infernoCounter = 0;
             _switched = false;
             summons.DespawnAll();
+            MakeInterruptable(false);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -627,6 +633,7 @@ public:
                         Talk(SAY_AGGRO);
                         break;
                     case EVENT_AEGIS_OF_FLAME:
+                        me->StopMoving();
                         DoCast(me, SPELL_AEGIS_OF_FLAME);
                         events.ScheduleEvent(EVENT_RISING_FLAMES, 2000);
                         break;
@@ -641,14 +648,14 @@ public:
                         if (!targets.empty())
                         {
                             leapTarget = me->getVictim();
-                            me->AttackStop();
-                            me->SetReactState(REACT_PASSIVE);
                             targets.remove_if(RandomDistancePlayerCheck(me));
                             if (targets.empty())
                                 break;
 
                             if (Unit* target = Trinity::Containers::SelectRandomContainerElement(targets))
                             {
+                                me->AttackStop();
+                                me->SetReactState(REACT_PASSIVE);
                                 DoCast(target, SPELL_INFERNO_LEAP);
                                 events.ScheduleEvent(EVENT_INFERNO_RUSH, 3000);
                             }
