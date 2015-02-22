@@ -1272,7 +1272,7 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
     uint32 attackPower = stats->AttackPower;
     uint32 rangedAttackPower = stats->RangedAttackPower;
 
-    if (!GetInstanceId())
+    if (!GetInstanceScript())
     {
         attackPower /= damageModifier;
         rangedAttackPower /= damageModifier;
