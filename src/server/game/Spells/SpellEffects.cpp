@@ -636,6 +636,16 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             damage = damage * unitTarget->GetMaxHealth() / 100;
                         break;
                     }
+                    case 74817: // Inferno (Baron Geddon)
+                    {
+                        if (Aura* aur = m_caster->GetAura(74813))
+                        {
+                            int32 duration = aur->GetDuration() / 1000;
+                            int32 maxDuration = aur->GetMaxDuration() / 1000;
+                            damage += damage * (maxDuration - duration);
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }

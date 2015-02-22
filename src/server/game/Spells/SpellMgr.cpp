@@ -3634,6 +3634,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 72405: // Broken Frostmourne
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS); // 200yd
                 break;
+            case 74813: // Inferno
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 74817;
+                break;
+            case 74817: // Inferno (Triggered)
+                spellInfo->Effects[EFFECT_0].BasePoints = 5000;
+                break;
             // ENDOF ICECROWN CITADEL SPELLS
             //
             // RUBY SANCTUM SPELLS
