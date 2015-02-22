@@ -3640,6 +3640,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 74817: // Inferno (Triggered)
                 spellInfo->Effects[EFFECT_0].BasePoints = 5000;
                 break;
+            case 95391: // Summon Quicksilver Submersion Camera [INTERNAL]
+                spellInfo->Effects[EFFECT_0].BasePoints = 46598;
+                break;
             // ENDOF ICECROWN CITADEL SPELLS
             //
             // RUBY SANCTUM SPELLS
