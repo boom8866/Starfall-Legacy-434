@@ -6158,6 +6158,11 @@ void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)
 {
     m_baseRatingValue[cr] +=(apply ? value : -value);
 
+    // Even the pet gets 100% benefit from master's haste/hit
+    Pet* pet = GetPet();
+    if (pet)
+        pet->ApplyRatingMod(cr, value * GetRatingMultiplier(cr), apply);
+
     // explicit affected values
     switch (cr)
     {
@@ -6255,7 +6260,12 @@ void Player::UpdateRating(CombatRating cr)
 
             // Update Pet Scaling Auras
             if (Pet* pet = GetPet())
-                pet->PetBonuses();
+            {
+                if (pet->ToTempSummon())
+                    pet->ToTempSummon()->UpdateAttackPowerAndDamage();
+                else
+                    pet->UpdateAttackPowerAndDamage();
+            }
             break;
         }
         case CR_CRIT_RANGED:
@@ -6265,7 +6275,12 @@ void Player::UpdateRating(CombatRating cr)
 
             // Update Pet Scaling Auras
             if (Pet* pet = GetPet())
-                pet->PetBonuses();
+            {
+                if (pet->ToTempSummon())
+                    pet->ToTempSummon()->UpdateAttackPowerAndDamage();
+                else
+                    pet->UpdateAttackPowerAndDamage();
+            }
             break;
         }
         case CR_CRIT_SPELL:
@@ -7088,7 +7103,12 @@ void Player::UpdateSpellPower()
 
     // Update Pet Scaling Auras
     if (Pet* pet = GetPet())
-        pet->PetBonuses();
+    {
+        if (pet->ToTempSummon())
+            pet->ToTempSummon()->UpdateAttackPowerAndDamage();
+        else
+            pet->UpdateAttackPowerAndDamage();
+    }
 }
 
 bool Player::UpdatePosition(float x, float y, float z, float orientation, bool teleport)
@@ -13162,6 +13182,15 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, pItem->GetEntry(), slot);
     UpdateArmorSpecialization();
 
+    // Update Pet Scaling Auras
+    if (Pet* pet = GetPet())
+    {
+        if (pet->ToTempSummon())
+            pet->ToTempSummon()->UpdateAttackPowerAndDamage();
+        else
+            pet->UpdateAttackPowerAndDamage();
+    }
+
     return pItem;
 }
 
@@ -13184,6 +13213,15 @@ void Player::QuickEquipItem(uint16 pos, Item* pItem)
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM, pItem->GetEntry());
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, pItem->GetEntry(), slot);
         UpdateArmorSpecialization();
+
+        // Update Pet Scaling Auras
+        if (Pet* pet = GetPet())
+        {
+            if (pet->ToTempSummon())
+                pet->ToTempSummon()->UpdateAttackPowerAndDamage();
+            else
+                pet->UpdateAttackPowerAndDamage();
+        }
     }
 }
 
@@ -13305,6 +13343,14 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
         if (IsInWorld() && update)
         {
             UpdateArmorSpecialization();
+            // Update Pet Scaling Auras
+            if (Pet* pet = GetPet())
+            {
+                if (pet->ToTempSummon())
+                    pet->ToTempSummon()->UpdateAttackPowerAndDamage();
+                else
+                    pet->UpdateAttackPowerAndDamage();
+            }
             pItem->SendUpdateToPlayer(this);
         }
     }

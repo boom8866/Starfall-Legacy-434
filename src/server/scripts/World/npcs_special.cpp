@@ -8154,7 +8154,8 @@ public:
                 }
                 case POINT_AIR:
                 {
-                    Talk(1, playerSummoner->GetGUID());
+                    if (playerSummoner && playerSummoner != NULL && playerSummoner->IsInWorld())
+                        Talk(1, playerSummoner->GetGUID());
                     break;
                 }
                 default:
