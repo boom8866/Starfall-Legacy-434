@@ -181,8 +181,10 @@ enum Actions
     ACTION_RESET_COUNCIL,
     ACTION_DESPAWN,
     ACTION_ENCOUNTER_DONE,
+    ACTION_ACHIEVEMENT_FAILED,
 };
 
+#define DATA_ELEMENTARY 1
 Position const ElementiumMonstrosityPos = { -1009.01f, -582.467f, 831.9843f, 6.265732f };
 
 class at_ascendant_council_1 : public AreaTriggerScript
@@ -237,10 +239,10 @@ private:
     Unit* caster;
 };
 
-class VictimCheck
+class NoVictimCheck
 {
 public:
-    VictimCheck(Unit* caster) : caster(caster) { }
+    NoVictimCheck(Unit* caster) : caster(caster) { }
 
     bool operator()(WorldObject* object)
     {
@@ -1160,9 +1162,11 @@ public:
         boss_elementium_monstrosityAI(Creature* creature) : BossAI(creature, DATA_ELEMENTIUM_MONSTROSITY)
         {
             _instabilityCharges = 1;
+            _achievement = true;
         }
 
         uint8 _instabilityCharges;
+        bool _achievement;
 
         void InitializeAI()
         {
@@ -1176,6 +1180,7 @@ public:
 
         void Reset()
         {
+            _achievement = true;
             _Reset();
         }
 
@@ -1238,11 +1243,17 @@ public:
         {
             switch (action)
             {
-                case 0:
+                case ACTION_ACHIEVEMENT_FAILED:
+                    _achievement = false;
                     break;
                 default:
                     break;
             }
+        }
+
+        uint32 GetData(uint32 type) const
+        {
+            return type == DATA_ELEMENTARY ? _achievement : 0;
         }
 
         void UpdateAI(uint32 diff)
@@ -1994,7 +2005,7 @@ public:
             if (targets.empty())
                 return;
 
-            targets.remove_if(VictimCheck(GetCaster()));
+            targets.remove_if(NoVictimCheck(GetCaster()));
         }
 
         void Register()
@@ -2096,7 +2107,10 @@ public:
             if (Unit* caster = GetCaster())
             {
                 if (!caster->HasAura(SPELL_LIQUID_ICE_DUMMY))
+                {
                     caster->SummonCreature(NPC_LIQUID_ICE, caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
+                    caster->GetAI()->DoAction(ACTION_ACHIEVEMENT_FAILED);
+                }
 
                 if (Creature* ice = caster->FindNearestCreature(NPC_LIQUID_ICE, 200.0f, true))
                     if (caster->GetDistance2d(ice->GetPositionX(), ice->GetPositionY()) < (5.0f * ice->GetObjectSize()))
@@ -2274,6 +2288,23 @@ public:
     }
 };
 
+class achievement_elementary : public AchievementCriteriaScript
+{
+public:
+    achievement_elementary() : AchievementCriteriaScript("achievement_elementary") { }
+
+    bool OnCheck(Player* /*source*/, Unit* target)
+    {
+        if (!target)
+            return false;
+
+        if (target->GetMap()->IsHeroic())
+            return target->GetAI()->GetData(DATA_ELEMENTARY);
+
+        return false;
+    }
+};
+
 void AddSC_boss_ascendant_council()
 {
     new at_ascendant_council_1();
@@ -2306,4 +2337,5 @@ void AddSC_boss_ascendant_council()
     new spell_ac_eruption();
     new spell_ac_electrical_instability();
     new spell_ac_gravity_crush();
+    new achievement_elementary();
 }
