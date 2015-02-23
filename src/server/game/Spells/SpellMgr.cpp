@@ -3971,9 +3971,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 89485: // Inner Focus
                 spellInfo->ProcCharges = 1;
                 break;
-            case 34709: // Shadow Sight
-                spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL;
-                break;
             // Paladin
             case 85117:
             case 86172:
@@ -4262,6 +4259,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 57416: // Immune to Daze
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+                break;
+            case 34709: // Shadow Sight
+                spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL;
                 break;
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
