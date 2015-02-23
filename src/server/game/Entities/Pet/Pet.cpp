@@ -498,7 +498,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         }
         default:
         {
-            int fixedHp = 32474;
+            int32 baseHP = 32474;
 
             switch (GetEntry())
             {
@@ -586,7 +586,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 }
                 case 29264: // Feral Spirit
                 {
-                    SetCreateHealth(fixedHp);
+                    SetCreateHealth(baseHP);
 
                     int32 ownerAP = m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.30f;
 
@@ -625,7 +625,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 }
                 case 27829: // Ebon Gargoyle
                 {
-                    SetCreateHealth(fixedHp);
+                    SetCreateHealth(baseHP);
                     SetBonusDamage(int32(GetOwner()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
