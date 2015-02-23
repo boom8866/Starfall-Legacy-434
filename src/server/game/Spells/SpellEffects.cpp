@@ -2681,6 +2681,30 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                case 8921:  // Moonfire
+                {
+                    if (!m_caster)
+                        break;
+
+                    if (unitTarget)
+                    {
+                        if (Aura* sunfire = unitTarget->GetAura(93402, m_caster->GetGUID()))
+                            sunfire->Remove(AURA_REMOVE_BY_CANCEL);
+                    }
+                    break;
+                }
+                case 93402:  // Sunfire
+                {
+                    if (!m_caster)
+                        break;
+
+                    if (unitTarget)
+                    {
+                        if (Aura* moonfire = unitTarget->GetAura(8921, m_caster->GetGUID()))
+                            moonfire->Remove(AURA_REMOVE_BY_CANCEL);
+                    }
+                    break;
+                }
             }
             break;
         }
@@ -5288,7 +5312,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
@@ -5300,7 +5324,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
@@ -5318,7 +5342,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
@@ -5330,7 +5354,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
@@ -5354,7 +5378,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
