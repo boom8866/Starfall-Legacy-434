@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `DamageModifier`=8 WHERE `entry` IN (39625, 40177, 40319, 40484, 40320);

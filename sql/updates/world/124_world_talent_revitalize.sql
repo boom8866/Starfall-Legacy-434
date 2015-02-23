@@ -1,1 +1,0 @@
-UPDATE `spell_proc_event` SET `Cooldown`=12 WHERE  `entry` IN (48539, 48544);
