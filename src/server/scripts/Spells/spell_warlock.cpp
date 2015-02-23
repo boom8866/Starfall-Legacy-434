@@ -1497,9 +1497,14 @@ public:
     {
     }
 
+    enum spellId
+    {
+        SPELL_CURSE_OF_THE_ELEMENTS     = 1490
+    };
+
     bool operator()(WorldObject* object)
     {
-        return (object->ToPlayer()->HasAura(1490));
+        return ((object->ToUnit() && object->ToUnit()->HasAura(SPELL_CURSE_OF_THE_ELEMENTS)) || object->ToPlayer() && object->ToPlayer()->HasAura(SPELL_CURSE_OF_THE_ELEMENTS));
     }
 };
 
