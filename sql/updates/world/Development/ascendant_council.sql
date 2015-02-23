@@ -1,15 +1,13 @@
-﻿
-REPLACE INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+﻿REPLACE INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
 (6625, 'at_ascendant_council_1'),
 (6626, 'at_ascendant_council_2'),
 (6627, 'at_ascendant_council_3');
 
-
 UPDATE `creature_template` SET `scriptname`= 'npc_ascendant_council_controller' WHERE `entry`= 43691;
-UPDATE `creature_template` SET `scriptname`= 'boss_feludius', `speed_walk`= 4, `BaseAttackTime`= 1500, `AIName`= '' WHERE `entry`= 43687;
-UPDATE `creature_template` SET `scriptname`= 'boss_ignacious', `speed_walk`= 4, `BaseAttackTime`= 1500, `AIName`= '' WHERE `entry`= 43686;
-UPDATE `creature_template` SET `scriptname`= 'boss_arion', `speed_walk`= 4, `BaseAttackTime`= 1500, `AIName`= '' WHERE `entry`= 43688;
-UPDATE `creature_template` SET `scriptname`= 'boss_terrastra', `speed_walk`= 4, `BaseAttackTime`= 1500, `AIName`= '' WHERE `entry`= 43689;
+UPDATE `creature_template` SET `scriptname`= 'boss_feludius', `speed_walk`= 4, `BaseAttackTime`= 1500, `difficulty_entry_1`= 49612, `difficulty_entry_2`= 49613, `difficulty_entry_3`= 49614, `AIName`= '' WHERE `entry`= 43687;
+UPDATE `creature_template` SET `scriptname`= 'boss_ignacious', `speed_walk`= 4, `BaseAttackTime`= 1500, `difficulty_entry_1`= 49615, `difficulty_entry_2`= 49616, `difficulty_entry_3`= 49617, `AIName`= '' WHERE `entry`= 43686;
+UPDATE `creature_template` SET `scriptname`= 'boss_arion', `speed_walk`= 4, `BaseAttackTime`= 1500, `difficulty_entry_1`= 49606, `difficulty_entry_2`= 49607, `difficulty_entry_3`= 49608, `AIName`= '' WHERE `entry`= 43688;
+UPDATE `creature_template` SET `scriptname`= 'boss_terrastra', `speed_walk`= 4, `BaseAttackTime`= 1500, `difficulty_entry_1`= 49609, `difficulty_entry_2`= 49610, `difficulty_entry_3`= 49611, `AIName`= '' WHERE `entry`= 43689;
 UPDATE `creature_template` SET `scriptname`= 'boss_elementium_monstrosity', `difficulty_entry_1`= 49619, `difficulty_entry_2`= 49620, `difficulty_entry_3`= 49621, `AIName`= '' WHERE `entry`= 43735;
 
 DELETE FROM `creature_template_addon` WHERE `entry` IN (43686, 43687, 43688, 43689);
@@ -20,8 +18,12 @@ UPDATE `creature_template` SET `minlevel`= 80, `maxlevel`= 80, `faction`= 14, `u
 UPDATE `creature_template` SET `minlevel`= 80, `maxlevel`= 80, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 128, `InhabitType`= 4 WHERE `entry`= 47501;
 -- Violent Cyclone
 UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction`= 1847, `unit_flags`= 33554432, `flags_extra`= 128 WHERE `entry`= 44747;
+-- Feludius and Ignacious and Terrastra
+UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 16, `BaseAttackTime`= 1500, `speed_walk`= 4, `mechanic_immune_mask`= 617299839, `exp`= 3 WHERE `entry` IN (49612, 49613, 49614, 49615, 49616, 49617, 43686, 43687, 43689, 49609, 49610, 49611);
+-- Arion
+UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 16, `BaseAttackTime`= 1500, `speed_walk`= 4, `mechanic_immune_mask`= 650854399, `exp`= 3 WHERE `entry` IN (49606, 49607, 49608, 43688);
 -- Elementium Monstrosity
-UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 16, `BaseAttackTime`= 1500 WHERE `entry`= 43735;
+UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 16, `BaseAttackTime`= 1500, `mechanic_immune_mask`= 650854399, `exp`= 3 WHERE `entry` IN (43735, 49619, 49620, 49621);
 -- Liquid Ice
 UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 128 WHERE `entry`= 45452;
 -- Eruption target
@@ -112,7 +114,12 @@ REPLACE INTO `spell_script_names` (`spell_id`, `scriptname`) VALUES
 (83718, 'spell_ac_harden_skin'),
 (92541, 'spell_ac_harden_skin'),
 (92542, 'spell_ac_harden_skin'),
-(92543, 'spell_ac_harden_skin');
+(92543, 'spell_ac_harden_skin'),
+(83070, 'spell_ac_lightning_blast'),
+(92454, 'spell_ac_lightning_blast'),
+(92455, 'spell_ac_lightning_blast'),
+(92456, 'spell_ac_lightning_blast'),
+(94731, 'spell_ac_lightning_blast_triggered');
 
 DELETE FROM `conditions` WHERE `SourceEntry` IN (82699, 84913, 83087);
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES

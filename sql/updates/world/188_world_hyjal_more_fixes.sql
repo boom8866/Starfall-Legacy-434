@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `minlevel`=81, `maxlevel`=81, `exp`=3, `unit_flags`=512 WHERE `entry`=39659;

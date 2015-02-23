@@ -96,7 +96,7 @@ public:
 
         void PreparePlayerForEvent()
         {
-            if (playerSummoner && playerSummoner != NULL)
+            if (playerSummoner && playerSummoner != NULL && playerSummoner->IsInWorld())
             {
                 if (playerSummoner->ToPlayer())
                 {
@@ -123,7 +123,7 @@ public:
                 case ACTION_START_PRE_EVENT:
                 {
                     events.CancelEvent(EVENT_CHECK_PLAYER_CINEMATIC);
-                    if (playerSummoner && playerSummoner != NULL)
+                    if (playerSummoner && playerSummoner != NULL && playerSummoner->IsInWorld())
                         playerSummoner->SetPhaseMask(8192, true);
                     PreparePlayerForEvent();
                     eventInProgress = true;
@@ -132,7 +132,7 @@ public:
                 }
                 case ACTION_TALK_0:
                 {
-                    if (playerSummoner && playerSummoner != NULL)
+                    if (playerSummoner && playerSummoner != NULL && playerSummoner->IsInWorld())
                         Talk(0, playerSummoner->GetGUID());
                     break;
                 }

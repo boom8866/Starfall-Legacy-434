@@ -1020,8 +1020,8 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                     ap += effectVengeance->GetAmount();
 
                 // Set limit
-                if (ap > int32(victim->CountPctFromMaxHealth(10)))
-                    ap = int32(victim->CountPctFromMaxHealth(10));
+                if (ap > int32(victim->GetStat(STAT_STAMINA) * 0.10f + victim->GetCreateHealth()))
+                    ap = int32(victim->GetStat(STAT_STAMINA) * 0.10f + victim->GetCreateHealth());
 
                 // Cast effect & correct duration
                 if (victim->GetTypeId() == TYPEID_PLAYER)
@@ -1050,8 +1050,8 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                         ap += effectVengeance->GetAmount();
 
                     // Set limit
-                    if (ap > int32(victim->CountPctFromMaxHealth(10)))
-                        ap = int32(victim->CountPctFromMaxHealth(10));
+                    if (ap > int32(victim->GetStat(STAT_STAMINA) * 0.10f + victim->GetCreateHealth()))
+                        ap = int32(victim->GetStat(STAT_STAMINA) * 0.10f + victim->GetCreateHealth());
 
                     // Cast effect & correct duration
                     if (victim->GetTypeId() == TYPEID_PLAYER)
@@ -2928,6 +2928,13 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     // resist and deflect chances
     if (spell->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT)
         return SPELL_MISS_NONE;
+
+    // All non-damaging interrupts off the global cooldown will now always hit the target. This includes Pummel, Kick, Mind Freeze, Rebuke, Skull Bash, Counterspell, Wind Shear, Solar Beam, Silencing Shot, and related player pet abilities.
+    if (spell->Effects[EFFECT_0].Effect == SPELL_EFFECT_INTERRUPT_CAST || spell->Effects[EFFECT_1].Effect == SPELL_EFFECT_INTERRUPT_CAST)
+    {
+        if (spell->StartRecoveryCategory == 0 && spell->StartRecoveryTime == 0)
+            return SPELL_MISS_NONE;
+    }
 
     // Chance resist mechanic (select max value from every mechanic spell effect)
     int32 resist_chance = victim->GetMechanicResistChance(spell) * 100;
@@ -8845,6 +8852,21 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             {
                 switch (auraSpellInfo->Id)
                 {
+                    // Efflorescence
+                    case 34151:
+                    case 81274:
+                    case 81275:
+                    {
+                        if (victim)
+                        {
+                            if (SpellInfo const* efflorescence = sSpellMgr->GetSpellInfo(81262))
+                            {
+                                int32 heal = damage * triggerAmount / 100;
+                                CastCustomSpell(victim, 81262, &heal, NULL, NULL, true);
+                            }
+                        }
+                        break;
+                    }
                     // Druid Forms Trinket
                     case 37336:
                     {
@@ -11298,6 +11320,35 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // Custom scripted damage
     switch (spellProto->SpellFamilyName)
     {
+        case SPELLFAMILY_HUNTER:
+        {
+            if (isPet())
+            {
+                if (Unit* owner = GetCharmerOrOwner())
+                {
+                    int32 ownerRAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK);
+                    switch (spellProto->Id)
+                    {
+                        case 16827:    // Claw
+                        case 17253:    // Bite
+                        case 49966:    // Smack
+                        {
+                            DoneTotal += ownerRAP * 0.168f;
+                            // Spiked Collar
+                            if (AuraEffect* spikedCollar = GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2934, EFFECT_0))
+                                AddPct(DoneTotalMod, spikedCollar->GetAmount());
+
+                            // Wild Hunt
+                            if (AuraEffect* wildHunt = GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_0))
+                                if (GetPower(POWER_FOCUS) + spellProto->CalcPowerCost(this, spellProto->GetSchoolMask()) >= 50)
+                                    AddPct(DoneTotalMod, wildHunt->GetAmount());
+                            break;
+                        }
+                    }
+                }
+            }
+            break;
+        }
         case SPELLFAMILY_MAGE:
         {
             if (spellProto && GetTypeId() == TYPEID_PLAYER)
@@ -12325,6 +12376,24 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
             }
             break;
         }
+        case SPELLFAMILY_DRUID:
+        {
+            switch (spellProto->Id)
+            {
+                case 81269: // Efflorescence
+                {
+                    if (victim)
+                    {
+                        if (DynamicObject* dynObj = GetDynObject(81262))
+                            if (Aura* aur = dynObj->GetAura())
+                                if (AuraEffect* aurEff = aur->GetEffect(EFFECT_0))
+                                    DoneTotal += aurEff->GetAmount();
+                    }
+                    break;
+                }
+            }
+            break;
+        }
     }
 
     // Default calculation
@@ -13107,6 +13176,7 @@ void Unit::Dismount()
         else
             player->ResummonTemporaryUnsummonedPet();
     }
+    SetObjectScale(GetObjectScale());
 }
 
 MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
@@ -20017,6 +20087,9 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                 case 35905: // King's Greymane Horse
                 case 44427:
                 {
+                    // Immuned to Daze
+                    AddAura(57416, this);
+
                     if (player)
                     {
                         if (player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))

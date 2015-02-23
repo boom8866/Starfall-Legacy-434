@@ -305,7 +305,7 @@ public:
                     {
                         me->MonsterTextEmote("Chief Engineer takes off running.", 0, false);
                         me->SetWalk(false);
-                        me->GetMotionMaster()->MovePoint(0, 2352.27f, -4736.54f, 120.82f);
+                        me->GetMotionMaster()->MovePoint(50, 2352.27f, -4736.54f, 120.82f);
                         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         me->DespawnOrUnsummon(5000);
                         events.Reset();
@@ -648,10 +648,31 @@ public:
     }
 };
 
+class go_th_h_portal_to_twilight_highlands : public GameObjectScript
+{
+public:
+    go_th_h_portal_to_twilight_highlands() : GameObjectScript("go_th_h_portal_to_twilight_highlands")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_TRAITORS_BAIT     = 26830
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_TRAITORS_BAIT) == QUEST_STATUS_REWARDED)
+            return false;
+        return true;
+    }
+};
+
 void AddSC_orgrimmar()
 {
     new npc_th_hellscream_demolisher();
     new npc_th_chief_engineer();
     new npc_th_awol_grunt();
     new npc_th_bilgewater_foreman();
+    new go_th_h_portal_to_twilight_highlands();
 }

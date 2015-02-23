@@ -636,6 +636,16 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             damage = damage * unitTarget->GetMaxHealth() / 100;
                         break;
                     }
+                    case 74817: // Inferno (Baron Geddon)
+                    {
+                        if (Aura* aur = m_caster->GetAura(74813))
+                        {
+                            int32 duration = aur->GetDuration() / 1000;
+                            int32 maxDuration = aur->GetMaxDuration() / 1000;
+                            damage += damage * (maxDuration - duration);
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -2671,6 +2681,30 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                case 8921:  // Moonfire
+                {
+                    if (!m_caster)
+                        break;
+
+                    if (unitTarget)
+                    {
+                        if (Aura* sunfire = unitTarget->GetAura(93402, m_caster->GetGUID()))
+                            sunfire->Remove(AURA_REMOVE_BY_CANCEL);
+                    }
+                    break;
+                }
+                case 93402:  // Sunfire
+                {
+                    if (!m_caster)
+                        break;
+
+                    if (unitTarget)
+                    {
+                        if (Aura* moonfire = unitTarget->GetAura(8921, m_caster->GetGUID()))
+                            moonfire->Remove(AURA_REMOVE_BY_CANCEL);
+                    }
+                    break;
+                }
             }
             break;
         }
@@ -3252,6 +3286,10 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
             {
                 // Only for player casters
                 if (caster->GetTypeId() != TYPEID_PLAYER)
+                    break;
+
+                // Need Mastery
+                if (!caster->HasAura(86470))
                     break;
 
                 // Increase direct healing by 10% and 1.25% bonus per mastery points
@@ -5274,7 +5312,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
@@ -5286,7 +5324,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
@@ -5304,7 +5342,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
@@ -5316,7 +5354,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
@@ -5340,7 +5378,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
@@ -6223,35 +6261,26 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
 
                         for (Unit::AuraEffectList::const_iterator itr = dotList.begin(); itr != dotList.end(); ++itr)
                         {
-                            if (!(*itr)->GetBase())
-                                continue;
+                            if ((*itr)->GetCasterGUID() == m_caster->GetGUID())
+                            {
+                                uint32 duration = (*itr)->GetBase()->GetDuration();
+                                uint32 spellId = (*itr)->GetId();
+                                int32 damage = (*itr)->GetAmount();
 
-                            if (!(*itr)->GetBase()->GetSpellInfo())
-                                continue;
+                                if (spellId != 2120 && duration > 0 && damage > 0)
+                                {
+                                    if (spellId == 92315 || spellId == 11366 || spellId == 44614)
+                                        m_caster->AddAura(spellId, unitTarget);
+                                    else
+                                        m_caster->CastCustomSpell(unitTarget, spellId, &damage, NULL, NULL, true);
 
-                            if (!(*itr)->GetBase()->GetCasterGUID())
-                                continue;
-
-                            if ((*itr)->GetBase()->GetId() == 2120)
-                                continue;
-
-                            if ((*itr)->GetBase()->GetCasterGUID() != m_caster->GetGUID())
-                                continue;
-
-                            uint32 duration = (*itr)->GetBase()->GetDuration();
-                            uint32 spellId = (*itr)->GetId();
-                            int32 damage = (*itr)->GetAmount();
-
-                            if (spellId == 92315 || spellId == 11366 || spellId == 44614)
-                                m_caster->AddAura(spellId, unitTarget);
-                            else
-                                m_caster->CastCustomSpell(unitTarget, spellId, &damage, NULL, NULL, true);
-
-                            if (unitTarget->GetAura(spellId))
-                                unitTarget->GetAura(spellId)->SetDuration(duration);
+                                    if (unitTarget->GetAura(spellId))
+                                        unitTarget->GetAura(spellId)->SetDuration(duration);
+                                }
+                            }
                         }
-                        break;
                     }
+                    break;
                 }
                 case 62482:          // Grab Crate
                 {
@@ -8514,30 +8543,28 @@ void Spell::EffectActivateRune (SpellEffIndex effIndex)
                     continue;
             player->SetRuneCooldown(j, 0);
             --count;
-        }
+       }
     }
 
     // Blood Tap
-    if (m_spellInfo->Id == 45529)
+    if (m_spellInfo->Id == 45529 && count > 0)
     {
-        if (!player)
-            return;
-
-        m_runesState = player->GetRunesState();
-
-        std::list< std::pair<uint32, uint8> > list;
-        for (uint32 i = 0; i < MAX_RUNES; ++i)
-            if (player->GetCurrentRune(i) == RuneType(m_spellInfo->Effects[EFFECT_0].MiscValue))
-                list.push_back(std::make_pair(player->GetRuneCooldown(i), i));
-        list.sort();
-
-        uint32 count = (damage == 0) ? 1 : damage;
-        for (std::list< std::pair<uint32, uint8> >::const_iterator itr = list.begin(); (itr != list.end()) && (count > 0); ++itr, --count)
-            player->SetRuneCooldown(itr->second, 0);
-
-        // Send rune state diff
-        uint8 runesState = player->GetRunesState() & ~m_runesState;
-        player->AddRunePower(runesState);
+        for (uint32 l = 0; l < MAX_RUNES && count > 0; ++l)
+        {
+            // Check if both runes are on cd as that is the only time when this needs to come into effect
+            if ((player->GetRuneCooldown(l) && player->GetCurrentRune(l) == RuneType(m_spellInfo->Effects[effIndex].MiscValueB)) && (player->GetRuneCooldown(l + 1) && player->GetCurrentRune(l + 1) == RuneType(m_spellInfo->Effects[effIndex].MiscValueB)))
+            {
+                // Should always update the rune with the lowest cd
+                if (player->GetRuneCooldown(l) >= player->GetRuneCooldown(l + 1))
+                    l++;
+                player->SetRuneCooldown(l, 0);
+                --count;
+                // is needed to push through to the client that the rune is active
+                player->ResyncRunes(MAX_RUNES);
+            }
+            else
+                break;
+        }
     }
 
     // Empower rune weapon

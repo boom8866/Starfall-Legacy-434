@@ -60,11 +60,12 @@ void ArchaeologyMgr::LoadData()
 
     for (uint32 i = 0; i < sQuestPOIPointStore.GetNumRows(); i++)
     {
-        const QuestPOIPointEntry *entry = sQuestPOIPointStore.LookupEntry(i);    
+        const QuestPOIPointEntry *entry = sQuestPOIPointStore.LookupEntry(i);
         if (!entry)
             continue;
 
         for (std::list<std::pair<uint16, uint32> >::iterator itr = sites.begin(); itr != sites.end();)
+        {
             if (itr->second == entry->blobId)
             {
                 uint16 site = itr->first;
@@ -76,27 +77,28 @@ void ArchaeologyMgr::LoadData()
                     break;
                 }
 
-                _polygonMap[site] = new SitePolygon();
-                _polygonMap[site]->_x[0] = entry->x;
-                _polygonMap[site]->_y[0] = entry->y;
+                _polygonMap[site] = new SitePolygonGraph<float>();
+                _polygonMap[site]->add_node(entry->x, entry->y);
 
                 for (uint32 j = 1; j < 12; j++)
                 {
                     entry = sQuestPOIPointStore.LookupEntry(++i);
                     if (poiRel != entry->blobId)
                     {
-                        sLog->outError(LOG_FILTER_SERVER_LOADING, "Archaeology: Tried to use POI %u not related to site %u", entry->id , poiRel);
+                        sLog->outError(LOG_FILTER_SERVER_LOADING, "Archaeology: Tried to use POI %u not related to site %u", entry->id, poiRel);
                         break;
                     }
-                    _polygonMap[site]->_x[j] = entry->x;
-                    _polygonMap[site]->_y[j] = entry->y;
+
+                    _polygonMap[site]->add_node(entry->x, entry->y);
                 }
                 count++;
                 sites.erase(itr++);
             }
             else
                 itr++;
+        }
     }
+
     for (std::list<std::pair<uint16, uint32> >::iterator itr = sites.begin(); itr != sites.end(); itr++)
         sLog->outError(LOG_FILTER_PLAYER_SKILLS, "Archaeology: SiteEntry:%u links at POIBlob:%u which does not exist", itr->first, itr->second);
 
@@ -217,13 +219,13 @@ uint16 ArchaeologyMgr::GetNewSite(Continent continent, SiteData *sites, bool ext
 
 bool ArchaeologyMgr::SetSiteCoords(SiteData &site)
 {
-    if (SitePolygon * poly = _polygonMap[site.entry])
+    if (SitePolygonGraph<float>* poly = _polygonMap[site.entry])
     {
-        float _x, _y;
-        poly->GetRandomCoords(_x, _y);
+        SitePolygonGraphNode<float> node = poly->randomize_poi();
 
-        site.x = _x;
-        site.y = _y;
+        site.x = node.getX();
+        site.y = node.getY();
+
         return true;
     }
     return false;

@@ -24459,6 +24459,9 @@ void Player::SendInitialPacketsAfterAddToMap()
         SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
         UpdateSpeed(UnitMoveType(i), true);
     }
+
+    SendMovementSetWaterWalking(false);
+    SetRooted(false);
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()
@@ -26135,6 +26138,10 @@ void Player::RestoreBaseRune(uint8 index)
         if (GetBaseRune(index) == RUNE_BLOOD)
             return;
     }
+
+    // If rune was converted by a non-pasive aura that still active we should keep it converted
+    if (aura && !(aura->GetSpellInfo()->Attributes & SPELL_ATTR0_PASSIVE))
+        return;
 
     ConvertRune(index, GetBaseRune(index));
     SetRuneConvertAura(index, NULL);

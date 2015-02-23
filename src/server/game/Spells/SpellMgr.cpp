@@ -3046,9 +3046,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 49838: // Stop Time
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                 break;
-            case 45529: // Blood Tap
-                spellInfo->Effects[EFFECT_0].MiscValue = 0;
-                break;
             case 61407: // Energize Cores
             case 62136: // Energize Cores
             case 54069: // Energize Cores
@@ -3637,6 +3634,15 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 72405: // Broken Frostmourne
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS); // 200yd
                 break;
+            case 74813: // Inferno
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 74817;
+                break;
+            case 74817: // Inferno (Triggered)
+                spellInfo->Effects[EFFECT_0].BasePoints = 5000;
+                break;
+            case 95391: // Summon Quicksilver Submersion Camera [INTERNAL]
+                spellInfo->Effects[EFFECT_0].BasePoints = 46598;
+                break;
             // ENDOF ICECROWN CITADEL SPELLS
             //
             // RUBY SANCTUM SPELLS
@@ -3927,6 +3933,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 94338: // Eclipse (Solar)
                 spellInfo->Effects[EFFECT_0].BasePoints = 93402;
                 break;
+            case 34151: // Efflorescence
+            case 81274:
+            case 81275:
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
+                break;
             case 16870: // Omen of Clarity
                 spellInfo->ProcChance = 5.0f;
                 break;
@@ -3959,9 +3970,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 89485: // Inner Focus
                 spellInfo->ProcCharges = 1;
-                break;
-            case 34709: // Shadow Sight
-                spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL;
                 break;
             // Paladin
             case 85117:
@@ -4064,7 +4072,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 19263: // Deterrence
                 spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_MOD_PACIFY;
                 break;
-            // SPELLS GENERETIC
+            // SPELLS GENERIC
             case 73701: // Vashj'ir - Sea Legs (due to buggy liquid level calculation in vashjir)
                 spellInfo->AuraInterruptFlags         = 0;
                 spellInfo->SpellCastingRequirementsId = 0;
@@ -4251,6 +4259,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 57416: // Immune to Daze
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+                break;
+            case 34709: // Shadow Sight
+                spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL;
                 break;
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
@@ -5151,6 +5162,13 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 break;
             // * Ascendant Council
+            case 82772: // Frozen
+            case 92503:
+            case 92504:
+            case 92505:
+                spellInfo->AuraInterruptFlags = 0;
+                spellInfo->ProcFlags = 0;
+                break;
             case 83692: // Eruption
             case 92534:
             case 92535:

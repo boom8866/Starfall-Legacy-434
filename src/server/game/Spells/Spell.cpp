@@ -1240,12 +1240,13 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                 }
                 break;
             case SPELLFAMILY_PRIEST:
+            {
                 if (m_spellInfo->SpellFamilyFlags[0] == 0x10000000) // Circle of Healing
                 {
                     maxSize = m_caster->HasAura(55675) ? 6 : 5; // Glyph of Circle of Healing
                     power = POWER_HEALTH;
                 }
-                else if (m_spellInfo->Id == 64844) // Divine Hymn
+                else if (m_spellInfo->Id == 64844 || m_spellInfo->Id == 81269) // Divine Hymn - Efflorescence
                 {
                     maxSize = 3;
                     power = POWER_HEALTH;
@@ -1267,6 +1268,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                         ++itr;
                 }
                 break;
+            }
             case SPELLFAMILY_DRUID:
                 if (m_spellInfo->SpellFamilyFlags[1] == 0x04000000) // Wild Growth
                 {
