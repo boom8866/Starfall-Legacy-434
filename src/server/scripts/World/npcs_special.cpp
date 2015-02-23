@@ -8451,7 +8451,7 @@ public:
                     {
                         RESCHEDULE_IF_CASTING
                         DoCastVictim(SPELL_SHOOT);
-                        events.ScheduleEvent(EVENT_SHOOT, urand(3500, 8500));
+                        events.ScheduleEvent(EVENT_SHOOT, urand(8500, 15500));
                         break;
                     }
                     case EVENT_CHECK_HEALTH:

@@ -12581,6 +12581,47 @@ public:
     }
 };
 
+class spell_dh_deepvein_patch_kit : public SpellScriptLoader
+{
+public:
+    spell_dh_deepvein_patch_kit() : SpellScriptLoader("spell_dh_deepvein_patch_kit")
+    {
+    }
+
+    enum npcId
+    {
+        NPC_INJURED_EARTHEN     = 43229
+    };
+
+    class spell_dh_deepvein_patch_kit_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dh_deepvein_patch_kit_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetExplTargetUnit())
+                    if (target->GetTypeId() == TYPEID_UNIT)
+                        if (target->ToCreature() && target->GetEntry() == NPC_INJURED_EARTHEN)
+                            return SPELL_CAST_OK;
+            }
+
+            return SPELL_FAILED_BAD_TARGETS;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_dh_deepvein_patch_kit_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dh_deepvein_patch_kit_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -12831,4 +12872,5 @@ void AddSC_generic_spell_scripts()
     new spell_engineering_research();
     new spell_blackjack_hyjal();
     new spell_gen_vengeance_decay();
+    new spell_dh_deepvein_patch_kit();
 }
