@@ -1816,6 +1816,72 @@ public:
     }
 };
 
+class spell_dru_skull_bash : public SpellScriptLoader
+{
+public:
+    spell_dru_skull_bash() : SpellScriptLoader("spell_dru_skull_bash")
+    {
+    }
+
+    class spell_dru_skull_bash_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_skull_bash_SpellScript);
+
+        enum spellId
+        {
+            SPELL_CLEARCASTING_BUFF     = 16870
+        };
+
+        bool Load()
+        {
+            isClearCasting = false;
+            buffDuration = 0;
+            return true;
+        }
+
+        void CheckBeforeCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Aura* aur = caster->GetAura(SPELL_CLEARCASTING_BUFF, caster->GetGUID()))
+                {
+                    isClearCasting = true;
+                    buffDuration = aur->GetDuration();
+                }
+            }
+        }
+
+        void HandleAfterCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (isClearCasting == true && buffDuration > 0)
+                {
+                    caster->AddAura(SPELL_CLEARCASTING_BUFF, caster);
+                    if (Aura* aur = caster->GetAura(SPELL_CLEARCASTING_BUFF, caster->GetGUID()))
+                        aur->SetDuration(buffDuration);
+                }
+                isClearCasting = false;
+            }
+        }
+
+        void Register()
+        {
+            BeforeCast += SpellCastFn(spell_dru_skull_bash_SpellScript::CheckBeforeCast);
+            AfterCast += SpellCastFn(spell_dru_skull_bash_SpellScript::HandleAfterCast);
+        }
+
+    private:
+        bool isClearCasting;
+        uint32 buffDuration;
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_skull_bash_SpellScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1853,4 +1919,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_mangle_cat();
     new spell_dru_rejuvenation();
     new spell_dru_lifebloom_tol();
+    new spell_dru_skull_bash();
 }
