@@ -252,6 +252,19 @@ private:
     Unit* caster;
 };
 
+class VictimCheck
+{
+public:
+    VictimCheck(Unit* caster) : caster(caster) { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (caster->getVictim() == object);
+    }
+private:
+    Unit* caster;
+};
+
 class LiquidIceRangeCheck
 {
 public:
@@ -2262,6 +2275,11 @@ public:
             if (targets.empty())
                 return;
 
+            targets.remove_if(VictimCheck(GetCaster()));
+
+            if (targets.empty())
+                return;
+
             uint32 size = GetCaster()->GetMap()->Is25ManRaid() ? 3 : 1;
 
             Trinity::Containers::RandomResizeList(targets, size);
@@ -2298,10 +2316,7 @@ public:
         if (!target)
             return false;
 
-        if (target->GetMap()->IsHeroic())
-            return target->GetAI()->GetData(DATA_ELEMENTARY);
-
-        return false;
+        return target->GetAI()->GetData(DATA_ELEMENTARY);
     }
 };
 
