@@ -3,7 +3,7 @@
 (6626, 'at_ascendant_council_2'),
 (6627, 'at_ascendant_council_3');
 
-UPDATE `creature_template` SET `scriptname`= 'npc_ascendant_council_controller' WHERE `entry`= 43691;
+UPDATE `creature_template` SET `scriptname`= 'npc_ascendant_council_controller', `minlevel`= 80, `maxlevel`= 80, `faction`= 14, `unit_flags`= 33554432 WHERE `entry`= 43691;
 UPDATE `creature_template` SET `scriptname`= 'boss_feludius', `speed_walk`= 4, `BaseAttackTime`= 1500, `difficulty_entry_1`= 49612, `difficulty_entry_2`= 49613, `difficulty_entry_3`= 49614, `AIName`= '' WHERE `entry`= 43687;
 UPDATE `creature_template` SET `scriptname`= 'boss_ignacious', `speed_walk`= 4, `BaseAttackTime`= 1500, `difficulty_entry_1`= 49615, `difficulty_entry_2`= 49616, `difficulty_entry_3`= 49617, `AIName`= '' WHERE `entry`= 43686;
 UPDATE `creature_template` SET `scriptname`= 'boss_arion', `speed_walk`= 4, `BaseAttackTime`= 1500, `difficulty_entry_1`= 49606, `difficulty_entry_2`= 49607, `difficulty_entry_3`= 49608, `AIName`= '' WHERE `entry`= 43688;

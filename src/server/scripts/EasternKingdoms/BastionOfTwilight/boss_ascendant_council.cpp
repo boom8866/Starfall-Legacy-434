@@ -73,6 +73,7 @@ enum Spells
 
     // Elementium Monstrosity
     SPELL_TWILIGHT_EXPLOSION            = 95789,
+    SPELL_MERGE_HEALTH                  = 82344,
     SPELL_CRYOGENIC_AURA                = 84918,
     SPELL_LIQUID_ICE_GROWTH             = 84917,
     SPELL_ELECTRIC_INSTABILITY          = 84526,
@@ -184,30 +185,6 @@ enum Actions
 
 Position const ElementiumMonstrosityPos = { -1009.01f, -582.467f, 831.9843f, 6.265732f };
 
-class LiquidIceRangeCheck
-{
-public:
-    LiquidIceRangeCheck(Unit* caster) : caster(caster) { }
-
-    bool operator()(WorldObject* object)
-    {
-        return (object->GetExactDist2d(caster->GetPositionX(), caster->GetPositionY()) > (5.0f * caster->GetObjectSize()));
-    }
-private:
-    Unit* caster;
-};
-
-class ElementiumMonstrosityCheck
-{
-public:
-    ElementiumMonstrosityCheck() { }
-
-    bool operator()(WorldObject* object)
-    {
-        return (object->GetEntry() != BOSS_ELEMENTIUM_MONSTROSITY);
-    }
-};
-
 class at_ascendant_council_1 : public AreaTriggerScript
 {
 public:
@@ -273,6 +250,30 @@ private:
     Unit* caster;
 };
 
+class LiquidIceRangeCheck
+{
+public:
+    LiquidIceRangeCheck(Unit* caster) : caster(caster) { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->GetExactDist2d(caster->GetPositionX(), caster->GetPositionY()) > (5.0f * caster->GetObjectSize()));
+    }
+private:
+    Unit* caster;
+};
+
+class ElementiumMonstrosityCheck
+{
+public:
+    ElementiumMonstrosityCheck() { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->GetEntry() != BOSS_ELEMENTIUM_MONSTROSITY);
+    }
+};
+
 class SwirlingWindsCheck
 {
 public:
@@ -322,6 +323,7 @@ public:
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             MakeInterruptable(false);
+            _switched = false;
 
             if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
                 ignacious->AI()->AttackStart(who);
@@ -339,7 +341,6 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
-            _switched = false;
             me->SetReactState(REACT_AGGRESSIVE);
             me->GetMotionMaster()->MoveTargetedHome();
             summons.DespawnAll();
@@ -514,6 +515,7 @@ public:
         void Reset()
         {
             _Reset();
+            _switched = false;
             MakeInterruptable(false);
         }
 
@@ -522,6 +524,7 @@ public:
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             MakeInterruptable(false);
+            _switched = false;
             events.ScheduleEvent(EVENT_TALK_INTRO, 5000);
             events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, 31000);
             events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
@@ -540,7 +543,6 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             leapTarget = NULL;
             _infernoCounter = 0;
-            _switched = false;
             summons.DespawnAll();
             MakeInterruptable(false);
         }
@@ -765,6 +767,7 @@ public:
         void Reset()
         {
             _Reset();
+            _switched = false;
             me->SetReactState(REACT_PASSIVE);
             MakeInterruptable(false);
         }
@@ -772,6 +775,7 @@ public:
         void EnterCombat(Unit* who)
         {
             _EnterCombat();
+            _switched = false;
             events.ScheduleEvent(EVENT_TALK_INTRO, 4000);
             events.ScheduleEvent(EVENT_ERUPTION, 15000);
             events.ScheduleEvent(EVENT_QUAKE, 33000);
@@ -783,7 +787,6 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
-            _switched = false;
             MakeInterruptable(false);
             _eruptionCounter = 0;
             me->GetMotionMaster()->MoveTargetedHome();
@@ -870,10 +873,10 @@ public:
                 case ACTION_PREPARE_FUSE:
                     _switched = true;
                     me->SetReactState(REACT_PASSIVE);
-                    me->AttackStop();
                     me->CastStop();
-                    DoCast(me, SPELL_ELEMENTAL_STASIS, true);
+                    me->AttackStop();
                     DoCast(me, SPELL_TELEPORT_EARTH, true);
+                    DoCast(me, SPELL_ELEMENTAL_STASIS);
                     events.Reset();
                     summons.DespawnAll();
                     events.ScheduleEvent(EVENT_FACE_CONTROLLER, 200);
@@ -985,6 +988,7 @@ public:
         void Reset()
         {
             _Reset();
+            _switched = false;
             me->SetReactState(REACT_PASSIVE);
         }
 
@@ -992,6 +996,7 @@ public:
         {
             Talk(SAY_AGGRO);
             _EnterCombat();
+            _switched = false;
             events.ScheduleEvent(EVENT_CALL_WINDS, 15000);
             events.ScheduleEvent(EVENT_LIGHTNING_ROD, 32000);
             events.ScheduleEvent(EVENT_DISPERSE, 24000);
@@ -1003,7 +1008,6 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
-            _switched = false;
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
             summons.DespawnAll();
@@ -1398,7 +1402,7 @@ public:
                     break;
                 case ACTION_RESET_COUNCIL:
                     health = 0;
-                    events.ScheduleEvent(EVENT_RESET_COUNCIL, 200);
+                    events.ScheduleEvent(EVENT_RESET_COUNCIL, 1);
                     instance->SetBossState(DATA_ASCENDANT_COUNCIL, NOT_STARTED);
                     instance->SetBossState(DATA_FELUDIUS, FAIL);
                     instance->SetBossState(DATA_IGNACIOUS, FAIL);
