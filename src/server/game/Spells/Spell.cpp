@@ -1082,6 +1082,10 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
             break;
         case 75321: // Valionas Flame
         case 90973:
+        case 88558: // Flame Torrent
+        case 92516:
+        case 92517:
+        case 92518:
             coneAngle = M_PI / 4.5f;
             break;
         case 101872: // Shoot (Darkmoon Faire)
