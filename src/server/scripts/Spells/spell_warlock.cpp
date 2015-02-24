@@ -1504,7 +1504,7 @@ public:
 
     bool operator()(WorldObject* object)
     {
-        return ((object->ToUnit() && object->ToUnit()->HasAura(SPELL_CURSE_OF_THE_ELEMENTS)) || object->ToPlayer() && object->ToPlayer()->HasAura(SPELL_CURSE_OF_THE_ELEMENTS));
+        return ((object->ToUnit() && object->ToUnit()->HasAura(SPELL_CURSE_OF_THE_ELEMENTS)) || (object->ToPlayer() && object->ToPlayer()->HasAura(SPELL_CURSE_OF_THE_ELEMENTS)));
     }
 };
 

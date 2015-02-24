@@ -6262,9 +6262,23 @@ void Player::UpdateRating(CombatRating cr)
             if (Pet* pet = GetPet())
             {
                 if (pet->ToTempSummon())
+                {
                     pet->ToTempSummon()->UpdateAttackPowerAndDamage();
+                    for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                        pet->ToTempSummon()->UpdateStats(Stats(i));
+
+                    for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+                        pet->ToTempSummon()->UpdateMaxPower(Powers(i));
+                }
                 else
+                {
                     pet->UpdateAttackPowerAndDamage();
+                    for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                        pet->UpdateStats(Stats(i));
+
+                    for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+                        pet->UpdateMaxPower(Powers(i));
+                }
             }
             break;
         }
@@ -6277,9 +6291,23 @@ void Player::UpdateRating(CombatRating cr)
             if (Pet* pet = GetPet())
             {
                 if (pet->ToTempSummon())
+                {
                     pet->ToTempSummon()->UpdateAttackPowerAndDamage();
+                    for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                        pet->ToTempSummon()->UpdateStats(Stats(i));
+
+                    for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+                        pet->ToTempSummon()->UpdateMaxPower(Powers(i));
+                }
                 else
+                {
                     pet->UpdateAttackPowerAndDamage();
+                    for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                        pet->UpdateStats(Stats(i));
+
+                    for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+                        pet->UpdateMaxPower(Powers(i));
+                }
             }
             break;
         }
@@ -7105,9 +7133,23 @@ void Player::UpdateSpellPower()
     if (Pet* pet = GetPet())
     {
         if (pet->ToTempSummon())
+        {
             pet->ToTempSummon()->UpdateAttackPowerAndDamage();
+            for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                pet->ToTempSummon()->UpdateStats(Stats(i));
+
+            for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+                pet->ToTempSummon()->UpdateMaxPower(Powers(i));
+        }
         else
+        {
             pet->UpdateAttackPowerAndDamage();
+            for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                pet->UpdateStats(Stats(i));
+
+            for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+                pet->UpdateMaxPower(Powers(i));
+        }
     }
 }
 
@@ -13186,9 +13228,23 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
     if (Pet* pet = GetPet())
     {
         if (pet->ToTempSummon())
+        {
             pet->ToTempSummon()->UpdateAttackPowerAndDamage();
+            for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                pet->ToTempSummon()->UpdateStats(Stats(i));
+
+            for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+                pet->ToTempSummon()->UpdateMaxPower(Powers(i));
+        }
         else
+        {
             pet->UpdateAttackPowerAndDamage();
+            for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                pet->UpdateStats(Stats(i));
+
+            for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+                pet->UpdateMaxPower(Powers(i));
+        }
     }
 
     return pItem;
@@ -13218,9 +13274,23 @@ void Player::QuickEquipItem(uint16 pos, Item* pItem)
         if (Pet* pet = GetPet())
         {
             if (pet->ToTempSummon())
+            {
                 pet->ToTempSummon()->UpdateAttackPowerAndDamage();
+                for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                    pet->ToTempSummon()->UpdateStats(Stats(i));
+
+                for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+                    pet->ToTempSummon()->UpdateMaxPower(Powers(i));
+            }
             else
+            {
                 pet->UpdateAttackPowerAndDamage();
+                for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                    pet->UpdateStats(Stats(i));
+
+                for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+                    pet->UpdateMaxPower(Powers(i));
+            }
         }
     }
 }
@@ -13347,9 +13417,23 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
             if (Pet* pet = GetPet())
             {
                 if (pet->ToTempSummon())
+                {
                     pet->ToTempSummon()->UpdateAttackPowerAndDamage();
+                    for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                        pet->ToTempSummon()->UpdateStats(Stats(i));
+
+                    for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+                        pet->ToTempSummon()->UpdateMaxPower(Powers(i));
+                }
                 else
+                {
                     pet->UpdateAttackPowerAndDamage();
+                    for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                        pet->UpdateStats(Stats(i));
+
+                    for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+                        pet->UpdateMaxPower(Powers(i));
+                }
             }
             pItem->SendUpdateToPlayer(this);
         }
