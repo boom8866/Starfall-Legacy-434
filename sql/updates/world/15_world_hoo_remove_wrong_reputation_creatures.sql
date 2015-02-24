@@ -1,0 +1,1 @@
+DELETE FROM `creature_onkill_reward` WHERE `creature_id` IN (40033, 40170, 40668, 40715, 40787);
