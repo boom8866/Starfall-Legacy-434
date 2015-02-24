@@ -20200,6 +20200,15 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 48728: // Artillery Seat
+                {
+                    if (player)
+                    {
+                        player->CastSpell(player, 91102, true);
+                        player->NearTeleportTo(-8258.20f, -127.26f, 320.70f, 2.74f);
+                    }
+                    break;
+                }
                 default:
                     break;
             }

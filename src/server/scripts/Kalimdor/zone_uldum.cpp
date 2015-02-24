@@ -15026,6 +15026,7 @@ public:
         {
             player->AddAura(SPELL_UNIQUE_PHASING, player);
             player->CastSpell(player, SPELL_FADE_TO_BLACK, true);
+            player->NearTeleportTo(-8507.00f, -45.32f, 272.48f, 2.74f);
             player->CastSpell(player, SPELL_SUMMON_SEAT, true);
             return true;
         }
@@ -15066,7 +15067,7 @@ public:
         void IsSummonedBy(Unit* owner)
         {
             playerOwner = owner;
-            events.ScheduleEvent(EVENT_RIDE_INVOKER, 2000);
+            events.ScheduleEvent(EVENT_RIDE_INVOKER, 1000);
             owner->AddAura(SPELL_UNIQUE_PHASING, me);
             achievementCounter = 0;
         }
