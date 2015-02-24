@@ -794,6 +794,7 @@ public:
             events.ScheduleEvent(EVENT_TALK_INTRO, 4000);
             events.ScheduleEvent(EVENT_ERUPTION, 15000);
             events.ScheduleEvent(EVENT_QUAKE, 33000);
+            events.ScheduleEvent(EVENT_QUAKE_EMOTE, 23000);
             events.ScheduleEvent(EVENT_GRAVITY_WELL, 12000);
             events.ScheduleEvent(EVENT_HARDEN_SKIN, 20000);
         }
@@ -953,7 +954,7 @@ public:
                         Talk(SAY_ANNOUNCE_ABILITY);
                         DoCast(me, SPELL_QUAKE);
                         events.ScheduleEvent(EVENT_QUAKE, 66000);
-                        events.ScheduleEvent(EVENT_QUAKE, 58000);
+                        events.ScheduleEvent(EVENT_QUAKE_EMOTE, 56000);
                         break;
                     case EVENT_QUAKE_EMOTE:
                         if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
