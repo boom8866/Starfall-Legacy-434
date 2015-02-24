@@ -562,7 +562,7 @@ void Creature::Update(uint32 diff)
         case 4815:  // Vashj'ir
         {
             // Exception for Azshara
-            if (GetZoneId() == 16 && GetCreatureTemplate()->expansion == 3)
+            if (GetZoneId() == 16 && (GetCreatureTemplate()->expansion == 3 || GetCreatureTemplate()->Entry == 35867))
                 break;
 
             // Exception for Feralas
