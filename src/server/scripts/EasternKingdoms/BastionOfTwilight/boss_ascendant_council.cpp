@@ -652,7 +652,7 @@ public:
                     case EVENT_AEGIS_OF_FLAME:
                         me->StopMoving();
                         DoCast(me, SPELL_AEGIS_OF_FLAME);
-                        events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, urand(33000, 35000));
+                        events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, urand(63000, 65000));
                         events.ScheduleEvent(EVENT_RISING_FLAMES, 2000);
                         break;
                     case EVENT_RISING_FLAMES:
@@ -698,14 +698,14 @@ public:
                                 rushPos.Relocate(leapTarget);
                             }
 
-                            _infernoCounter++;
-
                             float ori = me->GetAngle(&rushPos);
                             float dist = _infernoCounter * 5.0f;
 
                             float x = ignaciousPos.GetPositionX() + cos(ori) * dist;
                             float y = ignaciousPos.GetPositionY() + sin(ori) * dist;
                             float z = ignaciousPos.GetPositionZ();
+
+                            _infernoCounter++;
 
                             me->SummonCreature(NPC_INFERNO_RUSH, x, y, z, ori, TEMPSUMMON_MANUAL_DESPAWN);
                             events.ScheduleEvent(EVENT_SUMMON_INFERNO_RUSH, 250);
