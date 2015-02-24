@@ -307,9 +307,9 @@ public:
                         me->SetWalk(false);
                         me->GetMotionMaster()->MovePoint(50, 2352.27f, -4736.54f, 120.82f);
                         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                        me->DespawnOrUnsummon(5000);
                         events.Reset();
                         me->m_Events.KillAllEvents(true);
+                        me->DespawnOrUnsummon(5000);
                         events.CancelEvent(EVENT_CHECK_FOR_EVADE);
                         break;
                     }

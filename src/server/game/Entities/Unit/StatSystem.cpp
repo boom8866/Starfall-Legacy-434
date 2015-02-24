@@ -149,9 +149,23 @@ bool Player::UpdateStats(Stats stat)
     if (Pet* pet = GetPet())
     {
         if (pet->ToTempSummon())
+        {
             pet->ToTempSummon()->UpdateAttackPowerAndDamage();
+            for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                pet->ToTempSummon()->UpdateStats(Stats(i));
+
+            for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+                pet->ToTempSummon()->UpdateMaxPower(Powers(i));
+        }
         else
+        {
             pet->UpdateAttackPowerAndDamage();
+            for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                pet->UpdateStats(Stats(i));
+
+            for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
+                pet->UpdateMaxPower(Powers(i));
+        }
     }
 
     return true;
@@ -1131,16 +1145,22 @@ bool Guardian::UpdateStats(Stats stat)
                         {
                             // Ferocity
                             case 0:
+                            {
                                 pct = 67;
                                 break;
-                                // Tenacity
+                            }
+                            // Tenacity
                             case 1:
+                            {
                                 pct = 78;
                                 break;
-                                // Cunning
+                            }
+                            // Cunning
                             case 2:
-                                pct = 73;
+                            {
+                                pct = 72.5;
                                 break;
+                            }
                         }
                     }
                 }
@@ -1314,11 +1334,6 @@ void Guardian::UpdateMaxHealth()
     float multiplicator;
     switch (GetEntry())
     {
-        case ENTRY_IMP:             multiplicator = 8.4f;   break;
-        case ENTRY_VOIDWALKER:      multiplicator = 11.0f;  break;
-        case ENTRY_SUCCUBUS:        multiplicator = 9.1f;   break;
-        case ENTRY_FELHUNTER:       multiplicator = 9.5f;   break;
-        case ENTRY_FELGUARD:        multiplicator = 11.0f;  break;
         case ENTRY_BLOODWORM:       multiplicator = 1.0f;   break;
         case ENTRY_WATER_ELEMENTAL: multiplicator = 7.5;    break;
         default:                    multiplicator = 14.0f;  break;
@@ -1328,6 +1343,26 @@ void Guardian::UpdateMaxHealth()
     value *= GetModifierValue(unitMod, BASE_PCT);
     value += GetModifierValue(unitMod, TOTAL_VALUE) + stamina * multiplicator;
     value *= GetModifierValue(unitMod, TOTAL_PCT);
+
+    if (Unit* owner = GetOwner())
+    {
+        switch (GetEntry())
+        {
+            case ENTRY_IMP:
+                value = (7.7 * getLevel() / 80) * GetOwner()->GetStat(STAT_STAMINA) + GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
+                break;
+            case ENTRY_VOIDWALKER:
+                value = (15.0 * getLevel() / 80) * GetOwner()->GetStat(STAT_STAMINA) + GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
+                break;
+            case ENTRY_FELHUNTER:
+            case ENTRY_FELGUARD:
+            case ENTRY_SUCCUBUS:
+                value = (9.1 * getLevel() / 80) * GetOwner()->GetStat(STAT_STAMINA) + GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
+                break;
+            default:
+                break;
+        }
+    }
 
     // Glyph of Voidwalker
     if (GetEntry() == ENTRY_VOIDWALKER && GetOwner() && GetOwner()->HasAura(56247))
@@ -1343,20 +1378,26 @@ void Guardian::UpdateMaxPower(Powers power)
     float addValue = (power == POWER_MANA) ? GetStat(STAT_INTELLECT) - GetCreateStat(STAT_INTELLECT) : 0.0f;
     float multiplicator = 15.0f;
 
-    switch (GetEntry())
-    {
-        case ENTRY_IMP:         multiplicator = 4.95f;  break;
-        case ENTRY_VOIDWALKER:
-        case ENTRY_SUCCUBUS:
-        case ENTRY_FELHUNTER:
-        case ENTRY_FELGUARD:    multiplicator = 11.5f;  break;
-        default:                multiplicator = 15.0f;  break;
-    }
-
     float value  = GetModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(power);
     value *= GetModifierValue(unitMod, BASE_PCT);
     value += GetModifierValue(unitMod, TOTAL_VALUE) + addValue * multiplicator;
     value *= GetModifierValue(unitMod, TOTAL_PCT);
+
+    if (Unit* owner = GetOwner())
+    {
+        switch (GetEntry())
+        {
+            case ENTRY_IMP:
+            case ENTRY_FELHUNTER:
+            case ENTRY_FELGUARD:
+            case ENTRY_SUCCUBUS:
+            case ENTRY_VOIDWALKER:
+                value = (7.5 * getLevel() / 80) * GetOwner()->GetStat(STAT_INTELLECT) + GetModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(power);
+                break;
+            default:
+                break;
+        }
+    }
 
     SetMaxPower(power, uint32(value));
 }

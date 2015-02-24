@@ -8121,6 +8121,7 @@ public:
                         y = victim->GetPositionY()-frand(1, 5);
                         z = victim->GetPositionZ()+0.5f;
 
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MovePoint(POINT_BOULDER, x, y, z, false);
                     }
                     break;
@@ -8132,6 +8133,7 @@ public:
 
         void IsSummonedBy(Unit* summoner)
         {
+            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10);
             if (summoner->GetTypeId() == TYPEID_PLAYER)
             {
                 TalkWithDelay(4000, 0, summoner->GetGUID());
@@ -8393,13 +8395,38 @@ public:
             }
         }
 
-        void TeleportOnStart()
+        void JustDied(Unit* /*who*/)
         {
             phase = 1;
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_NON_ATTACKABLE);
             playerInvoker = NULL;
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
             me->SetHomePosition(1497.82f, -165.34f, 55.99f, 6.19f);
             me->NearTeleportTo(1497.82f, -165.34f, 55.99f, 6.19f);
+            events.Reset();
+            me->Respawn();
+        }
+
+        void EnterEvadeMode()
+        {
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
+            if (phase > 1)
+            {
+                me->SetHomePosition(1497.82f, -165.34f, 55.99f, 6.19f);
+                me->NearTeleportTo(1497.82f, -165.34f, 55.99f, 6.19f);
+                me->Respawn();
+                events.Reset();
+                playerInvoker = NULL;
+                phase = 1;
+                return;
+            }
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+            playerInvoker = NULL;
+            phase = 1;
+        }
+
+        void TeleportOnStart()
+        {
             EnterEvadeMode();
         }
 
@@ -8417,7 +8444,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && me->isInCombat())
                 return;
 
             events.Update(diff);
