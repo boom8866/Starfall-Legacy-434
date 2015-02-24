@@ -721,6 +721,7 @@ public:
 
         void IsSummonedBy(Unit* /*owner*/)
         {
+            me->SetHealth(me->GetMaxHealth());
             me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 2, 5.0f, 5.0f, 0);
         }
 
@@ -873,7 +874,7 @@ public:
                             me->GetMotionMaster()->MovementExpired(false);
                             me->GetMotionMaster()->MoveFollow(target, 0.0f, 0);
                         }
-                        events.CancelEvent(EVENT_FOLLOW_PLAYER);
+                        events.RescheduleEvent(EVENT_FOLLOW_PLAYER, 1000);
                         break;
                     }
                     default:
