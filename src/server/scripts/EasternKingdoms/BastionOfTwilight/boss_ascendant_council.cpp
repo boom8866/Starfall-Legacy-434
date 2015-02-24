@@ -1005,6 +1005,7 @@ public:
         {
             _Reset();
             _switched = false;
+            MakeInterruptable(false);
             me->SetReactState(REACT_PASSIVE);
         }
 
@@ -1024,6 +1025,7 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
+            MakeInterruptable(false);
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
             summons.DespawnAll();
@@ -1047,6 +1049,20 @@ public:
                     break;
             }
             summons.Summon(summon);
+        }
+
+        void MakeInterruptable(bool apply)
+        {
+            if (apply)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
+            }
+            else
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            }
         }
 
         void KilledUnit(Unit* victim)
@@ -1147,11 +1163,16 @@ public:
                         events.ScheduleEvent(EVENT_DISPERSE, 25000);
                         break;
                     case EVENT_LIGHTNING_BLAST:
+                        MakeInterruptable(true);
                         DoCast(me, SPELL_LIGHTNING_BLAST);
+                        events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 4000);
                         break;
                     case EVENT_LIGHTNING_ROD:
                         DoCast(me, SPELL_LIGHTNING_ROD);
                         events.ScheduleEvent(EVENT_LIGHTNING_ROD, 25000);
+                        break;
+                    case EVENT_APPLY_IMMUNITY:
+                        MakeInterruptable(false);
                         break;
                     default:
                         break;
