@@ -8185,7 +8185,9 @@ class areatrigger_quest_tod : public AreaTriggerScript
         {
             QUEST_THE_THRILL_OF_DISCOVERY   = 27511,
             AT_NORTHERN_HIEROGLYPHS         = 6288,
+            AT_NORTHERN_HIEROGLYPHS_TWO     = 6287,
             AT_SOUTHERN_HIEROGLYPHS         = 6286,
+            AT_SOUTHERN_HIEROGLYPHS_TWO     = 6289,
             AT_ANCIENT_MECHANISM            = 6284,
             CREDIT_NORTHERN                 = 45760,
             CREDIT_SOUTHERN                 = 45759,

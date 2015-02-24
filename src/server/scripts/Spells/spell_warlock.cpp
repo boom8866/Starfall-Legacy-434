@@ -1490,6 +1490,56 @@ public:
     }
 };
 
+class CheckCurse
+{
+public:
+    CheckCurse()
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_CURSE_OF_THE_ELEMENTS     = 1490
+    };
+
+    bool operator()(WorldObject* object)
+    {
+        return ((object->ToUnit() && object->ToUnit()->HasAura(SPELL_CURSE_OF_THE_ELEMENTS)) || object->ToPlayer() && object->ToPlayer()->HasAura(SPELL_CURSE_OF_THE_ELEMENTS));
+    }
+};
+
+class spell_warl_jinx_filter : public SpellScriptLoader
+{
+public:
+    spell_warl_jinx_filter() : SpellScriptLoader("spell_warl_jinx_filter")
+    {
+    }
+
+    class spell_warl_jinx_filter_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_jinx_filter_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(CheckCurse());
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warl_jinx_filter_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warl_jinx_filter_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_jinx_filter_SpellScript();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_bane_of_doom();
@@ -1521,4 +1571,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_shadowburn();
     new spell_warl_soul_link_trigger();
     new spell_warl_hellfire();
+    new spell_warl_jinx_filter();
 }

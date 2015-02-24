@@ -541,6 +541,12 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         case SPELL_AURA_MANA_SHIELD:
         {
             m_canBeRecalculated = false;
+            if (caster)
+            {
+                // Mana Shield
+                if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_MAGE && GetSpellInfo()->SpellFamilyFlags[0] & 0x8000 && m_spellInfo->SpellFamilyFlags[2] & 0x8)
+                    amount += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 0.807f;
+            }
             break;
         }
         case SPELL_AURA_MOD_DECREASE_SPEED:
