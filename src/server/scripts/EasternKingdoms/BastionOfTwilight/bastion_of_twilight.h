@@ -72,7 +72,7 @@ enum Creatures
     NPC_DAZZ_DESTRUCTION_STALKER    = 46374,
     NPC_UNSTABLE_TWILIGHT           = 46304,
     NPC_TWILIGHT_RIFT               = 50014,
-    NPC_TWILIGHT_FLAME              = 46147, // 86194
+    NPC_TWILIGHT_FLAME              = 46147,
     NPC_THERALION_FLIGHT_STALKER    = 46364,
     NPC_DEVOURING_FLAMES_STALKER    = 46588,
     NPC_FABULOUS_FLAME_STALKER      = 46448,
@@ -89,6 +89,11 @@ enum Creatures
     NPC_GRAVITY_CRUSH               = 45476,
     NPC_GRAVITY_WELL                = 44824,
     NPC_TARGET_STALKER              = 44553,
+
+    // Cho'Gall
+    NPC_FIRE_PORTAL                 = 43393,
+    NPC_FIRE_ELEMENTAL              = 43406,
+    NPC_BLAZE                       = 43585,
 
     NPC_CHOGALL_HALFUS              = 46965,
     NPC_CHOGALL_DRAGONS             = 48142,
