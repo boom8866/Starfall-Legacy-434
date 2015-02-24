@@ -9442,6 +9442,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        // Cobra Strikes
+        case 53256:
+        case 53259:
+        case 53260:
+        {
+            // Procs only from Arcane Shot
+            if (!procSpell || (procSpell->Id != 3044))
+                return false;
+            break;
+        }
         // Vindication
         case 26016:
         {
@@ -21789,7 +21799,7 @@ void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool trigge
 
         bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
         {
-            if (me && victim)
+            if (me && me->IsInWorld() && victim && victim != NULL && victim->IsInWorld())
                 me->CastSpell(victim, spellId, triggered);
             return true;
         }
