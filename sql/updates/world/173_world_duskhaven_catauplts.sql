@@ -1,1 +1,0 @@
-UPDATE `creature` SET `phaseMask`=4096 WHERE `id`=36286 AND guid > 798000;

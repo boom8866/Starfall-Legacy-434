@@ -636,6 +636,16 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             damage = damage * unitTarget->GetMaxHealth() / 100;
                         break;
                     }
+                    case 74817: // Inferno (Baron Geddon)
+                    {
+                        if (Aura* aur = m_caster->GetAura(74813))
+                        {
+                            int32 duration = aur->GetDuration() / 1000;
+                            int32 maxDuration = aur->GetMaxDuration() / 1000;
+                            damage += damage * (maxDuration - duration);
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -2668,6 +2678,30 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                                 }
                             }
                         }
+                    }
+                    break;
+                }
+                case 8921:  // Moonfire
+                {
+                    if (!m_caster)
+                        break;
+
+                    if (unitTarget)
+                    {
+                        if (Aura* sunfire = unitTarget->GetAura(93402, m_caster->GetGUID()))
+                            sunfire->Remove(AURA_REMOVE_BY_CANCEL);
+                    }
+                    break;
+                }
+                case 93402:  // Sunfire
+                {
+                    if (!m_caster)
+                        break;
+
+                    if (unitTarget)
+                    {
+                        if (Aura* moonfire = unitTarget->GetAura(8921, m_caster->GetGUID()))
+                            moonfire->Remove(AURA_REMOVE_BY_CANCEL);
                     }
                     break;
                 }
@@ -5278,7 +5312,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
@@ -5290,7 +5324,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
@@ -5308,7 +5342,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
@@ -5320,7 +5354,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
@@ -5344,7 +5378,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100);
+                            fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
                 }
@@ -6227,29 +6261,23 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
 
                         for (Unit::AuraEffectList::const_iterator itr = dotList.begin(); itr != dotList.end(); ++itr)
                         {
-                            if (!(*itr)->GetBase())
-                                continue;
+                            if ((*itr)->GetCasterGUID() == m_caster->GetGUID())
+                            {
+                                uint32 duration = (*itr)->GetBase()->GetDuration();
+                                uint32 spellId = (*itr)->GetId();
+                                int32 damage = (*itr)->GetAmount();
 
-                            if (!(*itr)->GetBase()->GetCasterGUID())
-                                continue;
+                                if (spellId != 2120 && duration > 0 && damage > 0)
+                                {
+                                    if (spellId == 92315 || spellId == 11366 || spellId == 44614)
+                                        m_caster->AddAura(spellId, unitTarget);
+                                    else
+                                        m_caster->CastCustomSpell(unitTarget, spellId, &damage, NULL, NULL, true);
 
-                            if ((*itr)->GetBase()->GetCasterGUID() != m_caster->GetGUID())
-                                continue;
-
-                            if ((*itr)->GetBase()->GetId() == 2120)
-                                continue;
-
-                            uint32 duration = (*itr)->GetBase()->GetDuration();
-                            uint32 spellId = (*itr)->GetId();
-                            int32 damage = (*itr)->GetAmount();
-
-                            if (spellId == 92315 || spellId == 11366 || spellId == 44614)
-                                m_caster->AddAura(spellId, unitTarget);
-                            else
-                                m_caster->CastCustomSpell(unitTarget, spellId, &damage, NULL, NULL, true);
-
-                            if (unitTarget->GetAura(spellId))
-                                unitTarget->GetAura(spellId)->SetDuration(duration);
+                                    if (unitTarget->GetAura(spellId))
+                                        unitTarget->GetAura(spellId)->SetDuration(duration);
+                                }
+                            }
                         }
                     }
                     break;

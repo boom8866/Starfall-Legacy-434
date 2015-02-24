@@ -1,43 +1,26 @@
-/*Copyright (C) 2012 SkyMist Project.
-*
-*
-* This file is NOT free software. Third-party users can NOT redistribute it or modify it :). 
-* If you find it, you are either hacking something, or very lucky (presuming someone else managed to hack it).
-*/
 
-#include "ScriptPCH.h"
-#include "ScriptPCH.h"
 #include "bastion_of_twilight.h"
 #include "Vehicle.h"
-#include "Unit.h"
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
-#include "ScriptedGossip.h"
-#include "ScriptedEscortAI.h"
-#include "Cell.h"
-#include "CellImpl.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
-#include "CombatAI.h"
-#include "PassiveAI.h"
-#include "ObjectMgr.h"
-#include "SpellInfo.h"
-#include "SpellScript.h"
-#include "Vehicle.h"
-#include "VehicleDefines.h"
-#include "Spell.h"
-#include "Player.h"
-#include "Map.h"
-#include "InstanceScript.h"
 
 enum Texts
 {
-    SAY_INTRO_1     = 1,
+    SAY_INTRO       = 7,
+    SAY_AGGRO       = 8,
 };
 
 enum Spells
 {
-    SPELL_BERSERK   = 26662
+    // Cho'Gall
+    SPELL_SIT_THRONE            = 88648,
+    SPELL_BOSS_HITTIN_YA        = 73878,
+    SPELL_CORRUPTED_BLOOD       = 93104,
+    SPELL_CORRUPTED_BLOOD_BAR   = 93103,
+
+    SPELL_FLAMES_ORDER          = 81171,
+    SPELL_ABSORB_FIRE           = 81196,
+
+    SPELL_CONVERSION            = 91303,
+
 };
 
 enum Phases
@@ -49,8 +32,25 @@ enum Phases
 
 enum Events
 {
- //##### Cho'gall #####
- EVENT_BERSERK,
+    EVENT_BERSERK = 1,
+};
+
+enum Actions
+{
+    ACTION_TALK_INTRO = 1,
+};
+
+class at_chogall_intro : public AreaTriggerScript
+{
+public:
+    at_chogall_intro() : AreaTriggerScript("at_chogall_intro") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
+    {
+        if (Creature* controller = player->FindNearestCreature(BOSS_CHOGALL, 500.0f, true))
+            controller->AI()->DoAction(ACTION_TALK_INTRO);
+        return true;
+    }
 };
 
 class boss_chogall : public CreatureScript
@@ -58,74 +58,78 @@ class boss_chogall : public CreatureScript
 public:
     boss_chogall() : CreatureScript("boss_chogall") { }
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new boss_chogallAI (creature);
-    }
-
     struct boss_chogallAI: public BossAI
     {
         boss_chogallAI(Creature* creature) : BossAI(creature, DATA_CHOGALL)
         {
+            _introDone = false;
         }
 
-        Phases phase;
+        bool _introDone;
 
         void Reset()
         {
-            events.Reset();
-            me->SetReactState(REACT_PASSIVE);
-            phase = PHASE_NULL;
-
             _Reset();
-        }
-
-        void EnterEvadeMode()
-        {
-            Reset();
-
-            me->GetMotionMaster()->MoveTargetedHome();
-
-            if (instance)
-            {
-                instance->SetBossState(DATA_CHOGALL, FAIL);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me); // Remove
-            }
-
-            _EnterEvadeMode();
+            DoCast(me, SPELL_SIT_THRONE, true);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
-            phase = PHASE_NORMAL;
-            events.SetPhase(PHASE_NORMAL);
-
-            if (instance)
-            {
-                instance->SetBossState(DATA_CHOGALL, IN_PROGRESS);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me); // Add
-            }
-
-            events.ScheduleEvent(EVENT_BERSERK, 420000);
-
+            Talk(SAY_AGGRO);
             _EnterCombat();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            me->RemoveAurasDueToSpell(SPELL_SIT_THRONE);
+            DoCast(me, SPELL_CORRUPTED_BLOOD);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            instance->SetBossState(DATA_CHOGALL, FAIL);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTED_BLOOD_BAR);
+            summons.DespawnAll();
+            _DespawnAtEvade();
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            _JustDied();
+            instance->SetBossState(DATA_CHOGALL, DONE);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTED_BLOOD_BAR);
+        }
+
+        void JustRespawned()
+        {
+            Reset();
         }
 
         void JustSummoned(Creature* summon)
         {
-            summon->AI()->DoZoneInCombat();
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_TALK_INTRO:
+                    if (!_introDone)
+                    {
+                        TalkToMap(SAY_INTRO);
+                        _introDone = true;
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+            if (!UpdateVictim())
                 return;
-
-            if (me->GetHealthPct() < 21) // Phase 2
-            {
-                phase = PHASE_LAST;
-                events.SetPhase(PHASE_LAST);
-            }
 
             events.Update(diff);
 
@@ -134,33 +138,22 @@ public:
                 switch (eventId)
                 {
                     case EVENT_BERSERK:
-                        DoCast(me, SPELL_BERSERK);
-                        return;
-                    
+                        return; 
                     default:
                         break;
                 }
-            }		
-
-                DoMeleeAttackIfReady();
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
-            me->RemoveAllAuras();
-
-            if (instance)
-            {
-                instance->SetBossState(DATA_CHOGALL, DONE);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me); // Remove
             }
-
-            _JustDied();
+            DoMeleeAttackIfReady();
         }
     };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_chogallAI(creature);
+    }
 };
 
 void AddSC_boss_chogall()
 {
+    new at_chogall_intro();
     new boss_chogall();
 }

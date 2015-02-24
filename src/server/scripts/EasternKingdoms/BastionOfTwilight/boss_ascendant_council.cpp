@@ -73,6 +73,7 @@ enum Spells
 
     // Elementium Monstrosity
     SPELL_TWILIGHT_EXPLOSION            = 95789,
+    SPELL_MERGE_HEALTH                  = 82344,
     SPELL_CRYOGENIC_AURA                = 84918,
     SPELL_LIQUID_ICE_GROWTH             = 84917,
     SPELL_ELECTRIC_INSTABILITY          = 84526,
@@ -180,33 +181,11 @@ enum Actions
     ACTION_RESET_COUNCIL,
     ACTION_DESPAWN,
     ACTION_ENCOUNTER_DONE,
+    ACTION_ACHIEVEMENT_FAILED,
 };
 
+#define DATA_ELEMENTARY 1
 Position const ElementiumMonstrosityPos = { -1009.01f, -582.467f, 831.9843f, 6.265732f };
-
-class LiquidIceRangeCheck
-{
-public:
-    LiquidIceRangeCheck(Unit* caster) : caster(caster) { }
-
-    bool operator()(WorldObject* object)
-    {
-        return (object->GetExactDist2d(caster->GetPositionX(), caster->GetPositionY()) > (5.0f * caster->GetObjectSize()));
-    }
-private:
-    Unit* caster;
-};
-
-class ElementiumMonstrosityCheck
-{
-public:
-    ElementiumMonstrosityCheck() { }
-
-    bool operator()(WorldObject* object)
-    {
-        return (object->GetEntry() != BOSS_ELEMENTIUM_MONSTROSITY);
-    }
-};
 
 class at_ascendant_council_1 : public AreaTriggerScript
 {
@@ -260,10 +239,10 @@ private:
     Unit* caster;
 };
 
-class VictimCheck
+class NoVictimCheck
 {
 public:
-    VictimCheck(Unit* caster) : caster(caster) { }
+    NoVictimCheck(Unit* caster) : caster(caster) { }
 
     bool operator()(WorldObject* object)
     {
@@ -271,6 +250,43 @@ public:
     }
 private:
     Unit* caster;
+};
+
+class VictimCheck
+{
+public:
+    VictimCheck(Unit* caster) : caster(caster) { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (caster->getVictim() == object);
+    }
+private:
+    Unit* caster;
+};
+
+class LiquidIceRangeCheck
+{
+public:
+    LiquidIceRangeCheck(Unit* caster) : caster(caster) { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->GetExactDist2d(caster->GetPositionX(), caster->GetPositionY()) > (5.0f * caster->GetObjectSize()));
+    }
+private:
+    Unit* caster;
+};
+
+class ElementiumMonstrosityCheck
+{
+public:
+    ElementiumMonstrosityCheck() { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->GetEntry() != BOSS_ELEMENTIUM_MONSTROSITY);
+    }
 };
 
 class SwirlingWindsCheck
@@ -322,6 +338,7 @@ public:
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             MakeInterruptable(false);
+            _switched = false;
 
             if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
                 ignacious->AI()->AttackStart(who);
@@ -339,7 +356,6 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
-            _switched = false;
             me->SetReactState(REACT_AGGRESSIVE);
             me->GetMotionMaster()->MoveTargetedHome();
             summons.DespawnAll();
@@ -514,6 +530,7 @@ public:
         void Reset()
         {
             _Reset();
+            _switched = false;
             MakeInterruptable(false);
         }
 
@@ -522,6 +539,7 @@ public:
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             MakeInterruptable(false);
+            _switched = false;
             events.ScheduleEvent(EVENT_TALK_INTRO, 5000);
             events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, 31000);
             events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
@@ -540,7 +558,6 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             leapTarget = NULL;
             _infernoCounter = 0;
-            _switched = false;
             summons.DespawnAll();
             MakeInterruptable(false);
         }
@@ -765,6 +782,7 @@ public:
         void Reset()
         {
             _Reset();
+            _switched = false;
             me->SetReactState(REACT_PASSIVE);
             MakeInterruptable(false);
         }
@@ -772,6 +790,7 @@ public:
         void EnterCombat(Unit* who)
         {
             _EnterCombat();
+            _switched = false;
             events.ScheduleEvent(EVENT_TALK_INTRO, 4000);
             events.ScheduleEvent(EVENT_ERUPTION, 15000);
             events.ScheduleEvent(EVENT_QUAKE, 33000);
@@ -783,7 +802,6 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
-            _switched = false;
             MakeInterruptable(false);
             _eruptionCounter = 0;
             me->GetMotionMaster()->MoveTargetedHome();
@@ -870,10 +888,10 @@ public:
                 case ACTION_PREPARE_FUSE:
                     _switched = true;
                     me->SetReactState(REACT_PASSIVE);
-                    me->AttackStop();
                     me->CastStop();
-                    DoCast(me, SPELL_ELEMENTAL_STASIS, true);
+                    me->AttackStop();
                     DoCast(me, SPELL_TELEPORT_EARTH, true);
+                    DoCast(me, SPELL_ELEMENTAL_STASIS);
                     events.Reset();
                     summons.DespawnAll();
                     events.ScheduleEvent(EVENT_FACE_CONTROLLER, 200);
@@ -985,6 +1003,7 @@ public:
         void Reset()
         {
             _Reset();
+            _switched = false;
             me->SetReactState(REACT_PASSIVE);
         }
 
@@ -992,6 +1011,7 @@ public:
         {
             Talk(SAY_AGGRO);
             _EnterCombat();
+            _switched = false;
             events.ScheduleEvent(EVENT_CALL_WINDS, 15000);
             events.ScheduleEvent(EVENT_LIGHTNING_ROD, 32000);
             events.ScheduleEvent(EVENT_DISPERSE, 24000);
@@ -1003,7 +1023,6 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
-            _switched = false;
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
             summons.DespawnAll();
@@ -1156,9 +1175,11 @@ public:
         boss_elementium_monstrosityAI(Creature* creature) : BossAI(creature, DATA_ELEMENTIUM_MONSTROSITY)
         {
             _instabilityCharges = 1;
+            _achievement = true;
         }
 
         uint8 _instabilityCharges;
+        bool _achievement;
 
         void InitializeAI()
         {
@@ -1172,6 +1193,7 @@ public:
 
         void Reset()
         {
+            _achievement = true;
             _Reset();
         }
 
@@ -1234,11 +1256,17 @@ public:
         {
             switch (action)
             {
-                case 0:
+                case ACTION_ACHIEVEMENT_FAILED:
+                    _achievement = false;
                     break;
                 default:
                     break;
             }
+        }
+
+        uint32 GetData(uint32 type) const
+        {
+            return type == DATA_ELEMENTARY ? _achievement : 0;
         }
 
         void UpdateAI(uint32 diff)
@@ -1398,7 +1426,7 @@ public:
                     break;
                 case ACTION_RESET_COUNCIL:
                     health = 0;
-                    events.ScheduleEvent(EVENT_RESET_COUNCIL, 200);
+                    events.ScheduleEvent(EVENT_RESET_COUNCIL, 1);
                     instance->SetBossState(DATA_ASCENDANT_COUNCIL, NOT_STARTED);
                     instance->SetBossState(DATA_FELUDIUS, FAIL);
                     instance->SetBossState(DATA_IGNACIOUS, FAIL);
@@ -1990,7 +2018,7 @@ public:
             if (targets.empty())
                 return;
 
-            targets.remove_if(VictimCheck(GetCaster()));
+            targets.remove_if(NoVictimCheck(GetCaster()));
         }
 
         void Register()
@@ -2092,7 +2120,10 @@ public:
             if (Unit* caster = GetCaster())
             {
                 if (!caster->HasAura(SPELL_LIQUID_ICE_DUMMY))
+                {
                     caster->SummonCreature(NPC_LIQUID_ICE, caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
+                    caster->GetAI()->DoAction(ACTION_ACHIEVEMENT_FAILED);
+                }
 
                 if (Creature* ice = caster->FindNearestCreature(NPC_LIQUID_ICE, 200.0f, true))
                     if (caster->GetDistance2d(ice->GetPositionX(), ice->GetPositionY()) < (5.0f * ice->GetObjectSize()))
@@ -2244,6 +2275,11 @@ public:
             if (targets.empty())
                 return;
 
+            targets.remove_if(VictimCheck(GetCaster()));
+
+            if (targets.empty())
+                return;
+
             uint32 size = GetCaster()->GetMap()->Is25ManRaid() ? 3 : 1;
 
             Trinity::Containers::RandomResizeList(targets, size);
@@ -2267,6 +2303,20 @@ public:
     SpellScript* GetSpellScript() const
     {
         return new spell_ac_gravity_crush_SpellScript();
+    }
+};
+
+class achievement_elementary : public AchievementCriteriaScript
+{
+public:
+    achievement_elementary() : AchievementCriteriaScript("achievement_elementary") { }
+
+    bool OnCheck(Player* /*source*/, Unit* target)
+    {
+        if (!target)
+            return false;
+
+        return target->GetAI()->GetData(DATA_ELEMENTARY);
     }
 };
 
@@ -2302,4 +2352,5 @@ void AddSC_boss_ascendant_council()
     new spell_ac_eruption();
     new spell_ac_electrical_instability();
     new spell_ac_gravity_crush();
+    new achievement_elementary();
 }

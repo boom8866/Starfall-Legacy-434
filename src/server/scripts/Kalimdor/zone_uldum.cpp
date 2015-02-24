@@ -8185,7 +8185,9 @@ class areatrigger_quest_tod : public AreaTriggerScript
         {
             QUEST_THE_THRILL_OF_DISCOVERY   = 27511,
             AT_NORTHERN_HIEROGLYPHS         = 6288,
+            AT_NORTHERN_HIEROGLYPHS_TWO     = 6287,
             AT_SOUTHERN_HIEROGLYPHS         = 6286,
+            AT_SOUTHERN_HIEROGLYPHS_TWO     = 6289,
             AT_ANCIENT_MECHANISM            = 6284,
             CREDIT_NORTHERN                 = 45760,
             CREDIT_SOUTHERN                 = 45759,
@@ -18342,6 +18344,26 @@ public:
     }
 };
 
+class go_ud_portal_to_uldum : public GameObjectScript
+{
+public:
+    go_ud_portal_to_uldum() : GameObjectScript("go_ud_portal_to_uldum")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_ESCAPE_FROM_THE_LOST_CITY     = 28112
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_ESCAPE_FROM_THE_LOST_CITY) == QUEST_STATUS_REWARDED)
+            return false;
+        return true;
+    }
+};
+
 void AddSC_uldum()
 {
     new spell_uldum_hammer();
@@ -18516,4 +18538,5 @@ void AddSC_uldum()
     new npc_the_coffer_of_promise_brann();
     new npc_the_coffer_of_promise_lt();
     new go_the_coffer_of_promise();
+    new go_ud_portal_to_uldum();
 }

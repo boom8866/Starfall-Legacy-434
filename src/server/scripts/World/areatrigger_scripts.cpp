@@ -1762,12 +1762,12 @@ class Areatrigger_at_world_pillar_fragment : public AreaTriggerScript
         {
             if (player->HasAura(SPELL_TROGG_CRATE) && player->GetQuestStatus(QUEST_ENTRY_QUICKSILVER_SUBMERSION) == QUEST_STATUS_INCOMPLETE)
             {
-                player->AddAura(SPELL_PLAYER_INVISIBILITY, player);
-                player->CastSpell(player, SPELL_ENTRY_QUICKSILVER_SUBMERSION, true);
                 player->SetPhaseMask(8, true);
+                player->AddAura(SPELL_PLAYER_INVISIBILITY, player);
                 player->CastSpell(player, SPELL_SUMMON_MILLHOUSE, true);
                 player->CastSpell(player, SPELL_SUMMON_AZIL, true);
                 player->SummonCreature(NPC_ENTRY_OGRE_BODYGUARD, 566.75f, -767.85f, 147.40f, 0.03f, TEMPSUMMON_TIMED_DESPAWN, 120000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                player->CastWithDelay(500, player, SPELL_ENTRY_QUICKSILVER_SUBMERSION);
             }
             return false;
         }

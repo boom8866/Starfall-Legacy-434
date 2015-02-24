@@ -893,7 +893,7 @@ public:
                         }
 
                         ownerBonus = owner->GetTotalStatValue(STAT_STAMINA) * mod;
-                        amount += ownerBonus;
+                        amount = ownerBonus;
                     }
                 }
             }
@@ -926,7 +926,7 @@ public:
 
                 bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.42f * mod;
 
-                amount += bonusAP;
+                amount = bonusAP;
             }
         }
 
@@ -957,7 +957,7 @@ public:
 
                 bonusDamage = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.1287f * mod;
 
-                amount += bonusDamage;
+                amount = bonusDamage;
             }
         }
 
@@ -976,7 +976,7 @@ public:
         void Register()
         {
             AfterEffectApply += AuraEffectApplyFn(spell_hun_pet_scaling_01_AuraScript::SetMaxHealth, EFFECT_0, SPELL_AURA_MOD_MAX_HEALTH, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
-            //DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hun_pet_scaling_01_AuraScript::CalculateStaminaAmount, EFFECT_0, SPELL_AURA_MOD_MAX_HEALTH);
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hun_pet_scaling_01_AuraScript::CalculateStaminaAmount, EFFECT_0, SPELL_AURA_MOD_MAX_HEALTH);
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hun_pet_scaling_01_AuraScript::CalculateAttackPowerAmount, EFFECT_1, SPELL_AURA_MOD_ATTACK_POWER);
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hun_pet_scaling_01_AuraScript::CalculateDamageDoneAmount, EFFECT_2, SPELL_AURA_MOD_DAMAGE_DONE);
         }
@@ -1023,7 +1023,7 @@ public:
 
                 ownerBonus = CalculatePct(owner->GetResistance(SPELL_SCHOOL_FROST), 40);
 
-                amount += ownerBonus;
+                amount = ownerBonus;
             }
         }
 
@@ -1043,7 +1043,7 @@ public:
 
                 ownerBonus = CalculatePct(owner->GetResistance(SPELL_SCHOOL_FIRE), 40);
 
-                amount += ownerBonus;
+                amount = ownerBonus;
             }
         }
 
@@ -1063,7 +1063,7 @@ public:
 
                 ownerBonus = CalculatePct(owner->GetResistance(SPELL_SCHOOL_NATURE), 40);
 
-                amount += ownerBonus;
+                amount = ownerBonus;
             }
         }
 
@@ -1113,7 +1113,7 @@ public:
 
                 ownerBonus = CalculatePct(owner->GetResistance(SPELL_SCHOOL_SHADOW), 40);
 
-                amount += ownerBonus;
+                amount = ownerBonus;
             }
         }
 
@@ -1133,7 +1133,7 @@ public:
 
                 ownerBonus = CalculatePct(owner->GetResistance(SPELL_SCHOOL_ARCANE), 40);
 
-                amount += ownerBonus;
+                amount = ownerBonus;
             }
         }
 
@@ -1153,7 +1153,7 @@ public:
 
                 ownerBonus = CalculatePct(owner->GetArmor(), 35);
 
-                amount += ownerBonus;
+                amount = ownerBonus;
             }
         }
 
@@ -1161,7 +1161,7 @@ public:
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hun_pet_scaling_03_AuraScript::CalculateShadowResistanceAmount, EFFECT_0, SPELL_AURA_MOD_RESISTANCE);
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hun_pet_scaling_03_AuraScript::CalculateArcaneResistanceAmount, EFFECT_1, SPELL_AURA_MOD_RESISTANCE);
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hun_pet_scaling_03_AuraScript::CalculateArmorAmount, EFFECT_2, SPELL_AURA_MOD_RESISTANCE);
+            //DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hun_pet_scaling_03_AuraScript::CalculateArmorAmount, EFFECT_2, SPELL_AURA_MOD_RESISTANCE);
         }
     };
 
@@ -1202,7 +1202,7 @@ public:
                 // Increase hit melee from meele hit ratings
                 HitMelee += owner->GetRatingBonusValue(CR_HIT_MELEE);
 
-                amount += int32(HitMelee);
+                amount = int32(HitMelee);
             }
         }
 
@@ -1221,7 +1221,7 @@ public:
                 // Increase hit spell from spell hit ratings
                 HitSpell += owner->GetRatingBonusValue(CR_HIT_SPELL);
 
-                amount += int32(HitSpell);
+                amount = int32(HitSpell);
             }
         }
 
@@ -1240,7 +1240,7 @@ public:
                 // Increase Expertise from Expertise ratings
                 Expertise += owner->GetRatingBonusValue(CR_EXPERTISE);
 
-                amount += int32(Expertise);
+                amount = int32(Expertise);
             }
         }
 
@@ -1334,7 +1334,7 @@ public:
                 // Increase crit spell from spell crit ratings
                 CritSpell += owner->GetRatingBonusValue(CR_CRIT_RANGED);
 
-                amount += CritSpell;
+                amount = CritSpell;
             }
         }
 
@@ -1351,7 +1351,7 @@ public:
                 // Increase crit ranged from ranged crit ratings
                 CritMelee += owner->GetRatingBonusValue(CR_CRIT_MELEE);
 
-                amount += CritMelee;
+                amount = CritMelee;
             }
         }
 
@@ -2067,25 +2067,25 @@ class spell_pet_raid_buffs_block : public SpellScriptLoader
 
 void AddSC_pet_spell_scripts()
 {
-    new spell_warl_pet_scaling_01();
+    /*new spell_warl_pet_scaling_01();
     new spell_warl_pet_scaling_02();
     new spell_warl_pet_scaling_03();
     new spell_warl_pet_scaling_04();
     new spell_warl_pet_scaling_05();
-    new spell_warl_pet_scaling_06();
+    new spell_warl_pet_scaling_06();*/
     new spell_warl_pet_passive();
 
-    new spell_hun_pet_scaling_01();
+    /*new spell_hun_pet_scaling_01();
     new spell_hun_pet_scaling_02();
     new spell_hun_pet_scaling_03();
     new spell_hun_pet_scaling_04();
     new spell_hun_pet_scaling_05();
-    new spell_hun_pet_passive_crit();
+    new spell_hun_pet_passive_crit();*/
 
-    new spell_dk_pet_scaling_01();
+    /*new spell_dk_pet_scaling_01();
     new spell_dk_pet_scaling_02();
     new spell_dk_pet_scaling_03();
-    new spell_dk_crit();
+    new spell_dk_crit();*/
 
     new spell_mage_pet_scaling_05();
     new spell_priest_pet_scaling_05();

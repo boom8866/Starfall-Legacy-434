@@ -1,2 +1,0 @@
-UPDATE `spell_script_names` SET `ScriptName`='spell_hun_serpent_sting' WHERE `spell_id` IN (88453, 88466) AND `ScriptName`='spell_hun_serpent_spread';
-UPDATE `spell_bonus_data` SET `ap_dot_bonus`=0.08 WHERE `entry` IN (88453, 88466);

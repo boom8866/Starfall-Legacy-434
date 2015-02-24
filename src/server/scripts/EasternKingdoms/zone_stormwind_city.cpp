@@ -1554,6 +1554,26 @@ public:
     }
 };
 
+class go_th_a_portal_to_twilight_highlands : public GameObjectScript
+{
+public:
+    go_th_a_portal_to_twilight_highlands() : GameObjectScript("go_th_a_portal_to_twilight_highlands")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_THE_WAY_IS_OPEN   = 27545
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_THE_WAY_IS_OPEN) == QUEST_STATUS_REWARDED)
+            return false;
+        return true;
+    }
+};
+
 void AddSC_stormwind_city()
 {
     new npc_th_anduinn_wrynn();
@@ -1566,4 +1586,5 @@ void AddSC_stormwind_city()
     new npc_th_major_samuelson();
     new npc_th_seaplane_trigger();
     new npc_th_flintlocke_seaplane();
+    new go_th_a_portal_to_twilight_highlands();
 }

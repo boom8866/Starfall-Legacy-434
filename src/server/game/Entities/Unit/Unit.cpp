@@ -2929,6 +2929,13 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     if (spell->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT)
         return SPELL_MISS_NONE;
 
+    // All non-damaging interrupts off the global cooldown will now always hit the target. This includes Pummel, Kick, Mind Freeze, Rebuke, Skull Bash, Counterspell, Wind Shear, Solar Beam, Silencing Shot, and related player pet abilities.
+    if (spell->Effects[EFFECT_0].Effect == SPELL_EFFECT_INTERRUPT_CAST || spell->Effects[EFFECT_1].Effect == SPELL_EFFECT_INTERRUPT_CAST)
+    {
+        if (spell->StartRecoveryCategory == 0 && spell->StartRecoveryTime == 0)
+            return SPELL_MISS_NONE;
+    }
+
     // Chance resist mechanic (select max value from every mechanic spell effect)
     int32 resist_chance = victim->GetMechanicResistChance(spell) * 100;
     tmp += resist_chance;
@@ -13169,6 +13176,7 @@ void Unit::Dismount()
         else
             player->ResummonTemporaryUnsummonedPet();
     }
+    SetObjectScale(GetObjectScale());
 }
 
 MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
@@ -16709,6 +16717,20 @@ Unit* Unit::SelectNearbyTarget(Unit* exclude, float dist) const
 
     // select random
     return Trinity::Containers::SelectRandomContainerElement(targets);
+}
+
+void Unit::ApplyCastTimePercentMod(float val, bool apply)
+{
+    if (val > 0)
+    {
+        ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, val, !apply);
+        ApplyPercentModFloatValue(UNIT_MOD_CAST_HASTE, val, !apply);
+    }
+    else
+    {
+        ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, -val, apply);
+        ApplyPercentModFloatValue(UNIT_MOD_CAST_HASTE, -val, apply);
+    }
 }
 
 uint32 Unit::GetCastingTimeForBonus(SpellInfo const* spellProto, DamageEffectType damagetype, uint32 CastingTime) const

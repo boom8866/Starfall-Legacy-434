@@ -3634,6 +3634,15 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 72405: // Broken Frostmourne
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS); // 200yd
                 break;
+            case 74813: // Inferno
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 74817;
+                break;
+            case 74817: // Inferno (Triggered)
+                spellInfo->Effects[EFFECT_0].BasePoints = 5000;
+                break;
+            case 95391: // Summon Quicksilver Submersion Camera [INTERNAL]
+                spellInfo->Effects[EFFECT_0].BasePoints = 46598;
+                break;
             // ENDOF ICECROWN CITADEL SPELLS
             //
             // RUBY SANCTUM SPELLS
@@ -3962,9 +3971,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 89485: // Inner Focus
                 spellInfo->ProcCharges = 1;
                 break;
-            case 34709: // Shadow Sight
-                spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL;
-                break;
             // Paladin
             case 85117:
             case 86172:
@@ -4253,6 +4259,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 57416: // Immune to Daze
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+                break;
+            case 34709: // Shadow Sight
+                spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL;
                 break;
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)

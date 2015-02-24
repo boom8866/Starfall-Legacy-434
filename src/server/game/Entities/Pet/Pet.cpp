@@ -494,16 +494,18 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
             //damage range is then petlevel / 2
             SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
-            //damage is increased afterwards as strength and pet scaling modify attack power
-            SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(m_owner->GetArmor()) * 0.7f);  //  Bonus Armor (70% of player armor)
             break;
         }
         default:
         {
+            int32 baseHP = 32474;
+
             switch (GetEntry())
             {
                 case 510: // Mage Water Elemental
                 {
+                    SetCreateStat(STAT_STAMINA, float(GetOwner()->GetStat(STAT_STAMINA)) * 0.78f);
+
                     SetDisplayId(GetCreatureTemplate()->Modelid1);
                     SetBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
                     break;
@@ -584,8 +586,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 }
                 case 29264: // Feral Spirit
                 {
-                    if (!pInfo)
-                        SetCreateHealth(30 * petlevel);
+                    SetCreateHealth(baseHP);
 
                     int32 ownerAP = m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.30f;
 
@@ -603,7 +604,6 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     }
 
                     SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(m_owner->GetArmor()) * 0.35f);  //  Bonus Armor (35% of player armor)
-                    SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.3f);  //  Bonus Stamina (30% of player stamina)
                     if (!HasAura(58877))//prevent apply twice for the 2 wolves
                         AddAura(58877, this);//Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
                     break;
@@ -625,13 +625,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 }
                 case 27829: // Ebon Gargoyle
                 {
-                    if (!pInfo)
-                    {
-                        SetCreateMana(28 + 10 * petlevel);
-                        SetCreateHealth(28 + 30 * petlevel);
-                    }
-                    if (Player* owner = m_owner->ToPlayer())
-                        SetCreateHealth(uint32(owner->GetMaxHealth() * 0.8f));
+                    SetCreateHealth(baseHP);
                     SetBonusDamage(int32(GetOwner()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
@@ -670,6 +664,16 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     }
 
     UpdateAllStats();
+
+    // Haste
+    InitRating(CR_HASTE_MELEE);
+    InitRating(CR_HASTE_RANGED);
+    InitRating(CR_HASTE_SPELL);
+
+    // Hit
+    InitRating(CR_HIT_MELEE);
+    InitRating(CR_HIT_RANGED);
+    InitRating(CR_HIT_SPELL);
 
     SetFullHealth();
     SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
@@ -1969,8 +1973,6 @@ void Pet::SetDisplayId(uint32 modelId)
             if (player->GetGroup())
                 player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MODEL_ID);
 
-            // Apply pet scaling auras
-            PetBonuses();
             SetHealth(GetMaxHealth());
 
             // For health scaling auras

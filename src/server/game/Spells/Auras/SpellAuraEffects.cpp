@@ -541,6 +541,12 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         case SPELL_AURA_MANA_SHIELD:
         {
             m_canBeRecalculated = false;
+            if (caster)
+            {
+                // Mana Shield
+                if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_MAGE && GetSpellInfo()->SpellFamilyFlags[0] & 0x8000 && m_spellInfo->SpellFamilyFlags[2] & 0x8)
+                    amount += caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()) * 0.807f;
+            }
             break;
         }
         case SPELL_AURA_MOD_DECREASE_SPEED:
@@ -7478,6 +7484,19 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
     // Dark Intent HoT
     if (crit && caster->HasAura(85767))
         caster->HandleDarkIntent();
+
+    if (caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        // Darkmoon Card: Tsunami
+        if (caster->HasAura(89183))
+        {
+            if (!caster->ToPlayer()->HasSpellCooldown(89182))
+            {
+                caster->CastSpell(caster, 89182, true);
+                caster->ToPlayer()->AddSpellCooldown(89182, 0, time(NULL) + 1.5);
+            }
+        }
+    }
 
     sLog->outInfo(LOG_FILTER_SPELLS_AURAS, "PeriodicTick: %u (TypeId: %u) heal of %u (TypeId: %u) for %u health inflicted by %u",
         GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), target->GetGUIDLow(), target->GetTypeId(), damage, GetId());
