@@ -12168,8 +12168,8 @@ uint32 Unit::SpellCriticalDamageBonus(SpellInfo const* spellProto, uint32 damage
         }
         default:
         {
-            // Pets and summons should always take 200% of crit damage
-            if (isPet() || isSummon())
+            // Pets and summons should always take 200% of crit damage (excluding Totems)
+            if ((isPet() || isSummon()) && !isTotem())
                 crit_bonus += damage;
             else
                 crit_bonus += damage / 2;                       // for spells is 50%
