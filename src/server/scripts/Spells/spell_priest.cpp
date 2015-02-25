@@ -1378,17 +1378,11 @@ public:
             bp0 /= spellInfo->GetDuration() / spellInfo->Effects[EFFECT_0].Amplitude;
             if (AuraEffect* eol = target->GetAuraEffect(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, EFFECT_0, caster->GetGUID()))
             {
-                uint32 tickNumber = eol->GetTickNumber();
-                if (tickNumber == 1)
-                {
-                    bp0 += target->GetAura(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, caster->GetGUID())->GetEffect(EFFECT_0)->GetAmount();
-                    target->CastCustomSpell(info.GetActionTarget(), SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, &bp0, NULL, NULL, true);
-                }
-                else
-                {
-                    if (Aura* aur = eol->GetBase())
-                        aur->RefreshDuration();
-                }
+                uint32 tickRemaining = target->GetRemainingPeriodicAmount(caster->GetGUID(), SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, SPELL_AURA_PERIODIC_HEAL);
+                bp0 += target->GetAura(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, caster->GetGUID())->GetEffect(EFFECT_0)->GetAmount();
+                bp0 += tickRemaining;
+
+                target->CastCustomSpell(info.GetActionTarget(), SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, &bp0, NULL, NULL, true);
                 return;
             }
 
