@@ -3548,7 +3548,7 @@ void Spell::DoCreateItem (uint32 /*i*/, uint32 itemtype)
                 guild->AddGuildNews(GUILD_NEWS_ITEM_CRAFTED, player->GetGUID(), 0, pProto->ItemId);
 
         // Mix Master (Guild Achievement) (NFY - Check why this update also other criterias with same type)
-        if (Guild* guild = player->GetGuild())
+        /*if (Guild* guild = player->GetGuild())
         {
             switch (m_spellInfo->Id)
             {
@@ -3564,7 +3564,7 @@ void Spell::DoCreateItem (uint32 /*i*/, uint32 itemtype)
                 default:
                     break;
             }
-        }
+        }*/
 
         // we succeeded in creating at least one item, so a levelup is possible
         if (bgType == 0)
