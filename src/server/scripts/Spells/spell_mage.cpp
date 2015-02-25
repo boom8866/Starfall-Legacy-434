@@ -688,31 +688,29 @@ class spell_mage_living_bomb : public SpellScriptLoader
                     if (caster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    Unit* target = GetTarget();
-                    if (!target)
-                        return;
-
-                    livingTargets = 1;
-
-                    std::list<Unit*> targets;
-                    Trinity::AnyUnitInObjectRangeCheck u_check(caster, 60.0f);
-                    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
-                    caster->VisitNearbyObject(60.0, searcher);
-                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    if (Unit* target = GetTarget())
                     {
-                        if ((*itr))
+                        livingTargets = 1;
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(caster, 60.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(target, targets, u_check);
+                        target->VisitNearbyObject(60.0, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
-                            if (Aura* livingBomb = (*itr)->GetAura(SPELL_MAGE_LIVING_BOMB, caster->GetGUID()))
+                            if ((*itr) && (*itr)->isAlive() && (*itr)->IsInWorld())
                             {
-                                if ((*itr) != target)
+                                if (Aura* livingBomb = (*itr)->GetAura(SPELL_MAGE_LIVING_BOMB, caster->GetGUID()))
                                 {
-                                    if (livingTargets < 3)
-                                        livingTargets++;
-                                    else
+                                    if (livingTargets <= 0)
+                                        continue;
+
+                                    if (livingTargets > 3)
                                     {
                                         livingBomb->Remove(AURA_REMOVE_BY_CANCEL);
                                         livingTargets--;
                                     }
+                                    else
+                                        livingTargets++;
                                 }
                             }
                         }
@@ -732,7 +730,7 @@ class spell_mage_living_bomb : public SpellScriptLoader
 
             void Register()
             {
-                AfterEffectApply += AuraEffectApplyFn(spell_mage_living_bomb_AuraScript::AfterApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+                AfterEffectApply += AuraEffectApplyFn(spell_mage_living_bomb_AuraScript::AfterApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
                 AfterEffectRemove += AuraEffectRemoveFn(spell_mage_living_bomb_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
 

@@ -7015,6 +7015,7 @@ public:
             me->SetHover(true);
             me->SetDisableGravity(true);
             events.ScheduleEvent(EVENT_MOVE_TO_NOBUNDO, 5000);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)

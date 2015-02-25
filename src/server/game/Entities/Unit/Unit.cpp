@@ -4531,9 +4531,9 @@ void Unit::RemoveRespecAuras()
         if (!(aura->GetSpellInfo()->AttributesEx4 & SPELL_ATTR4_UNK21)                                          // don't remove stances, shadowform, pally/hunter auras
             && !aura->IsPassive()                                                                               // don't remove passive auras
             && (aurApp->IsPositive()
-            || !(aura->GetSpellInfo()->AttributesEx3 & SPELL_ATTR3_DEATH_PERSISTENT)                             // not negative death persistent auras
-            || !(aura->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_POTION)                                    // Potions
-            || !(aura->GetSpellInfo()->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)))                                  // Foods and Drinks
+            && !(aura->GetSpellInfo()->AttributesEx3 & SPELL_ATTR3_DEATH_PERSISTENT)                             // not negative death persistent auras
+            && !(aura->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_POTION)                                    // Potions
+            && !(aura->GetSpellInfo()->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)))                                  // Foods and Drinks
             RemoveAura(iter);
         else
             ++iter;
@@ -9439,6 +9439,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             // Procs only from Judgement spell
             if (!procSpell || (procSpell->Id != 54158))
+                return false;
+            break;
+        }
+        // Cobra Strikes
+        case 53256:
+        case 53259:
+        case 53260:
+        {
+            // Procs only from Arcane Shot
+            if (!procSpell || (procSpell->Id != 3044))
                 return false;
             break;
         }
@@ -20190,6 +20200,15 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 48728: // Artillery Seat
+                {
+                    if (player)
+                    {
+                        player->CastSpell(player, 91102, true);
+                        player->NearTeleportTo(-8258.20f, -127.26f, 320.70f, 2.74f);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -21789,7 +21808,7 @@ void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool trigge
 
         bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
         {
-            if (me && victim)
+            if (me && me->IsInWorld() && victim && victim != NULL && victim->IsInWorld())
                 me->CastSpell(victim, spellId, triggered);
             return true;
         }

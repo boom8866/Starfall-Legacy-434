@@ -7498,6 +7498,10 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         }
     }
 
+    float minval = (float)caster->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+    if (minval)
+        AddPct(damage, minval);
+
     sLog->outInfo(LOG_FILTER_SPELLS_AURAS, "PeriodicTick: %u (TypeId: %u) heal of %u (TypeId: %u) for %u health inflicted by %u",
         GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), target->GetGUIDLow(), target->GetTypeId(), damage, GetId());
 

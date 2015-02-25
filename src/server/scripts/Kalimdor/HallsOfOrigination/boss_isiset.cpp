@@ -1255,12 +1255,20 @@ public:
 
         void Reset()
         {
-            me->SetReactState(REACT_PASSIVE);
-            events.ScheduleEvent(EVENT_SUMMON_FLUX, 15000);
+            me->SetControlled(true, UNIT_STATE_ROOT);
+            events.Reset();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_SUMMON_FLUX, urand(15000, 18500));
         }
 
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
