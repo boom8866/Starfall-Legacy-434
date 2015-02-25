@@ -322,7 +322,7 @@ void WorldSession::SendLfgPlayerLockInfo()
             quest = sObjectMgr->GetQuestTemplate(reward->firstQuest);
             if (quest)
             {
-                weeklyLimitReached = !GetPlayer()->CanRewardQuest(quest, false);
+                weeklyLimitReached = !player->CanRewardQuest(quest, false);
                 if (weeklyLimitReached)
                     quest = sObjectMgr->GetQuestTemplate(reward->otherQuest);
             }
@@ -367,7 +367,6 @@ void WorldSession::SendLfgPlayerLockInfo()
             data << uint32(0);
             data << uint32(0);
         }
-
 
         if (dungeonId != 300 && dungeonId != 416 && dungeonId != 417 && cta)
         {
