@@ -316,14 +316,14 @@ void WorldSession::SendLfgPlayerLockInfo()
         Quest const* quest = NULL;
         Quest const* ctaQuest = sObjectMgr->GetQuestTemplate(30114);
         uint16 dungeonId = (*it & 0x00FFFFFF);
-        bool done = false;
+        bool weeklyLimitReached = false;
         if (reward)
         {
             quest = sObjectMgr->GetQuestTemplate(reward->firstQuest);
             if (quest)
             {
-                done = !GetPlayer()->CanRewardQuest(quest, false);
-                if (done)
+                weeklyLimitReached = !player->CanRewardQuest(quest, false);
+                if (weeklyLimitReached)
                     quest = sObjectMgr->GetQuestTemplate(reward->otherQuest);
             }
         }
@@ -332,24 +332,41 @@ void WorldSession::SendLfgPlayerLockInfo()
             (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_HEALER) && (player->getClass() == CLASS_PRIEST || player->getClass() == CLASS_PALADIN || player->getClass() == CLASS_DRUID || player->getClass() == CLASS_SHAMAN)) ||
             (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_DPS)) && player->getLevel() == sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) && !player->GetGroup();
 
-        data << uint8(done);
-        data << uint32(0);                                              // currencyQuantity
-        data << uint32(player->GetCurrencyWeekCap(currency));           // some sort of overall cap/weekly cap
-        data << uint32(CURRENCY_TYPE_VALOR_POINTS);                     // currencyID
-        data << uint32(player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION); // tier1Quantity
-        data << uint32(player->GetCurrencyWeekCap(currency));           // tier1Limit
-        data << uint32(player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION); // overallQuantity
-        if ((player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION) + (done ? 14000 : 7000) > player->GetCurrencyWeekCap(currency))
-            data << uint32((player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION)); // overallLimit
-        else
-            data << uint32((player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION) + (done ? 14000 : 7000)); // overallLimit
-        data << uint32(player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION); // periodPurseQuantity
-        data << uint32(player->GetCurrencyWeekCap(currency));           // periodPurseLimit
-        data << uint32(0);                                              // purseQuantity
-        data << uint32(player->GetCurrencyWeekCap(currency));           // purseLimit
-        data << uint32(0);                                              // some sort of reward for completion
-        data << uint32(0);                                              // completedEncounters
-
+        switch (dungeonId)
+        {
+        case 301: // Random Cataclysm Heroic
+        case 434: // Random Hour of Twilight Heroic
+            data << uint8(weeklyLimitReached);
+            data << uint32(0);                                                  // 150 * completed runs this week (7 times total per week)
+            data << uint32(100000);                                             // some sort of overall cap/weekly cap
+            data << uint32(CURRENCY_TYPE_VALOR_POINTS);                         // currency ID (Valor Points)
+            data << uint32(0);                                                  // tier1Quantity
+            data << uint32(100000);                                             // tier1Limit
+            data << uint32(0);                                                  // overallQuantity
+            data << uint32(100000);
+            data << uint32(player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, false)); // General Currency ammount this week
+            data << uint32(100000);                                             // periodPurseLimit
+            data << uint32(40000);                                              // purseQuantity
+            data << uint32(0);                                                  // purseLimit
+            data << uint32(150);                                                // some sort of reward for completion
+            data << uint32(0);                                                  // completedEncounters
+            break;
+        default:
+            data << uint8(weeklyLimitReached);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+        }
 
         if (dungeonId != 300 && dungeonId != 416 && dungeonId != 417 && cta)
         {

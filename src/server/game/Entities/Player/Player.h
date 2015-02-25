@@ -2640,9 +2640,6 @@ class Player : public Unit, public GridObject<Player>
         bool isUsingLfg();
         bool inRandomLfgDungeon();
 
-        typedef std::set<uint32> DFQuestsDoneList;
-        DFQuestsDoneList m_DFQuests;
-
         void SendCinematicStart(uint32 CinematicSequenceId);
         void SendMovieStart(uint32 MovieId);
 
