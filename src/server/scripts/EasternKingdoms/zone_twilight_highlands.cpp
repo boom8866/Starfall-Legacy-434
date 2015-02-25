@@ -686,10 +686,12 @@ public:
 
     bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
     {
-        if (player->isAlive() && (player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE_A) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE_H) == QUEST_STATUS_INCOMPLETE))
+        if (player->isAlive())
         {
-            player->CompleteQuest(QUEST_SCOUTING_THE_SHORE_A);
-            player->CompleteQuest(QUEST_SCOUTING_THE_SHORE_H);
+            if (player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE_A) == QUEST_STATUS_INCOMPLETE)
+                player->CompleteQuest(QUEST_SCOUTING_THE_SHORE_A);
+            if (player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE_H) == QUEST_STATUS_INCOMPLETE)
+                player->CompleteQuest(QUEST_SCOUTING_THE_SHORE_H);
         }
         return false;
     }
