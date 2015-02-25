@@ -313,18 +313,36 @@ void WorldSession::SendLfgPlayerLockInfo()
         data << uint32(*it);                               // Dungeon Entry (id + type)
         lfg::LfgReward const* reward = sLFGMgr->GetRandomDungeonReward(*it, level);
         CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(CURRENCY_TYPE_VALOR_POINTS);
+
         Quest const* quest = NULL;
         Quest const* ctaQuest = sObjectMgr->GetQuestTemplate(30114);
         uint16 dungeonId = (*it & 0x00FFFFFF);
+
         bool weeklyLimitReached = false;
+        bool valorPointsCap = false;
+
         if (reward)
         {
             quest = sObjectMgr->GetQuestTemplate(reward->firstQuest);
+
             if (quest)
             {
-                weeklyLimitReached = !player->CanRewardQuest(quest, false);
-                if (weeklyLimitReached)
-                    quest = sObjectMgr->GetQuestTemplate(reward->otherQuest);
+                switch (dungeonId)
+                {
+                    case 301: // Random Cataclysm Heroic
+                    case 434: // Random Hour of Twilight
+                        weeklyLimitReached = !player->CanRewardQuest(quest, false);
+                        valorPointsCap = player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, false) == player->GetCurrencyWeekCap(CURRENCY_TYPE_VALOR_POINTS, false);
+
+                        if (weeklyLimitReached || valorPointsCap)
+                            quest = sObjectMgr->GetQuestTemplate(reward->otherQuest);
+                        break;
+                    default:
+                        weeklyLimitReached = !player->CanRewardQuest(quest, false);
+                        if (weeklyLimitReached)
+                            quest = sObjectMgr->GetQuestTemplate(reward->otherQuest);
+                        break;
+                }
             }
         }
 

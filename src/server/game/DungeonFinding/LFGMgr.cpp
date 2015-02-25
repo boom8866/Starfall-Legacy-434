@@ -1440,12 +1440,13 @@ void LFGMgr::FinishDungeon(uint64 gguid, const uint32 dungeonId)
             continue;
 
         bool done = false;
+        bool valorPointsCap = player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, false) == player->GetCurrencyWeekCap(CURRENCY_TYPE_VALOR_POINTS, false);
+
         Quest const* quest = sObjectMgr->GetQuestTemplate(reward->firstQuest);
         if (!quest)
             continue;
 
-        // if we can take the quest, means that we haven't done this kind of "run", IE: First Heroic Random of Day.
-        if (player->CanRewardQuest(quest, false))
+        if (player->CanRewardQuest(quest, false) && !valorPointsCap)
             player->RewardQuest(quest, 0, NULL, false);
         else
         {
@@ -1453,7 +1454,7 @@ void LFGMgr::FinishDungeon(uint64 gguid, const uint32 dungeonId)
             quest = sObjectMgr->GetQuestTemplate(reward->otherQuest);
             if (!quest)
                 continue;
-            // we give reward without informing client (retail does this)
+
             player->RewardQuest(quest, 0, NULL, false);
         }
 
