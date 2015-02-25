@@ -652,7 +652,7 @@ public:
                     case EVENT_AEGIS_OF_FLAME:
                         me->StopMoving();
                         DoCast(me, SPELL_AEGIS_OF_FLAME);
-                        events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, urand(33000, 35000));
+                        events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, urand(63000, 65000));
                         events.ScheduleEvent(EVENT_RISING_FLAMES, 2000);
                         break;
                     case EVENT_RISING_FLAMES:
@@ -698,14 +698,14 @@ public:
                                 rushPos.Relocate(leapTarget);
                             }
 
-                            _infernoCounter++;
-
                             float ori = me->GetAngle(&rushPos);
                             float dist = _infernoCounter * 5.0f;
 
                             float x = ignaciousPos.GetPositionX() + cos(ori) * dist;
                             float y = ignaciousPos.GetPositionY() + sin(ori) * dist;
                             float z = ignaciousPos.GetPositionZ();
+
+                            _infernoCounter++;
 
                             me->SummonCreature(NPC_INFERNO_RUSH, x, y, z, ori, TEMPSUMMON_MANUAL_DESPAWN);
                             events.ScheduleEvent(EVENT_SUMMON_INFERNO_RUSH, 250);
@@ -794,6 +794,7 @@ public:
             events.ScheduleEvent(EVENT_TALK_INTRO, 4000);
             events.ScheduleEvent(EVENT_ERUPTION, 15000);
             events.ScheduleEvent(EVENT_QUAKE, 33000);
+            events.ScheduleEvent(EVENT_QUAKE_EMOTE, 23000);
             events.ScheduleEvent(EVENT_GRAVITY_WELL, 12000);
             events.ScheduleEvent(EVENT_HARDEN_SKIN, 20000);
         }
@@ -953,7 +954,7 @@ public:
                         Talk(SAY_ANNOUNCE_ABILITY);
                         DoCast(me, SPELL_QUAKE);
                         events.ScheduleEvent(EVENT_QUAKE, 66000);
-                        events.ScheduleEvent(EVENT_QUAKE, 58000);
+                        events.ScheduleEvent(EVENT_QUAKE_EMOTE, 56000);
                         break;
                     case EVENT_QUAKE_EMOTE:
                         if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASCENDANT_COUNCIL_CONTROLLER)))
@@ -1004,6 +1005,7 @@ public:
         {
             _Reset();
             _switched = false;
+            MakeInterruptable(false);
             me->SetReactState(REACT_PASSIVE);
         }
 
@@ -1023,6 +1025,7 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
+            MakeInterruptable(false);
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
             summons.DespawnAll();
@@ -1046,6 +1049,20 @@ public:
                     break;
             }
             summons.Summon(summon);
+        }
+
+        void MakeInterruptable(bool apply)
+        {
+            if (apply)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
+            }
+            else
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            }
         }
 
         void KilledUnit(Unit* victim)
@@ -1146,11 +1163,16 @@ public:
                         events.ScheduleEvent(EVENT_DISPERSE, 25000);
                         break;
                     case EVENT_LIGHTNING_BLAST:
+                        MakeInterruptable(true);
                         DoCast(me, SPELL_LIGHTNING_BLAST);
+                        events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 4000);
                         break;
                     case EVENT_LIGHTNING_ROD:
                         DoCast(me, SPELL_LIGHTNING_ROD);
                         events.ScheduleEvent(EVENT_LIGHTNING_ROD, 25000);
+                        break;
+                    case EVENT_APPLY_IMMUNITY:
+                        MakeInterruptable(false);
                         break;
                     default:
                         break;

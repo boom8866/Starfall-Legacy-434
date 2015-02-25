@@ -352,14 +352,14 @@ public:
                         DoCastAOE(SPELL_NIGHTMARE_PORTAL);
                         if (IsHeroic())
                         {
-                            events.ScheduleEvent(EVENT_SUMMON_SENTINEL, 1);
+                            events.ScheduleEvent(EVENT_SUMMON_SENTINEL, 2000);
                             events.ScheduleEvent(EVENT_SUMMON_WURMS, 6000);
                             events.ScheduleEvent(EVENT_SUMMON_SEEKER, 16000);
                             events.ScheduleEvent(EVENT_SUMMON_RANDOM, 31000);
                         }
                         else
                         {
-                            events.ScheduleEvent(EVENT_SUMMON_WURMS, 1);
+                            events.ScheduleEvent(EVENT_SUMMON_WURMS, 2000);
                             events.ScheduleEvent(EVENT_SUMMON_SEEKER, 12000);
                             events.ScheduleEvent(EVENT_SUMMON_SENTINEL, 27000);
                         }

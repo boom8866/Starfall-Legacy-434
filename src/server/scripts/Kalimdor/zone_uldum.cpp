@@ -9661,12 +9661,18 @@ public:
         {
             EVENT_POINT_CENTER      = 1,
             EVENT_TELEPORT_OBELISK,
-            EVENT_REMOVE_PASSENGER
+            EVENT_REMOVE_PASSENGER,
+            EVENT_ADJUST_FACING
         };
 
         enum npcId
         {
             NPC_ENTRY_STAR_CENTER   = 28960
+        };
+
+        enum pointId
+        {
+            POINT_OBELISK   = 10
         };
 
         void OnCharmed(bool apply) {}
@@ -9677,6 +9683,20 @@ public:
             me->AddAura(SPELL_UNIQUE_PHASING, me);
             owner->EnterVehicle(me, 2);
             events.ScheduleEvent(EVENT_POINT_CENTER, 1000);
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_OBELISK:
+                {
+                    events.ScheduleEvent(EVENT_ADJUST_FACING, 1);
+                    break;
+                }
+                default:
+                    break;
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -9704,17 +9724,26 @@ public:
                     {
                         events.CancelEvent(EVENT_TELEPORT_OBELISK);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
+                        {
+                            me->CastStop();
                             playerOwner->CastSpell(playerOwner, SPELL_FADE_TO_BLACK, true);
-                        me->NearTeleportTo(-9357.67f, -1635.93f, 237.04f, 0.71f);
+                        }
+                        me->GetMotionMaster()->MoveJump(-9357.67f, -1635.93f, 237.04f, 60.0f, 60.0f, POINT_OBELISK);
                         events.ScheduleEvent(EVENT_REMOVE_PASSENGER, 15000);
+                        break;
+                    }
+                    case EVENT_ADJUST_FACING:
+                    {
+                        me->SetFacingTo(0.71f);
+                        events.CancelEvent(EVENT_ADJUST_FACING);
                         break;
                     }
                     case EVENT_REMOVE_PASSENGER:
                     {
-                        events.CancelEvent(EVENT_REMOVE_PASSENGER);
                         if (me->GetVehicleKit())
                             me->GetVehicleKit()->RemoveAllPassengers();
                         me->DespawnOrUnsummon(5000);
+                        events.CancelEvent(EVENT_REMOVE_PASSENGER);
                         break;
                     }
                     default:
@@ -10041,7 +10070,8 @@ public:
         enum pointId
         {
             POINT_OUT   = 1,
-            POINT_DOWN
+            POINT_DOWN,
+            POINT_OBELISK   = 10
         };
 
         enum eventId
@@ -10050,7 +10080,8 @@ public:
             EVENT_MOVE_POINT_OUT,
             EVENT_POINT_DOWN,
             EVENT_TELEPORT_OBELISK,
-            EVENT_REMOVE_PASSENGER
+            EVENT_REMOVE_PASSENGER,
+            EVENT_ADJUST_FACING
         };
 
         enum npcId
@@ -10080,6 +10111,11 @@ public:
                 case POINT_OUT:
                 {
                     events.ScheduleEvent(EVENT_POINT_DOWN, 1000);
+                    break;
+                }
+                case POINT_OBELISK:
+                {
+                    events.ScheduleEvent(EVENT_ADJUST_FACING, 1);
                     break;
                 }
                 default:
@@ -10143,8 +10179,14 @@ public:
                         me->CastStop();
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                             playerOwner->CastSpell(playerOwner, SPELL_FADE_TO_BLACK, true);
-                        me->NearTeleportTo(-10517.26f, -392.48f, 509.29f, 0.053f);
+                        me->GetMotionMaster()->MoveJump(-10517.26f, -392.48f, 509.29f, 60.0f, 60.0f, POINT_OBELISK);
                         events.ScheduleEvent(EVENT_REMOVE_PASSENGER, 15000);
+                        break;
+                    }
+                    case EVENT_ADJUST_FACING:
+                    {
+                        me->SetFacingTo(0.053f);
+                        events.CancelEvent(EVENT_ADJUST_FACING);
                         break;
                     }
                     case EVENT_REMOVE_PASSENGER:
@@ -14984,6 +15026,7 @@ public:
         {
             player->AddAura(SPELL_UNIQUE_PHASING, player);
             player->CastSpell(player, SPELL_FADE_TO_BLACK, true);
+            player->NearTeleportTo(-8507.00f, -45.32f, 272.48f, 2.74f);
             player->CastSpell(player, SPELL_SUMMON_SEAT, true);
             return true;
         }
@@ -15024,7 +15067,7 @@ public:
         void IsSummonedBy(Unit* owner)
         {
             playerOwner = owner;
-            events.ScheduleEvent(EVENT_RIDE_INVOKER, 2000);
+            events.ScheduleEvent(EVENT_RIDE_INVOKER, 1000);
             owner->AddAura(SPELL_UNIQUE_PHASING, me);
             achievementCounter = 0;
         }

@@ -6274,8 +6274,8 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                                     else
                                         m_caster->CastCustomSpell(unitTarget, spellId, &damage, NULL, NULL, true);
 
-                                    if (unitTarget->GetAura(spellId))
-                                        unitTarget->GetAura(spellId)->SetDuration(duration);
+                                    if (Aura* aur = unitTarget->GetAura(spellId, m_caster->GetGUID()))
+                                        aur->SetDuration(duration);
                                 }
                             }
                         }

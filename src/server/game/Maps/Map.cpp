@@ -242,8 +242,18 @@ i_scriptLock(false), _defaultLight(GetDefaultMapLight(id))
 
 void Map::InitVisibilityDistance()
 {
-    //init visibility for continents
-    m_VisibleDistance = World::GetMaxVisibleDistanceOnContinents();
+    // Init visibility for continents
+    switch (GetId())
+    {
+        case 730:   // The Maelstrom
+        {
+            m_VisibleDistance = 533.0f;
+            break;
+        }
+        default:
+            m_VisibleDistance = World::GetMaxVisibleDistanceOnContinents();
+            break;
+    }
     m_VisibilityNotifyPeriod = World::GetVisibilityNotifyPeriodOnContinents();
 }
 

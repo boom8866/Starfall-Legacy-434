@@ -4531,9 +4531,9 @@ void Unit::RemoveRespecAuras()
         if (!(aura->GetSpellInfo()->AttributesEx4 & SPELL_ATTR4_UNK21)                                          // don't remove stances, shadowform, pally/hunter auras
             && !aura->IsPassive()                                                                               // don't remove passive auras
             && (aurApp->IsPositive()
-            || !(aura->GetSpellInfo()->AttributesEx3 & SPELL_ATTR3_DEATH_PERSISTENT)                             // not negative death persistent auras
-            || !(aura->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_POTION)                                    // Potions
-            || !(aura->GetSpellInfo()->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)))                                  // Foods and Drinks
+            && !(aura->GetSpellInfo()->AttributesEx3 & SPELL_ATTR3_DEATH_PERSISTENT)                             // not negative death persistent auras
+            && !(aura->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_POTION)                                    // Potions
+            && !(aura->GetSpellInfo()->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)))                                  // Foods and Drinks
             RemoveAura(iter);
         else
             ++iter;
@@ -7463,26 +7463,29 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (!(procSpell->Id == 51505 || procSpell->Id == 403 || procSpell->Id == 421))
                         return false;
 
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
                     if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2018, 0))
                     {
-                        if (roll_chance_i(aurEff->GetAmount()))
+                        if (roll_chance_f(int32(aurEff->GetAmount())))
                         {
                             // Lava Burst
                             if (procSpell->Id == 51505 && !ToPlayer()->GetSpellCooldownDelay(77451))
                             {
-                                CastSpell(target, 77451, false);
+                                CastSpell(target, 77451, true);
                                 ToPlayer()->AddSpellCooldown(77451, 0, time(NULL) + 1);
                             }
                             // Lightning Bolt
                             else if (procSpell->Id == 403 && !ToPlayer()->GetSpellCooldownDelay(45284))
                             {
-                                CastSpell(target, 45284, false);
+                                CastSpell(target, 45284, true);
                                 ToPlayer()->AddSpellCooldown(45284, 0, time(NULL) + 1);
                             }
                             // Chain Lightning
                             else if (procSpell->Id == 421 && !ToPlayer()->GetSpellCooldownDelay(45297))
                             {
-                                CastSpell(target, 45297, false);
+                                CastSpell(target, 45297, true);
                                 ToPlayer()->AddSpellCooldown(45297, 0, time(NULL) + 1);
                             }
                         }
@@ -9439,6 +9442,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             // Procs only from Judgement spell
             if (!procSpell || (procSpell->Id != 54158))
+                return false;
+            break;
+        }
+        // Cobra Strikes
+        case 53256:
+        case 53259:
+        case 53260:
+        {
+            // Procs only from Arcane Shot
+            if (!procSpell || (procSpell->Id != 3044))
                 return false;
             break;
         }
@@ -12168,8 +12181,8 @@ uint32 Unit::SpellCriticalDamageBonus(SpellInfo const* spellProto, uint32 damage
         }
         default:
         {
-            // Pets and summons should always take 200% of crit damage
-            if (isPet() || isSummon())
+            // Pets and summons should always take 200% of crit damage (excluding Totems)
+            if ((isPet() || isSummon()) && !isTotem())
                 crit_bonus += damage;
             else
                 crit_bonus += damage / 2;                       // for spells is 50%
@@ -20205,6 +20218,15 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 48728: // Artillery Seat
+                {
+                    if (player)
+                    {
+                        player->CastSpell(player, 91102, true);
+                        player->NearTeleportTo(-8258.20f, -127.26f, 320.70f, 2.74f);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -21804,7 +21826,7 @@ void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool trigge
 
         bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
         {
-            if (me && victim)
+            if (me && me->IsInWorld() && victim && victim != NULL && victim->IsInWorld())
                 me->CastSpell(victim, spellId, triggered);
             return true;
         }
