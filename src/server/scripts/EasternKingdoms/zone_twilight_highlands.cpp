@@ -7475,7 +7475,7 @@ public:
 
         void IsSummonedBy(Unit* owner)
         {
-            if (me->GetPhaseMask() >= 2048)
+            if (me->GetPhaseMask() & 2048)
             {
                 events.ScheduleEvent(EVENT_ATTACK_BRAIN, 6000);
                 owner->AddAura(SPELL_UNIQUE_PHASING, me);
@@ -7487,8 +7487,8 @@ public:
                 events.ScheduleEvent(EVENT_FOLLOW_MASTER, 1000);
             }
 
-            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 75 - me->getLevel())));
-            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 75 + me->getLevel())));
+            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 85 - me->getLevel())));
+            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 85 + me->getLevel())));
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -7586,12 +7586,12 @@ public:
                     {
                         if (Unit* owner = me->ToTempSummon()->GetSummoner())
                         {
-                            if (owner->GetDistance(me) > 15.0f && owner->GetPhaseMask() < 2048)
+                            if (owner->GetDistance(me) > 15.0f && !(owner->GetPhaseMask() & 2048))
                             {
                                 me->GetMotionMaster()->MovementExpired(false);
                                 me->GetMotionMaster()->MoveFollow(owner, 2.0f, urand(1, 4));
                             }
-                            if (owner->GetDistance(me) > 80.0f && owner->GetPhaseMask() >= 2048)
+                            if (owner->GetDistance(me) > 80.0f && (owner->GetPhaseMask() & 2048))
                             {
                                 me->GetMotionMaster()->MovementExpired(false);
                                 me->GetMotionMaster()->MoveFollow(owner, 1.5f, urand(1, 4));
