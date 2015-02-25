@@ -7463,26 +7463,29 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (!(procSpell->Id == 51505 || procSpell->Id == 403 || procSpell->Id == 421))
                         return false;
 
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
                     if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2018, 0))
                     {
-                        if (roll_chance_i(aurEff->GetAmount()))
+                        if (roll_chance_f(int32(aurEff->GetAmount())))
                         {
                             // Lava Burst
                             if (procSpell->Id == 51505 && !ToPlayer()->GetSpellCooldownDelay(77451))
                             {
-                                CastSpell(target, 77451, false);
+                                CastSpell(target, 77451, true);
                                 ToPlayer()->AddSpellCooldown(77451, 0, time(NULL) + 1);
                             }
                             // Lightning Bolt
                             else if (procSpell->Id == 403 && !ToPlayer()->GetSpellCooldownDelay(45284))
                             {
-                                CastSpell(target, 45284, false);
+                                CastSpell(target, 45284, true);
                                 ToPlayer()->AddSpellCooldown(45284, 0, time(NULL) + 1);
                             }
                             // Chain Lightning
                             else if (procSpell->Id == 421 && !ToPlayer()->GetSpellCooldownDelay(45297))
                             {
-                                CastSpell(target, 45297, false);
+                                CastSpell(target, 45297, true);
                                 ToPlayer()->AddSpellCooldown(45297, 0, time(NULL) + 1);
                             }
                         }
