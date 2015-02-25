@@ -1376,8 +1376,22 @@ public:
             int32 bp0 = info.GetHealInfo()->GetHeal() * (GetEffect(EFFECT_0)->GetAmount() / 100.f);
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT);
             bp0 /= spellInfo->GetDuration() / spellInfo->Effects[EFFECT_0].Amplitude;
-            if (target->HasAura(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, caster->GetGUID()))
-                bp0 += target->GetAura(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, caster->GetGUID())->GetEffect(EFFECT_0)->GetAmount();
+            if (AuraEffect* eol = target->GetAuraEffect(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, EFFECT_0, caster->GetGUID()))
+            {
+                uint32 tickNumber = eol->GetTickNumber();
+                if (tickNumber == 1)
+                {
+                    bp0 += target->GetAura(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, caster->GetGUID())->GetEffect(EFFECT_0)->GetAmount();
+                    target->CastCustomSpell(info.GetActionTarget(), SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, &bp0, NULL, NULL, true);
+                }
+                else
+                {
+                    if (Aura* aur = eol->GetBase())
+                        aur->RefreshDuration();
+                }
+                return;
+            }
+
             target->CastCustomSpell(info.GetActionTarget(), SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, &bp0, NULL, NULL, true);
         }
 
