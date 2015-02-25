@@ -4531,9 +4531,9 @@ void Unit::RemoveRespecAuras()
         if (!(aura->GetSpellInfo()->AttributesEx4 & SPELL_ATTR4_UNK21)                                          // don't remove stances, shadowform, pally/hunter auras
             && !aura->IsPassive()                                                                               // don't remove passive auras
             && (aurApp->IsPositive()
-            || !(aura->GetSpellInfo()->AttributesEx3 & SPELL_ATTR3_DEATH_PERSISTENT)                             // not negative death persistent auras
-            || !(aura->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_POTION)                                    // Potions
-            || !(aura->GetSpellInfo()->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)))                                  // Foods and Drinks
+            && !(aura->GetSpellInfo()->AttributesEx3 & SPELL_ATTR3_DEATH_PERSISTENT)                             // not negative death persistent auras
+            && !(aura->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_POTION)                                    // Potions
+            && !(aura->GetSpellInfo()->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)))                                  // Foods and Drinks
             RemoveAura(iter);
         else
             ++iter;
