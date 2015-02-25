@@ -4518,6 +4518,163 @@ public:
     }
 };
 
+class npc_dh_drowning_watchman : public CreatureScript
+{
+public:
+    npc_dh_drowning_watchman() : CreatureScript("npc_dh_drowning_watchman")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_SEARCH_GROUND         = 1,
+        EVENT_THANKS_PLAYER,
+        EVENT_MOVE_AWAY,
+        EVENT_CHECK_DROWNING
+    };
+
+    enum actionId
+    {
+        ACTION_MOUNT_PLAYER     = 1
+    };
+
+    enum creditId
+    {
+        CREDIT_WATCHMAN_SAVED   = 36450
+    };
+
+    enum pointId
+    {
+        POINT_AWAY  = 1
+    };
+
+    enum spellId
+    {
+        SPELL_RESCUE_DROWNING_WATCHMAN  = 68735,
+        SPELL_DROWNING_WATCHMAN         = 68730
+    };
+
+    enum questId
+    {
+        QUEST_GASPING_FOR_BREATH    = 14395
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_GASPING_FOR_BREATH) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (Vehicle* vehicle = player->GetVehicleKit())
+                if (Unit* passenger = vehicle->GetPassenger(0))
+                    return true;
+
+            if (player->HasAura(SPELL_RESCUE_DROWNING_WATCHMAN))
+            {
+                creature->EnterVehicle(player, 0);
+                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                creature->RemoveAurasDueToSpell(SPELL_DROWNING_WATCHMAN);
+                creature->AI()->DoAction(ACTION_MOUNT_PLAYER);
+            }
+            return true;
+        }
+        return true;
+    }
+
+    struct npc_dh_drowning_watchmanAI : public ScriptedAI
+    {
+        npc_dh_drowning_watchmanAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void DamageTaken(Unit* /*who*/, uint32& damage)
+        {
+            damage = 0;
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_MOUNT_PLAYER:
+                {
+                    events.ScheduleEvent(EVENT_SEARCH_GROUND, 2000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_GROUND:
+                    {
+                        events.ScheduleEvent(EVENT_CHECK_DROWNING, 500);
+                        if (Unit* owner = me->GetVehicleBase())
+                        {
+                            if (!owner->IsInWater() && !owner->IsUnderWater())
+                            {
+                                events.CancelEvent(EVENT_CHECK_DROWNING);
+                                if (owner->GetTypeId() == TYPEID_PLAYER)
+                                    owner->ToPlayer()->KilledMonsterCredit(CREDIT_WATCHMAN_SAVED);
+                                me->ExitVehicle();
+                                me->RemoveAurasDueToSpell(SPELL_DROWNING_WATCHMAN);
+                                events.ScheduleEvent(EVENT_THANKS_PLAYER, 1500);
+                                events.CancelEvent(EVENT_SEARCH_GROUND);
+                                return;
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_SEARCH_GROUND, 1500);
+                        break;
+                    }
+                    case EVENT_THANKS_PLAYER:
+                    {
+                        me->SetWalk(false);
+                        events.CancelEvent(EVENT_THANKS_PLAYER);
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_BOW);
+                        Talk(0);
+                        events.ScheduleEvent(EVENT_MOVE_AWAY, 2000);
+                        break;
+                    }
+                    case EVENT_MOVE_AWAY:
+                    {
+                        events.CancelEvent(EVENT_MOVE_AWAY);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_AWAY, -1838.48f, 2505.76f, 5.93f);
+                        me->DespawnOrUnsummon(4000);
+                        break;
+                    }
+                    case EVENT_CHECK_DROWNING:
+                    {
+                        if (!me->GetVehicleBase() && !me->HasAura(SPELL_DROWNING_WATCHMAN))
+                        {
+                            events.CancelEvent(EVENT_CHECK_DROWNING);
+                            me->DespawnOrUnsummon(1000);
+                            return;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_DROWNING, 3500);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_dh_drowning_watchmanAI(creature);
+    }
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -4608,4 +4765,5 @@ void AddSC_gilneas()
     new npc_stagecoach_harness();
     new npc_gilneas_swamp_crocolisk();
     new spell_toss_keg();
+    new npc_dh_drowning_watchman();
 }
