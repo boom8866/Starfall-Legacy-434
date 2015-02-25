@@ -1441,8 +1441,6 @@ void LFGMgr::FinishDungeon(uint64 gguid, const uint32 dungeonId)
 
         bool done = false;
         bool valorPointsCap = player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, false) == player->GetCurrencyWeekCap(CURRENCY_TYPE_VALOR_POINTS, false);
-        if (!valorPointsCap)
-            valorPointsCap = player->GetCurrency(CURRENCY_TYPE_VALOR_POINTS, false) == 4000;
 
         Quest const* quest = sObjectMgr->GetQuestTemplate(reward->firstQuest);
         if (!quest)

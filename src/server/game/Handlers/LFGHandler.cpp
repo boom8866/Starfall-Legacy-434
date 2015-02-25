@@ -333,8 +333,7 @@ void WorldSession::SendLfgPlayerLockInfo()
                     case 434: // Random Hour of Twilight
                         weeklyLimitReached = !player->CanRewardQuest(quest, false);
                         valorPointsCap = player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, false) == player->GetCurrencyWeekCap(CURRENCY_TYPE_VALOR_POINTS, false);
-                        if (!valorPointsCap)
-                            valorPointsCap = player->GetCurrency(CURRENCY_TYPE_VALOR_POINTS, false) == player->GetCurrencyTotalCap(currency);
+
                         if (weeklyLimitReached || valorPointsCap)
                             quest = sObjectMgr->GetQuestTemplate(reward->otherQuest);
                         break;
