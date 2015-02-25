@@ -686,10 +686,12 @@ public:
 
     bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
     {
-        if (player->isAlive() && (player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE_A) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE_H) == QUEST_STATUS_INCOMPLETE))
+        if (player->isAlive())
         {
-            player->CompleteQuest(QUEST_SCOUTING_THE_SHORE_A);
-            player->CompleteQuest(QUEST_SCOUTING_THE_SHORE_H);
+            if (player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE_A) == QUEST_STATUS_INCOMPLETE)
+                player->CompleteQuest(QUEST_SCOUTING_THE_SHORE_A);
+            if (player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE_H) == QUEST_STATUS_INCOMPLETE)
+                player->CompleteQuest(QUEST_SCOUTING_THE_SHORE_H);
         }
         return false;
     }
@@ -2912,7 +2914,7 @@ public:
                         RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                         {
-                            if (me->GetHealth() <= me->GetMaxHealth() * 0.50f)
+                            if (me->GetHealth() >= me->GetMaxHealth() * 0.75f)
                                 DoCast(victim, SPELL_STATIC_FLUX);
                         }
                         events.RescheduleEvent(EVENT_STATIC_FLUX, 6000);
@@ -15939,6 +15941,8 @@ public:
             me->GetMotionMaster()->MovePoint(POINT_CENTER, -4182.39f, -5148.45f, -7.73f, false);
             me->SetReactState(REACT_AGGRESSIVE);
             events.ScheduleEvent(EVENT_CHECK_EVADE, 20000);
+            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 8 - me->getLevel())));
+            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 8 + me->getLevel())));
         }
 
         void JustDied(Unit* /*killer*/)
@@ -16105,6 +16109,8 @@ public:
             TalkWithDelay(3000, 0);
             me->SetReactState(REACT_AGGRESSIVE);
             events.ScheduleEvent(EVENT_CHECK_EVADE, 20000);
+            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 9 - me->getLevel())));
+            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 9 + me->getLevel())));
         }
 
         void JustDied(Unit* /*killer*/)
@@ -16283,6 +16289,8 @@ public:
             TalkWithDelay(3000, 0);
             me->SetReactState(REACT_AGGRESSIVE);
             events.ScheduleEvent(EVENT_CHECK_EVADE, 20000);
+            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 9 - me->getLevel())));
+            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 9 + me->getLevel())));
         }
 
         void JustDied(Unit* /*killer*/)
@@ -16477,6 +16485,8 @@ public:
             events.ScheduleEvent(EVENT_ENTER_COMBAT, 17000);
             me->SetReactState(REACT_AGGRESSIVE);
             events.ScheduleEvent(EVENT_CHECK_EVADE, 20000);
+            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 10 - me->getLevel())));
+            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 10 + me->getLevel())));
         }
 
         void EnterEvadeMode()
@@ -16833,6 +16843,8 @@ public:
         {
             eventCarriageDone = false;
             me->SetHealth(me->GetMaxHealth());
+            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 10 - me->getLevel())));
+            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 10 + me->getLevel())));
         }
 
         void JustDied(Unit* /*killer*/)
@@ -17203,6 +17215,8 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             events.ScheduleEvent(EVENT_ENGAGE, 17000);
             events.ScheduleEvent(EVENT_CHECK_EVADE, 30000);
+            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 12 - me->getLevel())));
+            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 12 + me->getLevel())));
         }
 
         void JustDied(Unit* /*killer*/)
