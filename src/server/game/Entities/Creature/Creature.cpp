@@ -1274,8 +1274,19 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
 
     if (!GetInstanceScript())
     {
-        attackPower /= damageModifier;
-        rangedAttackPower /= damageModifier;
+        if (!GetScriptId())
+        {
+            if (getLevel() >= 80)
+            {
+                attackPower /= (damageModifier * 0.45f);
+                rangedAttackPower /= (damageModifier * 0.45f);
+            }
+            else
+            {
+                attackPower /= damageModifier;
+                rangedAttackPower /= damageModifier;
+            }
+        }
     }
 
     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, weaponBaseMinDamage);
