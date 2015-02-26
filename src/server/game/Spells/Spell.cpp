@@ -221,9 +221,6 @@ void SpellCastTargets::SetUnitTarget(Unit* target)
     if (!target)
         return;
 
-    if (target && !target->IsInWorld())
-        return;
-
     m_objectTarget = target;
     m_objectTargetGUID = target->GetGUID();
     m_targetMask |= TARGET_FLAG_UNIT;
