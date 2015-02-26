@@ -7486,9 +7486,6 @@ public:
                 events.ScheduleEvent(EVENT_CHECK_BUFF, 2000);
                 events.ScheduleEvent(EVENT_FOLLOW_MASTER, 1000);
             }
-
-            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 85 - me->getLevel())));
-            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 85 + me->getLevel())));
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -8635,7 +8632,8 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE ||
+            (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_REWARDED && player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_NONE))
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SQUADRON, 0, 0);
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
@@ -8844,8 +8842,6 @@ public:
                 default:
                     break;
             }
-            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 125 - me->getLevel())));
-            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 125 + me->getLevel())));
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -11232,7 +11228,7 @@ public:
                         me->GetMotionMaster()->MoveLand(POINT_LAND, moveLand);
                         if (Unit* invoker = me->ToTempSummon()->GetSummoner())
                         {
-                            invoker->SummonCreature(NPC_DEATHWING, -4223.69f, -3174.06f, 496.24f, 4.69f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            invoker->SummonCreature(NPC_DEATHWING, -4230.17f, -3277.38f, 440.50f, 4.90f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                             invoker->CastSpell(invoker, SPELL_DRAKE_DOUBLE, true);
                         }
                         std::list<Creature*> creatures;
@@ -15941,8 +15937,6 @@ public:
             me->GetMotionMaster()->MovePoint(POINT_CENTER, -4182.39f, -5148.45f, -7.73f, false);
             me->SetReactState(REACT_AGGRESSIVE);
             events.ScheduleEvent(EVENT_CHECK_EVADE, 20000);
-            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 8 - me->getLevel())));
-            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 8 + me->getLevel())));
         }
 
         void JustDied(Unit* /*killer*/)
@@ -16109,8 +16103,6 @@ public:
             TalkWithDelay(3000, 0);
             me->SetReactState(REACT_AGGRESSIVE);
             events.ScheduleEvent(EVENT_CHECK_EVADE, 20000);
-            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 9 - me->getLevel())));
-            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 9 + me->getLevel())));
         }
 
         void JustDied(Unit* /*killer*/)
@@ -16289,8 +16281,6 @@ public:
             TalkWithDelay(3000, 0);
             me->SetReactState(REACT_AGGRESSIVE);
             events.ScheduleEvent(EVENT_CHECK_EVADE, 20000);
-            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 9 - me->getLevel())));
-            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 9 + me->getLevel())));
         }
 
         void JustDied(Unit* /*killer*/)
@@ -16485,8 +16475,6 @@ public:
             events.ScheduleEvent(EVENT_ENTER_COMBAT, 17000);
             me->SetReactState(REACT_AGGRESSIVE);
             events.ScheduleEvent(EVENT_CHECK_EVADE, 20000);
-            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 10 - me->getLevel())));
-            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 10 + me->getLevel())));
         }
 
         void EnterEvadeMode()
@@ -16843,8 +16831,6 @@ public:
         {
             eventCarriageDone = false;
             me->SetHealth(me->GetMaxHealth());
-            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 10 - me->getLevel())));
-            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 10 + me->getLevel())));
         }
 
         void JustDied(Unit* /*killer*/)
@@ -17215,8 +17201,6 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             events.ScheduleEvent(EVENT_ENGAGE, 17000);
             events.ScheduleEvent(EVENT_CHECK_EVADE, 30000);
-            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 12 - me->getLevel())));
-            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 12 + me->getLevel())));
         }
 
         void JustDied(Unit* /*killer*/)
@@ -21505,7 +21489,8 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE ||
+            (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_REWARDED && player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_NONE))
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SQUADRON, 0, 0);
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
