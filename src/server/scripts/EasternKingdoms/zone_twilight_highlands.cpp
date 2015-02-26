@@ -8635,7 +8635,8 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE ||
+            (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_REWARDED && player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_NONE))
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SQUADRON, 0, 0);
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
@@ -21505,7 +21506,8 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE ||
+            (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_REWARDED && player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_NONE))
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SQUADRON, 0, 0);
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
