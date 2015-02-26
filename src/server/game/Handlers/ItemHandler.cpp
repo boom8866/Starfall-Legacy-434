@@ -621,6 +621,35 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
                 }
 
                 uint32 money = pProto->SellPrice * count;
+
+                // WoTLK Items (Sell price nerfed)
+                if (pProto->ItemId <= 56806)
+                {
+                    switch (pProto->Quality)
+                    {
+                        case ITEM_QUALITY_UNCOMMON:
+                        {
+                            if (money >= 25000)
+                                money = 25000;
+                            break;
+                        }
+                        case ITEM_QUALITY_RARE:
+                        {
+                            if (money >= 35000)
+                                money = 35000;
+                            break;
+                        }
+                        case ITEM_QUALITY_EPIC:
+                        {
+                            if (money >= 50000)
+                                money = 50000;
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+
                 _player->ModifyMoney(money);
                 _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_VENDORS, money);
             }
