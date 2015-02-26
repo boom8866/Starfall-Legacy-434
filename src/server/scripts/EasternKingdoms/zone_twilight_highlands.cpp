@@ -11233,7 +11233,7 @@ public:
                         me->GetMotionMaster()->MoveLand(POINT_LAND, moveLand);
                         if (Unit* invoker = me->ToTempSummon()->GetSummoner())
                         {
-                            invoker->SummonCreature(NPC_DEATHWING, -4223.69f, -3174.06f, 496.24f, 4.69f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            invoker->SummonCreature(NPC_DEATHWING, -4230.17f, -3277.38f, 440.50f, 4.90f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                             invoker->CastSpell(invoker, SPELL_DRAKE_DOUBLE, true);
                         }
                         std::list<Creature*> creatures;
