@@ -218,7 +218,7 @@ Unit* SpellCastTargets::GetUnitTarget() const
 
 void SpellCastTargets::SetUnitTarget(Unit* target)
 {
-    if (!target)
+    if (!target || !target->IsInWorld() || target == NULL)
         return;
 
     m_objectTarget = target;

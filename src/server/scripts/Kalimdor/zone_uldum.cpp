@@ -15226,7 +15226,6 @@ class spell_fire_from_the_sky_init : public SpellScriptLoader
 
                     caster->SetPhaseMask(16384, true);
                     caster->AddAura(SPELL_UNIQUE_PHASING, caster);
-                    caster->AddAura(SPELL_FADE_TO_BLACK, caster);
                     caster->CastSpell(caster, SPELL_SUMMON_CAMERA, true);
                 }
             }
@@ -15331,8 +15330,11 @@ public:
                     {
                         events.CancelEvent(EVENT_RIDE_INVOKER);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
+                        {
                             playerOwner->EnterVehicle(me, 0);
-                        events.ScheduleEvent(EVENT_TELEPORT_CAMERA, 500);
+                            me->GetMotionMaster()->MoveJump(-8556.00f, -102.33f, 222.21f, 85.0f, 15.0f);
+                        }
+                        events.ScheduleEvent(EVENT_TELEPORT_CAMERA, 5000);
                         break;
                     }
                     case EVENT_TELEPORT_CAMERA:
@@ -15340,8 +15342,6 @@ public:
                         events.CancelEvent(EVENT_TELEPORT_CAMERA);
                         me->SetCanFly(true);
                         me->SetDisableGravity(true);
-                        me->NearTeleportTo(-8556.00f, -102.33f, 232.21f, 3.07f);
-                        me->Relocate(-8556.00f, -102.33f, 232.21f, 3.07f);
                         if (Creature* smokeBunny = me->FindNearestCreature(NPC_ENTRY_SMOKE_BUNNY, 100.0f, true))
                             me->CastSpell(smokeBunny, SPELL_CAMERA_CHANNELING, true);
                         events.ScheduleEvent(EVENT_START_WP, 1000);
