@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `speed_walk`=0.0001, `speed_run`=0.0001 WHERE `entry`=40147;

@@ -2247,14 +2247,14 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     else
         sLog->outDebug(LOG_FILTER_MAPS, "Player %s is being teleported to map %u", GetName().c_str(), mapid);
 
-    if (m_vehicle)
+    if (m_vehicle && (!(options & TELE_NOT_LEAVE_VEHICLE)))
         ExitVehicle();
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
     SetUnitMovementFlags(GetUnitMovementFlags() & MOVEMENTFLAG_MASK_HAS_PLAYER_STATUS_OPCODE);
     DisableSpline();
 
-    if (Transport* transport = GetTransport())
+    if (m_transport)
     {
         if (!(options & TELE_TO_NOT_LEAVE_TRANSPORT))
         {

@@ -510,11 +510,7 @@ void SmartAI::MoveInLineOfSight(Unit* who)
         if (me->IsWithinDistInMap(who, fAttackRadius) && me->IsWithinLOSInMap(who))
         {
             if (!me->getVictim())
-            {
-                if (who->HasAuraType(SPELL_AURA_MOD_STEALTH))
-                    who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                 AttackStart(who);
-            }
             else/* if (me->GetMap()->IsDungeon())*/
             {
                 who->SetInCombatWith(me);
