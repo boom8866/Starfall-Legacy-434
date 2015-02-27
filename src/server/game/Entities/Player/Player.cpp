@@ -17364,34 +17364,36 @@ bool Player::TakeQuestSourceItem(uint32 questId, bool msg)
     if (quest)
     {
         uint32 srcItemId = quest->GetSrcItemId();
-        ItemTemplate const* item = sObjectMgr->GetItemTemplate(srcItemId);
-
-        if (srcItemId > 0)
+        if (ItemTemplate const* item = sObjectMgr->GetItemTemplate(srcItemId))
         {
-            uint32 count = quest->GetSrcItemCount();
-            if (count <= 0)
-                count = 1;
-
-            // exist two cases when destroy source quest item not possible:
-            // a) non un-equippable item (equipped non-empty bag, for example)
-            // b) when quest is started from an item and item also is needed in
-            // the end as RequiredItemId
-            InventoryResult res = CanUnequipItems(srcItemId, count);
-            if (res != EQUIP_ERR_OK)
+            if (srcItemId > 0)
             {
-                if (msg)
-                    SendEquipError(res, NULL, NULL, srcItemId);
-                return false;
+                uint32 count = quest->GetSrcItemCount();
+                if (count <= 0)
+                    count = 1;
+
+                // exist two cases when destroy source quest item not possible:
+                // a) non un-equippable item (equipped non-empty bag, for example)
+                // b) when quest is started from an item and item also is needed in
+                // the end as RequiredItemId
+                InventoryResult res = CanUnequipItems(srcItemId, count);
+                if (res != EQUIP_ERR_OK)
+                {
+                    if (msg)
+                        SendEquipError(res, NULL, NULL, srcItemId);
+                    return false;
+                }
+
+                bool destroyItem = true;
+                for (uint8 n = 0; n < QUEST_ITEM_OBJECTIVES_COUNT; ++n)
+                    if (item->StartQuest == questId && srcItemId == quest->RequiredItemId[n])
+                        destroyItem = false;
+
+                if (destroyItem)
+                    DestroyItemCount(srcItemId, count, true, true);
             }
-
-            ASSERT(item);
-            bool destroyItem = true;
-            for (uint8 n = 0; n < QUEST_ITEM_OBJECTIVES_COUNT; ++n)
-                if (item->StartQuest == questId && srcItemId == quest->RequiredItemId[n])
-                    destroyItem = false;
-
-            if (destroyItem)
-                DestroyItemCount(srcItemId, count, true, true);
+            else
+                sLog->outError(LOG_FILTER_GENERAL, "Quest item u% would cause crash", srcItemId);
         }
     }
 
