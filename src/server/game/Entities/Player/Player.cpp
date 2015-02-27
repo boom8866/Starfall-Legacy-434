@@ -14375,10 +14375,6 @@ void Player::AddItemToBuyBackSlot(Item* pItem)
 {
     if (pItem)
     {
-        // TEMP: Don't allow to buyback the custom item for imported players
-        if (pItem->GetTemplate()->ItemId == 100000)
-            return;
-
         uint32 slot = m_currentBuybackSlot;
         // if current back slot non-empty search oldest or free
         if (m_items[slot])
