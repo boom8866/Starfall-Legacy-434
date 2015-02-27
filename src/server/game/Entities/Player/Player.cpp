@@ -2439,22 +2439,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (oldmap)
                 oldmap->RemovePlayerFromMap(this, false);
 
-            // new final coordinates
-            float final_x = x;
-            float final_y = y;
-            float final_z = z;
-            float final_o = orientation;
-
-            if (m_transport)
-            {
-                final_x += m_movementInfo.t_pos.GetPositionX();
-                final_y += m_movementInfo.t_pos.GetPositionY();
-                final_z += m_movementInfo.t_pos.GetPositionZ();
-                final_o += m_movementInfo.t_pos.GetOrientation();
-            }
-
-            m_teleport_dest = WorldLocation(mapid, final_x, final_y, final_z, final_o);
-            SetFallInformation(0, final_z);
+            m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
+            SetFallInformation(0, z);
 
             // if the player is saved before worldportack (at logout for example)
             // this will be used instead of the current location in SaveToDB
@@ -24614,6 +24600,16 @@ void Player::SendInitialPacketsAfterAddToMap()
 
     RestoreAllSpellMods();
 
+    // Unstuck Player
+    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
+    {
+        if (i != MOVE_TURN_RATE && i != MOVE_PITCH_RATE)
+        {
+            SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
+            UpdateSpeed(UnitMoveType(i), true);
+        }
+    }
+
     phaseMgr.AddUpdateFlag(PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED);
     phaseMgr.Update();
 
@@ -24657,16 +24653,6 @@ void Player::SendInitialPacketsAfterAddToMap()
             break;
         }
     }
-
-    // Unstuck Player
-    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-    {
-        SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
-        UpdateSpeed(UnitMoveType(i), true);
-    }
-
-    SendMovementSetWaterWalking(false);
-    SetRooted(false);
 
     // WoW Anniversary!
     if (sGameEventMgr->IsActiveEvent(101) && !HasAchieved(5512))
