@@ -295,6 +295,7 @@ bool AntiCheat::CheckNeeded(AntiCheatCheck checktype)
             break;
         }
         case CHECK_SPELL:
+            return false;
             break;
         case CHECK_QUEST:
             return false;
@@ -310,6 +311,7 @@ bool AntiCheat::CheckNeeded(AntiCheatCheck checktype)
             break;
         case CHECK_DAMAGE:
         case CHECK_ITEM:
+            return false;
             break;
         default:
             return false;
@@ -340,11 +342,7 @@ bool AntiCheat::CheckNeeded(AntiCheatCheck checktype)
                 return false;
             break;
         case CHECK_MOVEMENT_AIRJUMP:
-            if (isCanFly() ||
-                !isActiveMover() ||
-                GetMover()->HasAuraType(SPELL_AURA_FEATHER_FALL) ||
-                GetMover()->GetBaseMap()->IsUnderWater(m_currentmovementInfo->pos.m_positionX, m_currentmovementInfo->pos.m_positionY, m_currentmovementInfo->pos.m_positionZ-5.0f))
-                return false;
+            return false;
             break;
         case CHECK_MOVEMENT_TELEPORT:
             if (!isActiveMover() || GetPlayer()->IsBeingTeleported())
