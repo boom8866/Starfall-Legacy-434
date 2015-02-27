@@ -2275,7 +2275,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         ExitVehicle();
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
-    SetUnitMovementFlags(0);
+    SetUnitMovementFlags(GetUnitMovementFlags() & MOVEMENTFLAG_MASK_HAS_PLAYER_STATUS_OPCODE);
     DisableSpline();
 
     if (Transport* transport = GetTransport())
@@ -2336,6 +2336,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         {
             Position oldPos;
             GetPosition(&oldPos);
+            if (HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
+                z += GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
             Relocate(x, y, z, orientation);
             SendTeleportPacket(oldPos); // this automatically relocates to oldPos in order to broadcast the packet in the right place
         }
@@ -2437,8 +2439,23 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (oldmap)
                 oldmap->RemovePlayerFromMap(this, false);
 
-            m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
-            SetFallInformation(0, z);
+            // new final coordinates
+            float final_x = x;
+            float final_y = y;
+            float final_z = z;
+            float final_o = orientation;
+
+            if (m_transport)
+            {
+                final_x += m_movementInfo.t_pos.GetPositionX();
+                final_y += m_movementInfo.t_pos.GetPositionY();
+                final_z += m_movementInfo.t_pos.GetPositionZ();
+                final_o += m_movementInfo.t_pos.GetOrientation();
+            }
+
+            m_teleport_dest = WorldLocation(mapid, final_x, final_y, final_z, final_o);
+            SetFallInformation(0, final_z);
+
             // if the player is saved before worldportack (at logout for example)
             // this will be used instead of the current location in SaveToDB
 
