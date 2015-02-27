@@ -1862,8 +1862,6 @@ public:
             {
                 if (target->HasAura(SPELL_SWIRLING_WINDS))
                     target->RemoveAurasDueToSpell(SPELL_SWIRLING_WINDS);
-
-                GetCaster()->CastSpell(target, SPELL_MAGNETIC_PULL_GRAB, true);
             }
         }
 
