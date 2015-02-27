@@ -1274,8 +1274,19 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
 
     if (!GetInstanceScript())
     {
-        attackPower /= damageModifier;
-        rangedAttackPower /= damageModifier;
+        if (!GetScriptId())
+        {
+            if (getLevel() >= 80)
+            {
+                attackPower /= (damageModifier * 0.45f);
+                rangedAttackPower /= (damageModifier * 0.45f);
+            }
+            else
+            {
+                attackPower /= damageModifier;
+                rangedAttackPower /= damageModifier;
+            }
+        }
     }
 
     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, weaponBaseMinDamage);
@@ -1290,18 +1301,15 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
         case CLASS_PALADIN:
         case CLASS_WARRIOR:
         case CLASS_ROGUE:
-        case CLASS_DEATH_KNIGHT:
         {
             SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, attackPower);
             SetModifierValue(UNIT_MOD_ATTACK_POWER_NEG, BASE_VALUE, 0);
             break;
         }
-        case CLASS_HUNTER:
+        case CLASS_MAGE:
         {
-            SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, attackPower);
+            SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, uint32(attackPower * 0.33f));
             SetModifierValue(UNIT_MOD_ATTACK_POWER_NEG, BASE_VALUE, 0);
-            SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED_POS, BASE_VALUE, rangedAttackPower);
-            SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED_NEG, BASE_VALUE, 0);
             break;
         }
         default:

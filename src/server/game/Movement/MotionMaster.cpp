@@ -266,10 +266,6 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlo
     if (!target || target == _owner || _owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return;
 
-    // Do not allow to follow creatures if can't see (prevent crash)
-    if (target && _owner && !target->canSeeOrDetect(_owner))
-        return;
-
     //_owner->AddUnitState(UNIT_STATE_FOLLOW);
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {

@@ -686,10 +686,12 @@ public:
 
     bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
     {
-        if (player->isAlive() && (player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE_A) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE_H) == QUEST_STATUS_INCOMPLETE))
+        if (player->isAlive())
         {
-            player->CompleteQuest(QUEST_SCOUTING_THE_SHORE_A);
-            player->CompleteQuest(QUEST_SCOUTING_THE_SHORE_H);
+            if (player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE_A) == QUEST_STATUS_INCOMPLETE)
+                player->CompleteQuest(QUEST_SCOUTING_THE_SHORE_A);
+            if (player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE_H) == QUEST_STATUS_INCOMPLETE)
+                player->CompleteQuest(QUEST_SCOUTING_THE_SHORE_H);
         }
         return false;
     }
@@ -2912,7 +2914,7 @@ public:
                         RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                         {
-                            if (me->GetHealth() <= me->GetMaxHealth() * 0.50f)
+                            if (me->GetHealth() >= me->GetMaxHealth() * 0.75f)
                                 DoCast(victim, SPELL_STATIC_FLUX);
                         }
                         events.RescheduleEvent(EVENT_STATIC_FLUX, 6000);
@@ -7473,7 +7475,7 @@ public:
 
         void IsSummonedBy(Unit* owner)
         {
-            if (me->GetPhaseMask() >= 2048)
+            if (me->GetPhaseMask() & 2048)
             {
                 events.ScheduleEvent(EVENT_ATTACK_BRAIN, 6000);
                 owner->AddAura(SPELL_UNIQUE_PHASING, me);
@@ -7484,9 +7486,6 @@ public:
                 events.ScheduleEvent(EVENT_CHECK_BUFF, 2000);
                 events.ScheduleEvent(EVENT_FOLLOW_MASTER, 1000);
             }
-
-            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 75 - me->getLevel())));
-            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 75 + me->getLevel())));
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -7584,12 +7583,12 @@ public:
                     {
                         if (Unit* owner = me->ToTempSummon()->GetSummoner())
                         {
-                            if (owner->GetDistance(me) > 15.0f && owner->GetPhaseMask() < 2048)
+                            if (owner->GetDistance(me) > 15.0f && !(owner->GetPhaseMask() & 2048))
                             {
                                 me->GetMotionMaster()->MovementExpired(false);
                                 me->GetMotionMaster()->MoveFollow(owner, 2.0f, urand(1, 4));
                             }
-                            if (owner->GetDistance(me) > 80.0f && owner->GetPhaseMask() >= 2048)
+                            if (owner->GetDistance(me) > 80.0f && (owner->GetPhaseMask() & 2048))
                             {
                                 me->GetMotionMaster()->MovementExpired(false);
                                 me->GetMotionMaster()->MoveFollow(owner, 1.5f, urand(1, 4));
@@ -8633,7 +8632,8 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE ||
+            (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_REWARDED && player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_NONE))
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SQUADRON, 0, 0);
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
@@ -8842,8 +8842,6 @@ public:
                 default:
                     break;
             }
-            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 125 - me->getLevel())));
-            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 125 + me->getLevel())));
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -11230,7 +11228,7 @@ public:
                         me->GetMotionMaster()->MoveLand(POINT_LAND, moveLand);
                         if (Unit* invoker = me->ToTempSummon()->GetSummoner())
                         {
-                            invoker->SummonCreature(NPC_DEATHWING, -4223.69f, -3174.06f, 496.24f, 4.69f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            invoker->SummonCreature(NPC_DEATHWING, -4230.17f, -3277.38f, 440.50f, 4.90f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                             invoker->CastSpell(invoker, SPELL_DRAKE_DOUBLE, true);
                         }
                         std::list<Creature*> creatures;
@@ -21491,7 +21489,8 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE ||
+            (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_REWARDED && player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_NONE))
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SQUADRON, 0, 0);
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());

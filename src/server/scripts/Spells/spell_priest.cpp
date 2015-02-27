@@ -1368,31 +1368,30 @@ public:
 
         void HandleProc(ProcEventInfo& info)
         {
-            Unit* target = GetTarget();
+            Unit* target = info.GetActionTarget();
             Unit* caster = GetCaster();
             if (!caster || !target || !info.GetHealInfo()->GetHeal())
                 return;
 
             int32 bp0 = info.GetHealInfo()->GetHeal() * (GetEffect(EFFECT_0)->GetAmount() / 100.f);
-            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT);
-            bp0 /= spellInfo->GetDuration() / spellInfo->Effects[EFFECT_0].Amplitude;
-            if (AuraEffect* eol = target->GetAuraEffect(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, EFFECT_0, caster->GetGUID()))
+            if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT))
             {
-                uint32 tickNumber = eol->GetTickNumber();
-                if (tickNumber == 1)
+                bp0 /= spellInfo->GetDuration() / spellInfo->Effects[EFFECT_0].Amplitude;
+                if (AuraEffect* aurEff = target->GetAuraEffect(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, EFFECT_0, caster->GetGUID()))
                 {
-                    bp0 += target->GetAura(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, caster->GetGUID())->GetEffect(EFFECT_0)->GetAmount();
-                    target->CastCustomSpell(info.GetActionTarget(), SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, &bp0, NULL, NULL, true);
+                    uint32 remainingAmount = aurEff->GetAmount();
+                    uint32 tickNumber = aurEff->GetTickNumber();
+                    if (tickNumber > 0 && remainingAmount > 0)
+                    {
+                        remainingAmount /= tickNumber;
+                        aurEff->SetAmount(aurEff->GetAmount() + remainingAmount);
+                        aurEff->GetBase()->RefreshDuration();
+                    }
+                    return;
                 }
                 else
-                {
-                    if (Aura* aur = eol->GetBase())
-                        aur->RefreshDuration();
-                }
-                return;
+                    caster->CastCustomSpell(target, SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, &bp0, NULL, NULL, true);
             }
-
-            target->CastCustomSpell(info.GetActionTarget(), SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, &bp0, NULL, NULL, true);
         }
 
         void Register()
