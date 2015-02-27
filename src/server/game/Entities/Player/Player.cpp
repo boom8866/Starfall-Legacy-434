@@ -133,6 +133,30 @@ enum CharacterCustomizeFlags
     CHAR_CUSTOMIZE_FLAG_RACE            = 0x00100000        // name, gender, race, etc...
 };
 
+class anniversaryAchievement : public BasicEvent
+{
+public:
+    explicit anniversaryAchievement(Player* player) : player(player)
+    {
+    }
+
+    bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+    {
+        if (player && player->IsInWorld())
+        {
+            if (AchievementEntry const* anniversary = sAchievementMgr->GetAchievement(5512))
+            {
+                if (!player->HasAchieved(5512))
+                    player->CompletedAchievement(anniversary);
+            }
+        }
+        return true;
+    }
+
+private:
+    Player* player;
+};
+
 // corpse reclaim times
 #define DEATH_EXPIRE_STEP (5*MINUTE)
 #define MAX_DEATH_COUNT 3
@@ -24623,6 +24647,10 @@ void Player::SendInitialPacketsAfterAddToMap()
 
     SendMovementSetWaterWalking(false);
     SetRooted(false);
+
+    // WoW Anniversary!
+    if (sGameEventMgr->IsActiveEvent(101) && !HasAchieved(5512))
+        m_Events.AddEvent(new anniversaryAchievement(this), (this)->m_Events.CalculateTime(10000));
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()
