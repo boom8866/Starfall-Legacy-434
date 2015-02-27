@@ -942,7 +942,14 @@ class spell_warr_sweeping_strikes : public SpellScriptLoader
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
             {
                 PreventDefaultAction();
-                GetTarget()->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, true, NULL, aurEff);
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetTarget())
+                    {
+                        if (_procTarget && _procTarget != NULL && caster->IsValidAttackTarget(target))
+                            target->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, true, NULL, aurEff);
+                    }
+                }
             }
 
             void Register()
