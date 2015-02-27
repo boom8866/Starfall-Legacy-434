@@ -2251,7 +2251,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         ExitVehicle();
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
-    SetUnitMovementFlags(GetUnitMovementFlags() & MOVEMENTFLAG_MASK_HAS_PLAYER_STATUS_OPCODE);
+    SetUnitMovementFlags(0);
     DisableSpline();
 
     if (Transport* transport = GetTransport())
@@ -2312,8 +2312,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         {
             Position oldPos;
             GetPosition(&oldPos);
-            if (HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
-                z += GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
             Relocate(x, y, z, orientation);
             SendTeleportPacket(oldPos); // this automatically relocates to oldPos in order to broadcast the packet in the right place
         }
@@ -13583,8 +13581,22 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
         // Delete rolled money / loot from db.
         // MUST be done before RemoveFromWorld() or GetTemplate() fails
         if (ItemTemplate const* pTmp = pItem->GetTemplate())
+        {
+            // Switch for nonworking items that should loot money
+            switch (pTmp->ItemId)
+            {
+                case 64491: // Royal Reward
+                {
+                    ModifyMoney(2000000);
+                    break;
+                }
+                default:
+                    break;
+            }
+
             if (pTmp->Flags & ITEM_PROTO_FLAG_OPENABLE)
                 pItem->ItemContainerDeleteLootMoneyAndLootItemsFromDB();
+        }
 
         if (IsInWorld() && update)
         {
