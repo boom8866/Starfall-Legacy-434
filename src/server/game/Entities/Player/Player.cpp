@@ -2251,7 +2251,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         ExitVehicle();
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
-    SetUnitMovementFlags(GetUnitMovementFlags() & MOVEMENTFLAG_MASK_HAS_PLAYER_STATUS_OPCODE);
+    SetUnitMovementFlags(0);
     DisableSpline();
 
     if (Transport* transport = GetTransport())
@@ -2312,8 +2312,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         {
             Position oldPos;
             GetPosition(&oldPos);
-            if (HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
-                z += GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
             Relocate(x, y, z, orientation);
             SendTeleportPacket(oldPos); // this automatically relocates to oldPos in order to broadcast the packet in the right place
         }
