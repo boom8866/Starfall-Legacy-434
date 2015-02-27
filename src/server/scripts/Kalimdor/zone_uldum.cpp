@@ -512,14 +512,14 @@ public:
                     case EVENT_UPPER_VISUAL:
                     {
                         events.CancelEvent(EVENT_UPPER_VISUAL);
-                        if (playerOwner && playerOwner != NULL && playerOwner->GetVehicleBase())
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->GetVehicleBase())
                             playerOwner->GetVehicle()->GetPassenger(0)->ChangeSeat(2, true);
                         break;
                     }
                     case EVENT_SWITCH_SEAT:
                     {
                         events.CancelEvent(EVENT_SWITCH_SEAT);
-                        if (playerOwner && playerOwner != NULL && playerOwner->GetVehicleBase())
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->GetVehicleBase())
                             playerOwner->GetVehicle()->GetPassenger(2)->ChangeSeat(1, true);
 
                         me->NearTeleportTo(-8937.54f,-1725.59f, 125.31f, 2.09f);
@@ -527,7 +527,7 @@ public:
                     }
                     case EVENT_FADE_TO_BLACK:
                     {
-                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->IsInWorld())
                             playerOwner->CastSpell(playerOwner, SPELL_FADE_TO_BLACK, true);
 
                         if (Creature* ladyHumps = me->FindNearestCreature(NPC_ENTRY_LADY_HUMPS, 100.0f, true))
@@ -550,7 +550,7 @@ public:
                     {
                         events.CancelEvent(EVENT_RETURN_SEAT);
                         events.ScheduleEvent(EVENT_SEAT_UNDER_ATTACK, 6000);
-                        if (playerOwner && playerOwner != NULL && playerOwner->GetVehicleBase())
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->GetVehicleBase())
                             playerOwner->GetVehicle()->GetPassenger(1)->ChangeSeat(0, true);
                         break;
                     }
@@ -559,7 +559,7 @@ public:
                         events.CancelEvent(EVENT_SEAT_UNDER_ATTACK);
                         me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveJump(-8992.04f, -1663.47f, 108.99f, 25.0f, 25.0f, POINT_RIDGE);
-                        if (playerOwner && playerOwner != NULL && playerOwner->GetVehicleBase())
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->GetVehicleBase())
                         {
                             playerOwner->CastSpell(playerOwner, SPELL_SUMMON_SKARF, true);
                             playerOwner->GetVehicle()->GetPassenger(0)->ChangeSeat(2, true);
@@ -573,7 +573,7 @@ public:
                         me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveJump(-8950.93f, -1646.22f, 98.93f, 30.0f, 30.0f, POINT_AMBUSHER);
                         events.ScheduleEvent(EVENT_TELEPORT_CAMERA, 10000);
-                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->IsInWorld())
                             playerOwner->CastWithDelay(8000, playerOwner, SPELL_FADE_TO_BLACK, true);
                         break;
                     }
@@ -592,7 +592,7 @@ public:
                     case EVENT_REMOVE_PASSENGERS:
                     {
                         events.CancelEvent(EVENT_REMOVE_PASSENGERS);
-                        if (playerOwner && playerOwner != NULL && playerOwner->GetVehicle())
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->GetVehicle())
                             playerOwner->GetVehicle()->RemoveAllPassengers();
                         if (Creature* ambushers = me->FindNearestCreature(NPC_ENTRY_AMBUSHERS, 200.0f, true))
                             ambushers->AI()->TalkWithDelay(2000, 1);
