@@ -2233,6 +2233,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         return false;
     }
 
+    StopMoving();
+    SendMovementFlagUpdate();
+
     // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
     Pet* pet = GetPet();
 
@@ -2472,6 +2475,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         //    return false;
     }
     return true;
+
+    GetSession()->HandleMoveWorldportAckOpcode();
 }
 
 bool Player::TeleportToBGEntryPoint()
