@@ -2069,8 +2069,8 @@ MovementStatusElements MoveUpdateTeleport[] =
 
     MSEFallTime,
     MSEFallHorizontalSpeed,
-    MSEFallCosAngle,
     MSEFallSinAngle,
+    MSEFallCosAngle,
     MSEFallVerticalSpeed,
 
     MSEGuidByte5,

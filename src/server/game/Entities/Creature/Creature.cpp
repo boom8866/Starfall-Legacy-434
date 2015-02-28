@@ -1278,8 +1278,8 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
         {
             if (getLevel() >= 80)
             {
-                attackPower /= (damageModifier * 0.45f);
-                rangedAttackPower /= (damageModifier * 0.45f);
+                attackPower /= (damageModifier * 0.90f);
+                rangedAttackPower /= (damageModifier * 0.90f);
             }
             else
             {

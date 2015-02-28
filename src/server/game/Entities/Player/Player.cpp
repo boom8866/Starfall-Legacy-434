@@ -139,6 +139,24 @@ enum CharacterCustomizeFlags
 
 static uint32 copseReclaimDelay[MAX_DEATH_COUNT] = { 30, 60, 120 };
 
+class unstuckPlayer : public BasicEvent
+{
+public:
+    explicit unstuckPlayer(Player* player) : player(player)
+    {
+    }
+
+    bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+    {
+        if (player && player->IsInWorld())
+            player->ResurrectPlayer(0, false);
+        return true;
+    }
+
+private:
+    Player* player;
+};
+
 // == PlayerTaxi ================================================
 
 PlayerTaxi::PlayerTaxi()
@@ -2247,14 +2265,14 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     else
         sLog->outDebug(LOG_FILTER_MAPS, "Player %s is being teleported to map %u", GetName().c_str(), mapid);
 
-    if (m_vehicle && (!(options & TELE_NOT_LEAVE_VEHICLE)))
+    if (m_vehicle)
         ExitVehicle();
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
-    SetUnitMovementFlags(GetUnitMovementFlags() & MOVEMENTFLAG_MASK_HAS_PLAYER_STATUS_OPCODE);
+    SetUnitMovementFlags(0);
     DisableSpline();
 
-    if (m_transport)
+    if (Transport* transport = GetTransport())
     {
         if (!(options & TELE_TO_NOT_LEAVE_TRANSPORT))
         {
@@ -2312,8 +2330,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         {
             Position oldPos;
             GetPosition(&oldPos);
-            if (HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
-                z += GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
             Relocate(x, y, z, orientation);
             SendTeleportPacket(oldPos); // this automatically relocates to oldPos in order to broadcast the packet in the right place
         }
@@ -2415,8 +2431,22 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (oldmap)
                 oldmap->RemovePlayerFromMap(this, false);
 
-            m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
-            SetFallInformation(0, z);
+            // new final coordinates
+            float final_x = x;
+            float final_y = y;
+            float final_z = z;
+            float final_o = orientation;
+
+            if (m_transport)
+            {
+                final_x += m_movementInfo.t_pos.GetPositionX();
+                final_y += m_movementInfo.t_pos.GetPositionY();
+                final_z += m_movementInfo.t_pos.GetPositionZ();
+                final_o += m_movementInfo.t_pos.GetOrientation();
+            }
+
+            m_teleport_dest = WorldLocation(mapid, final_x, final_y, final_z, final_o);
+            SetFallInformation(0, final_z);
 
             // if the player is saved before worldportack (at logout for example)
             // this will be used instead of the current location in SaveToDB
@@ -17321,34 +17351,36 @@ bool Player::TakeQuestSourceItem(uint32 questId, bool msg)
     if (quest)
     {
         uint32 srcItemId = quest->GetSrcItemId();
-        ItemTemplate const* item = sObjectMgr->GetItemTemplate(srcItemId);
-
-        if (srcItemId > 0)
+        if (ItemTemplate const* item = sObjectMgr->GetItemTemplate(srcItemId))
         {
-            uint32 count = quest->GetSrcItemCount();
-            if (count <= 0)
-                count = 1;
-
-            // exist two cases when destroy source quest item not possible:
-            // a) non un-equippable item (equipped non-empty bag, for example)
-            // b) when quest is started from an item and item also is needed in
-            // the end as RequiredItemId
-            InventoryResult res = CanUnequipItems(srcItemId, count);
-            if (res != EQUIP_ERR_OK)
+            if (srcItemId > 0)
             {
-                if (msg)
-                    SendEquipError(res, NULL, NULL, srcItemId);
-                return false;
+                uint32 count = quest->GetSrcItemCount();
+                if (count <= 0)
+                    count = 1;
+
+                // exist two cases when destroy source quest item not possible:
+                // a) non un-equippable item (equipped non-empty bag, for example)
+                // b) when quest is started from an item and item also is needed in
+                // the end as RequiredItemId
+                InventoryResult res = CanUnequipItems(srcItemId, count);
+                if (res != EQUIP_ERR_OK)
+                {
+                    if (msg)
+                        SendEquipError(res, NULL, NULL, srcItemId);
+                    return false;
+                }
+
+                bool destroyItem = true;
+                for (uint8 n = 0; n < QUEST_ITEM_OBJECTIVES_COUNT; ++n)
+                    if (item->StartQuest == questId && srcItemId == quest->RequiredItemId[n])
+                        destroyItem = false;
+
+                if (destroyItem)
+                    DestroyItemCount(srcItemId, count, true, true);
             }
-
-            ASSERT(item);
-            bool destroyItem = true;
-            for (uint8 n = 0; n < QUEST_ITEM_OBJECTIVES_COUNT; ++n)
-                if (item->StartQuest == questId && srcItemId == quest->RequiredItemId[n])
-                    destroyItem = false;
-
-            if (destroyItem)
-                DestroyItemCount(srcItemId, count, true, true);
+            else
+                sLog->outError(LOG_FILTER_GENERAL, "Quest item u% would cause crash", srcItemId);
         }
     }
 
@@ -24558,18 +24590,10 @@ void Player::SendInitialPacketsAfterAddToMap()
 
     RestoreAllSpellMods();
 
-    // Unstuck Player
-    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-    {
-        if (i != MOVE_TURN_RATE && i != MOVE_PITCH_RATE)
-        {
-            SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
-            UpdateSpeed(UnitMoveType(i), true);
-        }
-    }
-
     phaseMgr.AddUpdateFlag(PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED);
     phaseMgr.Update();
+
+    m_Events.AddEvent(new unstuckPlayer(this), (this)->m_Events.CalculateTime(3000));
 
     // Remove all kinds of shapeshift to prevent exploits (Druids Only)
     if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_DRUID)
@@ -24611,6 +24635,8 @@ void Player::SendInitialPacketsAfterAddToMap()
             break;
         }
     }
+
+    ResurrectPlayer(0, false);
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()
