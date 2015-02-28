@@ -320,8 +320,8 @@ void Minion::InitStats(uint32 duration)
         CreatureTemplate const* cInfo = GetCreatureTemplate();
         if (cInfo)
         {
-            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((getLevel() * 5 * cInfo->ModDamage) / 2));
-            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((getLevel() * 10 * cInfo->ModDamage) / 2));
+            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((getLevel() * 3 * cInfo->ModDamage) / 2));
+            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((getLevel() * 6 * cInfo->ModDamage) / 2));
         }
     }
 }
@@ -369,8 +369,8 @@ void Guardian::InitStats(uint32 duration)
         CreatureTemplate const* cInfo = GetCreatureTemplate();
         if (cInfo)
         {
-            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((getLevel() * 5 * cInfo->ModDamage) / 2));
-            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((getLevel() * 10 * cInfo->ModDamage) / 2));
+            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((getLevel() * 3 * cInfo->ModDamage) / 2));
+            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((getLevel() * 6 * cInfo->ModDamage) / 2));
         }
     }
 }
