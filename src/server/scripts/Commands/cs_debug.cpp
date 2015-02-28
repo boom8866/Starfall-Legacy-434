@@ -1332,7 +1332,6 @@ public:
                 target->SetExtraUnitMovementFlags(moveFlagsExtra);
             }
 
-            target->SendMovementFlagUpdate();
             handler->PSendSysMessage(LANG_MOVEFLAGS_SET, target->GetUnitMovementFlags(), target->GetExtraUnitMovementFlags());
         }
 

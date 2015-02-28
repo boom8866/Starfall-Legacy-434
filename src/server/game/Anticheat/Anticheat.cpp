@@ -606,7 +606,7 @@ bool AntiCheat::CheckOnTransport()
         return true;
     */
 
-    float const trans_rad = sqrt(m_currentmovementInfo->t_pos.m_positionX * m_currentmovementInfo->t_pos.m_positionX + m_currentmovementInfo->t_pos.m_positionY * m_currentmovementInfo->t_pos.m_positionY + m_currentmovementInfo->t_pos.m_positionZ * m_currentmovementInfo->t_pos.m_positionZ);
+    float const trans_rad = sqrt(m_currentmovementInfo->transport.pos.m_positionX * m_currentmovementInfo->transport.pos.m_positionX + m_currentmovementInfo->transport.pos.m_positionY * m_currentmovementInfo->transport.pos.m_positionY + m_currentmovementInfo->transport.pos.m_positionZ * m_currentmovementInfo->transport.pos.m_positionZ);
 
     if (trans_rad < m_currentConfig->checkFloatParam[0])
         return true;

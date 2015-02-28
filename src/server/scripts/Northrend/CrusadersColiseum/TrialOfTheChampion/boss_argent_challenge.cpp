@@ -488,8 +488,6 @@ public:
                         me->SetOrientation(2.79f);
                         break;
                 }
-
-                me->SendMovementFlagUpdate();
             }
         }
 
