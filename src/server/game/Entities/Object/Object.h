@@ -633,26 +633,6 @@ struct MovementInfo
     void OutDebug();
 };
 
-struct ExtraMovementInfo
-{
-    uint32 UnkDword;        // this is sent in CMSG_MOVE_SET_CAN_FLY_ACK and CMSG_MOVE_SET_COLLISION_HEIGHT_ACK
-    float flySpeed;
-    float flyBackSpeed;
-    float runSpeed;
-    float walkSpeed;
-    float swimSpeed;
-
-    ExtraMovementInfo()
-    {
-        UnkDword     = 0;
-        flySpeed     = 0.0f;
-        flyBackSpeed = 0.0f;
-        runSpeed     = 0.0f;
-        walkSpeed    = 0.0f;
-        swimSpeed    = 0.0f;
-    }
-};
-
 #define MAPID_INVALID 0xFFFFFFFF
 
 class WorldLocation : public Position
