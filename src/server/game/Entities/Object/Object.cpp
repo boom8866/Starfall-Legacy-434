@@ -258,8 +258,6 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     buf.append(GetPackGUID());
     buf << uint8(m_objectTypeId);
 
-    _BuildMovementUpdate(&buf, flags);
-
     UpdateMask updateMask;
     updateMask.SetCount(valCount);
     _SetCreateBits(&updateMask, target);
@@ -2076,7 +2074,6 @@ void Unit::BuildHeartBeatMsg(WorldPacket* data) const
 {
     data->Initialize(MSG_MOVE_HEARTBEAT, 32);
     data->append(GetPackGUID());
-    BuildMovementPacket(data);
 }
 
 void WorldObject::SendMessageToSet(WorldPacket* data, bool self)

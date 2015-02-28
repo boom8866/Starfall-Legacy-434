@@ -517,7 +517,7 @@ void Unit::UpdateSplinePosition()
         pos.SetOrientation(loc.orientation);
 
         if (TransportBase* transport = GetDirectTransport())
-            transport->CalculatePassengerPosition(loc.x, loc.y, loc.z, &loc.orientation);
+            transport->CalculatePassengerPosition(loc.x, loc.y, loc.z, loc.orientation);
     }
 
     if (HasUnitState(UNIT_STATE_CANNOT_TURN))
