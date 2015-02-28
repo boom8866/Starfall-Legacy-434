@@ -163,6 +163,24 @@ private:
 
 static uint32 copseReclaimDelay[MAX_DEATH_COUNT] = { 30, 60, 120 };
 
+class unstuckPlayer : public BasicEvent
+{
+public:
+    explicit unstuckPlayer(Player* player) : player(player)
+    {
+    }
+
+    bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+    {
+        if (player && player->IsInWorld())
+            player->ResurrectPlayer(0, false);
+        return true;
+    }
+
+private:
+    Player* player;
+};
+
 // == PlayerTaxi ================================================
 
 PlayerTaxi::PlayerTaxi()
@@ -24614,6 +24632,8 @@ void Player::SendInitialPacketsAfterAddToMap()
     phaseMgr.AddUpdateFlag(PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED);
     phaseMgr.Update();
 
+    m_Events.AddEvent(new unstuckPlayer(this), (this)->m_Events.CalculateTime(3000));
+
     // Remove all kinds of shapeshift to prevent exploits (Druids Only)
     if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_DRUID)
     {
@@ -24659,7 +24679,7 @@ void Player::SendInitialPacketsAfterAddToMap()
     if (sGameEventMgr->IsActiveEvent(101) && !HasAchieved(5512))
         m_Events.AddEvent(new anniversaryAchievement(this), (this)->m_Events.CalculateTime(10000));
 
-    SetRooted(false);
+    ResurrectPlayer(0, false);
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()
