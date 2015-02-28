@@ -689,7 +689,7 @@ void WorldSession::HandleAuctionListItems(WorldPacket& recvData)
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_AUCTION_LIST_ITEMS");
 
     std::string searchedname;
-    uint8 levelmin, levelmax, usable;
+    uint8 levelmin, levelmax, usable, isFull, sortCount, unk;
     uint32 listfrom, auctionSlotID, auctionMainCategory, auctionSubCategory, quality;
     uint64 guid;
 
@@ -698,15 +698,27 @@ void WorldSession::HandleAuctionListItems(WorldPacket& recvData)
     recvData >> searchedname;
 
     recvData >> levelmin >> levelmax;
-    recvData >> auctionSlotID >> auctionMainCategory >> auctionSubCategory;
-    recvData >> quality >> usable;
+    recvData >> auctionSlotID >> auctionMainCategory >> auctionSubCategory >> quality;
+    recvData >> usable >> isFull >> unk >> sortCount;
 
-    recvData.read_skip<uint8>();                           // unk
-    recvData.read_skip<uint8>();                           // unk
+    if (sortCount >= MAX_AUCTION_SORT)
+        return;
 
-    // this block looks like it uses some lame byte packing or similar...
-    for (uint8 i = 0; i < 15; i++)
-        recvData.read_skip<uint8>();
+    uint8 Sort[MAX_AUCTION_SORT];
+    memset(Sort, MAX_AUCTION_SORT, MAX_AUCTION_SORT);
+
+    // auction columns sorting
+    for (uint32 i = 0; i < sortCount; ++i)
+    {
+        uint8 column, reversed;
+        recvData >> column;
+
+        if (column >= MAX_AUCTION_SORT)
+            return;
+
+        recvData >> reversed;
+        Sort[i] = (reversed > 0) ? (column |= AUCTION_SORT_REVERSED) : column;
+    }
 
     Creature* creature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_AUCTIONEER);
     if (!creature)

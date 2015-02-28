@@ -31,6 +31,8 @@ class WorldPacket;
 
 #define MIN_AUCTION_TIME (12*HOUR)
 #define MAX_AUCTION_ITEMS 160
+#define MAX_AUCTION_SORT 12
+#define AUCTION_SORT_REVERSED 0x10
 
 enum AuctionError
 {
