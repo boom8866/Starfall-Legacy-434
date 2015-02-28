@@ -391,7 +391,6 @@ class Object
 
         void _SetUpdateBits(UpdateMask* updateMask, Player* target) const;
         void _SetCreateBits(UpdateMask* updateMask, Player* target) const;
-        void _BuildMovementUpdate(ByteBuffer * data, uint16 flags) const;
         void _BuildValuesUpdate(uint8 updatetype, ByteBuffer *data, UpdateMask* updateMask, Player* target) const;
 
         uint16 m_objectType;
@@ -555,54 +554,81 @@ struct MovementInfo
     uint16 flags2;
     Position pos;
     uint32 time;
+
     // transport
-    uint64 t_guid;
-    Position t_pos;
-    int8 t_seat;
-    uint32 t_time;
-    uint32 t_time2;
-    uint32 t_vehicleId;
+    struct TransportInfo
+    {
+        void Reset()
+        {
+            guid = 0;
+            pos.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
+            seat = -1;
+            time = 0;
+            time2 = 0;
+            time3 = 0;
+        }
+
+        uint64 guid;
+        Position pos;
+        int8 seat;
+        uint32 time;
+        uint32 time2;
+        uint32 time3;
+    } transport;
+
     // swimming/flying
     float pitch;
-    // falling
-    uint32 fallTime;
+
     // jumping
-    float j_zspeed, j_cosAngle, j_sinAngle, j_xyspeed;
+    struct JumpInfo
+    {
+        void Reset()
+        {
+            fallTime = 0;
+            zspeed = sinAngle = cosAngle = xyspeed = 0.0f;
+        }
+
+        uint32 fallTime;
+
+        float zspeed, sinAngle, cosAngle, xyspeed;
+
+    } jump;
+
     // spline
     float splineElevation;
 
-    // bit markers
-    struct MovementElementMarkers
-    {
-        bool hasTransportTime2;
-        bool hasTransportVehicleId;
-        bool hasPitch;
-        bool hasFallData;
-        bool hasFallDirection;
-        bool hasSplineElevation;
-    } bits;
-
     MovementInfo() :
-        guid(0), flags(0), flags2(0), time(0), t_guid(0),
-        t_seat(-1), t_time(0), t_time2(0), t_vehicleId(0), pitch(0.0f), fallTime(0),
-        j_zspeed(0.0f), j_sinAngle(0.0f), j_cosAngle(0.0f), j_xyspeed(0.0f)
+        guid(0), flags(0), flags2(0), time(0), pitch(0.0f), splineElevation(0.0f)
     {
         pos.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
-        t_pos.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
-        memset(&bits, 0, sizeof(bits));
+        transport.Reset();
+        jump.Reset();
     }
 
     uint32 GetMovementFlags() const { return flags; }
     void SetMovementFlags(uint32 flag) { flags = flag; }
     void AddMovementFlag(uint32 flag) { flags |= flag; }
     void RemoveMovementFlag(uint32 flag) { flags &= ~flag; }
-    bool HasMovementFlag(uint32 flag) const { return flags & flag; }
+    bool HasMovementFlag(uint32 flag) const { return (flags & flag) != 0; }
 
     uint16 GetExtraMovementFlags() const { return flags2; }
+    void SetExtraMovementFlags(uint16 flag) { flags2 = flag; }
     void AddExtraMovementFlag(uint16 flag) { flags2 |= flag; }
-    bool HasExtraMovementFlag(uint16 flag) const { return flags2 & flag; }
+    void RemoveExtraMovementFlag(uint16 flag) { flags2 &= ~flag; }
+    bool HasExtraMovementFlag(uint16 flag) const { return (flags2 & flag) != 0; }
 
-    void SetFallTime(uint32 time) { fallTime = time; }
+    uint32 GetFallTime() const { return jump.fallTime; }
+    void SetFallTime(uint32 time) { jump.fallTime = time; }
+
+    void ResetTransport()
+    {
+        transport.Reset();
+    }
+
+    void ResetJump()
+    {
+        jump.Reset();
+    }
 
     void OutDebug();
 };

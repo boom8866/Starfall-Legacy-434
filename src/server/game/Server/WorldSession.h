@@ -50,7 +50,6 @@ struct AreaTableEntry;
 struct AuctionEntry;
 struct DeclinedName;
 struct ItemTemplate;
-struct MovementInfo;
 struct PlayerPet;
 
 namespace lfg
@@ -233,9 +232,6 @@ class WorldSession
         void ReadAddonsInfo(WorldPacket& data);
         void SendAddonsInfo();
         bool IsAddonRegistered(const std::string& prefix) const;
-
-        void ReadMovementInfo(WorldPacket& data, MovementInfo* mi, ExtraMovementInfo* emi = NULL);
-        void WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi = NULL);
 
         void SendPacket(WorldPacket const* packet, bool forced = false);
         WorldPacket BuildMultiplePackets(packetBlock packets);
@@ -456,6 +452,7 @@ class WorldSession
 
         void HandleMoveTeleportAck(WorldPacket& recvPacket);
         void HandleForceSpeedChangeAck(WorldPacket& recvData);
+        void HandleSetCollisionHeightAck(WorldPacket& recvPacket);
 
         void HandlePingOpcode(WorldPacket& recvPacket);
         void HandleAuthSessionOpcode(WorldPacket& recvPacket);

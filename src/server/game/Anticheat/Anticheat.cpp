@@ -491,7 +491,7 @@ bool AntiCheat::CheckFall()
 {
     if (!m_isFall)
     {
-        m_lastfalltime = m_currentmovementInfo->fallTime;
+        m_lastfalltime = m_currentmovementInfo->GetFallTime();
         m_lastfallz    = m_currentmovementInfo->pos.m_positionZ;
         SetInFall(true);
     }

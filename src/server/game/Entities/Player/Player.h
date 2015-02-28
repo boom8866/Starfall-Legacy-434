@@ -2784,16 +2784,10 @@ class Player : public Unit, public GridObject<Player>
         void AddWhisperWhiteList(uint64 guid) { WhisperList.push_back(guid); }
         bool IsInWhisperWhiteList(uint64 guid);
 
-        /*! These methods send different packets to the client in apply and unapply case.
-            These methods are only sent to the current unit.
-        */
-        void SendMovementSetCanFly(bool apply);
-        void SendMovementSetCanTransitionBetweenSwimAndFly(bool apply);
-        void SendMovementSetHover(bool apply);
-        void SendMovementSetWaterWalking(bool apply);
-        void SendMovementSetFeatherFall(bool apply);
-        void SendMovementSetCollisionHeight(float height);
+        void ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::ExtraMovementStatusElement* extras = NULL);
 
+        void SendMovementSetCanTransitionBetweenSwimAndFly(bool apply);
+        void SendMovementSetCollisionHeight(float height);
         bool CanFly() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY); }
 
         //! Return collision height sent to client
