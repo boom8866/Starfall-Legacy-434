@@ -23,151 +23,209 @@
 
 uint8 Count;
 
-enum SlipStreamSpells
-{
-    SPELL_SLIPSTREAM_ENTER  = 84965,
-    SPELL_SLIPSTREAM_1      = 84980,
-    SPELL_SLIPSTREAM_2      = 84988,
-    SPELL_SLIPSTREAM_3      = 85016,
-    SPELL_SLIPSTREAM_4      = 85394,
-    SPELL_SLIPSTREAM_5      = 85397,
-};
-
-enum slipstreamGUID
-{
-    SLIPSTREAM_ERTAN_1      = 778156,
-    SLIPSTREAM_ERTAN_2      = 778155,
-    SLIPSTREAM_ERTAN_3      = 778153,
-    LANDING_ZONE_1          = 778157,
-
-    SLIPSTREAM_ALTAIRUS_1   = 778186,
-    SLIPSTREAM_ALTAIRUS_2   = 778192,
-    SLIPSTREAM_ALTAIRUS_3   = 778190,
-    SLIPSTREAM_ALTAIRUS_4   = 778188,
-    SLIPSTREAM_ALTAIRUS_5   = 778191,
-    LANDING_ZONE_2          = 778189,
-
-    SLIPSTREAM_ENTER_L      = 778154,
-    SLIPSTREAM_ENTER_R      = 778187
-};
-
-class spell_vp_slipstream : public SpellScriptLoader
+class npc_slipstream : public CreatureScript
 {
 public:
-    spell_vp_slipstream() : SpellScriptLoader("spell_vp_slipstream") { }
+    npc_slipstream() : CreatureScript("npc_slipstream") { }
 
-    class spell_vp_slipstream_SpellScript : public SpellScript
+    enum slipstreamGUID
     {
-        PrepareSpellScript(spell_vp_slipstream_SpellScript);
-
-        void SetTarget(WorldObject*& target)
-        {
-            if (Unit* caster = GetCaster())
-                if (Unit* stream = caster->GetVehicleBase())
-                {
-                    switch (stream->GetGUID())
-                    {
-                        case SLIPSTREAM_ERTAN_1:
-                            if (Creature* nextStream = ObjectAccessor::GetCreature(*caster, SLIPSTREAM_ERTAN_2))
-                                target = nextStream;
-                            break;
-                        case SLIPSTREAM_ERTAN_2:
-                            if (Creature* nextStream = ObjectAccessor::GetCreature(*caster, SLIPSTREAM_ERTAN_3))
-                                target = nextStream;
-                            break;
-                        case SLIPSTREAM_ERTAN_3:
-                            if (Creature* zone = ObjectAccessor::GetCreature(*caster, LANDING_ZONE_1))
-                                target = zone;
-                            break;
-                        case SLIPSTREAM_ALTAIRUS_1:
-                            if (Creature* nextStream = ObjectAccessor::GetCreature(*caster, SLIPSTREAM_ALTAIRUS_2))
-                                target = nextStream;
-                            break;
-                        case SLIPSTREAM_ALTAIRUS_2:
-                            if (Creature* nextStream = ObjectAccessor::GetCreature(*caster, SLIPSTREAM_ALTAIRUS_3))
-                                target = nextStream;
-                            break;
-                        case SLIPSTREAM_ALTAIRUS_3:
-                            if (Creature* nextStream = ObjectAccessor::GetCreature(*caster, SLIPSTREAM_ALTAIRUS_4))
-                                target = nextStream;
-                            break;
-                        case SLIPSTREAM_ALTAIRUS_4:
-                            if (Creature* nextStream = ObjectAccessor::GetCreature(*caster, SLIPSTREAM_ALTAIRUS_5))
-                                target = nextStream;
-                            break;
-                        case SLIPSTREAM_ALTAIRUS_5:
-                            if (Creature* nextStream = ObjectAccessor::GetCreature(*caster, LANDING_ZONE_2))
-                                target = nextStream;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-        }
-
-        void HandleHit(SpellEffIndex /*effIndex*/)
-        {
-            if (Unit* target = GetHitUnit())
-                if (Unit* caster = GetCaster())
-                    switch (target->GetGUID())
-                    {
-                        case SLIPSTREAM_ERTAN_2:
-                        case SLIPSTREAM_ALTAIRUS_2:
-                            target->CastSpell(caster, SPELL_SLIPSTREAM_2, true);
-                            break;
-                        case SLIPSTREAM_ERTAN_3:
-                        case SLIPSTREAM_ALTAIRUS_3:
-                            target->CastSpell(caster, SPELL_SLIPSTREAM_3, true);
-                            break;
-                        case SLIPSTREAM_ALTAIRUS_4:
-                            target->CastSpell(caster, SPELL_SLIPSTREAM_4, true);
-                            break;
-                        case SLIPSTREAM_ALTAIRUS_5:
-                            target->CastSpell(caster, SPELL_SLIPSTREAM_4, true);
-                            break;
-                        default:
-                            break;
-                    }
-        }
-
-        void Register()
-        {
-            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_vp_slipstream_SpellScript::SetTarget, EFFECT_0, TARGET_UNIT_NEARBY_ENTRY);
-            OnEffectHitTarget += SpellEffectFn(spell_vp_slipstream_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
-        }
+        SLIPSTREAM_ERTAN    = 778156,
+        SLIPSTREAM_ALTAIRUS = 778186,
+        SLIPSTREAM_ENTER_L  = 778154,
+        SLIPSTREAM_ENTER_R  = 778187
     };
 
-    SpellScript* GetSpellScript() const
+    enum spellId
     {
-        return new spell_vp_slipstream_SpellScript();
+        SPELL_FADE_TO_BLACK     = 89092
+    };
+
+    class eventTeleportErtan : public BasicEvent
+    {
+    public:
+        explicit eventTeleportErtan(Player* player) : player(player)
+        {
+        }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            if (player && player->IsInWorld())
+                player->NearTeleportTo(-902.08f, -178.86f, 664.55f, 2.82f);
+            return true;
+        }
+
+    private:
+        Player* player;
+    };
+
+    class eventTeleportAltairus : public BasicEvent
+    {
+    public:
+        explicit eventTeleportAltairus(Player* player) : player(player)
+        {
+        }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            if (player && player->IsInWorld())
+                player->NearTeleportTo(-1189.68f, 475.43f, 634.78f, 0.45f);
+            return true;
+        }
+
+    private:
+        Player* player;
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (InstanceScript* instance = creature->GetInstanceScript())
+        {
+            player->CLOSE_GOSSIP_MENU();
+            switch (creature->GetDBTableGUIDLow())
+            {
+                case SLIPSTREAM_ERTAN:
+                {
+                    if (instance->GetBossState(DATA_GRAND_VIZIER_ERTAN) == DONE)
+                    {
+                        Count = 0;
+                        creature->AddAura(85063, player);
+                    }
+                    break;
+                }
+                case SLIPSTREAM_ALTAIRUS:
+                {
+                    if (instance->GetBossState(DATA_ALTAIRUS) == DONE)
+                    {
+                        Count = 3;
+                        creature->AddAura(85063, player);
+                    }
+                    break;
+                }
+                case SLIPSTREAM_ENTER_L:
+                case SLIPSTREAM_ENTER_R:
+                {
+                    if (instance->GetBossState(DATA_GRAND_VIZIER_ERTAN) == DONE && instance->GetBossState(DATA_ALTAIRUS) != DONE)
+                    {
+                        player->CastSpell(player, SPELL_FADE_TO_BLACK, true);
+                        player->m_Events.AddEvent(new eventTeleportErtan(player), (player)->m_Events.CalculateTime(1000));
+                    }
+                    if (instance->GetBossState(DATA_GRAND_VIZIER_ERTAN) == DONE && instance->GetBossState(DATA_ALTAIRUS) == DONE)
+                    {
+                        player->CastSpell(player, SPELL_FADE_TO_BLACK, true);
+                        player->m_Events.AddEvent(new eventTeleportAltairus(player), (player)->m_Events.CalculateTime(1000));
+                    }
+                    break;
+                }
+                default:
+                    return true;
+            }
+        }
+
+        return true;
     }
 };
 
-class spell_vp_slipstream_enter : public SpellScriptLoader
+class spell_slipstream : public SpellScriptLoader
 {
 public:
-    spell_vp_slipstream_enter() : SpellScriptLoader("spell_vp_slipstream_enter") { }
+    spell_slipstream() : SpellScriptLoader("spell_slipstream") { }
 
-    class spell_vp_slipstream_enter_SpellScript : public SpellScript
+    class spell_slipstream_AuraScript : public AuraScript
     {
-        PrepareSpellScript(spell_vp_slipstream_enter_SpellScript);
+        PrepareAuraScript(spell_slipstream_AuraScript);
 
-        void HandleHit(SpellEffIndex /*effIndex*/)
+        void HandleEffectApply(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (Unit* caster = GetCaster())
+                    if (Vehicle* vehicle = caster->GetVehicleKit())
+                        if (vehicle->HasEmptySeat(0))
+                            target->EnterVehicle(caster, 0);
+                        else
+                            return;
+            }
+        }
+
+        void HandleEffectRemove(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
-                if (Unit* target = GetHitUnit())
-                    target->CastSpell(caster, SPELL_SLIPSTREAM_1, true);
+                if (Vehicle* vehicle = caster->GetVehicleKit())
+                    if (Unit* passenger = vehicle->GetPassenger(0))
+                        if (Player* player = passenger->ToPlayer())
+                        {
+                            vehicle->RemoveAllPassengers();
+                            switch(Count)
+                            {
+                            case 0:
+                                if (Creature* creature = player->SummonCreature(45455,-848.227f, -68.724f, 656.22f, 0, TEMPSUMMON_TIMED_DESPAWN, 2000))
+                                {
+                                    player->SetFacingToObject(creature);
+                                    creature->AddAura(85063, player);
+                                    ++Count;
+                                }
+                                break;
+                            case 1:
+                                if (Creature* creature = player->SummonCreature(45455,-844.885f, -205.135f, 662.708f, 0, TEMPSUMMON_TIMED_DESPAWN, 3000))
+                                {
+                                    player->SetFacingToObject(creature);
+                                    creature->AddAura(85063, player);
+                                    ++Count;
+                                }
+                                break;
+                            case 2:
+                                player->GetMotionMaster()->MoveJump(-906.08f, -176.514f, 664.505f, 42, 20);
+                                break;
+                            case 3: // 2nd part
+                                if (Creature* creature = player->SummonCreature(45455,-1138.55f, 178.524f, 711.494f, 0, TEMPSUMMON_TIMED_DESPAWN, 3000))
+                                {
+                                    player->SetFacingToObject(creature);
+                                    creature->AddAura(85063, player);
+                                    ++Count;
+                                }
+                                break;
+                            case 4:
+                                if (Creature* creature = player->SummonCreature(45455,-1245.21f, 230.986f, 690.608f, 0, TEMPSUMMON_TIMED_DESPAWN, 3000))
+                                {
+                                    player->SetFacingToObject(creature);
+                                    creature->AddAura(85063, player);
+                                    ++Count;
+                                }
+                                break;
+                            case 5:
+                                if (Creature* creature = player->SummonCreature(45455,-1282.07f, 344.856f, 660.987f, 0, TEMPSUMMON_TIMED_DESPAWN, 3000))
+                                {
+                                    player->SetFacingToObject(creature);
+                                    creature->AddAura(85063, player);
+                                    ++Count;
+                                }
+                                break;
+                            case 6:
+                                if (Creature* creature = player->SummonCreature(45455, -1229.64f, 412.26f, 641.293f, 0, TEMPSUMMON_TIMED_DESPAWN, 3000))
+                                {
+                                    player->SetFacingToObject(creature);
+                                    creature->AddAura(85063, player);
+                                    ++Count;
+                                }
+                                break;
+                            case 7:
+                                player->GetMotionMaster()->MoveJump(-1193.627441f, 472.767853f, 634.782410f, 42, 20);
+                                break;
+                            }
+                        }
         }
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_vp_slipstream_enter_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            OnEffectApply += AuraEffectApplyFn(spell_slipstream_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_slipstream_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
-    SpellScript* GetSpellScript() const
+    AuraScript* GetAuraScript() const
     {
-        return new spell_vp_slipstream_enter_SpellScript();
+        return new spell_slipstream_AuraScript();
     }
 };
 
@@ -1440,8 +1498,8 @@ public:
 
 void AddSC_vortex_pinnacle()
 {
-    new spell_vp_slipstream();
-    new spell_vp_slipstream_enter();
+    new npc_slipstream();
+    new spell_slipstream();
     new spell_healing_well();
     new npc_vp_gust_soldier();
     new npc_vp_wild_vortex();
