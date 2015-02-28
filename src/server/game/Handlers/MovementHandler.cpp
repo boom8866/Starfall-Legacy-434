@@ -84,11 +84,15 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         GetPlayer()->TeleportTo(GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation());
         return;
     }
-    else
-        GetPlayer()->Relocate(&loc);
 
+    float z = loc.GetPositionZ();
+    if (GetPlayer()->HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
+        z += GetPlayer()->GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
+
+    GetPlayer()->GetMotionMaster()->Initialize();
     GetPlayer()->ResetMap();
     GetPlayer()->SetMap(newMap);
+    GetPlayer()->Relocate(loc.GetPositionX(), loc.GetPositionY(), z, loc.GetOrientation());
 
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
     if (!GetPlayer()->GetMap()->AddPlayerToMap(GetPlayer()))
@@ -197,7 +201,6 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     movementInfo.time = getMSTime();
     movementInfo.guid = GetPlayer()->GetGUID();
 
-
     extraMovementInfo.flySpeed = GetPlayer()->GetSpeed(MOVE_FLIGHT);
     extraMovementInfo.flyBackSpeed = GetPlayer()->GetSpeed(MOVE_FLIGHT_BACK);
 
@@ -207,23 +210,15 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     WorldPacket speedUpdate(MSG_MOVE_UPDATE_FLIGHT_SPEED);
     WriteMovementInfo(speedUpdate, &extraMovementInfo);
 
-    // Unstuck Player
-    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-    {
-        if (i != MOVE_TURN_RATE && i != MOVE_PITCH_RATE)
-        {
-            GetPlayer()->SetSpeed(UnitMoveType(i), GetPlayer()->GetSpeedRate(UnitMoveType(i)), true);
-            GetPlayer()->UpdateSpeed(UnitMoveType(i), true);
-        }
-    }
-
     packetBlock packets;
     packets.push_back(&teleUpdate);
     packets.push_back(&speedUpdate);
 
     WorldPacket data = BuildMultiplePackets(packets);
 
-    GetPlayer()->SendMessageToSet(&data,true);
+    GetPlayer()->SendMessageToSet(&data, true);
+    GetPlayer()->SendMovementSetCanFly(true);
+    GetPlayer()->SendMovementSetCanFly(false);
 }
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)

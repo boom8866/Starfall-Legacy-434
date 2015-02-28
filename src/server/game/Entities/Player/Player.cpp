@@ -139,24 +139,6 @@ enum CharacterCustomizeFlags
 
 static uint32 copseReclaimDelay[MAX_DEATH_COUNT] = { 30, 60, 120 };
 
-class unstuckPlayer : public BasicEvent
-{
-public:
-    explicit unstuckPlayer(Player* player) : player(player)
-    {
-    }
-
-    bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
-    {
-        if (player && player->IsInWorld())
-            player->ResurrectPlayer(0, false);
-        return true;
-    }
-
-private:
-    Player* player;
-};
-
 // == PlayerTaxi ================================================
 
 PlayerTaxi::PlayerTaxi()
@@ -2233,9 +2215,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         return false;
     }
 
-    StopMoving();
-    SendMovementFlagUpdate();
-
     // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
     Pet* pet = GetPet();
 
@@ -2272,7 +2251,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         ExitVehicle();
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
-    SetUnitMovementFlags(0);
+    SetUnitMovementFlags(GetUnitMovementFlags() & MOVEMENTFLAG_MASK_HAS_PLAYER_STATUS_OPCODE);
     DisableSpline();
 
     if (Transport* transport = GetTransport())
@@ -2333,6 +2312,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         {
             Position oldPos;
             GetPosition(&oldPos);
+            if (HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
+                z += GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
             Relocate(x, y, z, orientation);
             SendTeleportPacket(oldPos); // this automatically relocates to oldPos in order to broadcast the packet in the right place
         }
@@ -2462,7 +2443,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 data << float(m_teleport_dest.GetPositionZ());
                 data << uint32(mapid);
                 data << float(m_teleport_dest.GetPositionY());
-
                 GetSession()->SendPacket(&data);
                 SendSavedInstances();
             }
@@ -2475,8 +2455,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         //    return false;
     }
     return true;
-
-    GetSession()->HandleMoveWorldportAckOpcode();
 }
 
 bool Player::TeleportToBGEntryPoint()
@@ -24598,8 +24576,6 @@ void Player::SendInitialPacketsAfterAddToMap()
     phaseMgr.AddUpdateFlag(PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED);
     phaseMgr.Update();
 
-    m_Events.AddEvent(new unstuckPlayer(this), (this)->m_Events.CalculateTime(3000));
-
     // Remove all kinds of shapeshift to prevent exploits (Druids Only)
     if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_DRUID)
     {
@@ -24640,8 +24616,6 @@ void Player::SendInitialPacketsAfterAddToMap()
             break;
         }
     }
-
-    ResurrectPlayer(0, false);
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()

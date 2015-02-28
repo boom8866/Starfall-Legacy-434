@@ -16527,7 +16527,6 @@ void Unit::StopMoving()
     if (!IsInWorld() || movespline->Finalized())
         return;
 
-    UpdateSplinePosition();
     Movement::MoveSplineInit init(this);
     init.Stop();
 }
@@ -19350,9 +19349,6 @@ void Unit::_ExitVehicle(Position const* exitPosition)
 
     if (player)
     {
-        player->StopMoving();
-        player->SendMovementFlagUpdate();
-
         if (vehicle)
         {
             switch (vehicle->GetCreatureEntry())
@@ -20219,8 +20215,6 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     break;
             }
 
-            player->StopMoving();
-            player->SendMovementFlagUpdate();
             player->ResummonTemporaryUnsummonedPet();
         }
 
