@@ -1988,8 +1988,8 @@ MovementStatusElements DismissControlledVehicle[] =
 
     MSEFallTime,
     MSEFallHorizontalSpeed,
-    MSEFallSinAngle,
     MSEFallCosAngle,
+    MSEFallSinAngle,
     MSEFallVerticalSpeed,
 
     MSEOrientation,
