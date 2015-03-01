@@ -647,7 +647,8 @@ class spell_pri_power_word_shield : public SpellScriptLoader
                     if (caster->HasAura(SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD))
                     {
                         int32 bp = amount * 0.20f;
-                        caster->CastCustomSpell(caster, SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD_TRIG, &bp, NULL, NULL, true, NULL);
+                        if (Unit* target = GetTarget())
+                            caster->CastCustomSpell(target, SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD_TRIG, &bp, NULL, NULL, true, NULL);
                     }
                 }
             }
