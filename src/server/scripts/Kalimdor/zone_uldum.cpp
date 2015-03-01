@@ -6351,7 +6351,7 @@ public:
             {
                 case ACTION_HANDLE_CREDIT:
                 {
-                    if (unitOwner && unitOwner != NULL)
+                    if (unitOwner && unitOwner != NULL && unitOwner->IsInWorld())
                     {
                         if (unitOwner->ToCreature())
                             unitOwner->ToCreature()->AI()->DoAction(1);

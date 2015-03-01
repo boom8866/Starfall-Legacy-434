@@ -93,8 +93,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     GetPlayer()->ResetMap();
     GetPlayer()->SetMap(newMap);
     GetPlayer()->Relocate(loc.GetPositionX(), loc.GetPositionY(), z, loc.GetOrientation());
-
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
+
     if (!GetPlayer()->GetMap()->AddPlayerToMap(GetPlayer()))
     {
         sLog->outError(LOG_FILTER_NETWORKIO, "WORLD: failed to teleport player %s (%d) to map %d because of unknown reason!",
@@ -217,8 +217,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     WorldPacket data = BuildMultiplePackets(packets);
 
     GetPlayer()->SendMessageToSet(&data, true);
-    GetPlayer()->SendMovementSetCanFly(true);
-    GetPlayer()->SendMovementSetCanFly(false);
+
+    GetPlayer()->SendMovementSetCanFly(GetPlayer()->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) ? true : false);
 }
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)
