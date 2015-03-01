@@ -4289,13 +4289,6 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
         if (GetQuestStatus(10069) != QUEST_STATUS_COMPLETE)
             KilledMonsterCredit(44420);
     }
-
-    // Control Pet
-    if (getClass() == CLASS_HUNTER || getClass() == CLASS_WARLOCK)
-    {
-        if (spell_id == 93321 || spell_id == 93375)
-            PetSpellInitialize();
-    }
 }
 
 void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
@@ -22144,11 +22137,7 @@ void Player::PetSpellInitialize()
     data << uint64(pet->GetGUID());
     data << uint16(pet->GetCreatureTemplate()->family);         // creature family (required for pet talents)
     data << uint32(pet->GetDuration());
-    // Set react defensive for warlocks and hunters pet if spell control pet is not known yet
-    if ((!HasAura(93321) && getClass() == CLASS_HUNTER) || (!HasAura(93375) && getClass() == CLASS_WARLOCK))
-        data << uint8(REACT_DEFENSIVE);
-    else
-        data << uint8(pet->GetReactState());
+    data << uint8(pet->GetReactState());
     data << uint8(charmInfo->GetCommandState());
     data << uint16(0); // Flags, mostly unknown
 
@@ -22214,14 +22203,7 @@ void Player::PetSpellInitialize()
         pet->GetCharmInfo()->SetSpellAutocast(spellInfo, 1);
     }
 
-    // Set react defensive for warlocks and hunters pet if spell control pet is not known yet
-    if ((!HasAura(93321) && getClass() == CLASS_HUNTER) || (!HasAura(93375) && getClass() == CLASS_WARLOCK))
-        pet->SetReactState(REACT_DEFENSIVE);
-    else
-    {
-        GetSession()->SendPacket(&data);
-        pet->GetCharmInfo()->InitPetActionBar();
-    }
+    GetSession()->SendPacket(&data);
 }
 
 void Player::PossessSpellInitialize()
