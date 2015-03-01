@@ -358,10 +358,16 @@ public:
             {
                 if (EnslavePlayer && EnslavePlayer != NULL && EnslavePlayer->IsInWorld() && (EnslavePlayer->HealthBelowPct(50) || !EnslavePlayer->HasAura(DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC))))
                 {
-                    EnslavePlayer->RemoveAurasDueToSpell(DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC));
-                    EnslavePlayer->RemoveAurasDueToSpell(SPELL_MINDBENDER_PLAYER_VEHICLE_AURA);
-                    EnslavePlayer->RemoveAurasDueToSpell(SPELL_ENSLAVE_FEED);
-                    EnslavePlayer->RemoveAurasDueToSpell(SPELL_ENSLAVE_GROW);
+                    if (EnslavePlayer->HasAura(SPELL_ENSLAVE_N))
+                        EnslavePlayer->RemoveAurasDueToSpell(SPELL_ENSLAVE_N);
+                    if (EnslavePlayer->HasAura(SPELL_ENSLAVE_HC))
+                        EnslavePlayer->RemoveAurasDueToSpell(SPELL_ENSLAVE_HC);
+                    if (EnslavePlayer->HasAura(SPELL_MINDBENDER_PLAYER_VEHICLE_AURA))
+                        EnslavePlayer->RemoveAurasDueToSpell(SPELL_MINDBENDER_PLAYER_VEHICLE_AURA);
+                    if (EnslavePlayer->HasAura(SPELL_ENSLAVE_FEED))
+                        EnslavePlayer->RemoveAurasDueToSpell(SPELL_ENSLAVE_FEED);
+                    if (EnslavePlayer->HasAura(SPELL_ENSLAVE_GROW))
+                        EnslavePlayer->RemoveAurasDueToSpell(SPELL_ENSLAVE_GROW);
                     EnslaveTarget(EnslavePlayer, false);
                 }
             }
