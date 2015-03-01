@@ -934,6 +934,10 @@ class spell_pal_holy_wrath : public SpellScriptLoader
 
             bool CheckAreaTarget(Unit* target)
             {
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
                 if (target)
                 {
                     // Exclude players
@@ -953,7 +957,7 @@ class spell_pal_holy_wrath : public SpellScriptLoader
                         case CREATURE_TYPE_ELEMENTAL:
                         {
                             // Only with Glyph of Holy Wrath
-                            if (GetCaster()->HasAura(56420))
+                            if (caster->HasAura(56420))
                                 return true;
                             return false;
                         }
