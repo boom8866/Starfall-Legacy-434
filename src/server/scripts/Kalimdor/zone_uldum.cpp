@@ -9963,6 +9963,13 @@ public:
             NPC_ENTRY_TITANIC_GUARDIAN  = 47032
         };
 
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+        }
+
         void SpellHit(Unit* caster, SpellInfo const* spell)
         {
             switch (spell->Id)
@@ -10020,6 +10027,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
