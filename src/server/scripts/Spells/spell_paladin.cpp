@@ -953,7 +953,7 @@ class spell_pal_holy_wrath : public SpellScriptLoader
                         case CREATURE_TYPE_ELEMENTAL:
                         {
                             // Only with Glyph of Holy Wrath
-                            if (GetCaster()->HasAura(56420))
+                            if (GetCaster() && GetCaster()->HasAura(56420))
                                 return true;
                             return false;
                         }

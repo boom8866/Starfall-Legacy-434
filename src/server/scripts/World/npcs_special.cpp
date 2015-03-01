@@ -5556,7 +5556,7 @@ public:
                 {
                     provincialMinuteman->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+10, 8.0f, 8.0f);
                     provincialMinuteman->EnterVehicle(me, 0);
-                    provincialMinuteman->CombatStop(true, true);
+                    provincialMinuteman->CombatStop(true);
 
                     std::list<Unit*> targets;
                     Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(provincialMinuteman, provincialMinuteman, 50.0f);

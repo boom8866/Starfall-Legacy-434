@@ -331,6 +331,9 @@ public:
             events.ScheduleEvent(EVENT_ABSORB_MAGIC, 20000);
             events.ScheduleEvent(EVENT_MIND_FOG, urand(6000, 12000));
             events.ScheduleEvent(EVENT_UNRELENTING_AGONY, 10000);
+            me->SetDisableGravity(true);
+            me->SetHover(true);
+            me->SetCanFly(true);
         }
 
         void JustSummoned(Creature* summon)
@@ -520,6 +523,12 @@ public:
 
         void EnslaveTarget(Unit* target, bool active)
         {
+            if (!target)
+                return;
+
+            if (target->GetTypeId() != TYPEID_PLAYER)
+                return;
+
             if (Player* player = target->ToPlayer())
             {
                 if (active)
@@ -575,6 +584,9 @@ public:
             RemoveEncounterFrame();
             RemoveEncounterAuras();
             instance->SetBossState(DATA_MINDEBENDER_GHURSHA, DONE);
+            me->SetDisableGravity(false);
+            me->SetHover(false);
+            me->SetCanFly(false);
         }
 
         void RemoveEncounterAuras()
