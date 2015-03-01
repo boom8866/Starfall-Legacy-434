@@ -2960,11 +2960,11 @@ Creature* Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
         return NULL;
 
     // not allow interaction under control, but allow with own pets
-    if (creature->GetCharmerGUID())
+    if (creature && creature->GetCharmerGUID())
         return NULL;
 
     // not enemy
-    if (creature->IsHostileTo(this))
+    if (creature && creature->IsHostileTo(this))
         return NULL;
 
     // not unfriendly (check for SPELL_AURA_FORCE_REACTION auras)

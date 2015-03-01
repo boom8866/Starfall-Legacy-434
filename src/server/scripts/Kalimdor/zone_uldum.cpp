@@ -550,8 +550,14 @@ public:
                     {
                         events.CancelEvent(EVENT_RETURN_SEAT);
                         events.ScheduleEvent(EVENT_SEAT_UNDER_ATTACK, 6000);
-                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->GetVehicleBase())
-                            playerOwner->GetVehicle()->GetPassenger(1)->ChangeSeat(0, true);
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
+                        {
+                            if (Vehicle* vehicle = playerOwner->GetVehicle())
+                            {
+                                if (Unit* passenger = vehicle->GetPassenger(1))
+                                    passenger->ChangeSeat(0, true);
+                            }
+                        }
                         break;
                     }
                     case EVENT_SEAT_UNDER_ATTACK:
@@ -559,10 +565,13 @@ public:
                         events.CancelEvent(EVENT_SEAT_UNDER_ATTACK);
                         me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveJump(-8992.04f, -1663.47f, 108.99f, 25.0f, 25.0f, POINT_RIDGE);
-                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->GetVehicleBase())
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
-                            playerOwner->CastSpell(playerOwner, SPELL_SUMMON_SKARF, true);
-                            playerOwner->GetVehicle()->GetPassenger(0)->ChangeSeat(2, true);
+                            if (Vehicle* vehicle = playerOwner->GetVehicle())
+                            {
+                                if (Unit* passenger = vehicle->GetPassenger(0))
+                                    passenger->ChangeSeat(2, true);
+                            }
                         }
                         events.ScheduleEvent(EVENT_AMBUSHER_CAMERA, 6000);
                         break;
@@ -573,7 +582,7 @@ public:
                         me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveJump(-8950.93f, -1646.22f, 98.93f, 30.0f, 30.0f, POINT_AMBUSHER);
                         events.ScheduleEvent(EVENT_TELEPORT_CAMERA, 10000);
-                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->IsInWorld())
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                             playerOwner->CastWithDelay(8000, playerOwner, SPELL_FADE_TO_BLACK, true);
                         break;
                     }
@@ -592,8 +601,11 @@ public:
                     case EVENT_REMOVE_PASSENGERS:
                     {
                         events.CancelEvent(EVENT_REMOVE_PASSENGERS);
-                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->GetVehicle())
-                            playerOwner->GetVehicle()->RemoveAllPassengers();
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
+                        {
+                            if (Vehicle* vehicle = playerOwner->GetVehicle())
+                                playerOwner->GetVehicle()->RemoveAllPassengers();
+                        }
                         if (Creature* ambushers = me->FindNearestCreature(NPC_ENTRY_AMBUSHERS, 200.0f, true))
                             ambushers->AI()->TalkWithDelay(2000, 1);
                         me->DespawnOrUnsummon(5000);

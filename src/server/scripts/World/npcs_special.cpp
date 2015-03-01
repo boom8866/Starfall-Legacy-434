@@ -6017,13 +6017,42 @@ public:
     {
         QUEST_THE_BEARS_UP_THERE    = 25462,
         SPELL_RIDE_VEHICLE_SEAT_1   = 63221,
-        SPELL_CLIMBING_TREE_EFFECT  = 75092
+        SPELL_CLIMBING_TREE_EFFECT  = 75092,
+        NPC_ENTRY_TREE_TOP          = 40250,
+        NPC_ENTRY_TREE_BOT          = 40190
     };
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (player->GetVehicleKit())
-            return false;
+        if (player->GetVehicleBase())
+            return true;
+
+        if (!creature->GetVehicleKit())
+            return true;
+
+        if (Creature* treeTop = player->FindNearestCreature(NPC_ENTRY_TREE_TOP, 200.0f, true))
+        {
+            if (treeTop->GetVehicleKit()->GetPassenger(0) || treeTop->GetVehicleKit()->GetPassenger(1) || treeTop->GetVehicleKit()->GetPassenger(2) || treeTop->GetVehicleKit()->GetPassenger(3))
+            {
+                player->MonsterWhisper("This Tree is already in use, try to search for another or wait!", player->GetGUID(), true);
+                return true;
+            }
+        }
+
+        if (Creature* treeBot = player->FindNearestCreature(NPC_ENTRY_TREE_BOT, 200.0f, true))
+        {
+            if (treeBot->GetVehicleKit()->GetPassenger(0) || treeBot->GetVehicleKit()->GetPassenger(1) || treeBot->GetVehicleKit()->GetPassenger(2) || treeBot->GetVehicleKit()->GetPassenger(3))
+            {
+                player->MonsterWhisper("This Tree is already in use, try to search for another or wait!", player->GetGUID(), true);
+                return true;
+            }
+        }
+
+        if (creature->GetVehicleKit()->GetPassenger(0) || creature->GetVehicleKit()->GetPassenger(1) || creature->GetVehicleKit()->GetPassenger(2) || creature->GetVehicleKit()->GetPassenger(3))
+        {
+            player->MonsterWhisper("This Tree is already in use, try to search for another or wait!", player->GetGUID(), true);
+            return true;
+        }
 
         if (player->GetQuestStatus(QUEST_THE_BEARS_UP_THERE) == QUEST_STATUS_INCOMPLETE)
         {
@@ -6031,7 +6060,7 @@ public:
             player->CastSpell(creature, SPELL_RIDE_VEHICLE_SEAT_1, true);
             return true;
         }
-        return false;
+        return true;
     }
 };
 

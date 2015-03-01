@@ -104,27 +104,23 @@ public:
 
         EventMap events;
 
-        void JustReachedHome()
-        {
-            me->CastSpell(me, SPELL_DRAIN_ESSENCE_CHANNELING, true);
-            instance->SetBossState(DATA_CORLA_HERALD_OF_TWILIGHT, FAIL);
-            RehandleZealots();
-        }
-
         void Reset()
         {
-            _Reset();
             events.Reset();
-            me->GetMotionMaster()->MoveTargetedHome();
             me->RemoveAllAuras();
             me->CastSpell(me, SPELL_DRAIN_ESSENCE_CHANNELING, true);
-
             RehandleZealots();
+            zealotsKilled = 0;
+        }
+
+        void EnterEvadeMode()
+        {
+            me->DespawnCreaturesInArea(NPC_TWILIGHT_ZEALOT);
+            me->DespawnCreaturesInArea(NPC_NETHER_ESSENCE_TRIGGER);
             RemoveCharmedPlayers();
             RemoveEncounterFrame();
-            RemoveNetherTriggers();
             zealotsKilled = 0;
-            _EnterEvadeMode();
+            _DespawnAtEvade();
         }
 
         void RemoveNetherTriggers()
@@ -144,23 +140,13 @@ public:
         {
             for (uint8 i = 0; i <= RAID_MODE(1, 2); i++)
             {
-                if (TwilightZealotsList[i] == NULL)
-                    TwilightZealotsList[i] = me->SummonCreature(NPC_TWILIGHT_ZEALOT, summonPositions[i], TEMPSUMMON_MANUAL_DESPAWN);
+                TwilightZealotsList[i] = me->SummonCreature(NPC_TWILIGHT_ZEALOT, summonPositions[i], TEMPSUMMON_MANUAL_DESPAWN);
 
                 if (me->isInCombat())
                     NetherEssenceTrigger[i] = TwilightZealotsList[i]->SummonCreature(NPC_NETHER_ESSENCE_TRIGGER, summonPositions[3], TEMPSUMMON_MANUAL_DESPAWN);
 
-                if (TwilightZealotsList[i] && TwilightZealotsList[i] != NULL && TwilightZealotsList[i]->isDead())
-                    TwilightZealotsList[i]->Respawn();
-
-                if (TwilightZealotsList[i] && TwilightZealotsList[i] != NULL)
-                    TwilightZealotsList[i]->RemoveAllAuras();
-
-                if (TwilightZealotsList[i] && TwilightZealotsList[i] != NULL)
-                    TwilightZealotsList[i]->NearTeleportTo(summonPositions[i].GetPositionX(), summonPositions[i].GetPositionY(), summonPositions[i].GetPositionZ(), summonPositions[i].GetOrientation());
-
-                if (TwilightZealotsList[i] && TwilightZealotsList[i] != NULL && !TwilightZealotsList[i]->HasAura(SPELL_KNEELING_IN_SUPPLICATION))
-                    TwilightZealotsList[i]->CastSpell(TwilightZealotsList[i], SPELL_KNEELING_IN_SUPPLICATION, true);
+                TwilightZealotsList[i]->NearTeleportTo(summonPositions[i].GetPositionX(), summonPositions[i].GetPositionY(), summonPositions[i].GetPositionZ(), summonPositions[i].GetOrientation());
+                TwilightZealotsList[i]->CastSpell(TwilightZealotsList[i], SPELL_KNEELING_IN_SUPPLICATION, true);
             }
         }
 
@@ -183,6 +169,9 @@ public:
         void EnterCombat(Unit* /*victim*/)
         {
             me->CastStop();
+            me->DespawnCreaturesInArea(NPC_TWILIGHT_ZEALOT);
+            me->DespawnCreaturesInArea(NPC_NETHER_ESSENCE_TRIGGER);
+
             RehandleZealots();
 
             if (me->getVictim())
@@ -487,52 +476,59 @@ public:
                         {
                             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                             {
-                                if (i->getSource()->IsInBetween(me, zealot, 1.0f))
+                                if (zealot && i->getSource() && i->getSource()->IsInBetween(me, zealot, 1.0f))
                                 {
                                     channelTarget = i->getSource();
-                                    if (!channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
+                                    if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && !channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
                                         DoCast(channelTarget, SPELL_EVOLUTION_VISUAL, true);
                                 }
                             }
                         }
 
-                        if (!channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
+                        if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && !channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
                             DoCast(channelTarget, SPELL_EVOLUTION_VISUAL, true);
 
                         // Refresh duration!
-                        if (channelTarget->HasAura(SPELL_EVOLUTION))
+                        if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && channelTarget->HasAura(SPELL_EVOLUTION))
                             channelTarget->GetAura(SPELL_EVOLUTION)->RefreshDuration();
-                        else if (channelTarget->HasAura(SPELL_EVOLUTION_H))
+                        else if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && channelTarget->HasAura(SPELL_EVOLUTION_H))
                             channelTarget->GetAura(SPELL_EVOLUTION_H)->RefreshDuration();
 
                         // Ritual done, init transformations!
-                        if (channelTarget->GetAuraCount(SPELL_EVOLUTION) == 100 || channelTarget->GetAuraCount(SPELL_EVOLUTION_H) == 100)
+                        if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL)
                         {
-                            if (channelTarget == zealot)
+                            if (channelTarget->GetAuraCount(SPELL_EVOLUTION) == 100 || channelTarget->GetAuraCount(SPELL_EVOLUTION_H) == 100)
                             {
-                                channelTarget->RemoveAllAuras();
-                                zealot->CastSpell(channelTarget, SPELL_TWILIGHT_EVOLUTION, true);
-                                if (Creature* corla = me->FindNearestCreature(NPC_ENTRY_CORLA, 500.0f, true))
+                                if (channelTarget == zealot)
                                 {
-                                    if (alreadyEmpowered == false)
+                                    channelTarget->RemoveAllAuras();
+                                    zealot->CastSpell(channelTarget, SPELL_TWILIGHT_EVOLUTION, true);
+                                    if (Creature* corla = me->FindNearestCreature(NPC_ENTRY_CORLA, 500.0f, true))
                                     {
-                                        corla->AI()->Talk(SAY_POWER);
-                                        alreadyEmpowered = true;
-                                    }
+                                        if (alreadyEmpowered == false)
+                                        {
+                                            corla->AI()->Talk(SAY_POWER);
+                                            alreadyEmpowered = true;
+                                        }
 
-                                    corla->AI()->Talk(SAY_WARNING);
+                                        corla->AI()->Talk(SAY_WARNING);
+                                    }
+                                    events.CancelEvent(EVENT_CHECK_PLAYER_BETWEEN);
+                                    break;
+                                }
+
+                                // Player will be controlled by Corla
+                                if (channelTarget->ToPlayer())
+                                {
+                                    channelTarget->CastSpell(channelTarget, SPELL_TWILIGHT_EVOLUTION, true);
+                                    if (Creature* corla = me->FindNearestCreature(NPC_ENTRY_CORLA, 500.0f, true))
+                                        channelTarget->SetCharmedBy(corla, CHARM_TYPE_CHARM);
+
+                                    events.CancelEvent(EVENT_CHECK_PLAYER_BETWEEN);
+                                    break;
                                 }
                             }
-
-                            // Player will be controlled by Corla
-                            if (channelTarget->ToPlayer())
-                            {
-                                channelTarget->CastSpell(channelTarget, SPELL_TWILIGHT_EVOLUTION, true);
-                                if (Creature* corla = me->FindNearestCreature(NPC_ENTRY_CORLA, 500.0f, true))
-                                    channelTarget->SetCharmedBy(corla, CHARM_TYPE_CHARM);
-                            }
                         }
-
                         events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 800);
                         break;
                     }

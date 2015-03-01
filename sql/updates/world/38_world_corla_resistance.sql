@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `resistance2`=0 WHERE `entry` IN (39679, 39665, 39698, 39700, 39705);

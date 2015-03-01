@@ -10226,7 +10226,6 @@ class spell_climb_up_tree : public SpellScriptLoader
                                     vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_1);
                                     player->CastSpell(vehicleTree, SPELL_SWITCH_SEAT_2, true);
                                     player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
-                                    player->SetPhaseMask(201, true);
                                     return;
                                 }
                                 if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_2))
@@ -10234,7 +10233,6 @@ class spell_climb_up_tree : public SpellScriptLoader
                                     vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_2);
                                     player->CastSpell(vehicleTree, SPELL_SWITCH_SEAT_3, true);
                                     player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
-                                    player->SetPhaseMask(201, true);
                                     return;
                                 }
                                 if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_3))
@@ -10242,7 +10240,6 @@ class spell_climb_up_tree : public SpellScriptLoader
                                     vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_3);
                                     player->CastSpell(vehicleTree, SPELL_SWITCH_SEAT_4, true);
                                     player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
-                                    player->SetPhaseMask(201, true);
                                     return;
                                 }
                                 if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_4))
@@ -10252,7 +10249,6 @@ class spell_climb_up_tree : public SpellScriptLoader
                                         player->CastSpell(treeTop, SPELL_RIDE_TREE_ATOP, true);
 
                                     player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
-                                    player->SetPhaseMask(201, true);
                                     return;
                                 }
                             }
@@ -10308,10 +10304,7 @@ class spell_climb_down_tree : public SpellScriptLoader
                                 {
                                     vehicleTree->RemoveAurasDueToSpell(SPELL_RIDE_TREE_ATOP);
                                     if (Creature* treeBot = player->FindNearestCreature(NPC_ENTRY_TREE_BOT, 200.0f, true))
-                                    {
                                         player->CastSpell(treeBot, SPELL_SWITCH_SEAT_4, true);
-                                        player->SetPhaseMask(201, true);
-                                    }
 
                                     player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
                                     return;
@@ -10320,7 +10313,6 @@ class spell_climb_down_tree : public SpellScriptLoader
                                 {
                                     vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_1);
                                     player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
-                                    player->SetPhaseMask(201, true);
                                     return;
                                 }
                                 if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_2))
@@ -10328,7 +10320,6 @@ class spell_climb_down_tree : public SpellScriptLoader
                                     vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_2);
                                     player->CastSpell(vehicleTree, SPELL_SWITCH_SEAT_1, true);
                                     player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
-                                    player->SetPhaseMask(201, true);
                                     return;
                                 }
                                 if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_3))
@@ -10336,7 +10327,6 @@ class spell_climb_down_tree : public SpellScriptLoader
                                     vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_3);
                                     player->CastSpell(vehicleTree, SPELL_SWITCH_SEAT_2, true);
                                     player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
-                                    player->SetPhaseMask(201, true);
                                     return;
                                 }
                                 if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_4))
@@ -10344,7 +10334,6 @@ class spell_climb_down_tree : public SpellScriptLoader
                                     vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_4);
                                     player->CastSpell(vehicleTree, SPELL_SWITCH_SEAT_3, true);
                                     player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
-                                    player->SetPhaseMask(201, true);
                                     return;
                                 }
                             }
