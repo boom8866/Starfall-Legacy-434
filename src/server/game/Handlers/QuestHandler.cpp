@@ -120,7 +120,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
     Object* object = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT|TYPEMASK_ITEM|TYPEMASK_PLAYER);
 
     // some kind of WPE protection
-    if (!_player->CanInteractWithQuestGiver(object))
+    if (_player && object && _player->IsInWorld() && object->IsInWorld() && !_player->CanInteractWithQuestGiver(object))
         return;
 
     if (Quest const* quest = sObjectMgr->GetQuestTemplate(questId))
