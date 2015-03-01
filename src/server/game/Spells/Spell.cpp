@@ -5938,16 +5938,24 @@ SpellCastResult Spell::CheckCast(bool strict)
                 // Soul swap
                 if (m_spellInfo->Id == 86213)
                 {
-                    if (!m_caster->HasAura(86211))
+                    if (m_caster && !m_caster->HasAura(86211))
                         return SPELL_FAILED_DONT_REPORT;
 
-                    if (m_targets.GetUnitTarget()->GetGUID() == m_caster->GetAura(86211)->GetCaster()->GetGUID())
-                        return SPELL_FAILED_BAD_TARGETS;
+                    if (m_caster && m_targets.GetUnitTarget())
+                    {
+                        if (Aura* aur = m_caster->GetAura(86211))
+                        {
+                            if (Unit* casterAura = aur->GetCaster())
+                                if (m_targets.GetUnitTarget()->GetGUID() == casterAura->GetGUID())
+                                    return SPELL_FAILED_BAD_TARGETS;
+                        }
+                    }
                 }
                 else if (m_spellInfo->Id == 86121)
                 {
-                    if (m_targets.GetUnitTarget()->GetDoTsByCaster(m_caster->GetGUID()) == 0)
-                        return SPELL_FAILED_BAD_TARGETS;
+                    if (m_caster && m_targets.GetUnitTarget())
+                        if (m_targets.GetUnitTarget()->GetDoTsByCaster(m_caster->GetGUID()) == 0)
+                            return SPELL_FAILED_BAD_TARGETS;
                 }
                 break;
             }

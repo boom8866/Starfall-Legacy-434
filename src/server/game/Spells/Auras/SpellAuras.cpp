@@ -1963,7 +1963,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             {
                 if (Player* player = caster->ToPlayer())
                 {
-                    if (GetSpellInfo()->IsPeriodicDamage() && GetSpellInfo()->SpellFamilyName == SPELLFAMILY_MAGE)
+                    if (GetSpellInfo()->IsPeriodicDamage() && GetSpellInfo()->SpellFamilyName == SPELLFAMILY_MAGE && !(GetSpellInfo()->GetExplicitTargetMask() & TARGET_FLAG_DEST_LOCATION))
                     {
                         if (apply)
                         {

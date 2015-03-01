@@ -5414,7 +5414,6 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
         SetPower(POWER_RAGE, 0);
         SetPower(POWER_ENERGY, uint32(GetMaxPower(POWER_ENERGY)*restore_percent));
         SetPower(POWER_FOCUS, uint32(GetMaxPower(POWER_FOCUS)*restore_percent));
-        SetPower(POWER_SOUL_SHARDS, 0);
         SetPower(POWER_HOLY_POWER, 0);
         SetPower(POWER_ALTERNATE_POWER, 0);
     }
