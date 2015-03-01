@@ -222,11 +222,6 @@ public:
 
         EventMap events;
 
-        void DamageTaken(Unit* attacker, uint32& damage)
-        {
-            damage = 0;
-        }
-
         void DoAction(int32 action)
         {
             switch(action)
