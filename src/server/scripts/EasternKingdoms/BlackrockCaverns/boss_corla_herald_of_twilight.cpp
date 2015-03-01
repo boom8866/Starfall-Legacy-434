@@ -654,10 +654,19 @@ public:
             if (targets.empty())
                 return;
 
-            targets.remove_if(EvolutionTargetSelector(GetCaster()->ToCreature(), GetCaster()->getVictim()));
-            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
-            targets.clear();
-            targets.push_back(target);
+            if (Unit* caster = GetCaster())
+            {
+                if (!caster->ToCreature())
+                    return;
+
+                if (Unit* victim = caster->getVictim())
+                {
+                    targets.remove_if(EvolutionTargetSelector(caster->ToCreature(), victim));
+                    WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                    targets.clear();
+                    targets.push_back(target);
+                }
+            }
         }
 
         void Register()

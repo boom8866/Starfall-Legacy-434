@@ -9855,6 +9855,12 @@ public:
             EVENT_REMOVE_ROOT
         };
 
+        enum npcId
+        {
+            NPC_TITANIC_GUARDIAN_METEOR     = 47058,
+            NPC_TITANIC_METEOR              = 47065
+        };
+
         void EnterCombat(Unit* /*who*/)
         {
             events.ScheduleEvent(EVENT_BLAZING_ERUPTION, 1);
@@ -9862,9 +9868,24 @@ public:
             events.ScheduleEvent(EVENT_SUMMON_METEOR, 8000);
         }
 
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->DespawnCreaturesInArea(NPC_TITANIC_GUARDIAN_METEOR);
+            me->DespawnCreaturesInArea(NPC_TITANIC_METEOR);
+            events.Reset();
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            me->DespawnCreaturesInArea(NPC_TITANIC_GUARDIAN_METEOR);
+            me->DespawnCreaturesInArea(NPC_TITANIC_METEOR);
+        }
+
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && me->isInCombat())
                 return;
 
             events.Update(diff);
