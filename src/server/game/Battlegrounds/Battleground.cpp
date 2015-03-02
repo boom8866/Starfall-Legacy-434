@@ -964,7 +964,7 @@ void Battleground::EndBattleground(uint32 winner)
                 UpdatePlayerScore(player, SCORE_BONUS_HONOR, GetBonusHonorFromKill(winner_kills));
                 if (!player->GetRandomWinner())
                 {
-                    // 100cp awarded for the first random battleground won each day
+                    // 100cp awarded for the first random battleground won each day (10 per day till arenas will be opened)
                     player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_ARENA, BG_REWARD_WINNER_CONQUEST_FIRST);
                     player->SetRandomWinner(true);
                 }
@@ -978,7 +978,7 @@ void Battleground::EndBattleground(uint32 winner)
 
                 //player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND, 1);
             }
-            else // 50cp awarded for each non-rated battleground won
+            else // 50cp awarded for each non-rated battleground won    (1 per day till arenas will be opened)
             {
                 if (!isArena())
                     player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_ARENA, BG_REWARD_WINNER_CONQUEST_LAST);

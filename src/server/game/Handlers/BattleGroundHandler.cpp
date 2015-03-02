@@ -968,7 +968,7 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& /*recvData*/)
     data << _player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true);
     data << uint32(0);  // unk
     data << uint32(0);  // unk
-    data << uint32(_player->GetRandomWinner() ? BG_REWARD_WINNER_CONQUEST_FIRST / CURRENCY_PRECISION : BG_REWARD_WINNER_CONQUEST_LAST / CURRENCY_PRECISION);
+    data << uint32(!_player->GetRandomWinner() ? BG_REWARD_WINNER_CONQUEST_FIRST / CURRENCY_PRECISION : BG_REWARD_WINNER_CONQUEST_LAST / CURRENCY_PRECISION);
 
     SendPacket(&data);
 }
