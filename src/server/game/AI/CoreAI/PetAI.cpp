@@ -542,7 +542,7 @@ void PetAI::HandleReturnMovement()
     }
     else // COMMAND_FOLLOW
     {
-        if (!me->GetCharmInfo()->IsFollowing() && !me->GetCharmInfo()->IsReturning() && !me->GetCharmInfo()->GetChasingUnit())
+        if (me->GetCharmInfo() && (!me->GetCharmInfo()->IsFollowing() && !me->GetCharmInfo()->IsReturning() && !me->GetCharmInfo()->GetChasingUnit()))
         {
             ClearCharmInfoFlags();
             me->GetCharmInfo()->SetIsReturning(true);
