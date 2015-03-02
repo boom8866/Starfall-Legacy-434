@@ -100,6 +100,7 @@ public:
         void Reset()
         {
             RemoveEncounterFrame();
+            RemoveEncounterAuras();
             if (instance->GetBossState(DATA_MINDEBENDER_GHURSHA) == DONE)
             {
                 me->setFaction(FACTION_FRIENDLY);
@@ -165,7 +166,7 @@ public:
         void EnterCombat(Unit* who)
         {
             AddEncounterFrame();
-
+            RemoveEncounterAuras();
             events.ScheduleEvent(EVENT_EARTH_SHARDS, 20000);
             events.ScheduleEvent(EVENT_EMBERSTRIKE, 11000);
             events.ScheduleEvent(EVENT_LAVA_BOLT, 6500);
@@ -283,6 +284,15 @@ public:
                 Reset();
             }
         }
+
+        void RemoveEncounterAuras()
+        {
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENSLAVE_FEED);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENSLAVE_GROW);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MINDBENDER_PLAYER_VEHICLE_AURA);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENSLAVE_N);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENSLAVE_HC);
+        }
     };
 
     CreatureAI* GetAI(Creature *creature) const
@@ -359,19 +369,13 @@ public:
 
             if (Enslave)
             {
-                if (EnslavePlayer && EnslavePlayer != NULL && EnslavePlayer->IsInWorld() && (EnslavePlayer->HealthBelowPct(50) || !EnslavePlayer->HasAura(DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC))))
+                if (EnslavePlayer && EnslavePlayer != NULL && EnslavePlayer->IsInWorld())
                 {
-                    if (EnslavePlayer->HasAura(SPELL_ENSLAVE_N))
-                        EnslavePlayer->RemoveAurasDueToSpell(SPELL_ENSLAVE_N);
-                    if (EnslavePlayer->HasAura(SPELL_ENSLAVE_HC))
-                        EnslavePlayer->RemoveAurasDueToSpell(SPELL_ENSLAVE_HC);
-                    if (EnslavePlayer->HasAura(SPELL_MINDBENDER_PLAYER_VEHICLE_AURA))
-                        EnslavePlayer->RemoveAurasDueToSpell(SPELL_MINDBENDER_PLAYER_VEHICLE_AURA);
-                    if (EnslavePlayer->HasAura(SPELL_ENSLAVE_FEED))
-                        EnslavePlayer->RemoveAurasDueToSpell(SPELL_ENSLAVE_FEED);
-                    if (EnslavePlayer->HasAura(SPELL_ENSLAVE_GROW))
-                        EnslavePlayer->RemoveAurasDueToSpell(SPELL_ENSLAVE_GROW);
-                    EnslaveTarget(EnslavePlayer, false);
+                    if (EnslavePlayer->HealthBelowPct(50))
+                    {
+                        RemoveEncounterAuras();
+                        EnslaveTarget(EnslavePlayer, false);
+                    }
                 }
             }
 
@@ -594,6 +598,8 @@ public:
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENSLAVE_FEED);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENSLAVE_GROW);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MINDBENDER_PLAYER_VEHICLE_AURA);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENSLAVE_N);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENSLAVE_HC);
         }
     };
 
