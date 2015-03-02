@@ -512,16 +512,27 @@ public:
                     case EVENT_UPPER_VISUAL:
                     {
                         events.CancelEvent(EVENT_UPPER_VISUAL);
-                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->GetVehicleBase())
-                            playerOwner->GetVehicle()->GetPassenger(0)->ChangeSeat(2, true);
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
+                        {
+                            if (Vehicle* veh = playerOwner->GetVehicle())
+                            {
+                                if (Unit* passenger = veh->GetPassenger(0))
+                                    passenger->ChangeSeat(2, true);
+                            }
+                        }
                         break;
                     }
                     case EVENT_SWITCH_SEAT:
                     {
                         events.CancelEvent(EVENT_SWITCH_SEAT);
-                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->GetVehicleBase())
-                            playerOwner->GetVehicle()->GetPassenger(2)->ChangeSeat(1, true);
-
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
+                        {
+                            if (Vehicle* veh = playerOwner->GetVehicle())
+                            {
+                                if (Unit* passenger = veh->GetPassenger(2))
+                                    passenger->ChangeSeat(1, true);
+                            }
+                        }
                         me->NearTeleportTo(-8937.54f,-1725.59f, 125.31f, 2.09f);
                         break;
                     }
@@ -604,7 +615,7 @@ public:
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
                             if (Vehicle* vehicle = playerOwner->GetVehicle())
-                                playerOwner->GetVehicle()->RemoveAllPassengers();
+                                vehicle->RemoveAllPassengers();
                         }
                         if (Creature* ambushers = me->FindNearestCreature(NPC_ENTRY_AMBUSHERS, 200.0f, true))
                             ambushers->AI()->TalkWithDelay(2000, 1);
