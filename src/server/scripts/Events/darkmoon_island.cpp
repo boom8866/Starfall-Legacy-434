@@ -292,6 +292,27 @@ public:
     {
     }
 
+    class resetFlag : public BasicEvent
+    {
+    public:
+        explicit resetFlag(Creature* creature) : creature(creature)
+        {
+        }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            creature->SetFlag(UNIT_FIELD_BYTES_1, 8);
+            creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            creature->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+            creature->DisappearAndDie();
+            creature->m_Events.KillAllEvents(true);
+            return true;
+        }
+
+    private:
+        Creature* creature;
+    };
+
     enum npcId
     {
         NPC_DAMAGED_TONK    = 54504
@@ -329,9 +350,10 @@ public:
                     if (target->ToCreature())
                     {
                         target->RemoveFlag(UNIT_NPC_FLAGS, UNIT_FLAG2_FEIGN_DEATH);
-                        target->ToCreature()->DespawnOrUnsummon(10000);
                         target->SetWalk(true);
                         target->GetMotionMaster()->MovePoint(0, target->GetPositionX()+urand(1,3), target->GetPositionY()+urand(1,3), target->GetPositionZ());
+                        if (target->ToCreature())
+                            target->m_Events.AddEvent(new resetFlag(target->ToCreature()), (target->ToCreature())->m_Events.CalculateTime(9000));
                     }
                     target->SetHealth(target->GetMaxHealth());
                     caster->ToPlayer()->KilledMonsterCredit(NPC_DAMAGED_TONK);
