@@ -526,7 +526,7 @@ void PetAI::HandleReturnMovement()
     if (me->GetCharmInfo() && me->GetCharmInfo()->GetCommandState() == COMMAND_MOVE_TO)
         return;
 
-    if (me->GetCharmInfo()->HasCommandState(COMMAND_STAY))
+    if (me->GetCharmInfo() && me->GetCharmInfo()->HasCommandState(COMMAND_STAY))
     {
         if (!me->GetCharmInfo()->IsAtStay() && !me->GetCharmInfo()->IsReturning())
         {
