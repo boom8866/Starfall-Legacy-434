@@ -14303,7 +14303,8 @@ void Unit::setDeathState(DeathState s)
     {
         CombatStop();
         DeleteThreatList();
-        getHostileRefManager().deleteReferences();
+        if (!getHostileRefManager().isEmpty())
+            getHostileRefManager().deleteReferences();
         //ClearComboPointHolders();                           // Since cataclysm the target keeps the combo points
 
         if (IsNonMeleeSpellCasted(false))
