@@ -528,12 +528,12 @@ inline void KillRewarder::_RewardHonor(Player* player)
         player->RewardHonor(_victim, _count, -1, true);
 
         // EoTS: Achievements (Take a Chill Pill & Bloodthirsty Berserker)
-        if (player->GetMapId() == 566)
+        if (player && player->GetMapId() == 566)
         {
-            if (chillPill && _victim->HasAura(23505))
+            if (chillPill && _victim && _victim->HasAura(23505))
                 player->CompletedAchievement(chillPill);
 
-            if (bBerserker && player->HasAura(23505))
+            if (bBerserker && _victim && player->HasAura(23505))
                 player->CompletedAchievement(bBerserker);
         }
 
