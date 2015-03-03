@@ -1,0 +1,1 @@
+UPDATE `playercreateinfo_spell` SET `classmask`=0 WHERE `racemask`=64 AND `classmask`=32 AND `Spell`=20589;

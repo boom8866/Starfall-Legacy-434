@@ -192,7 +192,7 @@ public:
                     {
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_SHIELD_BASH, true);
-                        events.RescheduleEvent(EVENT_SHIELD_BASH, urand(3000, 6000));
+                        events.RescheduleEvent(EVENT_SHIELD_BASH, urand(14500, 20000));
                         break;
                     }
                     default:
