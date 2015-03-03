@@ -7485,7 +7485,7 @@ void Player::RewardOnKill(Unit* victim, float rate)
         Map const* map = GetMap();
         if (map && map->IsNonRaidDungeon())
             if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
-                if (dungeon->reclevel == 80 || dungeon->reclevel == 85)
+                if (dungeon->reclevel == 85)
                     ChampioningFaction = GetChampioningFaction();
     }
 

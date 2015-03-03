@@ -460,17 +460,18 @@ public:
                             break;
                         }
                         channelTarget = zealot;
-                        Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
-                        if (!PlayerList.isEmpty())
+
+                        std::list<Player*> targets;
+                        Trinity::AnyPlayerInObjectRangeCheck u_check(me, 100.0f);
+                        Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(100.0f, searcher);
+                        for (std::list<Player*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
-                            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                            if (zealot && (*itr) && (*itr)->IsInBetween(me, zealot, 1.0f))
                             {
-                                if (zealot && i->getSource() && i->getSource()->IsInBetween(me, zealot, 1.0f))
-                                {
-                                    channelTarget = i->getSource();
-                                    if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && !channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
-                                        DoCast(channelTarget, SPELL_EVOLUTION_VISUAL, true);
-                                }
+                                channelTarget = (*itr);
+                                if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && !channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
+                                    DoCast(channelTarget, SPELL_EVOLUTION_VISUAL, true);
                             }
                         }
 
