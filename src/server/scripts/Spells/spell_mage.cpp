@@ -1908,6 +1908,46 @@ public:
     }
 };
 
+class spell_mage_flamestrike : public SpellScriptLoader
+{
+public:
+    spell_mage_flamestrike() : SpellScriptLoader("spell_mage_flamestrike")
+    {
+    }
+
+    class spell_mage_flamestrike_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_flamestrike_SpellScript);
+
+        enum spellId
+        {
+            SPELL_FLAMESTRIKE   = 2120
+        };
+
+        void HandleController()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (DynamicObject* flamestrike = caster->GetDynObject(SPELL_FLAMESTRIKE))
+                {
+                    if (flamestrike->GetCaster() && flamestrike->GetCaster() == caster)
+                        flamestrike->Remove();
+                }
+            }
+        }
+
+        void Register()
+        {
+            BeforeCast += SpellCastFn(spell_mage_flamestrike_SpellScript::HandleController);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_flamestrike_SpellScript();
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -1941,4 +1981,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_glyph_of_molten_armor();
     new spell_mage_pyroblast();
     new spell_mage_ring_of_frost();
+    new spell_mage_flamestrike();
 }

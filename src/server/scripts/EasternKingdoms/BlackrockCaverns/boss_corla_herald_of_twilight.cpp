@@ -228,21 +228,6 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            for (uint8 i = 0; i <= RAID_MODE(1, 2); i++)
-            {
-                if (NetherEssenceTrigger[i] && NetherEssenceTrigger[i] != NULL)
-                    NetherEssenceTrigger[i]->GetAI()->DoAction(ACTION_TRIGGER_STOP_CHANNELING);
-            }
-
-            for (uint8 i = 0; i <= RAID_MODE(1, 2); i++)
-            {
-                if (NetherEssenceTrigger[i] && NetherEssenceTrigger[i] != NULL && TwilightZealotsList[i] && TwilightZealotsList[i] != NULL)
-                {
-                    TwilightZealotsList[i]->DespawnOrUnsummon();
-                    TwilightZealotsList[i] = NULL;
-                }
-            }
-
             Talk(SAY_DEATH);
             RemoveCharmedPlayers();
             RemoveEncounterFrame();
@@ -250,6 +235,8 @@ public:
                 instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_ARRESTED_DEVELOPEMENT);
             if (instance)
                 instance->SetBossState(DATA_CORLA_HERALD_OF_TWILIGHT, DONE);
+            me->DespawnCreaturesInArea(NPC_NETHER_ESSENCE_TRIGGER, 300.0f);
+            me->DespawnCreaturesInArea(NPC_TWILIGHT_ZEALOT);
         }
 
         void KilledUnit(Unit* victim)

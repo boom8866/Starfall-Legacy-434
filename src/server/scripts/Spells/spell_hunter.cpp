@@ -1992,6 +1992,47 @@ public:
     }
 };
 
+class spell_hun_rapid_killing : public SpellScriptLoader
+{
+public:
+    spell_hun_rapid_killing() : SpellScriptLoader("spell_hun_rapid_killing")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_HUN_RAPID_RECUPERATION_R1         = 53228,
+        SPELL_HUN_RAPID_RECUPERATION_R2         = 53232,
+        SPELL_HUN_RAPID_RECUPERATION_ENERGIZE   = 58883
+    };
+
+    class spell_hun_rapid_killing_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_hun_rapid_killing_AuraScript);
+
+        void HandleEffectApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_HUN_RAPID_RECUPERATION_R1))
+                    caster->EnergizeBySpell(caster, SPELL_HUN_RAPID_RECUPERATION_ENERGIZE, 25, POWER_FOCUS);
+                if (caster->HasAura(SPELL_HUN_RAPID_RECUPERATION_R2))
+                    caster->EnergizeBySpell(caster, SPELL_HUN_RAPID_RECUPERATION_ENERGIZE, 50, POWER_FOCUS);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_hun_rapid_killing_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_hun_rapid_killing_AuraScript();
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -2033,4 +2074,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_lock_and_load();
     new spell_hun_attack_basic();
     new spell_hun_explosive_trap();
+    new spell_hun_rapid_killing();
 }

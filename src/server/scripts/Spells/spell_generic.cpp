@@ -12612,6 +12612,47 @@ public:
     }
 };
 
+class spell_racial_will_of_the_forsaken : public SpellScriptLoader
+{
+public:
+    spell_racial_will_of_the_forsaken() : SpellScriptLoader("spell_racial_will_of_the_forsaken")
+    {
+    }
+
+    class spell_racial_will_of_the_forsaken_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_racial_will_of_the_forsaken_SpellScript);
+
+        enum spellId
+        {
+            SPELL_WOTA_WOTF     = 72757
+        };
+
+        void HandleCooldownShare()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (caster->ToPlayer()->HasSpellCooldown(SPELL_WOTA_WOTF))
+                        caster->ToPlayer()->RemoveSpellCooldown(SPELL_WOTA_WOTF, true);
+                    caster->CastSpell(caster, SPELL_WOTA_WOTF);
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterHit += SpellHitFn(spell_racial_will_of_the_forsaken_SpellScript::HandleCooldownShare);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_racial_will_of_the_forsaken_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -12863,4 +12904,5 @@ void AddSC_generic_spell_scripts()
     new spell_blackjack_hyjal();
     new spell_gen_vengeance_decay();
     new spell_dh_deepvein_patch_kit();
+    new spell_racial_will_of_the_forsaken();
 }
