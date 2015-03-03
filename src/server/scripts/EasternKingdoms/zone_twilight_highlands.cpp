@@ -7473,18 +7473,26 @@ public:
             NPC_BRAIN       = 47960
         };
 
+        enum questId
+        {
+            QUEST_NIGHTMARE = 27380
+        };
+
         void IsSummonedBy(Unit* owner)
         {
-            if (me->GetPhaseMask() & 2048)
+            if (owner->GetTypeId() == TYPEID_PLAYER)
             {
-                events.ScheduleEvent(EVENT_ATTACK_BRAIN, 6000);
-                owner->AddAura(SPELL_UNIQUE_PHASING, me);
-            }
-            else
-            {
-                TalkWithDelay(2000, 1);
-                events.ScheduleEvent(EVENT_CHECK_BUFF, 2000);
-                events.ScheduleEvent(EVENT_FOLLOW_MASTER, 1000);
+                if (owner->ToPlayer()->GetQuestStatus(QUEST_NIGHTMARE) == QUEST_STATUS_INCOMPLETE)
+                {
+                    events.ScheduleEvent(EVENT_ATTACK_BRAIN, 6000);
+                    owner->AddAura(SPELL_UNIQUE_PHASING, me);
+                }
+                else
+                {
+                    TalkWithDelay(2000, 1);
+                    events.ScheduleEvent(EVENT_CHECK_BUFF, 2000);
+                    events.ScheduleEvent(EVENT_FOLLOW_MASTER, 1000);
+                }
             }
         }
 
@@ -7583,15 +7591,18 @@ public:
                     {
                         if (Unit* owner = me->ToTempSummon()->GetSummoner())
                         {
-                            if (owner->GetDistance(me) > 15.0f && !(owner->GetPhaseMask() & 2048))
+                            if (owner->GetTypeId() == TYPEID_PLAYER)
                             {
-                                me->GetMotionMaster()->MovementExpired(false);
-                                me->GetMotionMaster()->MoveFollow(owner, 2.0f, urand(1, 4));
-                            }
-                            if (owner->GetDistance(me) > 80.0f && (owner->GetPhaseMask() & 2048))
-                            {
-                                me->GetMotionMaster()->MovementExpired(false);
-                                me->GetMotionMaster()->MoveFollow(owner, 1.5f, urand(1, 4));
+                                if (owner->GetDistance(me) > 15.0f && owner->ToPlayer()->GetQuestStatus(QUEST_NIGHTMARE) == QUEST_STATUS_NONE)
+                                {
+                                    me->GetMotionMaster()->MovementExpired(false);
+                                    me->GetMotionMaster()->MoveFollow(owner, 2.0f, urand(1, 4));
+                                }
+                                if (owner->GetDistance(me) > 80.0f && owner->ToPlayer()->GetQuestStatus(QUEST_NIGHTMARE) == QUEST_STATUS_INCOMPLETE)
+                                {
+                                    me->GetMotionMaster()->MovementExpired(false);
+                                    me->GetMotionMaster()->MoveFollow(owner, 1.5f, urand(1, 4));
+                                }
                             }
                         }
                         events.RescheduleEvent(EVENT_FOLLOW_MASTER, 5000);
