@@ -332,10 +332,16 @@ public:
                         me->GetMotionMaster()->MoveJump(AbovePlatformPos, 15.0f, 8.5f, POINT_ABOVE_PLATFORM);
                         break;
                     case EVENT_EARTH_FURY_CHECK_SEAT0:
-                        if (!vehicle->GetPassenger(0))
-                            DoCast(SPELL_SEISMIC_SHARD_PREPARE);
+                    {
+                        if (vehicle)
+                        {
+                            Unit* passenger = vehicle->GetPassenger(0);
+                            if (!passenger)
+                                DoCast(SPELL_SEISMIC_SHARD_PREPARE);
+                        }
                         events.ScheduleEvent(EVENT_EARTH_FURY_LAUNCH_SHARD, 1800);
                         break;
+                    }
                     case EVENT_EARTH_FURY_LAUNCH_SHARD:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 500.0f, true))
                         {
