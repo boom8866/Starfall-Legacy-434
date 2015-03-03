@@ -3354,18 +3354,19 @@ public:
 
         EventMap events;
 
-        void InitializeAI()
+        void IsSummonedBy(Unit* /*owner*/)
         {
             ScriptedAI::InitializeAI();
             Unit* owner = me->GetOwner();
             if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
                 return;
 
+            events.ScheduleEvent(EVENT_FULLY_FORMED, 2000);
+
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-            events.ScheduleEvent(EVENT_FULLY_FORMED, 3000);
             isFormed = false;
 
             // Remove other ring spawned by the player
@@ -3420,8 +3421,18 @@ public:
                     case EVENT_RECAST:
                     {
                         if (isFormed == true)
-                            DoCast(me, SPELL_RING_OF_FROST_TRIGGERED, true);
-                        events.RescheduleEvent(EVENT_RECAST, 1000);
+                        {
+                            if (Unit* owner = me->GetCharmerOrOwner())
+                            {
+                                if (!owner->HasBreakableByDamageCrowdControlAura(owner))
+                                {
+                                    DoCast(me, SPELL_RING_OF_FROST_TRIGGERED, true);
+                                    events.RescheduleEvent(EVENT_RECAST, 100);
+                                    break;
+                                }
+                            }
+                            events.RescheduleEvent(EVENT_RECAST, 100);
+                        }
                         break;
                     }
                     default:

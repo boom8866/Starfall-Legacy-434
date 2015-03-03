@@ -824,9 +824,19 @@ class spell_mage_ignite : public SpellScriptLoader
                 PreventDefaultAction();
                 int32 pct = 13;
 
-                // Molten Armor exclusion
-                if (eventInfo.GetDamageInfo() && eventInfo.GetDamageInfo()->GetSpellInfo() && eventInfo.GetDamageInfo()->GetSpellInfo()->Id == 34913)
-                    return;
+                // Spells exclusions
+                if (eventInfo.GetDamageInfo() && eventInfo.GetDamageInfo()->GetSpellInfo())
+                {
+                    switch (eventInfo.GetDamageInfo()->GetSpellInfo()->Id)
+                    {
+                        case 34913: // Molten Armor
+                        case 2120:  // Flamestrike
+                        case 11113: // Blast Wave
+                            return;
+                        default:
+                            break;
+                    }
+                }
 
                 if (Unit* caster = GetCaster())
                 {
@@ -1845,6 +1855,28 @@ class spell_mage_pyroblast : public SpellScriptLoader
         }
 };
 
+class EligibleForFreeze
+{
+public:
+    EligibleForFreeze(Unit* caster) : caster(caster)
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_RING_OF_FROST_FREEZE      = 82691,
+        SPELL_RING_OF_FROST_IMMUNITY    = 91264
+    };
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->ToUnit()->HasAura(SPELL_RING_OF_FROST_FREEZE) || object->ToUnit()->HasAura(SPELL_RING_OF_FROST_IMMUNITY) || !caster->IsInRange(object, 2.0f, 4.7f));
+    }
+
+private:
+    Unit* caster;
+};
+
 class spell_mage_ring_of_frost : public SpellScriptLoader
 {
 public:
@@ -1856,33 +1888,12 @@ public:
     {
         PrepareSpellScript(spell_mage_ring_of_frost_SpellScript);
 
-        enum spellId
-        {
-            SPELL_RING_OF_FROST_FREEZE      = 82691,
-            SPELL_RING_OF_FROST_IMMUNITY    = 91264
-        };
-
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            std::list<WorldObject*> validTarget;
-            for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
-            {
-                if ((*itr))
-                {
-                    if (Unit* unit = (*itr)->ToUnit())
-                    {
-                        // Exclude all targets with immunity or already frozen, also exclude training dummies
-                        if (!unit->HasAura(SPELL_RING_OF_FROST_FREEZE) && !unit->HasAura(SPELL_RING_OF_FROST_IMMUNITY) &&
-                            GetCaster()->IsInRange(unit, 2.0f, 4.7f) && (!(unit->ToCreature() && (unit->ToCreature()->GetScriptName() == "npc_training_dummy" || unit->ToCreature()->IsInEvadeMode()))))
-                            validTarget.push_back((*itr));
-                    }
-                }
-            }
+            if (targets.empty())
+                return;
 
-            targets.clear();
-
-            for (std::list<WorldObject*>::iterator itr = validTarget.begin(); itr != validTarget.end(); ++itr)
-                targets.push_back((*itr));
+            targets.remove_if(EligibleForFreeze(GetCaster()));
         }
 
         void Register()
