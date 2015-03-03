@@ -997,8 +997,8 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                     ap += effectVengeance->GetAmount();
 
                 // Set limit
-                if (ap > int32((victim->GetMaxHealth() * 0.10f) - victim->GetCreateHealth()))
-                    ap = int32((victim->GetMaxHealth() * 0.10f) - victim->GetCreateHealth());
+                if (ap > int32(victim->CountPctFromMaxHealth(10)))
+                    ap = int32(victim->CountPctFromMaxHealth(10));
 
                 // Cast effect & correct duration
                 if (victim->GetTypeId() == TYPEID_PLAYER)
@@ -1027,8 +1027,8 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                         ap += effectVengeance->GetAmount();
 
                     // Set limit
-                    if (ap > int32((victim->GetMaxHealth() * 0.10f) - victim->GetCreateHealth()))
-                        ap = int32((victim->GetMaxHealth() * 0.10f) - victim->GetCreateHealth());
+                    if (ap > int32(victim->CountPctFromMaxHealth(10)))
+                        ap = int32(victim->CountPctFromMaxHealth(10));
 
                     // Cast effect & correct duration
                     if (victim->GetTypeId() == TYPEID_PLAYER)
@@ -1048,20 +1048,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                         victim->RemoveAurasDueToSpell(76691);
                 }
             }
-        }
-    }
-
-    // Blade Flurry
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        if (HasAura(13877))
-        {
-            // Do not allow proc from itself
-            if (spellProto && spellProto->Id == 22482)
-                return damage;
-
-            if (Unit* nearbyTarget = SelectNearbyTarget(victim, 10.0f))
-                CastSpell(nearbyTarget, 22482, true);
         }
     }
 
@@ -1805,9 +1791,8 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
                 {
                     case 467:   // Thorns
                     {
-                        uint32 attackPower = (caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.421f) + 447;
-                        uint32 spellPower = (caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) * 0.421f) + 447;
-
+                        uint32 attackPower = caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.421f;
+                        uint32 spellPower = caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) * 0.421f;
                         if (caster->GetShapeshiftForm() == FORM_BEAR || caster->GetShapeshiftForm() == FORM_CAT)
                             damage += attackPower;
                         else
@@ -1817,7 +1802,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
                     default:
                     {
                         damage = caster->SpellDamageBonusDone(this, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
-                        damage = this->SpellDamageBonusTaken(caster, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
+                        damage = SpellDamageBonusTaken(caster, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
                         break;
                     }
                 }

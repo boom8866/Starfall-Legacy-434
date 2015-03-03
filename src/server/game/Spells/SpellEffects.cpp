@@ -407,12 +407,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
-                        // Blade Flurry
-                    case 22482:
-                    {
-                        damage = m_caster->GetDamageDoneInPastSecs(1);
-                        break;
-                    }
                         // Emerald Barrage
                     case 65063:
                     {
@@ -5182,7 +5176,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
 
                     // Sunder Armor
                     if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
-                        totalDamagePercentMod += totalDamagePercentMod * aur->GetStackAmount();
+                        totalDamagePercentMod += totalDamagePercentMod * aur->GetStackAmount() / 2;
                     break;
                 }
             }
