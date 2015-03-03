@@ -696,6 +696,9 @@ class spell_rog_main_gauche : public SpellScriptLoader
                if (!(procInfo.GetTypeMask() & PROC_FLAG_DONE_MAINHAND_ATTACK))
                    return;
 
+               if (procInfo.GetSpellInfo())
+                   return;
+
                // If no weapon found in main hand, avoid to proc
                Item* mainHand = GetCaster()->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
                if (!mainHand)
@@ -1212,6 +1215,61 @@ public:
     }
 };
 
+class spell_rog_blade_flurry : public SpellScriptLoader
+{
+public:
+    spell_rog_blade_flurry() : SpellScriptLoader("spell_rog_blade_flurry")
+    {
+    }
+
+    class spell_rog_blade_flurry_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_blade_flurry_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK))
+                return false;
+            return true;
+        }
+
+        bool Load()
+        {
+            _procTarget = NULL;
+            return true;
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            _procTarget = eventInfo.GetActor()->SelectNearbyTarget(eventInfo.GetProcTarget());
+
+            if (!_procTarget)
+                return false;
+
+            if (eventInfo.GetDamageInfo())
+            {
+                int32 damage = eventInfo.GetDamageInfo()->GetDamage();
+                if (GetTarget())
+                    GetTarget()->CastCustomSpell(SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK, SPELLVALUE_BASE_POINT0, damage, _procTarget, true, NULL, NULL);
+            }
+            return _procTarget;
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(spell_rog_blade_flurry_AuraScript::CheckProc);
+        }
+
+    private:
+        Unit* _procTarget;
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_rog_blade_flurry_AuraScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_cheat_death();
@@ -1235,4 +1293,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_revealing_strike();
     new spell_rog_bandits_guile();
     new spell_rog_smoke_bomb();
+    new spell_rog_blade_flurry();
 }
