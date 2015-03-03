@@ -11263,12 +11263,12 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                             DoneTotal += ownerRAP * 0.168f;
                             // Spiked Collar
                             if (AuraEffect* spikedCollar = GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2934, EFFECT_0))
-                                AddPct(DoneTotalMod, spikedCollar->GetAmount());
+                                AddPct(DoneTotal, spikedCollar->GetAmount() / 100);
 
                             // Wild Hunt
                             if (AuraEffect* wildHunt = GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_0))
                                 if (GetPower(POWER_FOCUS) + spellProto->CalcPowerCost(this, spellProto->GetSchoolMask()) >= 50)
-                                    AddPct(DoneTotalMod, wildHunt->GetAmount());
+                                    AddPct(DoneTotal, wildHunt->GetAmount() / 100);
                             break;
                         }
                     }
