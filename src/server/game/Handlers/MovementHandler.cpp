@@ -32,6 +32,7 @@
 #include "ObjectMgr.h"
 #include "InstanceScript.h"
 #include "MovementStructures.h"
+#include "Vehicle.h"
 
 #define MOVEMENT_PACKET_TIME_DELAY 0
 
@@ -420,13 +421,20 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
 
     //Package defined here
     WorldPacket data(SMSG_PLAYER_MOVE, recvPacket.size());
-    // this is almost never true (not sure why it is sometimes, but it is), normally use mover->IsVehicle()
-    if (mover->GetVehicle())
+    // Some vehicles allow the passenger to turn by himself
+    if (Vehicle* vehicle = mover->GetVehicle())
     {
-        mover->SetOrientation(movementInfo.pos.GetOrientation());
-        //NOTE Send befor we get outa here
-        WriteMovementInfo(data, &emi);
-        mover->SendMessageToSet(&data, _player);
+        if (VehicleSeatEntry const* seat = vehicle->GetSeatForPassenger(mover))
+        {
+            if (seat->m_flags & VEHICLE_SEAT_FLAG_ALLOW_TURNING)
+            {
+                if (movementInfo.pos.GetOrientation() != mover->GetOrientation())
+                {
+                    mover->SetOrientation(movementInfo.pos.GetOrientation());
+                    mover->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TURNING);
+                }
+            }
+        }
         return;
     }
 

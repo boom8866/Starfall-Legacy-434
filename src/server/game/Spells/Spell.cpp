@@ -6228,7 +6228,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
                             {
                                 for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
                                 {
-                                    if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                                    if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger.Guid))
                                     {
                                         player->m_cloudStacks++;
                                         player->KilledMonsterCredit(47097);

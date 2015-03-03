@@ -324,9 +324,7 @@ public:
                 return;
 
             if (!me->HasUnitState(UNIT_STATE_ONVEHICLE))
-            {
                 me->DespawnOrUnsummon();
-            }
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spell)

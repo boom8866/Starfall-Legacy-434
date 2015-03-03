@@ -455,7 +455,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     {
                         if (Vehicle* vehicle = m_caster->GetVehicleKit())
                             for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
-                                if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                                if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger.Guid))
                                     player->KilledMonsterCredit(46862);
                         break;
                     }
@@ -465,7 +465,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     {
                         if (Vehicle* vehicle = m_caster->GetVehicleKit())
                             for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
-                                if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                                if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger.Guid))
                                     player->KilledMonsterCredit(46865);
                         break;
                     }
@@ -2491,7 +2491,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                 {
                     if (Vehicle* vehicle = m_caster->GetVehicleKit())
                         for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
-                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger.Guid))
                                 player->KilledMonsterCredit(46867);
                     break;
                 }
@@ -2500,7 +2500,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                 {
                     if (Vehicle* vehicle = m_caster->GetVehicleKit())
                         for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
-                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger.Guid))
                                 player->KilledMonsterCredit(46866);
                     break;
                 }
@@ -2509,7 +2509,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                 {
                     if (Vehicle* vehicle = m_caster->GetVehicleKit())
                         for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
-                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger.Guid))
                                 player->KilledMonsterCredit(46863);
                     break;
                 }
@@ -2518,7 +2518,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                 {
                     if (Vehicle* vehicle = m_caster->GetVehicleKit())
                         for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
-                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger.Guid))
                                 player->KilledMonsterCredit(46864);
                     break;
                 }
@@ -6570,7 +6570,7 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                             if (Vehicle* vehicle = m_caster->GetVehicleKit())
                             {
                                 for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
-                                    if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                                    if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger.Guid))
                                         player->KilledMonsterCredit(47080);
                             }
                         }
