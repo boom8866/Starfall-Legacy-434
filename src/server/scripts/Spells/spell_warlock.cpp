@@ -1288,7 +1288,7 @@ public:
                     Aura* glyAur = plr->GetAura(SPELL_WARLOCK_GYLPH_OF_SOUL_SWAP);
 
                     for (std::list<uint32>::iterator i = plr->soulSwapDots.begin(); i != plr->soulSwapDots.end(); ++i)
-                        plr->CastCustomSpell(unitTarget, (*i), NULL, NULL, NULL, true, NULL, NULL, 0);
+                        plr->AddAura((*i), unitTarget);
 
                     plr->soulSwapDots.clear();
 

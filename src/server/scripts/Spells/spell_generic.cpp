@@ -10219,7 +10219,7 @@ class spell_climb_up_tree : public SpellScriptLoader
                     {
                         for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
                         {
-                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger.Guid))
                             {
                                 if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_1))
                                 {
@@ -10298,7 +10298,7 @@ class spell_climb_down_tree : public SpellScriptLoader
                     {
                         for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
                         {
-                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger.Guid))
                             {
                                 if (vehicleTree->HasAura(SPELL_RIDE_TREE_ATOP))
                                 {
@@ -10379,7 +10379,7 @@ class spell_chuck_a_bear : public SpellScriptLoader
                     {
                         for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
                         {
-                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger.Guid))
                             {
                                 if (player->HasItemCount(ITEM_ENTRY_HYJAL_BEAR_CUB, 1, false))
                                     return SPELL_CAST_OK;
@@ -10400,7 +10400,7 @@ class spell_chuck_a_bear : public SpellScriptLoader
                     {
                         for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
                         {
-                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger.Guid))
                             {
                                 // Just to be sure check if player still have item
                                 if (player->HasItemCount(ITEM_ENTRY_HYJAL_BEAR_CUB, 1, false))

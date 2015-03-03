@@ -1552,12 +1552,18 @@ public:
     enum Id
     {
         QUEST_ENTRY_FLIGHT_IN_THE_FIRELANDS = 25523,
+        QUEST_ENTRY_WAVE_ONE                = 25525,
+        QUEST_ENTRY_WAVE_TWO                = 25544,
+        QUEST_ENTRY_EGG_WAVE                = 25560,
         ITEM_ENTRY_TWILIGHT_FIRELANCE       = 52716
     };
 
     bool OnGossipHello(Player* player, GameObject* go)
     {
-        if (player->GetQuestStatus(QUEST_ENTRY_FLIGHT_IN_THE_FIRELANDS) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_ENTRY_FLIGHT_IN_THE_FIRELANDS) == QUEST_STATUS_INCOMPLETE ||
+            player->GetQuestStatus(QUEST_ENTRY_WAVE_ONE) == QUEST_STATUS_INCOMPLETE ||
+            player->GetQuestStatus(QUEST_ENTRY_WAVE_TWO) == QUEST_STATUS_INCOMPLETE ||
+            player->GetQuestStatus(QUEST_ENTRY_EGG_WAVE) == QUEST_STATUS_INCOMPLETE)
         {
             if (!player->HasItemCount(ITEM_ENTRY_TWILIGHT_FIRELANCE, 1))
                 player->MonsterWhisper("Equip the Lance", player->GetGUID(), true);

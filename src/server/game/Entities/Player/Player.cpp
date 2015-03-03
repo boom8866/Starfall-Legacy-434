@@ -713,10 +713,14 @@ void KillRewarder::_RewardGroup()
             {
                 if (Player* member = itr->getSource())
                 {
-                    if (member->IsAtGroupRewardDistance(_victim))
+                    if (_victim && _victim->IsInWorld() && member->IsInWorld() && member->IsAtGroupRewardDistance(_victim))
                     {
-                        _RewardPlayer(member, isDungeon);
-                        member->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL, 1, 0, 0, _victim);
+                        if (member)
+                        {
+                            _RewardPlayer(member, isDungeon);
+                            if (_victim && member && member->IsInWorld() && _victim->IsInWorld())
+                                member->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL, 1, 0, 0, _victim);
+                        }
                     }
                 }
             }
@@ -16734,16 +16738,13 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     // Guild Rewards
     if (Guild* guild = sGuildMgr->GetGuildById(GetGuildId()))
     {
-        if (!quest->IsRepeatable())
-        {
-            // For Reputation
-            uint32 const xpRep = uint32(quest->XPValue(this));
-            RewardGuildReputation(uint32(xpRep / 450));
+        // For Reputation
+        uint32 const xpRep = uint32(quest->XPValue(this));
+        RewardGuildReputation(uint32(xpRep / 450));
 
-            // For Experience
-            uint32 const xpExp = uint32(quest->XPValue(this) * sWorld->getRate(RATE_XP_QUEST) * sWorld->getRate(RATE_XP_GUILD_MODIFIER));
-            guild->GiveXP(xpExp, this);
-        }
+        // For Experience
+        uint32 const xpExp = uint32(quest->XPValue(this) * sWorld->getRate(RATE_XP_QUEST) * sWorld->getRate(RATE_XP_GUILD_MODIFIER));
+        guild->GiveXP(xpExp, this);
     }
 
     // Autosubmit system for autoaccept quest in chain

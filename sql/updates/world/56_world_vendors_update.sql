@@ -1,0 +1,1 @@
+UPDATE `npc_vendor` SET `ExtendedCost`=3166 WHERE `ExtendedCost`=465;

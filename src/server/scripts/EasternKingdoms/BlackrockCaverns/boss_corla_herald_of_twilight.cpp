@@ -116,8 +116,8 @@ public:
 
         void EnterEvadeMode()
         {
-            me->DespawnCreaturesInArea(NPC_TWILIGHT_ZEALOT);
             me->DespawnCreaturesInArea(NPC_NETHER_ESSENCE_TRIGGER);
+            me->DespawnCreaturesInArea(NPC_TWILIGHT_ZEALOT);
             RemoveCharmedPlayers();
             RemoveEncounterFrame();
             zealotsKilled = 0;
@@ -170,8 +170,8 @@ public:
         void EnterCombat(Unit* /*victim*/)
         {
             me->CastStop();
-            me->DespawnCreaturesInArea(NPC_TWILIGHT_ZEALOT);
             me->DespawnCreaturesInArea(NPC_NETHER_ESSENCE_TRIGGER);
+            me->DespawnCreaturesInArea(NPC_TWILIGHT_ZEALOT);
 
             RehandleZealots();
 
@@ -189,12 +189,6 @@ public:
             if (NetherEssenceTrigger[0] && NetherEssenceTrigger[0] != NULL)
                 NetherEssenceTrigger[0]->CastSpell(NetherEssenceTrigger[0], SPELL_NETHERESSENCE_AURA, true);
 
-            for (uint8 i = 0; i <= RAID_MODE(1, 2); i++)
-            {
-                if (TwilightZealotsList[i] && TwilightZealotsList[i] != NULL)
-                    TwilightZealotsList[i]->SetInCombatWithZone();
-            }
-
             me->AddAura(SPELL_AURA_OF_ACCELERATION, me);
 
             Talk(SAY_AGGRO);
@@ -206,7 +200,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() || !CheckInRoom())
                 return;
 
             events.Update(diff);
@@ -223,6 +217,13 @@ public:
                         break;
                     }
                 }
+            }
+
+            // Safety distance check to prevent exit area
+            if (me->GetDistance2d(573.44f, 987.68f) > 50)
+            {
+                events.Reset();
+                EnterEvadeMode();
             }
 
             DoMeleeAttackIfReady();
@@ -569,7 +570,7 @@ public:
 class EvolutionTargetSelector : public std::unary_function<Unit *, bool>
 {
 public:
-    EvolutionTargetSelector(Creature* me, const Unit* victim) : _me(me), _victim(victim)
+    EvolutionTargetSelector(Unit* me, const Unit* victim) : _me(me), _victim(victim)
     {
     }
 
@@ -581,8 +582,11 @@ public:
 
     bool operator() (WorldObject* target)
     {
+        if (!target)
+            return false;
+
         // Filtering for Units
-        if (target->GetTypeId() == TYPEID_UNIT && (target->GetEntry() == NPC_TWILIGHT_ZEALOT_N || target->GetEntry() == NPC_TWILIGHT_ZEALOT_H) && !target->ToUnit()->HasAura(SPELL_TWILIGHT_EVOLUTION) && target->ToUnit()->isAlive())
+        if (target && target->GetTypeId() == TYPEID_UNIT && (target->GetEntry() == NPC_TWILIGHT_ZEALOT_N || target->GetEntry() == NPC_TWILIGHT_ZEALOT_H) && !target->ToUnit()->HasAura(SPELL_TWILIGHT_EVOLUTION) && target->ToUnit()->isAlive())
         {
             Map::PlayerList const &PlayerList = _me->GetMap()->GetPlayers();
             if (!PlayerList.isEmpty())
@@ -597,7 +601,7 @@ public:
         }
 
         // Filtering for Players
-        if (target->GetTypeId() == TYPEID_PLAYER && !target->ToUnit()->HasAura(SPELL_TWILIGHT_EVOLUTION))
+        if (target && target->GetTypeId() == TYPEID_PLAYER && !target->ToUnit()->HasAura(SPELL_TWILIGHT_EVOLUTION))
         {
             std::list<Unit*> targets;
             Trinity::AnyUnitInObjectRangeCheck u_check(target, 80.0f);
@@ -624,7 +628,7 @@ public:
         return true;
     }
 
-    Creature* _me;
+    Unit* _me;
     Unit const* _victim;
 };
 
@@ -643,10 +647,15 @@ public:
         {
             if (!targets.empty())
             {
-                targets.remove_if(EvolutionTargetSelector(GetCaster()->ToCreature(), GetCaster()->getVictim()));
-                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
-                targets.clear();
-                targets.push_back(target);
+                if (Unit* caster = GetCaster())
+                {
+                    targets.remove_if(EvolutionTargetSelector(caster->ToUnit(), caster->getVictim()));
+                    if (WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets))
+                    {
+                        targets.clear();
+                        targets.push_back(target);
+                    }
+                }
             }
         }
 
