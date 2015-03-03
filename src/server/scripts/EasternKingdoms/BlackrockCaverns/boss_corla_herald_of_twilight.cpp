@@ -116,8 +116,8 @@ public:
 
         void EnterEvadeMode()
         {
-            me->DespawnCreaturesInArea(NPC_TWILIGHT_ZEALOT);
             me->DespawnCreaturesInArea(NPC_NETHER_ESSENCE_TRIGGER);
+            me->DespawnCreaturesInArea(NPC_TWILIGHT_ZEALOT);
             RemoveCharmedPlayers();
             RemoveEncounterFrame();
             zealotsKilled = 0;
@@ -170,8 +170,8 @@ public:
         void EnterCombat(Unit* /*victim*/)
         {
             me->CastStop();
-            me->DespawnCreaturesInArea(NPC_TWILIGHT_ZEALOT);
             me->DespawnCreaturesInArea(NPC_NETHER_ESSENCE_TRIGGER);
+            me->DespawnCreaturesInArea(NPC_TWILIGHT_ZEALOT);
 
             RehandleZealots();
 
@@ -200,7 +200,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() || !CheckInRoom())
                 return;
 
             events.Update(diff);
@@ -217,6 +217,13 @@ public:
                         break;
                     }
                 }
+            }
+
+            // Safety distance check to prevent exit area
+            if (me->GetDistance2d(573.44f, 987.68f) > 50)
+            {
+                events.Reset();
+                EnterEvadeMode();
             }
 
             DoMeleeAttackIfReady();
