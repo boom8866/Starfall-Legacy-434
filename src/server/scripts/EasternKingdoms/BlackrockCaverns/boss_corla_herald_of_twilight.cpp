@@ -106,6 +106,7 @@ public:
 
         void Reset()
         {
+            _Reset();
             events.Reset();
             me->RemoveAllAuras();
             me->CastSpell(me, SPELL_DRAIN_ESSENCE_CHANNELING, true);
@@ -200,6 +201,7 @@ public:
             AddEncounterFrame();
 
             zealotsKilled = 0;
+            _EnterCombat();
         }
 
         void UpdateAI(uint32 diff)
@@ -235,7 +237,7 @@ public:
                 instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_ARRESTED_DEVELOPEMENT);
             if (instance)
                 instance->SetBossState(DATA_CORLA_HERALD_OF_TWILIGHT, DONE);
-            me->DespawnCreaturesInArea(NPC_NETHER_ESSENCE_TRIGGER, 300.0f);
+            me->DespawnCreaturesInArea(NPC_NETHER_ESSENCE_TRIGGER);
             me->DespawnCreaturesInArea(NPC_TWILIGHT_ZEALOT);
         }
 
@@ -638,21 +640,12 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            if (targets.empty())
-                return;
-
-            if (Unit* caster = GetCaster())
+            if (!targets.empty())
             {
-                if (!caster->ToCreature())
-                    return;
-
-                if (Unit* victim = caster->getVictim())
-                {
-                    targets.remove_if(EvolutionTargetSelector(caster->ToCreature(), victim));
-                    WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
-                    targets.clear();
-                    targets.push_back(target);
-                }
+                targets.remove_if(EvolutionTargetSelector(GetCaster()->ToCreature(), GetCaster()->getVictim()));
+                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                targets.clear();
+                targets.push_back(target);
             }
         }
 

@@ -997,8 +997,8 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                     ap += effectVengeance->GetAmount();
 
                 // Set limit
-                if (ap > int32(victim->GetStat(STAT_STAMINA) * 10 + victim->GetCreateHealth() * 0.10f))
-                    ap = int32(victim->GetStat(STAT_STAMINA) * 10 + victim->GetCreateHealth() * 0.10f);
+                if (ap > int32(victim->CountPctFromMaxHealth(10)))
+                    ap = int32(victim->CountPctFromMaxHealth(10));
 
                 // Cast effect & correct duration
                 if (victim->GetTypeId() == TYPEID_PLAYER)
@@ -1027,8 +1027,8 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                         ap += effectVengeance->GetAmount();
 
                     // Set limit
-                    if (ap > int32(victim->GetStat(STAT_STAMINA) * 10 + victim->GetCreateHealth() * 0.10f))
-                        ap = int32(victim->GetStat(STAT_STAMINA) * 10 + victim->GetCreateHealth() * 0.10f);
+                    if (ap > int32(victim->CountPctFromMaxHealth(10)))
+                        ap = int32(victim->CountPctFromMaxHealth(10));
 
                     // Cast effect & correct duration
                     if (victim->GetTypeId() == TYPEID_PLAYER)
