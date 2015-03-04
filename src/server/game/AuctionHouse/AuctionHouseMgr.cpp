@@ -152,6 +152,11 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction, SQLTransaction& 
             .AddItem(pItem)
             .SendMailTo(trans, MailReceiver(bidder, auction->bidder), auction, MAIL_CHECK_MASK_COPIED);
     }
+    else
+    {
+        // bidder doesn't exist, delete the item
+        sAuctionMgr->RemoveAItem(auction->itemGUIDLow, true);
+    }
 }
 
 void AuctionHouseMgr::SendAuctionSalePendingMail(AuctionEntry* auction, SQLTransaction& trans)
@@ -212,6 +217,11 @@ void AuctionHouseMgr::SendAuctionExpiredMail(AuctionEntry* auction, SQLTransacti
             .AddItem(pItem)
             .SendMailTo(trans, MailReceiver(owner, auction->owner), auction, MAIL_CHECK_MASK_COPIED, 0);
     }
+    else
+    {
+        // owner doesn't exist, delete the item
+        sAuctionMgr->RemoveAItem(auction->itemGUIDLow, true);
+    }
 }
 
 //this function sends mail to old bidder
@@ -259,6 +269,15 @@ void AuctionHouseMgr::SendAuctionCancelledToBidderMail(AuctionEntry* auction, SQ
 void AuctionHouseMgr::LoadAuctionItems()
 {
     uint32 oldMSTime = getMSTime();
+
+    // need to clear in case we are reloading
+    if (!mAitems.empty())
+    {
+        for (ItemMap::iterator itr = mAitems.begin(); itr != mAitems.end(); ++itr)
+            delete itr->second;
+
+        mAitems.clear();
+    }
 
     // data needs to be at first place for Item::LoadFromDB
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_AUCTION_ITEMS);
@@ -349,11 +368,18 @@ void AuctionHouseMgr::AddAItem(Item* it)
     mAitems[it->GetGUIDLow()] = it;
 }
 
-bool AuctionHouseMgr::RemoveAItem(uint32 id)
+bool AuctionHouseMgr::RemoveAItem(uint32 id, bool deleteItem)
 {
     ItemMap::iterator i = mAitems.find(id);
     if (i == mAitems.end())
         return false;
+
+    if (deleteItem)
+    {
+        SQLTransaction trans = SQLTransaction(nullptr);
+        i->second->FSetState(ITEM_REMOVED);
+        i->second->SaveToDB(trans);
+    }
 
     mAitems.erase(i);
     return true;
@@ -520,9 +546,16 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
     int loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
     int locdbc_idx = player->GetSession()->GetSessionDbcLocale();
 
+    time_t curTime = sWorld->GetGameTime();
+
     for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
     {
         AuctionEntry* Aentry = itr->second;
+
+        // Skip expired auctions
+        if (Aentry->expire_time < curTime)
+            continue;
+
         Item* item = sAuctionMgr->GetAItem(Aentry->itemGUIDLow);
         if (!item)
             continue;
@@ -688,28 +721,6 @@ bool AuctionEntry::LoadFromDB(Field* fields)
     startbid = fields[10].GetUInt32();
     deposit = fields[11].GetUInt32();
 
-    CreatureData const* auctioneerData = sObjectMgr->GetCreatureData(auctioneer);
-    if (!auctioneerData)
-    {
-        sLog->outError(LOG_FILTER_GENERAL, "Auction %u has not a existing auctioneer (GUID : %u)", Id, auctioneer);
-        return false;
-    }
-
-    CreatureTemplate const* auctioneerInfo = sObjectMgr->GetCreatureTemplate(auctioneerData->id);
-    if (!auctioneerInfo)
-    {
-        sLog->outError(LOG_FILTER_GENERAL, "Auction %u has not a existing auctioneer (GUID : %u Entry: %u)", Id, auctioneer, auctioneerData->id);
-        return false;
-    }
-
-    factionTemplateId = auctioneerInfo->faction;
-    auctionHouseEntry = AuctionHouseMgr::GetAuctionHouseEntry(factionTemplateId);
-    if (!auctionHouseEntry)
-    {
-        sLog->outError(LOG_FILTER_GENERAL, "Auction %u has auctioneer (GUID : %u Entry: %u) with wrong faction %u", Id, auctioneer, auctioneerData->id, factionTemplateId);
-        return false;
-    }
-
     // check if sold item exists for guid
     // and itemEntry in fact (GetAItem will fail if problematic in result check in AuctionHouseMgr::LoadAuctionItems)
     if (!sAuctionMgr->GetAItem(itemGUIDLow))
@@ -717,122 +728,6 @@ bool AuctionEntry::LoadFromDB(Field* fields)
         sLog->outError(LOG_FILTER_GENERAL, "Auction %u has not a existing item : %u", Id, itemGUIDLow);
         return false;
     }
-    return true;
-}
-
-void AuctionHouseMgr::DeleteExpiredAuctionsAtStartup()
-{
-    // Deletes expired auctions. Should be called at server start before loading auctions.
-
-    // DO NOT USE after auctions are already loaded since this deletes from the DB
-    //  and assumes the auctions HAVE NOT been loaded into a list or AuctionEntryMap yet
-
-    uint32 oldMSTime = getMSTime();
-    uint32 expirecount = 0;
-    time_t curTime = sWorld->GetGameTime();
-
-    // Query the DB to see if there are any expired auctions
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_EXPIRED_AUCTIONS);
-    stmt->setUInt32(0, (uint32)curTime+60);
-    PreparedQueryResult expAuctions = CharacterDatabase.Query(stmt);
-
-    if (!expAuctions)
-    {
-        sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> No expired auctions to delete");
-
-        return;
-    }
-
-    do
-    {
-        Field* fields = expAuctions->Fetch();
-
-        AuctionEntry* auction = new AuctionEntry();
-
-        // Can't use LoadFromDB() because it assumes the auction map is loaded
-        if (!auction->LoadFromFieldList(fields))
-        {
-            // For some reason the record in the DB is broken (possibly corrupt
-            //  faction info). Delete the object and move on.
-            delete auction;
-            continue;
-        }
-
-        SQLTransaction trans = CharacterDatabase.BeginTransaction();
-
-        if (auction->bidder==0)
-        {
-            // Cancel the auction, there was no bidder
-            sAuctionMgr->SendAuctionExpiredMail(auction, trans);
-        }
-        else
-        {
-            // Send the item to the winner and money to seller
-            sAuctionMgr->SendAuctionSuccessfulMail(auction, trans);
-            sAuctionMgr->SendAuctionWonMail(auction, trans);
-        }
-
-        // Call the appropriate AuctionHouseObject script
-        //  ** Do we need to do this while core is still loading? **
-        sScriptMgr->OnAuctionExpire(GetAuctionsMap(auction->factionTemplateId), auction);
-
-        // Delete the auction from the DB
-        auction->DeleteFromDB(trans);
-        CharacterDatabase.CommitTransaction(trans);
-
-        // Release memory
-        delete auction;
-        ++expirecount;
-
-    } while (expAuctions->NextRow());
-
-    sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Deleted %u expired auctions in %u ms", expirecount, GetMSTimeDiffToNow(oldMSTime));
-
-
-}
-
-bool AuctionEntry::LoadFromFieldList(Field* fields)
-{
-    // Loads an AuctionEntry item from a field list. Unlike "LoadFromDB()", this one
-    //  does not require the AuctionEntryMap to have been loaded with items. It simply
-    //  acts as a wrapper to fill out an AuctionEntry struct from a field list
-
-    Id = fields[0].GetUInt32();
-    auctioneer = fields[1].GetUInt32();
-    itemGUIDLow = fields[2].GetUInt32();
-    itemEntry = fields[3].GetUInt32();
-    itemCount = fields[4].GetUInt32();
-    owner = fields[5].GetUInt32();
-    buyout = fields[6].GetUInt32();
-    expire_time = fields[7].GetUInt32();
-    bidder = fields[8].GetUInt32();
-    bid = fields[9].GetUInt32();
-    startbid = fields[10].GetUInt32();
-    deposit = fields[11].GetUInt32();
-
-    CreatureData const* auctioneerData = sObjectMgr->GetCreatureData(auctioneer);
-    if (!auctioneerData)
-    {
-        sLog->outError(LOG_FILTER_GENERAL, "AuctionEntry::LoadFromFieldList() - Auction %u has not a existing auctioneer (GUID : %u)", Id, auctioneer);
-        return false;
-    }
-
-    CreatureTemplate const* auctioneerInfo = sObjectMgr->GetCreatureTemplate(auctioneerData->id);
-    if (!auctioneerInfo)
-    {
-        sLog->outError(LOG_FILTER_GENERAL, "AuctionEntry::LoadFromFieldList() - Auction %u has not a existing auctioneer (GUID : %u Entry: %u)", Id, auctioneer, auctioneerData->id);
-        return false;
-    }
-
-    factionTemplateId = auctioneerInfo->faction;
-    auctionHouseEntry = AuctionHouseMgr::GetAuctionHouseEntry(factionTemplateId);
-
-    if (!auctionHouseEntry)
-    {
-        sLog->outError(LOG_FILTER_GENERAL, "AuctionEntry::LoadFromFieldList() - Auction %u has auctioneer (GUID : %u Entry: %u) with wrong faction %u", Id, auctioneer, auctioneerData->id, factionTemplateId);
-        return false;
-    }
-
     return true;
 }
 

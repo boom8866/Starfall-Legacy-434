@@ -781,8 +781,11 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
     else
     {
         creature->Relocate(x, y, z, ang);
-        if (creature->IsVehicle())
-            creature->GetVehicleKit()->RelocatePassengers();
+        if (creature && creature->IsInWorld() && creature->IsVehicle())
+        {
+            if (Vehicle* vehicle = creature->GetVehicleKit())
+                vehicle->RelocatePassengers();
+        }
         creature->UpdateObjectVisibility(false);
         RemoveCreatureFromMoveList(creature);
     }

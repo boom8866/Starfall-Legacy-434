@@ -44,14 +44,14 @@ enum AuctionError
     ERR_AUCTION_HIGHER_BID          = 5,
     ERR_AUCTION_BID_INCREMENT       = 7,
     ERR_AUCTION_BID_OWN             = 10,
-    ERR_RESTRICTED_ACCOUNT          = 13,
+    ERR_AUCTION_RESTRICTED_ACCOUNT  = 13
 };
 
 enum AuctionAction
 {
-    AUCTION_SELL_ITEM = 0,
-    AUCTION_CANCEL = 1,
-    AUCTION_PLACE_BID = 2
+    AUCTION_SELL_ITEM   = 0,
+    AUCTION_CANCEL      = 1,
+    AUCTION_PLACE_BID   = 2
 };
 
 enum MailAuctionAnswers
@@ -91,7 +91,6 @@ struct AuctionEntry
     void DeleteFromDB(SQLTransaction& trans) const;
     void SaveToDB(SQLTransaction& trans) const;
     bool LoadFromDB(Field* fields);
-    bool LoadFromFieldList(Field* fields);
     std::string BuildAuctionMailSubject(MailAuctionAnswers response) const;
     static std::string BuildAuctionMailBody(uint32 lowGuid, uint32 bid, uint32 buyout, uint32 deposit, uint32 cut);
 
@@ -179,15 +178,12 @@ class AuctionHouseMgr
 
     public:
 
-        // Used primarily at server start to avoid loading a list of expired auctions
-        void DeleteExpiredAuctionsAtStartup();
-
         //load first auction items, because of check if item exists, when loading
         void LoadAuctionItems();
         void LoadAuctions();
 
         void AddAItem(Item* it);
-        bool RemoveAItem(uint32 id);
+        bool RemoveAItem(uint32 id, bool deleteItem = false);
 
         void Update();
 

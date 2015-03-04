@@ -16,7 +16,9 @@ INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, 
 SET @GUID  := 218338;
 SET @WP_ID := 2183380;
 UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
-UPDATE `creature_addon` SET `path_id` = 2183380 WHERE `guid` = 218338;
+DELETE FROM `creature_addon` WHERE `path_id` = '2183380';
+INSERT INTO `creature_addon` (`guid`, `path_id`) VALUES
+(218338, 2183380);
 DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
 INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
 (@WP_ID, 1, -743.771, 515.638, 67.208, 0),
@@ -80,7 +82,9 @@ INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, 
 SET @GUID  := 218422;
 SET @WP_ID := 2184220;
 UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
-UPDATE `creature_addon` SET `path_id` = 2184220 WHERE `guid` = 218422;
+DELETE FROM `creature_addon` WHERE `path_id` = '2184220';
+INSERT INTO `creature_addon` (`guid`, `path_id`) VALUES
+(218422, 2184220);
 DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
 INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
 (@WP_ID, 1, -507.548, 338.866, 95.649, 0),
@@ -98,7 +102,9 @@ INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, 
 SET @GUID  := 218415;
 SET @WP_ID := 2184150;
 UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
-UPDATE `creature_addon` SET `path_id` = 2184150 WHERE `guid` = 218415;
+DELETE FROM `creature_addon` WHERE `path_id` = '2184150';
+INSERT INTO `creature_addon` (`guid`, `path_id`) VALUES
+(218415, 2184450);
 DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
 INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
 (@WP_ID, 1, -614.053, 192.745, 81.752, 0),
@@ -153,7 +159,9 @@ INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, 
 SET @GUID  := 218440;
 SET @WP_ID := 2184400;
 UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
-UPDATE `creature_addon` SET `path_id` = 2184400 WHERE `guid` = 218440;
+DELETE FROM `creature_addon` WHERE `path_id` = '2184400';
+INSERT INTO `creature_addon` (`guid`, `path_id`) VALUES
+(218440, 2184400);
 DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
 INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
 (@WP_ID, 1, -337.544, 313.383, 83.733, 0),
@@ -192,7 +200,9 @@ INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, 
 SET @GUID  := 218496;
 SET @WP_ID := 2184960;
 UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
-UPDATE `creature_addon` SET `path_id` = 2184960 WHERE `guid` = 218496;
+DELETE FROM `creature_addon` WHERE `path_id` = '2184960';
+INSERT INTO `creature_addon` (`guid`, `path_id`) VALUES
+(218496, 2184960);
 DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
 INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
 (@WP_ID, 1, -320.947, 456.350, 89.144, 0),
@@ -886,7 +896,9 @@ INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, 
 SET @GUID  := 218457;
 SET @WP_ID := 2184570;
 UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
-UPDATE `creature_addon` SET `path_id` = 2184570 WHERE `guid` = 218457;
+DELETE FROM `creature_addon` WHERE `path_id` = '2184570';
+INSERT INTO `creature_addon` (`guid`, `path_id`) VALUES
+(218457, 2184570);
 DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
 INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
 (@WP_ID, 1, -303.748, 356.715, 75.890, 0),
