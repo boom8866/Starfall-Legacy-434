@@ -795,6 +795,15 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                 m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
                             }
                         }
+                        // Imp Firebolt
+                        if (m_spellInfo->Id == 3110)
+                        {
+                            if (m_caster->GetCharmerOrOwner())
+                            {
+                                float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
+                                damage += int32((spellpower * 0.329f) / 2);
+                            }
+                        }
                         break;
                     }
                     case 89751: // Felstorm
@@ -812,13 +821,21 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
-                    case 7814: // Lash of Pain
+                    case 7814:  // Lash of Pain
+                    {
+                        if (m_caster->GetCharmerOrOwner())
+                        {
+                            float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
+                            damage += int32((spellpower * 0.306f));
+                        }
+                        break;
+                    }
                     case 54049: // Shadow Bite
                     {
                         if (m_caster->GetCharmerOrOwner())
                         {
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
-                            damage += int32((spellpower * 0.4290f));
+                            damage += int32((spellpower * 0.614f));
                         }
                         break;
                     }
@@ -5265,31 +5282,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             {
                 if (AuraEffect const* rendAndTear = m_caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2859, 0))
                     AddPct(totalDamagePercentMod, rendAndTear->GetAmount());
-            }
-            break;
-        }
-        case SPELLFAMILY_PALADIN:
-        {
-            //Templar's Verdict
-            if (m_spellInfo->Id == 85256)
-            {
-                // Divine Purpose
-                if (m_caster->HasAura(90174))
-                {
-                    totalDamagePercentMod += 7.5f;
-                    break;
-                }
-                switch (m_caster->GetPower(POWER_HOLY_POWER))
-                {
-                    // 2 Holy Power
-                    case 1:
-                        totalDamagePercentMod += 3.0f;
-                        break;
-                    // 3 Holy Power
-                    case 2:
-                        totalDamagePercentMod += 7.5f;
-                        break;
-                }
             }
             break;
         }

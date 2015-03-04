@@ -6872,6 +6872,20 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (effIndex != 0)                       // effect 2 used by seal unleashing code
                         return false;
 
+                    if (procSpell)
+                    {
+                        switch (procSpell->Id)
+                        {
+                            case 879:   // Exorcism
+                            case 35395: // Crusader Strike
+                            case 85256: // Templar's Verdict
+                            case 20271: // Judgement
+                                break;
+                            default:
+                                return false;
+                        }
+                    }
+
                     triggered_spell_id = 31803;
 
                     // On target with 5 stacks of Censure direct damage is done
@@ -12752,6 +12766,39 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
 
         switch (spellProto->SpellFamilyName)
         {
+           case SPELLFAMILY_PALADIN:
+           {
+                switch(spellProto->Id)
+                {
+                    // Templar's Verdict
+                    case 85256:
+                    {
+                        int32 damage = CalculateDamage(BASE_ATTACK, true, true);
+                        // Divine Purpose
+                        if (HasAura(90174))
+                            damage *= 2.82f;
+                        else
+                        {
+                            switch (GetPower(POWER_HOLY_POWER))
+                            {
+                                case 1: // 1 Holy Power
+                                    damage *= 0.36f;
+                                    break;
+                                case 2: // 2 Holy Power
+                                    damage *= 1.08f;
+                                    break;
+                                case 3: // 3 Holy Power
+                                    damage *= 2.82f;
+                                    break;
+                            }
+                        }
+
+                        pdamage = damage;
+                        break;
+                    }
+                }
+                break;
+            }
             case SPELLFAMILY_ROGUE:
             {
                 switch (spellProto->Id)
