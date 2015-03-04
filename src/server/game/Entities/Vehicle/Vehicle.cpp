@@ -1013,7 +1013,9 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
             case 34487: // Razormane Raider
             case 34594: // Burning Blade Raider
             case 42918: // Zoltrik Drakebane
+            case 36292: // Forsaken Machinist
                 Passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
+                Passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 break;
             default:
                 break;
