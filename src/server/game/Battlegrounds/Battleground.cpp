@@ -416,6 +416,10 @@ inline void Battleground::_ProcessRessurect(uint32 diff)
             player->ResurrectPlayer(1.0f);
             player->CastSpell(player, 6962, true);
             player->CastSpell(player, SPELL_SPIRIT_HEAL_MANA, true);
+
+            if (player->getClass() == CLASS_HUNTER || player->getClass() == CLASS_WARLOCK)
+                player->ResummonTemporaryUnsummonedPet();
+
             sObjectAccessor->ConvertCorpseForPlayer(*itr);
         }
         m_ResurrectQueue.clear();

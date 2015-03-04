@@ -14309,6 +14309,7 @@ void Unit::setDeathState(DeathState s)
         ExitVehicle();                                      // Exit vehicle before calling RemoveAllControlled
                                                             // vehicles use special type of charm that is not removed by the next function
                                                             // triggering an assert
+
         UnsummonAllTotems();
         RemoveAllControlled();
         RemoveAllAurasOnDeath();
