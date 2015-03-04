@@ -2729,10 +2729,10 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_HAS_AURA: // 10
                 if (!unit || !unit->HasAura(reqValue))
                     return false;
-            /*case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_HAS_AURA_TYPE: // 11
+            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_HAS_AURA_TYPE: // 11
                 if (!unit || !unit->HasAuraType(AuraType(reqValue)))
                     return false;
-                break;*/
+                break;
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_ITEM_QUALITY_MIN: // 14
             {
                 // miscValue1 is itemid
