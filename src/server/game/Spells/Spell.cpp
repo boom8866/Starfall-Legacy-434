@@ -6637,6 +6637,12 @@ SpellCastResult Spell::CheckPower()
                     return SPELL_CAST_OK;
                 break;
             }
+            case 81170: // Ravage!
+            {
+                if (m_caster->HasAura(81022) || m_caster->HasAura(81017))
+                    return SPELL_CAST_OK;
+                break;
+            }
         }
         return SPELL_FAILED_NO_POWER;
     }
