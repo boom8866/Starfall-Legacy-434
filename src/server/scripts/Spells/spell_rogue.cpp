@@ -1080,11 +1080,14 @@ public:
         {
             if (Unit* caster = GetCaster())
             {
-                if (caster->GetTypeId() == TYPEID_PLAYER)
+                if (caster->isAlive())
                 {
-                    if (caster->ToPlayer()->HasSpellCooldown(SPELL_STEALTH_EFFECT))
-                        caster->ToPlayer()->RemoveSpellCooldown(SPELL_STEALTH_EFFECT, true);
-                    caster->CastSpell(caster, SPELL_STEALTH_EFFECT, true);
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (caster->ToPlayer()->HasSpellCooldown(SPELL_STEALTH_EFFECT))
+                            caster->ToPlayer()->RemoveSpellCooldown(SPELL_STEALTH_EFFECT, true);
+                        caster->CastSpell(caster, SPELL_STEALTH_EFFECT, true);
+                    }
                 }
             }
         }
