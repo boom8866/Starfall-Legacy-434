@@ -410,13 +410,13 @@ void Unit::Update(uint32 p_time)
         }
         else
         {
-            if (!GetMap()->IsRaidOrHeroicDungeon() && !GetMap()->IsDungeon())
+            if (!GetInstanceScript())
             {
                 if (m_CombatTimer <= p_time)
                 {
-                    if (!GetDamageTakenInPastSecs(10) && !GetDamageDoneInPastSecs(10) && !getVictim())
+                    if (!GetDamageTakenInPastSecs(4) && !GetDamageDoneInPastSecs(4) && !getVictim())
                         ClearInCombat();
-                    m_CombatTimer = 10000;
+                    m_CombatTimer = 5100;
                 }
                 else
                     m_CombatTimer -= p_time;
@@ -12766,39 +12766,6 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
 
         switch (spellProto->SpellFamilyName)
         {
-           case SPELLFAMILY_PALADIN:
-           {
-                switch(spellProto->Id)
-                {
-                    // Templar's Verdict
-                    case 85256:
-                    {
-                        int32 damage = CalculateDamage(BASE_ATTACK, true, true);
-                        // Divine Purpose
-                        if (HasAura(90174))
-                            damage *= 2.82f;
-                        else
-                        {
-                            switch (GetPower(POWER_HOLY_POWER))
-                            {
-                                case 1: // 1 Holy Power
-                                    damage *= 0.36f;
-                                    break;
-                                case 2: // 2 Holy Power
-                                    damage *= 1.08f;
-                                    break;
-                                case 3: // 3 Holy Power
-                                    damage *= 2.82f;
-                                    break;
-                            }
-                        }
-
-                        pdamage = damage;
-                        break;
-                    }
-                }
-                break;
-            }
             case SPELLFAMILY_ROGUE:
             {
                 switch (spellProto->Id)
@@ -12808,15 +12775,12 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                         if (Player* player = ToPlayer())
                         {
                             float mod = 1.0f;
-                            int32 add = 1115;
                             Item* mainHand = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
                             if (mainHand && (mainHand->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER))
-                            {
                                 mod = 1.447f;
-                                add = 1467;
-                            }
+
                             int32 weaponDmg = CalculateDamage(BASE_ATTACK, true, false) * (1.9f * mod);
-                            pdamage = uint32(weaponDmg + add);
+                            pdamage = uint32(weaponDmg);
                         }
                         break;
                     }

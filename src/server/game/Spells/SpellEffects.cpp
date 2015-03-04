@@ -5285,6 +5285,34 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_PALADIN:
+        {
+            //Templar's Verdict
+            if (m_spellInfo->Id == 85256)
+            {
+                // Divine Purpose
+                if (m_caster->HasAura(90174))
+                {
+                    totalDamagePercentMod += totalDamagePercentMod * 7.82f;
+                    break;
+                }
+                switch (m_caster->GetPower(POWER_HOLY_POWER))
+                {
+                    case 0: // 1 Holy Power
+                        totalDamagePercentMod += totalDamagePercentMod * 0.36f;
+                        break;
+                    case 1: // 2 Holy Power
+                        totalDamagePercentMod += totalDamagePercentMod * 3.0f;
+                        break;
+                    case 2: // 3 Holy Power
+                        totalDamagePercentMod += totalDamagePercentMod * 7.82f;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            break;
+        }
         case SPELLFAMILY_HUNTER:
         {
             switch (m_spellInfo->Id)
