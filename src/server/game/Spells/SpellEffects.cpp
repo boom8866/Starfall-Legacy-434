@@ -3641,6 +3641,25 @@ void Spell::EffectCreateItem2 (SpellEffIndex effIndex)
         else
             player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell);          // create some random items
     }
+
+    // Jewelcrafting Daily Quests
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        switch (m_spellInfo->Id)
+        {
+            case 73227: // Solid Zephyrite
+                m_caster->ToPlayer()->KilledMonsterCredit(39221);
+                break;
+            case 73274: // Jagged Jasper
+                m_caster->ToPlayer()->KilledMonsterCredit(39223);
+                break;
+            case 73243: // Timeless Nightstone
+                m_caster->ToPlayer()->KilledMonsterCredit(39222);
+                break;
+            default:
+                break;
+        }
+    }
     // TODO: ExecuteLogEffectCreateItem(i, m_spellInfo->Effects[i].ItemType);
 }
 
