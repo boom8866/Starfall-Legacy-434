@@ -12822,39 +12822,42 @@ InventoryResult Player::CanUseItem(ItemTemplate const* proto) const
 {
     // Used by group, function NeedBeforeGreed, to know if a prototype can be used by a player
 
-    if (proto)
+    if (!proto)
+        return EQUIP_ERR_ITEM_NOT_FOUND;
+
+    if ((proto->Flags2 & ITEM_FLAGS_EXTRA_HORDE_ONLY) && GetTeam() != HORDE)
+        return EQUIP_ERR_CANT_EQUIP_EVER;
+
+    if ((proto->Flags2 & ITEM_FLAGS_EXTRA_ALLIANCE_ONLY) && GetTeam() != ALLIANCE)
+        return EQUIP_ERR_CANT_EQUIP_EVER;
+
+    if ((proto->AllowableClass & getClassMask()) == 0 || (proto->AllowableRace & getRaceMask()) == 0)
+        return EQUIP_ERR_CANT_EQUIP_EVER;
+
+    if (proto->RequiredSkill != 0)
     {
-        if ((proto->Flags2 & ITEM_FLAGS_EXTRA_HORDE_ONLY) && GetTeam() != HORDE)
-            return EQUIP_ERR_CANT_EQUIP_EVER;
-
-        if ((proto->Flags2 & ITEM_FLAGS_EXTRA_ALLIANCE_ONLY) && GetTeam() != ALLIANCE)
-            return EQUIP_ERR_CANT_EQUIP_EVER;
-
-        if ((proto->AllowableClass & getClassMask()) == 0 || (proto->AllowableRace & getRaceMask()) == 0)
-            return EQUIP_ERR_CANT_EQUIP_EVER;
-
-        if (proto->RequiredSkill != 0)
-        {
-            if (GetSkillValue(proto->RequiredSkill) == 0)
-                return EQUIP_ERR_PROFICIENCY_NEEDED;
-            else if (GetSkillValue(proto->RequiredSkill) < proto->RequiredSkillRank)
-                return EQUIP_ERR_CANT_EQUIP_SKILL;
-        }
-
-        if (proto->RequiredSpell != 0 && !HasSpell(proto->RequiredSpell))
+        if (GetSkillValue(proto->RequiredSkill) == 0)
             return EQUIP_ERR_PROFICIENCY_NEEDED;
-
-        if (getLevel() < proto->RequiredLevel)
-            return EQUIP_ERR_CANT_EQUIP_LEVEL_I;
-
-        // If World Event is not active, prevent using event dependant items
-        if (proto->HolidayId && !IsHolidayActive((HolidayIds)proto->HolidayId))
-            return EQUIP_ERR_CLIENT_LOCKED_OUT;
-
-        return EQUIP_ERR_OK;
+        else if (GetSkillValue(proto->RequiredSkill) < proto->RequiredSkillRank)
+            return EQUIP_ERR_CANT_EQUIP_SKILL;
     }
 
-    return EQUIP_ERR_ITEM_NOT_FOUND;
+    if (proto->RequiredSpell != 0 && !HasSpell(proto->RequiredSpell))
+        return EQUIP_ERR_PROFICIENCY_NEEDED;
+
+    if (getLevel() < proto->RequiredLevel)
+        return EQUIP_ERR_CANT_EQUIP_LEVEL_I;
+
+    // If World Event is not active, prevent using event dependant items
+    if (proto->HolidayId && !IsHolidayActive((HolidayIds)proto->HolidayId))
+        return EQUIP_ERR_CLIENT_LOCKED_OUT;
+
+    // learning (recipes, mounts, pets, etc.)
+    if (proto->Spells[0].SpellId == 483 || proto->Spells[0].SpellId == 55884)
+        if (HasSpell(proto->Spells[1].SpellId))
+            return EQUIP_ERR_OK;
+
+    return EQUIP_ERR_OK;
 }
 
 InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObject const* lootedObject) const
