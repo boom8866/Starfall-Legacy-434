@@ -2157,8 +2157,6 @@ public:
                             me->setFaction(2339);
                             me->CombatStop();
                             me->ClearInCombat();
-                            me->getHostileRefManager().clearReferences();
-                            me->getThreatManager().clearReferences();
                             Talk(5);
                             me->HandleEmoteCommand(EMOTE_ONESHOT_BEG);
                             events.CancelEvent(EVENT_CHECK_HP);
@@ -4271,8 +4269,6 @@ public:
                             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
                             me->ClearInCombat();
                             me->AttackStop();
-                            me->getHostileRefManager().clearReferences();
-                            me->getThreatManager().clearReferences();
                             me->GetMotionMaster()->MovePoint(POINT_EVADE, -3202.53f, -5020.91f, 119.89f);
                             events.CancelEvent(EVENT_CHECK_COMBAT);
                             break;
@@ -16157,7 +16153,6 @@ public:
                         RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 100.0f, true))
                         {
-                            me->getThreatManager().clearReferences();
                             DoCast(target, SPELL_CHARGE);
                             me->AddThreat(target, 100);
                         }
@@ -16335,7 +16330,6 @@ public:
                         RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 100.0f, true))
                         {
-                            me->getThreatManager().clearReferences();
                             DoCast(target, SPELL_CHARGE);
                             me->AddThreat(target, 100);
                         }

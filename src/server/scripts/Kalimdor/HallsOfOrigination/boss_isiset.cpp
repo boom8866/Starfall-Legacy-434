@@ -85,7 +85,13 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            instance->SetBossState(DATA_ISISET, IN_PROGRESS);
+            _EnterCombat();
+            isPhased = false;
+            astralRain = false;
+            veilSky = false;
+            celestialCall = false;
+            me->SetVisible(true);
+            Phase = 0;
             Talk(SAY_AGGRO);
 
             // Init events for phase one

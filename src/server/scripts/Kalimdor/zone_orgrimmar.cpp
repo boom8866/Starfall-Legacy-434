@@ -408,8 +408,6 @@ public:
             me->setFaction(125);
             me->CombatStop();
             me->CastStop();
-            me->getHostileRefManager().clearReferences();
-            me->getThreatManager().clearReferences();
             me->SetHealth(me->GetMaxHealth());
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             _EnterEvadeMode();
@@ -465,8 +463,6 @@ public:
                             me->setFaction(125);
                             me->CombatStop();
                             me->CastStop();
-                            me->getHostileRefManager().clearReferences();
-                            me->getThreatManager().clearReferences();
                             me->SetHealth(me->GetMaxHealth());
                             Talk(2);
                             me->DespawnOrUnsummon(8000);
@@ -570,8 +566,6 @@ public:
             me->setFaction(2160);
             me->CombatStop();
             me->CastStop();
-            me->getHostileRefManager().clearReferences();
-            me->getThreatManager().clearReferences();
             me->SetHealth(me->GetMaxHealth());
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             _EnterEvadeMode();
@@ -605,8 +599,6 @@ public:
                         me->setFaction(125);
                         me->CombatStop();
                         me->CastStop();
-                        me->getHostileRefManager().clearReferences();
-                        me->getThreatManager().clearReferences();
                         me->SetHealth(me->GetMaxHealth());
                         Talk(5);
                         TalkWithDelay(7000, 6);

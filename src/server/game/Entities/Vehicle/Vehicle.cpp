@@ -678,25 +678,26 @@ void Vehicle::RelocatePassengers()
     {
         if (Unit* passenger = ObjectAccessor::GetUnit(*GetBase(), itr->second.Passenger.Guid))
         {
-            ASSERT(passenger->IsInWorld());
-
-            float px, py, pz, po;
-            passenger->m_movementInfo.t_pos.GetPosition(px, py, pz, po);
-            CalculatePassengerPosition(px, py, pz, po);
-
-            passenger->UpdatePosition(px, py, pz, po);
-            // Special switch to set fixed orientation for specific creature passengers
-            // *NOTE*: You also need an event that trigger the RelocatePassenger function
-            // to make it works correctly!
-            if (passenger->GetTypeId() == TYPEID_UNIT)
+            if (passenger && passenger->IsInWorld())
             {
-                switch (passenger->GetEntry())
+                float px, py, pz, po;
+                passenger->m_movementInfo.t_pos.GetPosition(px, py, pz, po);
+                CalculatePassengerPosition(px, py, pz, po);
+
+                passenger->UpdatePosition(px, py, pz, po);
+                // Special switch to set fixed orientation for specific creature passengers
+                // *NOTE*: You also need an event that trigger the RelocatePassenger function
+                // to make it works correctly!
+                if (passenger->GetTypeId() == TYPEID_UNIT)
                 {
-                    case 49820: // Deathwing
-                        passenger->SetFacingTo(0.26f);
-                        break;
-                    default:
-                        break;
+                    switch (passenger->GetEntry())
+                    {
+                        case 49820: // Deathwing
+                            passenger->SetFacingTo(0.26f);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
