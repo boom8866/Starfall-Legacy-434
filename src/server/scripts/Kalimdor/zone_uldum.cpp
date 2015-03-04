@@ -6277,7 +6277,8 @@ public:
 
         enum eventId
         {
-            EVENT_CHECK_PIVOT   = 1
+            EVENT_CHECK_PIVOT   = 1,
+            EVENT_KILL_SELF
         };
 
         enum npcId
@@ -6314,7 +6315,14 @@ public:
                             if (roll_chance_f(75.0f))
                                 me->PlayDirectSound(22458);
                             me->PlayDirectSound(22456);
+                            events.ScheduleEvent(EVENT_KILL_SELF, 3000);
                         }
+                        break;
+                    }
+                    case EVENT_KILL_SELF:
+                    {
+                        me->Kill(me, false);
+                        events.CancelEvent(EVENT_KILL_SELF);
                         break;
                     }
                     default:
