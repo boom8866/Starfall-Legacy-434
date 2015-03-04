@@ -705,8 +705,8 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
     {
         if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
         {
-            // Exclude first tick or deadly poison triggering (Exclude PvE things to prevent problems with bosses)
-            if (m_tickNumber > 0 || m_spellInfo->Id == 2818 || m_spellInfo->SpellFamilyName == SPELLFAMILY_GENERIC)
+            // Exclude first tick or deadly poison/ignite triggering (Exclude PvE things to prevent problems with bosses)
+            if (m_tickNumber > 0 || m_spellInfo->Id == 2818 || m_spellInfo->Id == 12654 || m_spellInfo->SpellFamilyName == SPELLFAMILY_GENERIC)
                 return;
         }
 
@@ -1869,8 +1869,16 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
             case FORM_FLIGHT:
             case FORM_MOONKIN:
             {
-                // remove movement affects
-                target->RemoveMovementImpairingAuras();
+                // remove slow effects
+                if (target->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED))
+                    target->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+
+                // Disentanglement
+                if (target->HasAura(96429))
+                {
+                    if (target->HasAuraType(SPELL_AURA_MOD_ROOT))
+                        target->RemoveAurasByType(SPELL_AURA_MOD_ROOT);
+                }
 
                 // and polymorphic affects
                 if (target->IsPolymorphed())
@@ -1956,8 +1964,17 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
             if (target->getClass() == CLASS_DRUID)
             {
                 target->setPowerType(POWER_MANA);
-                // Remove movement impairing effects also when shifting out
-                target->RemoveMovementImpairingAuras();
+
+                // Remove slow effects
+                if (target->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED))
+                    target->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+
+                // Disentanglement
+                if (target->HasAura(96429))
+                {
+                    if (target->HasAuraType(SPELL_AURA_MOD_ROOT))
+                        target->RemoveAurasByType(SPELL_AURA_MOD_ROOT);
+                }
             }
         }
 

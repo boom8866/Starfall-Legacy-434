@@ -410,13 +410,13 @@ void Unit::Update(uint32 p_time)
         }
         else
         {
-            if (!GetMap()->IsRaidOrHeroicDungeon() && !GetMap()->IsDungeon())
+            if (!GetInstanceScript())
             {
                 if (m_CombatTimer <= p_time)
                 {
-                    if (!GetDamageTakenInPastSecs(10) && !GetDamageDoneInPastSecs(10) && !getVictim())
+                    if (!GetDamageTakenInPastSecs(4) && !GetDamageDoneInPastSecs(4) && !getVictim())
                         ClearInCombat();
-                    m_CombatTimer = 10000;
+                    m_CombatTimer = 5100;
                 }
                 else
                     m_CombatTimer -= p_time;
@@ -6872,6 +6872,20 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (effIndex != 0)                       // effect 2 used by seal unleashing code
                         return false;
 
+                    if (procSpell)
+                    {
+                        switch (procSpell->Id)
+                        {
+                            case 879:   // Exorcism
+                            case 35395: // Crusader Strike
+                            case 85256: // Templar's Verdict
+                            case 20271: // Judgement
+                                break;
+                            default:
+                                return false;
+                        }
+                    }
+
                     triggered_spell_id = 31803;
 
                     // On target with 5 stacks of Censure direct damage is done
@@ -12761,15 +12775,12 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                         if (Player* player = ToPlayer())
                         {
                             float mod = 1.0f;
-                            int32 add = 1115;
                             Item* mainHand = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
                             if (mainHand && (mainHand->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER))
-                            {
                                 mod = 1.447f;
-                                add = 1467;
-                            }
+
                             int32 weaponDmg = CalculateDamage(BASE_ATTACK, true, false) * (1.9f * mod);
-                            pdamage = uint32(weaponDmg + add);
+                            pdamage = uint32(weaponDmg);
                         }
                         break;
                     }
@@ -14298,6 +14309,7 @@ void Unit::setDeathState(DeathState s)
         ExitVehicle();                                      // Exit vehicle before calling RemoveAllControlled
                                                             // vehicles use special type of charm that is not removed by the next function
                                                             // triggering an assert
+
         UnsummonAllTotems();
         RemoveAllControlled();
         RemoveAllAurasOnDeath();

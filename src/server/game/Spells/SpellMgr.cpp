@@ -128,6 +128,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Seduction
             else if (spellproto->SpellFamilyFlags[1] & 0x10000000)
                 return DIMINISHING_FEAR;
+            // Curse of Exhaustion
+            else if (spellproto->Id == 18223)
+                return DIMINISHING_ENTRAPMENT;
             break;
         }
         case SPELLFAMILY_DRUID:
@@ -3992,6 +3995,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             // Mage
             case 79684: // Arcane Missiles Proc
                 spellInfo->ProcChance = 40.0f;
+                break;
+            case 12654: // Ignite
+                spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 break;
             case 5143: // Arcane Missiles
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;

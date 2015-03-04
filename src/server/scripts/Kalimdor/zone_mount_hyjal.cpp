@@ -1046,6 +1046,11 @@ public:
             if (who->GetTypeId() != TYPEID_PLAYER || !apply)
                 return;
 
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_INCREASE_SPEED, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED, true);
+            me->ApplySpellImmune(0, IMMUNITY_ID, 32223, true);  // Crusader Aura
+
             if (me->GetZoneId() == ZONE_ID_MOUNT_HYJAL)
             {
                 SetNextWaypoint(4, false, false);

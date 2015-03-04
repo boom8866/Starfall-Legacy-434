@@ -1963,7 +1963,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             {
                 if (Player* player = caster->ToPlayer())
                 {
-                    if (GetSpellInfo()->IsPeriodicDamage() && GetSpellInfo()->SpellFamilyName == SPELLFAMILY_MAGE && !(GetSpellInfo()->GetExplicitTargetMask() & TARGET_FLAG_DEST_LOCATION))
+                    if (GetSpellInfo()->IsPeriodicDamage() && GetSpellInfo()->SpellFamilyName == SPELLFAMILY_MAGE && !(GetSpellInfo()->GetExplicitTargetMask() & TARGET_FLAG_DEST_LOCATION) && GetSpellInfo()->SchoolMask & SPELL_SCHOOL_MASK_FIRE)
                     {
                         if (apply)
                         {
@@ -1990,9 +1990,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 player->CastCustomSpell(player, 83582, &bp, NULL, NULL, true);
                             }
                             if (Aura* pyromaniac = player->GetAura(83582, player->GetGUID()))
-                                pyromaniac->SetDuration(10*IN_MILLISECONDS);
+                                pyromaniac->SetDuration(15*IN_MILLISECONDS);
                         }
-                        else
+
+                        if (player->m_pyromaniacCount <= 2)
                             player->RemoveAurasDueToSpell(83582);
                     }
                 }

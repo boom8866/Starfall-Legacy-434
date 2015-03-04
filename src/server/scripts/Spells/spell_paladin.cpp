@@ -1110,6 +1110,7 @@ class spell_pal_templar_s_verdict : public SpellScriptLoader
                         float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                         amount = amount * (0.168f + (0.021f * masteryPoints));
                     }
+
                     caster->CastCustomSpell(GetHitUnit(), 96172, &amount, NULL, NULL, true, NULL, NULL, caster->GetGUID());
                 }
             }
