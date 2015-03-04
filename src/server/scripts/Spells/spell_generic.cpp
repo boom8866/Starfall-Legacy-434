@@ -11251,7 +11251,7 @@ class spell_place_drake_skull : public SpellScriptLoader
                             return SPELL_FAILED_NOT_READY;
 
                         caster->SummonCreature(NPC_ENTRY_ARONUS, 3750.23f, -3266.52f, 991.91f, 0.98f, TEMPSUMMON_TIMED_DESPAWN, 200000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
-                        caster->ToPlayer()->AddSpellCooldown(76559, 0, time(NULL) + 180000);
+                        caster->ToPlayer()->AddSpellCooldown(76559, 0, time(NULL) + 180);
                         return SPELL_CAST_OK;
                     }
                 }
