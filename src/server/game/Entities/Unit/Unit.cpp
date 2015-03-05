@@ -6880,6 +6880,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                             case 35395: // Crusader Strike
                             case 85256: // Templar's Verdict
                             case 20271: // Judgement
+                            case 24275: // Hammer of Wrath
+                            case 53595: // Hammer of the Righteous
+                            case 53600: // Shield of the Righteous
                                 break;
                             default:
                                 return false;
