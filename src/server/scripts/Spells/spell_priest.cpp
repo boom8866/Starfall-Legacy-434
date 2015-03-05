@@ -642,20 +642,15 @@ class spell_pri_power_word_shield : public SpellScriptLoader
                             }
                         }
                     }
-
-                    // Glyph of Power Word: Shield
-                    if (caster->HasAura(SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD))
-                    {
-                        int32 bp = amount * 0.20f;
-                        if (Unit* target = GetTarget())
-                            caster->CastCustomSpell(target, SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD_TRIG, &bp, NULL, NULL, true, NULL);
-                    }
                 }
             }
 
             void ReflectDamage(AuraEffect* aurEff, DamageInfo& dmgInfo, uint32& absorbAmount)
             {
                 Unit* target = GetTarget();
+                if (!target)
+                    return;
+
                 if (dmgInfo.GetAttacker() == target)
                     return;
 
@@ -669,10 +664,27 @@ class spell_pri_power_word_shield : public SpellScriptLoader
                 }
             }
 
+            void HandleAfterApply(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetTarget();
+
+                if (caster && target && GetEffect(EFFECT_0))
+                {
+                    // Glyph of Power Word Shield
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD, EFFECT_0, caster->GetGUID()))
+                    {
+                        int32 bp0 = CalculatePct(GetEffect(EFFECT_0)->GetAmount(), aurEff->GetAmount());
+                        caster->CastCustomSpell(target, SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD_TRIG, &bp0, NULL, NULL, true);
+                    }
+                }
+            }
+
             void Register()
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_power_word_shield_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
                 AfterEffectAbsorb += AuraEffectAbsorbFn(spell_pri_power_word_shield_AuraScript::ReflectDamage, EFFECT_0);
+                AfterEffectApply += AuraEffectApplyFn(spell_pri_power_word_shield_AuraScript::HandleAfterApply, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
