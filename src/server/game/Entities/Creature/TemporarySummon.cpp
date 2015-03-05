@@ -41,6 +41,28 @@ void TempSummon::Update(uint32 diff)
 {
     Creature::Update(diff);
 
+    // This check will search for summoner on every update, if the summoner is too much distant or
+    // not in world anymore, it will be instantly unsummoned!
+    if (Unit* summoner = GetSummoner())
+    {
+        if (summoner->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (!summoner->IsWithinDist(this, 300.0f))
+            {
+                UnSummon();
+                return;
+            }
+        }
+    }
+    else
+    {
+        if (IsInWorld())
+        {
+            UnSummon();
+            return;
+        }
+    }
+
     if (m_deathState == DEAD)
     {
         UnSummon();
