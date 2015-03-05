@@ -240,10 +240,10 @@ bool TargetedMovementGeneratorMedium<T,D>::DoUpdate(T* owner, uint32 time_diff)
     if (i_recalculateTravel || targetMoved)
         _setTargetLocation(owner, targetMoved);
 
-    if (owner->movespline->Finalized())
+    if (owner && owner->IsInWorld() && owner->movespline->Finalized())
     {
         static_cast<D*>(this)->MovementInform(owner);
-        if (i_angle == 0.f && !owner->HasInArc(0.01f, i_target.getTarget()))
+        if (i_angle == 0.f && i_target.getTarget() && !owner->HasInArc(0.01f, i_target.getTarget()))
             owner->SetInFront(i_target.getTarget());
 
         if (!i_targetReached)

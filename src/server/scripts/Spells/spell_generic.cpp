@@ -12643,7 +12643,7 @@ public:
 
         void Register()
         {
-            AfterHit += SpellHitFn(spell_racial_will_of_the_forsaken_SpellScript::HandleCooldownShare);
+            OnCast += SpellCastFn(spell_racial_will_of_the_forsaken_SpellScript::HandleCooldownShare);
         }
     };
 

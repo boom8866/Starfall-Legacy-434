@@ -1988,7 +1988,10 @@ void Player::setDeathState(DeathState s)
                         if (Pet* pet = ToPlayer()->GetPet())
                         {
                             if (pet->isAlive())
+                            {
+                                pet->CombatStop();
                                 ToPlayer()->TemporaryUnsummonPet();
+                            }
                             else
                                 RemoveCurrentPet();
                         }
