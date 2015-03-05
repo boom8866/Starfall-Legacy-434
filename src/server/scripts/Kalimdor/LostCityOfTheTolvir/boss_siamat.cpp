@@ -452,13 +452,13 @@ class npc_lct_minion_of_siamat : public CreatureScript
             {
                 if (me->HealthBelowPct(6) && _tempest)
                 {
-                    me->CastStop();
-                    me->RemoveAllAuras();
-                    DoCastAOE(SPELL_TEMPEST_STORM);
-                    DoCastAOE(SPELL_TRANSFORM);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE);
                     me->AttackStop();
                     me->SetReactState(REACT_PASSIVE);
+                    me->CastStop();
+                    me->RemoveAllAuras();
+                    DoCast(me, SPELL_TEMPEST_STORM, true);
+                    DoCast(me, SPELL_TRANSFORM);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                     events.CancelEvent(EVENT_CHAIN_LIGHTNING);
                     events.ScheduleEvent(EVENT_MOVE_ARROUND, 4000);
                     _tempest = false;
