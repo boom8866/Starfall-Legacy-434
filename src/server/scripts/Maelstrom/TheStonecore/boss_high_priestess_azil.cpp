@@ -836,7 +836,8 @@ public:
         void SetTarget(WorldObject*& target)
         {
             if (Unit* caster = GetCaster())
-                target = caster->FindNearestCreature(NPC_SEISMIC_SHARD, 100.0f);
+                if (Creature* shard = caster->FindNearestCreature(NPC_SEISMIC_SHARD, 100.0f))
+                    target = shard;
         }
 
         void Register()
