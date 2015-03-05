@@ -1860,12 +1860,9 @@ class spell_pri_mind_control : public SpellScriptLoader
                     {
                         if (target->GetTypeId() != TYPEID_PLAYER)
                         {
-                            if (target->GetTypeId() != TYPEID_PLAYER)
-                            {
-                                target->GetMotionMaster()->Clear();
-                                target->AttackStop();
-                                target->ClearInCombat();
-                            }
+                            target->GetMotionMaster()->Clear();
+                            target->AttackStop();
+                            target->ClearInCombat();
                         }
                     }
                 }
