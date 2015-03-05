@@ -40,8 +40,10 @@ enum CreatureIds
     NPC_BOUNCER_SPIKE_SMALL         = 42201,
 
     // High Priestess Azil
-    NPC_WORLD_TRIGGER               = 22515,
-    NPC_GRAVITY_WELL                = 42499,
+    NPC_DEVOUT_FOLLOWER_N           = 42428,
+    NPC_DEVOUT_FOLLOWER_H           = 49648,
+    NPC_SEISMIC_SHARD               = 42355,
+    NPC_WORLDTRIGGER                = 22515,
 
     // Trash mobs
     NPC_STONECORE_BERSERKER         = 43430,
