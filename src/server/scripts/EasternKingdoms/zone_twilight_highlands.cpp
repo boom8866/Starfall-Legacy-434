@@ -4251,7 +4251,7 @@ public:
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_IMMUNE_TO_PC);
                                 me->Attack(narkrall, true);
                                 me->SetInCombatWith(narkrall);
-                                me->AddThreat(narkrall, 100);
+                                me->AddThreat(narkrall, 1.0f);
                                 events.CancelEvent(EVENT_SEARCH_FOR_NARKRALL);
                                 break;
                             }
@@ -18375,7 +18375,7 @@ public:
                         if (Unit* victim = me->getVictim())
                         {
                             DoCast(victim, SPELL_CHARGE);
-                            victim->AddThreat(me, 100);
+                            victim->AddThreat(me, 1.0f);
                         }
                         events.CancelEvent(EVENT_CHARGE);
                         break;

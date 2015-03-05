@@ -43,8 +43,7 @@ void TempSummon::Update(uint32 diff)
 
     // This check will search for summoner on every update, if the summoner is too much distant or
     // not in world anymore, it will be instantly unsummoned!
-    Unit* summoner = GetSummoner();
-    if (summoner)
+    if (Unit* summoner = GetSummoner())
     {
         if (summoner->GetTypeId() == TYPEID_PLAYER)
         {
