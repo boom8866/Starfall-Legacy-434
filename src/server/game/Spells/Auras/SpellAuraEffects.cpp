@@ -7220,6 +7220,33 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 
     caster->DealDamage(target, damage, &cleanDamage, DOT, GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), true);
 
+    // This will handle proc spells from absorbed DoT damage
+    if (!damage)
+    {
+        // Rage from absorbed damage
+        if (cleanDamage.absorbed_damage && target->getPowerType() == POWER_RAGE)
+            target->RewardRage(cleanDamage.absorbed_damage, false);
+
+        switch (m_spellInfo->Id)
+        {
+            case 15407: // Mind Flay
+            {
+                // Dark Evangelism Handling
+                if (caster->HasAura(81659))
+                    caster->CastSpell(caster, 87117, true);
+                else if (caster->HasAura(81662))
+                    caster->CastSpell(caster, 87118, true);
+
+                if (Aura* evangelism = caster->GetAura(87154))
+                    evangelism->RefreshDuration();
+                else
+                    caster->CastSpell(caster, 87154, true);
+            }
+            default:
+                break;
+        }
+    }
+
     // Bane of Havoc
     if (caster->m_havocTarget != NULL && caster->GetTypeId() == TYPEID_PLAYER && GetSpellInfo()->Id != 85455 && caster->m_havocTarget)
     {

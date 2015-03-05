@@ -130,7 +130,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
                 return DIMINISHING_FEAR;
             // Curse of Exhaustion
             else if (spellproto->Id == 18223)
-                return DIMINISHING_ENTRAPMENT;
+                return DIMINISHING_LIMITONLY;
             break;
         }
         case SPELLFAMILY_DRUID:

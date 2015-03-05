@@ -808,6 +808,20 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             {
                 switch (spellProto->Id)
                 {
+                    case 585:   // Smite
+                    {
+                        // Dark Evangelism Handling
+                        if (HasAura(81659))
+                            CastSpell(this, 87117, true);
+                        else if (HasAura(81662))
+                            CastSpell(this, 87118, true);
+
+                        if (Aura* evangelism = GetAura(87154))
+                            evangelism->RefreshDuration();
+                        else
+                            CastSpell(this, 87154, true);
+                        break;
+                    }
                     case 55090: // Scourge Strike
                     {
                         int32 bp0 = cleanDamage->absorbed_damage;
@@ -6331,7 +6345,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                             if (Aura* evangelism = GetAura(87154))
                                 evangelism->RefreshDuration();
                             else
-                                AddAura(87154, this);
+                                CastSpell(this, 87154, true);
                             break;
                         }
                         case 585:   // Smite
@@ -6344,7 +6358,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                             if (Aura* evangelism = GetAura(87154))
                                 evangelism->RefreshDuration();
                             else
-                                AddAura(87154, this);
+                                CastSpell(this, 87154, true);
                             break;
                         }
                     }

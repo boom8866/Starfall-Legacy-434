@@ -681,39 +681,30 @@ public:
 
         float x, y, z;
 
-        bool Load()
-        {
-            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
-                return false;
-
-            return true;
-        }
-
         bool Validate (SpellInfo const* /*spellEntry*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_CONSECRATION_DAMAGE) ||
                 !sSpellMgr->GetSpellInfo(SPELL_PALADIN_CONSECRATION_SUMMON))
                 return false;
-
             return true;
         }
 
         void HandlePeriodicDummy(AuraEffect const* /*aurEff*/)
         {
-            Unit* caster = GetCaster();
-            if (!caster)
-                return;
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* consecrationNpc = ObjectAccessor::GetCreature(*caster, caster->m_SummonSlot[1]))
+                {
+                    if (consecrationNpc->ToTempSummon() && GetOwner())
+                    {
+                        if (consecrationNpc->ToTempSummon()->GetSummonerGUID() != GetOwner()->GetGUID())
+                            return;
+                    }
 
-            Unit* consecrationNpc = ObjectAccessor::GetCreature(*caster, caster->m_SummonSlot[1]);
-            if (!consecrationNpc)
-                return;
-
-            if (consecrationNpc->ToTempSummon()->GetSummonerGUID() != GetOwner()->GetGUID())
-                return;
-
-            consecrationNpc->GetPosition(x, y, z);
-
-            caster->CastSpell(x, y, z, SPELL_PALADIN_CONSECRATION_DAMAGE, true, NULL, NULL, caster->GetGUID());
+                    consecrationNpc->GetPosition(x, y, z);
+                    caster->CastSpell(x, y, z, SPELL_PALADIN_CONSECRATION_DAMAGE, true, NULL, NULL, caster->GetGUID());
+                }
+            }
         }
 
         void Register()
