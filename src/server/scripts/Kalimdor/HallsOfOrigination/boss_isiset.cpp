@@ -674,11 +674,10 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            targets.remove_if(OrientationCheck(GetCaster()));
+            if (targets.empty())
+                return;
 
-            uint32 maxSize = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 5 : 5);
-            if (targets.size() > maxSize)
-                Trinity::Containers::RandomResizeList(targets, maxSize);
+            targets.remove_if(OrientationCheck(GetCaster()));
         }
 
         void Register()
@@ -705,11 +704,10 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            targets.remove_if(OrientationCheck(GetCaster()));
+            if (targets.empty())
+                return;
 
-            uint32 maxSize = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 5 : 5);
-            if (targets.size() > maxSize)
-                Trinity::Containers::RandomResizeList(targets, maxSize);
+            targets.remove_if(OrientationCheck(GetCaster()));
         }
 
         void Register()
