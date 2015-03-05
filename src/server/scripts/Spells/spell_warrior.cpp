@@ -885,11 +885,9 @@ class spell_warr_slaughter : public SpellScriptLoader
 
             void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                Player* caster = GetCaster()->ToPlayer();
-                _procTarget = caster->getVictim();
-
-                if (caster)
+                if (Unit* caster = GetCaster())
                 {
+                    _procTarget = caster->getVictim();
                     if (_procTarget && _procTarget->HasAura(94009, caster->GetGUID())) // we check if rend is active on the target
                         _procTarget->GetAura(94009, caster->GetGUID())->RefreshDuration();
                 }
