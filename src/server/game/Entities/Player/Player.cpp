@@ -1975,35 +1975,8 @@ void Player::setDeathState(DeathState s)
         ClearResurrectRequestData();
 
         //FIXME: is pet dismissed at dying or releasing spirit? if second, add setDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
-        // Pet System
         if (GetPet())
-        {
-            switch (getClass())
-            {
-                case CLASS_HUNTER:
-                case CLASS_WARLOCK:
-                {
-                    if (GetMap()->IsBattleground())
-                    {
-                        if (Pet* pet = ToPlayer()->GetPet())
-                        {
-                            if (pet->isAlive())
-                            {
-                                pet->CombatStop();
-                                ToPlayer()->TemporaryUnsummonPet();
-                            }
-                            else
-                                RemoveCurrentPet();
-                        }
-                    }
-                    break;
-                }
-                default:
-                    RemoveCurrentPet();
-                    break;
-            }
-        }
-
+            RemoveCurrentPet();
         // save value before aura remove in Unit::setDeathState
         ressSpellId = GetUInt32Value(PLAYER_SELF_RES_SPELL);
 
