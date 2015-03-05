@@ -844,6 +844,9 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
+                if (targets.empty())
+                    return;
+
                 if (Unit* caster = GetCaster())
                 {
                     if (isSoulBurnUsed == true)
@@ -853,11 +856,9 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
 
                         for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
-                            if ((*itr) && (*itr)->ToUnit())
-                            {
+                            if (*itr)
                                 if (Unit* unit = (*itr)->ToUnit())
                                     caster->CastSpell(unit, SPELL_WARLOCK_CORRUPTION, true);
-                            }
                         }
                     }
                 }

@@ -418,7 +418,8 @@ void PetAI::KilledUnit(Unit* victim)
 
 void PetAI::AttackStart(Unit* target)
 {
-    // Overrides Unit::AttackStart to correctly evaluate Pet states
+    if (!me->GetCharmInfo())
+        return;
 
     // Check all pet states to decide if we can attack this target
     if (!CanAttack(target))
@@ -667,7 +668,7 @@ bool PetAI::CanAttack(Unit* target)
     }
 
     // Follow
-    if (me->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
+    if (me->GetCharmInfo() && me->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
         return !me->GetCharmInfo()->IsReturning();
 
     // default, though we shouldn't ever get here
