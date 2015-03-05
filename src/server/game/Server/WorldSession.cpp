@@ -535,13 +535,13 @@ void WorldSession::LogoutPlayer(bool save)
         {
             if ((*itr))
             {
+                if (!(*itr)->IsInWorld())
+                    continue;
+
                 if (!(*itr)->ToCreature())
                     continue;
 
                 if (!(*itr)->ToTempSummon())
-                    continue;
-
-                if (!(*itr)->IsInWorld())
                     continue;
 
                 if (!(*itr)->ToTempSummon()->GetSummoner())
