@@ -832,6 +832,8 @@ class spell_mage_ignite : public SpellScriptLoader
                         case 34913: // Molten Armor
                         case 2120:  // Flamestrike
                         case 11113: // Blast Wave
+                        case 31661: // Dragon's Breath
+                        case 44461: // Living Bomb (Explosion)
                             return;
                         default:
                             break;

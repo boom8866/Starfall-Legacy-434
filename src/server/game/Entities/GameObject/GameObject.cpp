@@ -484,13 +484,13 @@ void GameObject::Update(uint32 diff)
                         ok = player;
                     }
 
-                    if (ok && !ok->GetAuraEffectsByType(SPELL_AURA_MOD_CAMOUFLAGE).size())
+                    if (ok && ok->IsInWorld() && !ok->GetAuraEffectsByType(SPELL_AURA_MOD_CAMOUFLAGE).size())
                     {
                         // some traps do not have spell but should be triggered
-                        if (goInfo->trap.spellId)
+                        if (goInfo && goInfo->trap.spellId)
                             CastSpell(ok, goInfo->trap.spellId);
 
-                        m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown :  uint32(4));   // template or 4 seconds
+                            m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown :  uint32(4));   // template or 4 seconds
 
                         if (goInfo->trap.type == 1)
                             SetLootState(GO_JUST_DEACTIVATED);

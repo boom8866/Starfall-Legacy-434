@@ -12653,6 +12653,103 @@ public:
     }
 };
 
+class spell_jc_stardust_no_2 : public SpellScriptLoader
+{
+public:
+    spell_jc_stardust_no_2() : SpellScriptLoader("spell_jc_stardust_no_2")
+    {
+    }
+
+    enum creditId
+    {
+        QUEST_CREDIT_JC_STARDUST    = 39171
+    };
+
+    enum spellId
+    {
+        SPELL_STARDUST_APPLY    = 73619
+    };
+
+    class spell_jc_stardust_no_2_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_jc_stardust_no_2_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetExplTargetUnit())
+                {
+                    if (target != caster && (target->GetTypeId() == TYPEID_PLAYER || (target->ToCreature() && target->ToCreature()->GetCreatureType() == CREATURE_TYPE_HUMANOID)))
+                    {
+                        caster->CastSpell(target, SPELL_STARDUST_APPLY);
+                        return SPELL_FAILED_DONT_REPORT;
+                    }
+                }
+            }
+
+            return SPELL_FAILED_BAD_TARGETS;
+        }
+
+        void HandleQuestCredit()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                    caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_JC_STARDUST);
+            }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_jc_stardust_no_2_SpellScript::CheckCast);
+            AfterHit += SpellHitFn(spell_jc_stardust_no_2_SpellScript::HandleQuestCredit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_jc_stardust_no_2_SpellScript();
+    }
+};
+
+class spell_jc_stardust_no_2_triggered : public SpellScriptLoader
+{
+public:
+    spell_jc_stardust_no_2_triggered() : SpellScriptLoader("spell_jc_stardust_no_2_triggered")
+    {
+    }
+
+    enum creditId
+    {
+        QUEST_CREDIT_JC_STARDUST = 39237
+    };
+
+    class spell_jc_stardust_no_2_triggered_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_jc_stardust_no_2_triggered_SpellScript);
+
+        void HandleQuestCredit()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                    caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_JC_STARDUST);
+            }
+        }
+
+        void Register()
+        {
+            AfterHit += SpellHitFn(spell_jc_stardust_no_2_triggered_SpellScript::HandleQuestCredit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_jc_stardust_no_2_triggered_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -12905,4 +13002,6 @@ void AddSC_generic_spell_scripts()
     new spell_gen_vengeance_decay();
     new spell_dh_deepvein_patch_kit();
     new spell_racial_will_of_the_forsaken();
+    new spell_jc_stardust_no_2();
+    new spell_jc_stardust_no_2_triggered();
 }

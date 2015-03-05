@@ -705,8 +705,8 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
     {
         if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
         {
-            // Exclude first tick or deadly poison/ignite triggering (Exclude PvE things to prevent problems with bosses)
-            if (m_tickNumber > 0 || m_spellInfo->Id == 2818 || m_spellInfo->Id == 12654 || m_spellInfo->SpellFamilyName == SPELLFAMILY_GENERIC)
+            // Exclude first tick or deadly poison triggering (Exclude PvE things to prevent problems with bosses)
+            if (m_tickNumber > 0 || m_spellInfo->Id == 2818 || m_spellInfo->SpellFamilyName == SPELLFAMILY_GENERIC)
                 return;
         }
 

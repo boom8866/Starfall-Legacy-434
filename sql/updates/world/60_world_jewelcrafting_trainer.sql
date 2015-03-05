@@ -1,0 +1,2 @@
+UPDATE `gossip_menu_option` SET `option_id`=5, `npc_option_npcflag`=16 WHERE `menu_id`=7815 AND `id`=0;
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1, `action_menu_id`=8377 WHERE  `menu_id`=7815 AND `id`=1;
