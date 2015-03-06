@@ -16477,6 +16477,7 @@ void Unit::StopMoving()
     if (!IsInWorld() || movespline->Finalized())
         return;
 
+    UpdateSplinePosition();
     Movement::MoveSplineInit init(this);
     init.Stop();
 }
@@ -17444,6 +17445,8 @@ void Unit::SetControlled(bool apply, UnitState state)
         if (HasUnitState(state))
             return;
 
+        StopMoving();
+
         AddUnitState(state);
         switch (state)
         {
@@ -17525,6 +17528,8 @@ void Unit::SetControlled(bool apply, UnitState state)
             default:
                 break;
         }
+
+        StopMoving();
 
         ClearUnitState(state);
 
