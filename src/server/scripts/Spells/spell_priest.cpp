@@ -463,14 +463,30 @@ class spell_pri_mind_sear : public SpellScriptLoader
         {
             PrepareSpellScript(spell_pri_mind_sear_SpellScript);
 
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetExplTargetUnit())
+                        if (target == caster)
+                            return SPELL_FAILED_BAD_TARGETS;
+                }
+
+                return SPELL_CAST_OK;
+            }
+
             void FilterTargets(std::list<WorldObject*>& unitList)
             {
+                if (unitList.empty())
+                    return;
+
                 unitList.remove_if(Trinity::ObjectGUIDCheck(GetCaster()->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT)));
             }
 
             void Register()
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pri_mind_sear_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+                OnCheckCast += SpellCheckCastFn(spell_pri_mind_sear_SpellScript::CheckCast);
             }
         };
 

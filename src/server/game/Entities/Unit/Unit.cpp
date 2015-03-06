@@ -822,6 +822,13 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                             CastSpell(this, 87154, true);
                         break;
                     }
+                    case 32409: // Shadow Word: Death (Backdamage)
+                    {
+                        // Masochism
+                        if (HasAura(88994) || HasAura(88995))
+                            CastSpell(this, 89007, true);
+                        break;
+                    }
                     case 55090: // Scourge Strike
                     {
                         int32 bp0 = cleanDamage->absorbed_damage;
@@ -16470,6 +16477,7 @@ void Unit::StopMoving()
     if (!IsInWorld() || movespline->Finalized())
         return;
 
+    UpdateSplinePosition();
     Movement::MoveSplineInit init(this);
     init.Stop();
 }
@@ -17437,6 +17445,8 @@ void Unit::SetControlled(bool apply, UnitState state)
         if (HasUnitState(state))
             return;
 
+        StopMoving();
+
         AddUnitState(state);
         switch (state)
         {
@@ -17518,6 +17528,8 @@ void Unit::SetControlled(bool apply, UnitState state)
             default:
                 break;
         }
+
+        StopMoving();
 
         ClearUnitState(state);
 
