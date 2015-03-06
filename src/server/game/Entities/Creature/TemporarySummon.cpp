@@ -44,7 +44,7 @@ void TempSummon::Update(uint32 diff)
     // This check will search for summoner on every update, if the summoner is too much distant will be unsummoned!
     if (Unit* summoner = GetSummoner())
         if (summoner->GetTypeId() == TYPEID_PLAYER)
-            if (!summoner->IsWithinDist(this, 500.0f))
+            if (!summoner->IsWithinDist(this, 1001.0f))
                 if (IsInWorld())
                 {
                     m_Events.KillAllEvents(true);
