@@ -2753,6 +2753,13 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                 return true;
             break;
         }
+        case SPELLFAMILY_WARRIOR:
+        {
+            // Bladestorm
+            if (Id == 46924)
+                return true;
+            break;
+        }
         default:
             break;
     }

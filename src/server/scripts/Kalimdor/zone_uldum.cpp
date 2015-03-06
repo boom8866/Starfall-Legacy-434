@@ -3075,7 +3075,8 @@ public:
         EVENT_SUMMON_SECOND_CROCK,
         EVENT_JUMP_TO_FIGHT,
         EVENT_START_FIGHT,
-        EVENT_CHECK_EGGS
+        EVENT_CHECK_EGGS,
+        EVENT_CHECK_RESTART
     };
 
     enum npcId
@@ -3120,6 +3121,7 @@ public:
                 tahet->AI()->Talk(0);
                 tahet->DespawnOrUnsummon(15000);
             }
+            crocksDead = 0;
         }
 
         void IsSummonedBy(Unit* /*owner*/)
@@ -3128,6 +3130,7 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
             DoAction(ACTION_MOVE_TO_TALK);
+            events.ScheduleEvent(EVENT_CHECK_RESTART, 600000);
         }
 
         void DoAction(int32 action)
@@ -3236,6 +3239,16 @@ public:
                         }
 
                         events.RescheduleEvent(EVENT_CHECK_EGGS, 1500);
+                        break;
+                    }
+                    case EVENT_CHECK_RESTART:
+                    {
+                        events.CancelEvent(EVENT_CHECK_RESTART);
+                        me->DespawnCreaturesInArea(NPC_ENTRY_TAHET);
+                        me->DespawnCreaturesInArea(NPC_ENTRY_GOREBITE);
+                        me->DespawnCreaturesInArea(NPC_ENTRY_THARTEP);
+                        me->DespawnCreaturesInArea(NPC_ENTRY_KAMEN);
+                        me->DespawnOrUnsummon(1000);
                         break;
                     }
                     default:

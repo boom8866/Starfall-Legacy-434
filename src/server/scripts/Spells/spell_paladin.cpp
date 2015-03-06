@@ -87,6 +87,8 @@ enum PaladinSpells
     SPELL_TALENT_ETERNAL_GLORY_R1                = 87163,
     SPELL_TALENT_ETERNAL_GLORY_R2                = 87164,
     SPELL_EFFECT_ETERNAL_GLORY                   = 88676,
+
+    SPELL_PALADIN_INQUISITION                    = 84963
 };
 
 // 31850 - Ardent Defender
@@ -331,6 +333,11 @@ class spell_pal_divine_storm : public SpellScriptLoader
                     {
                         float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                         int32 amount = GetHitDamage() * (0.168f + (0.021f * masteryPoints));
+
+                        // Inquisition
+                        if (caster->HasAura(SPELL_PALADIN_INQUISITION))
+                            amount += amount * 0.30f;
+
                         caster->CastCustomSpell(GetHitUnit(), 96172, &amount, NULL, NULL, true, NULL, NULL, caster->GetGUID());
                     }
                 }
@@ -1100,6 +1107,10 @@ class spell_pal_templar_s_verdict : public SpellScriptLoader
                     {
                         float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                         amount = amount * (0.168f + (0.021f * masteryPoints));
+
+                        // Inquisition
+                        if (caster->HasAura(SPELL_PALADIN_INQUISITION))
+                            amount += amount * 0.30f;
                     }
 
                     caster->CastCustomSpell(GetHitUnit(), 96172, &amount, NULL, NULL, true, NULL, NULL, caster->GetGUID());
@@ -1460,6 +1471,11 @@ class spell_pal_crusader_strike : public SpellScriptLoader
                     {
                         float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                         int32 amount = GetHitDamage() * (0.168f + (0.021f * masteryPoints));
+
+                        // Inquisition
+                        if (caster->HasAura(SPELL_PALADIN_INQUISITION))
+                            amount += amount * 0.30f;
+
                         caster->CastCustomSpell(GetHitUnit(), 96172, &amount, NULL, NULL, true, NULL, NULL, caster->GetGUID());
                     }
                 }
