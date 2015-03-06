@@ -410,11 +410,11 @@ void Unit::Update(uint32 p_time)
         }
         else
         {
-            if (!GetInstanceScript())
+            if (!GetInstanceId())
             {
                 if (m_CombatTimer <= p_time)
                 {
-                    if (!GetDamageTakenInPastSecs(4) && !GetDamageDoneInPastSecs(4) && !getVictim())
+                    if (!GetDamageTakenInPastSecs(5) && !GetDamageDoneInPastSecs(5) && !getVictim())
                         ClearInCombat();
                     m_CombatTimer = 5100;
                 }
@@ -11294,7 +11294,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                             DoneTotal += ownerRAP * 0.168f;
                             // Spiked Collar
                             if (AuraEffect* spikedCollar = GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2934, EFFECT_0))
-                                AddPct(DoneTotal, spikedCollar->GetAmount() / 100);
+                                AddPct(DoneTotalMod, spikedCollar->GetAmount());
 
                             // Wild Hunt
                             if (AuraEffect* wildHunt = GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_0))

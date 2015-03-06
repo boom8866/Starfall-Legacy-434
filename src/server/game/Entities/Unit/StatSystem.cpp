@@ -1427,12 +1427,12 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
         {
             float mod = 0.425f;                                                 //Hunter contribution modifier
             bonusAP += owner->GetTotalAttackPowerValue(RANGED_ATTACK) * mod;
-            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.1287f));
+            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0687f));
         }
         else if (IsPetGhoul()) //ghouls benefit from deathknight's attack power (may be summon pet or not)
         {
             bonusAP += owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.12f;
-            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.1287f));
+            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.06287f));
         }
         else if (IsSpiritWolf()) //wolf benefit from shaman's attack power
         {
@@ -1454,8 +1454,8 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
             int32 maximum  = (fire > shadow) ? fire : shadow;
             if (maximum < 0)
                 maximum = 0;
-            SetBonusDamage(int32(maximum * 0.15f));
-            bonusAP += maximum * 0.57f;
+            SetBonusDamage(int32(maximum * 0.07f));
+            bonusAP += maximum * 0.25f;
         }
         //water elementals benefit from mage's frost damage
         else if (GetEntry() == ENTRY_WATER_ELEMENTAL)
