@@ -254,7 +254,7 @@ public:
                     }
                     case EVENT_SHIELD_OF_LIGHT:
                     {
-                        DoCastAOE(SPELL_ACTIVATE_BEACONS);
+                        DoCast(me, SPELL_ACTIVATE_BEACONS, true);
                         DoCast(me, SPELL_REVERBERATING_HYMN);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_31);
                         RespawnPit();
