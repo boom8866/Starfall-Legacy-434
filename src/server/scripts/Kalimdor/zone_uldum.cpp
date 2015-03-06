@@ -3111,14 +3111,20 @@ public:
 
         void JustDied(Unit* /*who*/)
         {
+            ResetCaimas();
+            crocksDead = 0;
+        }
+
+        void ResetCaimas()
+        {
             if (Creature* tahet = me->FindNearestCreature(NPC_ENTRY_TAHET, 200.0f, true))
             {
+                uint32 corpseDelay = tahet->GetCorpseDelay();
+                uint32 respawnDelay = tahet->GetRespawnDelay();
+
                 tahet->SetStandState(UNIT_STAND_STATE_STAND);
-                tahet->RemoveAllAuras();
-                tahet->CastStop();
-                tahet->CastSpell(tahet, SPELL_TAHET_CREDIT);
-                tahet->AI()->Talk(0);
-                tahet->DespawnOrUnsummon(15000);
+                tahet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                me->DespawnOrUnsummon(30000);
             }
         }
 
@@ -3182,6 +3188,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim() && me->isInCombat() && crocksDead >= 3)
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -3268,12 +3277,23 @@ public:
 
     enum npcId
     {
-        NPC_ENTRY_CAIMAS    = 46276
+        NPC_ENTRY_CAIMAS    = 46276,
+        NPC_ENTRY_GOREBITE  = 46278,
+        NPC_ENTRY_THARTEP   = 46280,
+        NPC_ENTRY_KAMEN     = 46281,
+        NPC_ENTRY_TAHET     = 46496
     };
 
     struct npc_entry_gorebiteAI : public ScriptedAI
     {
         npc_entry_gorebiteAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void EnterEvadeMode()
+        {
+            me->DespawnCreaturesInArea(NPC_ENTRY_CAIMAS);
+            me->DespawnCreaturesInArea(NPC_ENTRY_THARTEP);
+            me->DespawnCreaturesInArea(NPC_ENTRY_TAHET);
+        }
 
         void IsSummonedBy(Unit* /*owner*/)
         {
@@ -3327,7 +3347,11 @@ public:
 
     enum npcId
     {
-        NPC_ENTRY_CAIMAS    = 46276
+        NPC_ENTRY_CAIMAS    = 46276,
+        NPC_ENTRY_GOREBITE  = 46278,
+        NPC_ENTRY_THARTEP   = 46280,
+        NPC_ENTRY_KAMEN     = 46281,
+        NPC_ENTRY_TAHET     = 46496
     };
 
     struct npc_entry_thartepAI : public ScriptedAI
@@ -3341,6 +3365,13 @@ public:
             me->SetReactState(REACT_PASSIVE);
             me->GetMotionMaster()->MovementExpired(false);
             me->GetMotionMaster()->MovePoint(POINT_TO_ARENA, -11439.37f, -1180.78f, -2.64f);
+        }
+
+        void EnterEvadeMode()
+        {
+            me->DespawnCreaturesInArea(NPC_ENTRY_CAIMAS);
+            me->DespawnCreaturesInArea(NPC_ENTRY_THARTEP);
+            me->DespawnCreaturesInArea(NPC_ENTRY_TAHET);
         }
 
         void JustDied(Unit* /*victim*/)
@@ -3386,7 +3417,11 @@ public:
 
     enum npcId
     {
-        NPC_ENTRY_CAIMAS    = 46276
+        NPC_ENTRY_CAIMAS    = 46276,
+        NPC_ENTRY_GOREBITE  = 46278,
+        NPC_ENTRY_THARTEP   = 46280,
+        NPC_ENTRY_KAMEN     = 46281,
+        NPC_ENTRY_TAHET     = 46496
     };
 
     struct npc_entry_kamenAI : public ScriptedAI
@@ -3400,6 +3435,13 @@ public:
             me->SetReactState(REACT_PASSIVE);
             me->GetMotionMaster()->MovementExpired(false);
             me->GetMotionMaster()->MovePoint(POINT_TO_ARENA, -11460.16f, -1184.37f, -2.64f);
+        }
+
+        void EnterEvadeMode()
+        {
+            me->DespawnCreaturesInArea(NPC_ENTRY_CAIMAS);
+            me->DespawnCreaturesInArea(NPC_ENTRY_THARTEP);
+            me->DespawnCreaturesInArea(NPC_ENTRY_TAHET);
         }
 
         void JustDied(Unit* /*victim*/)
