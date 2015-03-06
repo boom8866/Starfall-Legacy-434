@@ -3346,6 +3346,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 12668:
                 spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
                 break;
+            case 30069: // Blood Frenzy
+            case 30070:
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(3);
+                break;
             // NAXXRAMAS SPELLS
             //
             case 29125: // Hopeless (Razuvious)
