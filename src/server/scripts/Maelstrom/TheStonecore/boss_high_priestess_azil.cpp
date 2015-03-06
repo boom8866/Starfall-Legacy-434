@@ -63,18 +63,9 @@ enum Spells
     SPELL_FORCE_GRIP_DAMAGE_H       = 92664
 };
 
-enum NPCs
-{
-    NPC_DEVOUT_FOLLOWER_N   = 42428,
-    NPC_DEVOUT_FOLLOWER_H   = 49648,
-    NPC_SEISMIC_SHARD       = 42355,
-    NPC_WORLDTRIGGER        = 22515,
-    NPC_HIGH_PRIESTESS_AZIL = 42333
-};
-
 enum Texts
 {
-    SAY_AGGRO,
+    SAY_AGGRO = 0,
     SAY_PHASE_TWO,
     SAY_SLAY,
     SAY_DEATH
@@ -82,8 +73,7 @@ enum Texts
 
 enum Events
 {
-    EVENT_NONE,
-    EVENT_INTRO_MOVE,
+    EVENT_INTRO_MOVE = 1,
     EVENT_CURSE_OF_BLOOD,
     EVENT_FORCE_GRIP,
     EVENT_SUMMON_GRAVITY_WELL,
@@ -453,7 +443,7 @@ public:
 
         void JustDied(Unit* /*victim*/)
         {
-            if (Creature* azil = me->FindNearestCreature(NPC_HIGH_PRIESTESS_AZIL, 300.0f, true))
+            if (Creature* azil = me->FindNearestCreature(BOSS_HIGH_PRIESTESS_AZIL, 300.0f, true))
                 if (azil->isInCombat())
                     azil->AI()->DoAction(ACTION_HANDLE_ACHIEVEMENT);
         }
@@ -567,7 +557,7 @@ public:
                 switch (eventId)
                 {
                     case EVENT_SEISMIC_SHARD_MOUNT:
-                        if (Creature* highPriestAzil = me->FindNearestCreature(NPC_HIGH_PRIESTESS_AZIL, 300.0f, true))
+                        if (Creature* highPriestAzil = me->FindNearestCreature(BOSS_HIGH_PRIESTESS_AZIL, 300.0f, true))
                             if (Vehicle* vehicle = highPriestAzil->GetVehicleKit())
                                 me->EnterVehicle(highPriestAzil, vehicle->GetNextEmptySeat(0, false)->first);
                         break;
@@ -716,6 +706,9 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& unitList)
         {
+            if (unitList.empty())
+                return;
+
             unitList.remove_if(PlayerPetOrDevoutFollowerCheck());
         }
 
@@ -724,7 +717,7 @@ public:
             if (Unit* caster = GetCaster())
             {
                 if (Unit* target = GetHitUnit())
-                    if (target->GetEntry() != NPC_HIGH_PRIESTESS_AZIL && target->GetEntry() != 49624)
+                    if (target->GetEntry() != BOSS_HIGH_PRIESTESS_AZIL && target->GetEntry() != 49624)
                         caster->CastSpell(target, SPELL_GRAVITY_WELL_DAMAGE, true);
             }
         }
@@ -809,6 +802,9 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& unitList)
         {
+            if (unitList.empty())
+                return;
+
             unitList.remove_if(PulledRecentlyCheck());
         }
 
@@ -840,7 +836,8 @@ public:
         void SetTarget(WorldObject*& target)
         {
             if (Unit* caster = GetCaster())
-                target = caster->FindNearestCreature(NPC_SEISMIC_SHARD, 100.0f);
+                if (Creature* shard = caster->FindNearestCreature(NPC_SEISMIC_SHARD, 100.0f))
+                    target = shard;
         }
 
         void Register()
@@ -870,7 +867,7 @@ public:
         void SetTarget(WorldObject*& target)
         {
             if (Unit* caster = GetCaster())
-                if (Creature* azil = caster->FindNearestCreature(NPC_HIGH_PRIESTESS_AZIL, 300.0f, true))
+                if (Creature* azil = caster->FindNearestCreature(BOSS_HIGH_PRIESTESS_AZIL, 300.0f, true))
                     target = azil;
         }
 
