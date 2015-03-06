@@ -39,6 +39,7 @@ enum Events
     EVENT_DIVINE_RECKONING = 1,
     EVENT_BURNING_LIGHT,
     EVENT_SEAR,
+    EVENT_SHIELD_OF_LIGHT,
     EVENT_ACHIEVEMENT_FAIL,
 };
 
@@ -125,6 +126,7 @@ public:
             _shieldCount  = 0;
             _beacons = 0;
             _achievement = true;
+            me->SetReactState(REACT_AGGRESSIVE);
             instance->SetBossState(DATA_TEMPLE_GUARDIAN_ANHUUR, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
@@ -164,41 +166,17 @@ public:
 
                 me->InterruptNonMeleeSpells(true);
                 me->AttackStop();
+                me->SetReactState(REACT_PASSIVE);
                 DoCast(me, SPELL_TELEPORT);
-
-                DoCastAOE(SPELL_ACTIVATE_BEACONS);
-                DoCast(me, SPELL_REVERBERATING_HYMN);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_31);
-                RespawnPit();
-
-                std::list<Creature*> stalkers;
-                GameObject* door = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_ANHUUR_DOOR));
-                GetCreatureListWithEntryInGrid(stalkers, me, NPC_CAVE_IN_STALKER, 100.0f);
-
-                stalkers.remove_if(Trinity::HeightDifferenceCheck(door, 0.0f, false)); // Target only the bottom ones
-                for (std::list<Creature*>::iterator itr = stalkers.begin(); itr != stalkers.end(); ++itr)
-                {
-                    if ((*itr)->GetPositionX() > door->GetPositionX())
-                    {
-                        (*itr)->CastSpell((*itr), SPELL_SHIELD_VISUAL_LEFT, true);
-                        (*itr)->CastSpell((*itr), SPELL_BEAM_OF_LIGHT_LEFT, true);
-                    }
-                    else
-                    {
-                        (*itr)->CastSpell((*itr), SPELL_SHIELD_VISUAL_RIGHT, true);
-                        (*itr)->CastSpell((*itr), SPELL_BEAM_OF_LIGHT_RIGHT, true);
-                    }
-                }
-
-                Talk(EMOTE_SHIELD);
                 Talk(SAY_SHIELD);
                 events.CancelEvent(EVENT_DIVINE_RECKONING);
                 events.CancelEvent(EVENT_BURNING_LIGHT);
-                events.ScheduleEvent(EVENT_ACHIEVEMENT_FAIL, 15000);
+                events.ScheduleEvent(EVENT_SHIELD_OF_LIGHT, 1000);
             }
             else if (me->HasAura(SPELL_REVERBERATING_HYMN) && !me->HasAura(SPELL_SHIELD_OF_LIGHT))
             {
                 me->RemoveAurasDueToSpell(SPELL_REVERBERATING_HYMN);
+                me->SetReactState(REACT_AGGRESSIVE);
                 events.CancelEvent(EVENT_ACHIEVEMENT_FAIL);
                 events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
                 events.ScheduleEvent(EVENT_BURNING_LIGHT, 12000);
@@ -272,6 +250,36 @@ public:
 
                         eye1->CastSpell(eye1, SPELL_SEARING_LIGHT, true);
                         eye2->CastSpell(eye2, SPELL_SEARING_LIGHT, true);
+                        break;
+                    }
+                    case EVENT_SHIELD_OF_LIGHT:
+                    {
+                        DoCastAOE(SPELL_ACTIVATE_BEACONS);
+                        DoCast(me, SPELL_REVERBERATING_HYMN);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_31);
+                        RespawnPit();
+
+                        std::list<Creature*> stalkers;
+                        GameObject* door = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_ANHUUR_DOOR));
+                        GetCreatureListWithEntryInGrid(stalkers, me, NPC_CAVE_IN_STALKER, 100.0f);
+
+                        stalkers.remove_if(Trinity::HeightDifferenceCheck(door, 0.0f, false)); // Target only the bottom ones
+                        for (std::list<Creature*>::iterator itr = stalkers.begin(); itr != stalkers.end(); ++itr)
+                        {
+                            if ((*itr)->GetPositionX() > door->GetPositionX())
+                            {
+                                (*itr)->CastSpell((*itr), SPELL_SHIELD_VISUAL_LEFT, true);
+                                (*itr)->CastSpell((*itr), SPELL_BEAM_OF_LIGHT_LEFT, true);
+                            }
+                            else
+                            {
+                                (*itr)->CastSpell((*itr), SPELL_SHIELD_VISUAL_RIGHT, true);
+                                (*itr)->CastSpell((*itr), SPELL_BEAM_OF_LIGHT_RIGHT, true);
+                            }
+                        }
+
+                        Talk(EMOTE_SHIELD);
+                        events.ScheduleEvent(EVENT_ACHIEVEMENT_FAIL, 15000);
                         break;
                     }
                     case EVENT_ACHIEVEMENT_FAIL:
