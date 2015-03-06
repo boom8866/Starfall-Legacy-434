@@ -8387,6 +8387,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (UpdateVictim() && me->isInCombat())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -8395,7 +8398,7 @@ public:
                 {
                     case EVENT_SEARCH_FOR_ENEMY:
                     {
-                        if (Unit* victim = me->SelectNearestTarget(50.0f))
+                        if (Unit* victim = me->SelectNearestTarget(15.0f))
                         {
                             AttackStart(victim);
                             events.CancelEvent(EVENT_SEARCH_FOR_ENEMY);
