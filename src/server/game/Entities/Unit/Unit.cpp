@@ -9310,7 +9310,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 20140:
         {
             // Cannot proc on self heal
-            if (victim == this)
+            if (victim == this || (procSpell && procSpell->IsPeriodicDamage()))
                 return false;
             break;
         }
