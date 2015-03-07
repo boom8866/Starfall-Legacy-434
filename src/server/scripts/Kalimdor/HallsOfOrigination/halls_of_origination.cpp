@@ -148,7 +148,7 @@ public:
                 me->AttackStop();
                 events.CancelEvent(EVENT_SEARING_FLAMES);
                 me->SetReactState(REACT_PASSIVE);
-                me->GetMotionMaster()->MovementExpired();
+                me->StopMoving();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 if (!_dispersed)
                 {

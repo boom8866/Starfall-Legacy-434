@@ -354,10 +354,19 @@ class spell_anhuur_disable_beacon_beams : public SpellScriptLoader
 
             void Notify(SpellEffIndex /*index*/)
             {
-                if (InstanceMap* instance = GetCaster()->GetMap()->ToInstanceMap())
-                    if (InstanceScript* const script = instance->GetInstanceScript())
-                        if (Creature* anhuur = instance->GetCreature(script->GetData64(DATA_ANHUUR_GUID)))
-                            anhuur->AI()->DoAction(ACTION_DISABLE_BEACON);
+                if (Unit* caster = GetCaster())
+                {
+                    if (GameObject* beacon = caster->FindNearestGameObject(GO_ANHUURS_LEFT_BEACON, 10.0f))
+                        beacon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    else if (GameObject* beacon = caster->FindNearestGameObject(GO_ANHUURS_RIGHT_BEACON, 10.0f))
+                        beacon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+
+
+                    if (InstanceMap* instance = caster->GetMap()->ToInstanceMap())
+                        if (InstanceScript* const script = instance->GetInstanceScript())
+                            if (Creature* anhuur = instance->GetCreature(script->GetData64(DATA_ANHUUR_GUID)))
+                                anhuur->AI()->DoAction(ACTION_DISABLE_BEACON);
+                }
             }
 
             void Register()
