@@ -516,7 +516,8 @@ public:
                         {
                             if (Vehicle* veh = playerOwner->GetVehicle())
                             {
-                                if (Unit* passenger = veh->GetPassenger(0))
+                                Unit* passenger = veh->GetPassenger(0);
+                                if (passenger && passenger != NULL && passenger->IsInWorld())
                                     passenger->ChangeSeat(2, true);
                             }
                         }
@@ -529,7 +530,8 @@ public:
                         {
                             if (Vehicle* veh = playerOwner->GetVehicle())
                             {
-                                if (Unit* passenger = veh->GetPassenger(2))
+                                Unit* passenger = veh->GetPassenger(2);
+                                if (passenger && passenger != NULL && passenger->IsInWorld())
                                     passenger->ChangeSeat(1, true);
                             }
                         }
@@ -563,9 +565,10 @@ public:
                         events.ScheduleEvent(EVENT_SEAT_UNDER_ATTACK, 6000);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
-                            if (Vehicle* vehicle = playerOwner->GetVehicle())
+                            if (Vehicle* veh = playerOwner->GetVehicle())
                             {
-                                if (Unit* passenger = vehicle->GetPassenger(1))
+                                Unit* passenger = veh->GetPassenger(1);
+                                if (passenger && passenger != NULL && passenger->IsInWorld())
                                     passenger->ChangeSeat(0, true);
                             }
                         }
@@ -578,9 +581,10 @@ public:
                         me->GetMotionMaster()->MoveJump(-8992.04f, -1663.47f, 108.99f, 25.0f, 25.0f, POINT_RIDGE);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
-                            if (Vehicle* vehicle = playerOwner->GetVehicle())
+                            if (Vehicle* veh = playerOwner->GetVehicle())
                             {
-                                if (Unit* passenger = vehicle->GetPassenger(0))
+                                Unit* passenger = veh->GetPassenger(0);
+                                if (passenger && passenger != NULL && passenger->IsInWorld())
                                     passenger->ChangeSeat(2, true);
                             }
                         }
