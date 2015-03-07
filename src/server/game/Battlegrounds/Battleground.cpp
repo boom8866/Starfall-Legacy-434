@@ -1006,12 +1006,13 @@ void Battleground::EndBattleground(uint32 winner)
                 player->UpdateRBGStats(1, false);
         }
 
-        if (player->GetGuildId() != 0 && player->GetGroup()->IsGuildGroup(player->GetGuildId()) && !battlegroundChallengeAwarded)
+        if (IsRBG())
             if (Guild* guild = player->GetGuild())
-            {
-                battlegroundChallengeAwarded = true;
-                guild->GetChallengesMgr()->CheckBattlegroundChallenge(this, m_BgRaids[player->GetTeam()]);
-            }
+                if (player->GetGroup() && player->GetGroup()->IsGuildGroup(player->GetGuildId()) && !battlegroundChallengeAwarded)
+                {
+                    battlegroundChallengeAwarded = true;
+                    guild->GetChallengesMgr()->CheckBattlegroundChallenge(this, m_BgRaids[player->GetTeam()]);
+                }
 
         player->ResetAllPowers();
         player->CombatStopWithPets(true);

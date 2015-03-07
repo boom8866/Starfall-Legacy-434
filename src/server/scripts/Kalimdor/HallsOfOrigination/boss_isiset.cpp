@@ -1336,6 +1336,7 @@ public:
 
         void Reset()
         {
+            target = NULL;
             me->SetMaxPower(POWER_ENERGY, 100);
             me->SetPower(POWER_ENERGY, 100);
             events.Reset();
@@ -1373,7 +1374,7 @@ public:
                     }
                     case EVENT_STAR_SHOCK:
                     {
-                        if (target)
+                        if (target && target != NULL && target->IsInWorld())
                             DoCast(target, IsHeroic() ? SPELL_STAR_SHOCK_H : SPELL_STAR_SHOCK_N, true);
                         events.RescheduleEvent(EVENT_STAR_SHOCK, 1000);
                         break;
