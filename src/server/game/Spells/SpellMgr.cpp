@@ -3910,6 +3910,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 76888: // Seed of Chaos
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
                 break;
+            case 76870:
+            case 89867:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_12_YARDS);
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_12_YARDS);
+                break;
             case 74108: // Solar Fire Damage Aura
             case 89130:
             case 89133: // Solar Fire Damage Aura

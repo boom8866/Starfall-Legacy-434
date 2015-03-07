@@ -54,7 +54,7 @@ enum Events
     EVENT_SUMMON_RANDOM,
 
     // Seed of Chaos
-    EVENT_EXPLODE,
+    EVENT_CHECK_PLAYERS,
 };
 
 enum Points
@@ -463,7 +463,7 @@ public:
             switch (pointId)
             {
                 case 1:
-                    events.ScheduleEvent(EVENT_EXPLODE, 1);
+                    events.ScheduleEvent(EVENT_CHECK_PLAYERS, 2000);
                     break;
             }
         }
@@ -476,11 +476,16 @@ public:
             {
                 switch (eventId)
                 {
-                    case EVENT_EXPLODE:
-                        DoCastAOE(SPELL_SEED_OF_CHAOS_EXPLOSION);
-                        me->RemoveAurasDueToSpell(SPELL_SEED_OF_CHAOS_VISUAL);
-                        me->DespawnOrUnsummon(3000);
-                        break;
+                    case EVENT_CHECK_PLAYERS:
+                        if (me->FindNearestPlayer(me->GetFloatValue(UNIT_FIELD_COMBATREACH), true))
+                        {
+                            DoCast(me, SPELL_SEED_OF_CHAOS_EXPLOSION);
+                            me->RemoveAurasDueToSpell(SPELL_SEED_OF_CHAOS_VISUAL);
+                            me->DespawnOrUnsummon(3000);
+                            break;
+                        }
+                        else
+                            events.ScheduleEvent(EVENT_CHECK_PLAYERS, 500);
                     default:
                         break;
                 }
