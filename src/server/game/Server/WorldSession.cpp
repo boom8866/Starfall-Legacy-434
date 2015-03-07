@@ -548,10 +548,7 @@ void WorldSession::LogoutPlayer(bool save)
                     continue;
 
                 if ((*itr)->ToTempSummon()->GetSummoner() == _player)
-                {
-                    (*itr)->m_Events.KillAllEvents(true);
-                    (*itr)->ToCreature()->DespawnOrUnsummon(1);
-                }
+                    (*itr)->ToCreature()->DisappearAndDie();
             }
         }
 
