@@ -2995,9 +2995,10 @@ public:
 
         EventMap events;
 
-        void Reset()
+        void InitializeAI()
         {
             me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
             events.ScheduleEvent(EVENT_CAST_ROPE, 1000);
         }
 
@@ -3487,10 +3488,19 @@ public:
                     case EVENT_JUMP_ON_TARGET:
                     {
                         events.CancelEvent(EVENT_JUMP_ON_TARGET);
-                        if (targetInvoker && targetInvoker != NULL)
+                        if (targetInvoker && targetInvoker != NULL && targetInvoker->IsInWorld())
                         {
-                            if (targetInvoker->IsVehicle())
-                                me->EnterVehicle(targetInvoker, urand(0,8));
+                            if (targetInvoker->GetVehicleKit())
+                            {
+                                if (!targetInvoker->GetVehicleKit()->GetAvailableSeatCount())
+                                {
+                                    me->DisappearAndDie();
+                                    break;
+                                }
+
+                                me->GetMotionMaster()->MovementExpired(false);
+                                me->EnterVehicle(targetInvoker, urand(0, 7));
+                            }
                         }
                         break;
                     }
