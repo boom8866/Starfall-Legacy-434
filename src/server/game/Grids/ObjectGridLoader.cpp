@@ -217,8 +217,7 @@ void ObjectGridStoper::Visit(CreatureMapType &m)
         {
             iter->getSource()->CombatStop();
             iter->getSource()->DeleteThreatList();
-            if (iter->getSource()->IsAIEnabled)
-                iter->getSource()->AI()->EnterEvadeMode();
+            iter->getSource()->AI()->EnterEvadeMode();
         }
     }
 }
