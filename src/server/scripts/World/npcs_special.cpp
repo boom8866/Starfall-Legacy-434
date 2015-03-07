@@ -9164,7 +9164,7 @@ public:
                 me->setFaction(1802);
                 if (Creature* aeonaxx = me->FindNearestCreature(NPC_ENTRY_AEONAXX, 1000.0f, true))
                 {
-                    me->GetMotionMaster()->MoveFollow(aeonaxx, 7.0f, aeonaxx->GetOrientation());
+                    me->GetMotionMaster()->MoveFollow(aeonaxx, 7.0f, urand(1, 4));
                     unitToFollow = aeonaxx;
                 }
 
@@ -9276,7 +9276,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        player->CastSpell(creature, SPELL_RIDE_AEONAXX, true);
+        player->EnterVehicle(creature, 0);
         return true;
     }
 
@@ -9296,9 +9296,8 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
             me->SetReactState(REACT_PASSIVE);
-            events.ScheduleEvent(EVENT_SET_VISIBLE, urand(120000, 300000));
             events.ScheduleEvent(EVENT_SET_INVISIBLE, urand(120000, 300000));
-            me->GetMotionMaster()->MoveRandom(20.0f);
+            me->GetMotionMaster()->MoveRandom(30.0f);
             hasPassenger = false;
         }
 
@@ -9306,7 +9305,6 @@ public:
         {
             if (apply)
             {
-                me->StopMoving();
                 me->SetReactState(REACT_PASSIVE);
                 hasPassenger = true;
                 passenger->AddAura(SPELL_AEONAXX_WHELP_SUMMON, passenger);
@@ -9320,19 +9318,31 @@ public:
             }
         }
 
-        void PassengerRemoved(Unit* /*passenger*/, bool /*apply*/)
+        void PassengerRemoved(Unit* passenger, bool /*apply*/)
         {
+            if (passenger->HasAura(SPELL_AEONAXX_WHELP_SUMMON))
+                passenger->RemoveAurasDueToSpell(SPELL_AEONAXX_WHELP_SUMMON);
             me->setFaction(FACTION_AEONAXX_NEUTRAL);
             me->SetSpeed(MOVE_RUN, 2.4f, true);
-            me->DespawnOrUnsummon(120000);
+            me->SetVisible(false);
             unitPassenger = NULL;
             hasPassenger = false;
+            events.Reset();
+            if (me->isAlive())
+            {
+                me->DespawnOrUnsummon(5000);
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            }
         }
 
         void JustDied(Unit* /*killer*/)
         {
             unitPassenger = NULL;
             hasPassenger = false;
+        }
+
+        void OnCharmed(bool apply)
+        {
         }
 
         void DoAction(int32 action)
@@ -9370,12 +9380,14 @@ public:
                     {
                         me->SetVisible(false);
                         events.ScheduleEvent(EVENT_SET_VISIBLE, urand(120000, 300000));
+                        events.CancelEvent(EVENT_SET_INVISIBLE);
                         break;
                     }
                     case EVENT_SET_VISIBLE:
                     {
                         me->SetVisible(true);
                         events.ScheduleEvent(EVENT_SET_INVISIBLE, urand(120000, 300000));
+                        events.CancelEvent(EVENT_SET_VISIBLE);
                         break;
                     }
                     default:
