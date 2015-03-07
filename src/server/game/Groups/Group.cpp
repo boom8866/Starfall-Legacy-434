@@ -2565,7 +2565,7 @@ bool Group::IsGuildGroup(uint32 const guildId, bool AllInSameMap, bool AllInSame
     std::vector<Player*> members;
     // First we populate the array
     for (GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next()) // Loop trought all members
-        if (Player *player = itr->getSource())
+        if (Player* player = itr->getSource())
             if (player->GetGuildId() == guildId) // Check if it has a guild
                 members.push_back(player);
 
