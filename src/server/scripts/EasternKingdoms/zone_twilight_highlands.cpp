@@ -8436,6 +8436,7 @@ public:
         enum Id
         {
             NPC_TWILIGHT_WYRMKILLER     = 45748,
+            NPC_TWILIGHT_DRAKE          = 45788,
             SPELL_RETURN_TO_EARTH       = 85390,
             CREDIT_RETURNED             = 45503
         };
@@ -8448,7 +8449,7 @@ public:
                 {
                     if (target->GetTypeId() != TYPEID_UNIT)
                         return SPELL_FAILED_BAD_TARGETS;
-                    if (target->ToCreature()->GetEntry() != 45748 || target->HasAura(SPELL_RETURN_TO_EARTH))
+                    if ((target->ToCreature()->GetEntry() != NPC_TWILIGHT_WYRMKILLER && target->ToCreature()->GetEntry() != NPC_TWILIGHT_WYRMKILLER) || target->HasAura(SPELL_RETURN_TO_EARTH))
                         return SPELL_FAILED_BAD_TARGETS;
                     else
                         return SPELL_CAST_OK;

@@ -2965,7 +2965,8 @@ public:
 
     enum spellId
     {
-        SPELL_COSMETIC_ROPE     = 87926
+        SPELL_COSMETIC_ROPE     = 87926,
+        SPELL_TAHET_IMPRISONED  = 101422
     };
 
     enum questId
@@ -2981,7 +2982,6 @@ public:
             creature->SetStandState(UNIT_STAND_STATE_DEAD);
             creature->RemoveAllAuras();
             creature->CastStop();
-            creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             if (!caimas)
                 player->SummonCreature(NPC_ENTRY_CAIMAS, -11450.20f, -1145.05f, 3.74f, 4.71f, TEMPSUMMON_DEAD_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
             return true;
@@ -2997,8 +2997,11 @@ public:
 
         void InitializeAI()
         {
+            me->SetStandState(UNIT_STAND_STATE_STAND);
             me->SetReactState(REACT_PASSIVE);
+            me->CastSpell(me, SPELL_TAHET_IMPRISONED, true);
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             events.ScheduleEvent(EVENT_CAST_ROPE, 1000);
         }
 
