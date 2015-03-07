@@ -36,10 +36,45 @@ enum Yells
 
 enum Spells
 {
+    // Venoxis
+
+    // Totems
+    SPELL_VENOM_TOTEM_BEAM_LEFT     = 96536,
+    SPELL_VENOM_TOTEM_BEAM_RIGHT    = 96537,
+    SPELL_VENOM_TOTEM               = 96534,
+
+    SPELL_WORD_OF_HETHISS           = 96560,
+    SPELL_WHISPER_OF_HETHIS         = 96466,
+
+    SPELL_TOXIC_LINK                = 96475,
+
+    SPELL_BLESSING_OF_THE_SNAKE_GOD = 96512,
+    SPELL_POOL_OF_ACRID_TEARS       = 96515,
+    SPELL_BREATH_OF_HETHISS         = 96509,
+    SPELL_TRANSFORM_REMOVAL_PRIMER  = 96617,
+    SPELL_BLOOD_VENOM               = 96842, // Resize to 3 target
+    SPELL_VENOMOUS_WITHDRAWAL       = 96653,
+
+    // Bloodvenom
+    SPELL_BLOOD_VENOM_VISUAL        = 97110,
+    SPELL_VENOM_TOTAM_BEAM_CENTER   = 97098,
+    SPELL_BLOOD_VENOM_TRIGGER       = 97099,
+
+    // Venomous Effusion Stalker
+    SPELL_VENOMOUS_EFFUSION_TRIGGER = 96678,
+
+    // Venomous Effusion
+    SPELL_VENOMOUS_EFFUSION         = 96681,
 };
 
 enum Events
 {
+};
+
+Position const venomousEffusionStalkerPos[] =
+{
+    { -12013.51f, -1684.175f, 32.36689f, 2.490533f },
+    { -12003.96f, -1698.644f, 32.36689f, 5.730771f },
 };
 
 class boss_venoxis : public CreatureScript
