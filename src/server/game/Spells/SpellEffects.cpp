@@ -801,7 +801,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             if (m_caster->GetCharmerOrOwner())
                             {
                                 float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
-                                damage += int32((spellpower * 0.329f) / 2);
+                                damage += int32(spellpower * 0.329f);
                             }
                         }
                         break;

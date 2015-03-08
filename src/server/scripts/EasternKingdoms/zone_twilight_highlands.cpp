@@ -63,7 +63,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
         }
@@ -161,7 +160,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
         }
@@ -244,7 +242,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
         }
@@ -263,6 +260,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -336,7 +336,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
         }
@@ -6321,7 +6320,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && me->isInCombat())
                 return;
 
             events.Update(diff);
@@ -7374,7 +7373,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && me->isInCombat())
                 return;
 
             events.Update(diff);
@@ -7525,11 +7524,6 @@ public:
                 default:
                     break;
             }
-        }
-
-        void EnterEvadeMode()
-        {
-            _EnterEvadeMode();
         }
 
         void CompleteCreditAoE()
@@ -7894,7 +7888,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && me->isInCombat())
                 return;
 
             events.Update(diff);
@@ -8515,7 +8509,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
         }
@@ -9239,7 +9232,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
         }
@@ -9287,7 +9279,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet() && !attacker->ToTempSummon())
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -12371,6 +12363,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -12523,7 +12518,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && me->isInCombat())
                 return;
 
             events.Update(diff);
@@ -12798,7 +12793,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
         }
@@ -12826,6 +12820,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -13791,7 +13788,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             me->UpdateEntry(NPC_APEXAR);
             events.Reset();
@@ -13799,7 +13795,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && me->isInCombat())
                 return;
 
             events.Update(diff);
@@ -13897,7 +13893,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             me->UpdateEntry(NPC_AETHARON);
             events.Reset();
@@ -13905,7 +13900,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && me->isInCombat())
                 return;
 
             events.Update(diff);
@@ -13992,7 +13987,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             me->UpdateEntry(NPC_EDEMANTUS);
             events.Reset();
@@ -14000,7 +13994,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && me->isInCombat())
                 return;
 
             events.Update(diff);
@@ -14119,7 +14113,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             helperSpawned = false;
             events.Reset();
@@ -14127,7 +14120,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && me->isInCombat())
                 return;
 
             events.Update(diff);
@@ -14296,7 +14289,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             helperSpawned = false;
             events.Reset();
@@ -14304,7 +14296,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && me->isInCombat())
                 return;
 
             events.Update(diff);
@@ -14473,7 +14465,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             helperSpawned = false;
             events.Reset();
@@ -14481,7 +14472,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && me->isInCombat())
                 return;
 
             events.Update(diff);
@@ -15301,7 +15292,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
             initiateFound = false;
             me->GetMotionMaster()->MoveTargetedHome();
@@ -15957,7 +15947,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
             me->DespawnOrUnsummon(5000);
@@ -16021,7 +16010,7 @@ public:
             }
 
             // Safety distance check to prevent exit arena
-            if (me->GetDistance2d(-4184.26f, -5152.62f) > 90)
+            if (me->GetDistance2d(-4184.26f, -5152.62f) > 140)
             {
                 events.Reset();
                 EnterEvadeMode();
@@ -16125,7 +16114,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
             me->DespawnOrUnsummon(5000);
             if (Creature* gloomwing = me->FindNearestCreature(NPC_GLOOMWING, 1000.0f, true))
@@ -16198,7 +16186,7 @@ public:
             }
 
             // Safety distance check to prevent exit arena
-            if (me->GetDistance2d(-4184.26f, -5152.62f) > 90)
+            if (me->GetDistance2d(-4184.26f, -5152.62f) > 140)
             {
                 events.Reset();
                 EnterEvadeMode();
@@ -16302,7 +16290,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
             me->DespawnOrUnsummon(5000);
             if (Creature* nobbly = me->FindNearestCreature(NPC_NOBBLY, 1000.0f, true))
@@ -16375,7 +16362,7 @@ public:
             }
 
             // Safety distance check to prevent exit arena
-            if (me->GetDistance2d(-4184.26f, -5152.62f) > 90)
+            if (me->GetDistance2d(-4184.26f, -5152.62f) > 140)
             {
                 events.Reset();
                 EnterEvadeMode();
@@ -16488,7 +16475,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
             me->DespawnOrUnsummon(5000);
             if (Creature* calder = me->FindNearestCreature(NPC_CALDER, 1000.0f, true))
@@ -16647,7 +16633,7 @@ public:
             }
 
             // Safety distance check to prevent exit arena
-            if (me->GetDistance2d(-4184.26f, -5152.62f) > 90)
+            if (me->GetDistance2d(-4184.26f, -5152.62f) > 140)
             {
                 events.Reset();
                 EnterEvadeMode();
@@ -16852,7 +16838,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
             me->DespawnOrUnsummon(5000);
@@ -17038,7 +17023,7 @@ public:
             }
 
             // Safety distance check to prevent exit arena
-            if (me->GetDistance2d(-4184.26f, -5152.62f) > 90)
+            if (me->GetDistance2d(-4184.26f, -5152.62f) > 140)
             {
                 events.Reset();
                 EnterEvadeMode();
@@ -17221,7 +17206,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
             me->DespawnOrUnsummon(5000);
@@ -18047,7 +18031,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
             me->DespawnOrUnsummon(20000);
@@ -18325,7 +18308,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
             me->DespawnOrUnsummon(20000);
@@ -19039,7 +19021,6 @@ public:
         {
             if (me->GetPhaseMask() == 4)
             {
-                _EnterEvadeMode();
                 me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
                 me->GetMotionMaster()->MoveTargetedHome();
@@ -19350,7 +19331,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
         }
@@ -19546,7 +19526,6 @@ public:
                 me->RemoveAurasDueToSpell(SPELL_HORDE_BANNER);
                 evadeForced = false;
                 events.Reset();
-                _EnterEvadeMode();
             }
             else
             {
@@ -20106,7 +20085,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
         }
@@ -20196,7 +20174,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->DespawnOrUnsummon(1000);
             events.Reset();
         }
@@ -20590,7 +20567,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
         }
@@ -21070,7 +21046,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->DespawnOrUnsummon(2000);
             events.Reset();
         }
