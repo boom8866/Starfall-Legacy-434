@@ -3983,12 +3983,12 @@ public:
                 {
                     if (reinforcementsTimer <= diff)
                     {
-                        if (roll_chance_f(50))
-                            me->SummonCreature(NPC_ENTRY_STONETROG_REINFORCEMENT, me->GetPositionX() - (urand(1, 2)), me->GetPositionY() - (urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000);
+                        if (roll_chance_f(75))
+                            me->SummonCreature(NPC_ENTRY_STONETROG_REINFORCEMENT, me->GetPositionX()-(urand(1, 2)), me->GetPositionY()-(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 120000);
                         else
-                            me->SummonCreature(NPC_ENTRY_FUNGAL_TERROR, me->GetPositionX() - (urand(1, 2)), me->GetPositionY() - (urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000);
+                            me->SummonCreature(NPC_ENTRY_FUNGAL_TERROR, me->GetPositionX()-(urand(1, 2)), me->GetPositionY()-(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 120000);
 
-                        reinforcementsTimer = 7*IN_MILLISECONDS;
+                        reinforcementsTimer = 3*IN_MILLISECONDS;
                     }
                     else
                         reinforcementsTimer -= diff;
@@ -3998,12 +3998,12 @@ public:
                 {
                     if (reinforcementsTimer <= diff)
                     {
-                        if (roll_chance_f(50))
-                            me->SummonCreature(NPC_ENTRY_FUNGAL_TERROR, me->GetPositionX()+(urand(1, 2)), me->GetPositionY()+(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000);
+                        if (roll_chance_f(75))
+                            me->SummonCreature(NPC_ENTRY_FUNGAL_TERROR, me->GetPositionX()+(urand(1, 2)), me->GetPositionY()+(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 120000);
                         else
-                            me->SummonCreature(NPC_ENTRY_STONETROG_REINFORCEMENT, me->GetPositionX() + (urand(1, 2)), me->GetPositionY() + (urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000);
+                            me->SummonCreature(NPC_ENTRY_STONETROG_REINFORCEMENT, me->GetPositionX()+(urand(1, 2)), me->GetPositionY()+(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 120000);
 
-                        reinforcementsTimer = 7*IN_MILLISECONDS;
+                        reinforcementsTimer = 3*IN_MILLISECONDS;
                     }
                     else
                         reinforcementsTimer -= diff;
@@ -6246,9 +6246,15 @@ public:
             MOVE_POINT_LAVAGROUND   = 1
         };
 
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        {
+            damage = 0;
+        }
+
         void Reset()
         {
             startTimer = 100;
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             me->SetSpeed(MOVE_RUN, 5.0f);
             me->SetSpeed(MOVE_WALK, 5.0f);
             me->GetHomePosition(x, y, z, o);
