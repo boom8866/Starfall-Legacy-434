@@ -1427,7 +1427,7 @@ public:
         {
             if (apply)
             {
-                if (playerInvoker && playerInvoker != NULL && playerInvoker->isInWorld())
+                if (playerInvoker && playerInvoker != NULL && playerInvoker->IsInWorld())
                     TalkWithDelay(1000, 0, playerInvoker->GetGUID());
             }
             else
