@@ -1800,62 +1800,26 @@ public:
         enum eventId
         {
             EVENT_CHECK_FLEEING_TIME    = 1,
-            EVENT_CHECK_HEALTH
+            EVENT_CHECK_FLEE_CHANCE
         };
 
-        class eventEvade : public BasicEvent
+        npc_frightened_partygoerAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void EnterCombat(Unit* /*attacker*/)
         {
-            public:
-                explicit eventEvade(Creature* creature) : creature(creature) {}
-
-            bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
-            {
-                creature->AI()->Reset();
-                creature->AI()->EnterEvadeMode();
-                return true;
-            }
-
-        private:
-            Creature* creature;
-        };
-
-        npc_frightened_partygoerAI(Creature* creature) : ScriptedAI(creature) {creatureAttacker = NULL;}
-
-        void DoAction(int32 action)
-        {
-            switch (action)
-            {
-                case ACTION_SET_FLEEING:
-                {
-                    if (creatureAttacker && creatureAttacker != NULL)
-                    {
-                        me->AttackStop();
-                        me->SetWalk(false);
-                        me->GetMotionMaster()->MoveFleeing(creatureAttacker, 6000);
-                        me->m_Events.AddEvent(new eventEvade(me), (me)->m_Events.CalculateTime(6100));
-                        me->SetHealth(me->GetMaxHealth());
-                    }
-                    break;
-                }
-                default:
-                    break;
-            }
+            events.ScheduleEvent(EVENT_CHECK_FLEE_CHANCE, 5000);
         }
 
-        void Reset()
+        void JustDied(Unit* /*killer*/)
         {
-            creatureAttacker = NULL;
-        }
-
-        void EnterCombat(Unit* attacker)
-        {
-            creatureAttacker = attacker;
-            events.ScheduleEvent(EVENT_CHECK_FLEEING_TIME, urand(6000, 8000));
-            events.ScheduleEvent(EVENT_CHECK_HEALTH, 2000);
+            events.Reset();
         }
 
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -1864,17 +1828,26 @@ public:
                 {
                     case EVENT_CHECK_FLEEING_TIME:
                     {
-                        if (me->isInCombat())
-                            DoAction(ACTION_SET_FLEEING);
-                        else
-                            events.ScheduleEvent(EVENT_CHECK_FLEEING_TIME, urand(6000, 8000));
+                        if (!me->isAlive())
+                        {
+                            events.CancelEvent(EVENT_CHECK_FLEEING_TIME);
+                            break;
+                        }
+                        me->CombatStop();
+                        me->SetHealth(me->GetMaxHealth());
+                        EnterEvadeMode();
+                        events.Reset();
                         break;
                     }
-                    case EVENT_CHECK_HEALTH:
+                    case EVENT_CHECK_FLEE_CHANCE:
                     {
-                        if (me->GetHealthPct() < 25)
-                            events.ScheduleEvent(EVENT_CHECK_FLEEING_TIME, 1000);
-                        events.ScheduleEvent(EVENT_CHECK_HEALTH, 2000);
+                        if (roll_chance_f(35))
+                        {
+                            events.ScheduleEvent(EVENT_CHECK_FLEEING_TIME, 1);
+                            events.CancelEvent(EVENT_CHECK_FLEE_CHANCE);
+                            break;
+                        }
+                        events.ScheduleEvent(EVENT_CHECK_FLEE_CHANCE, 3500);
                         break;
                     }
                     default:
@@ -1884,14 +1857,85 @@ public:
 
             DoMeleeAttackIfReady();
         }
-
-    protected:
-        Unit* creatureAttacker;
     };
 
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_frightened_partygoerAI(creature);
+    }
+};
+
+class npc_pirate_party_crasher : public CreatureScript
+{
+public:
+    npc_pirate_party_crasher() : CreatureScript("npc_pirate_party_crasher")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_SWASHBUCKLING_SLICE   = 75361
+    };
+
+    enum eventId
+    {
+        EVENT_SWASHBUCKLING_SLICE   = 1
+    };
+
+    struct npc_pirate_party_crasherAI : public ScriptedAI
+    {
+        npc_pirate_party_crasherAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_SWASHBUCKLING_SLICE, 3000);
+        }
+
+        void JustDied(Unit* /*who*/)
+        {
+            events.Reset();
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SWASHBUCKLING_SLICE:
+                    {
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_SWASHBUCKLING_SLICE);
+                        events.RescheduleEvent(EVENT_SWASHBUCKLING_SLICE, urand(5000, 8000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_pirate_party_crasherAI(creature);
     }
 };
 
@@ -1964,6 +2008,7 @@ void AddSC_kezan()
     new npc_buccaneer_roughness();
     new spell_awesome_party_ensemble();
     new npc_frightened_partygoer();
+    new npc_pirate_party_crasher();
     new spell_hobart_ingenious_cap();
     new go_first_bank_of_kezan();
 }
