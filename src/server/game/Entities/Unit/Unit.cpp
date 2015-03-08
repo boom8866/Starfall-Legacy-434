@@ -396,10 +396,6 @@ void Unit::Update(uint32 p_time)
         // Check UNIT_STATE_MELEE_ATTACKING or UNIT_STATE_CHASE (without UNIT_STATE_FOLLOW in this case) so pets can reach far away
         // targets without stopping half way there and running off.
         // These flags are reset after target dies or another command is given.
-
-        // Use this check to prevent permanent combat while questing in world zone just
-        // walking through two npc's that are fighting eachother
-        // Use normal check
         if (m_HostileRefManager.isEmpty())
         {
             // m_CombatTimer set at aura start and it will be freeze until aura removing
@@ -407,20 +403,6 @@ void Unit::Update(uint32 p_time)
                 ClearInCombat();
             else
                 m_CombatTimer -= p_time;
-        }
-        else
-        {
-            if (!GetInstanceId())
-            {
-                if (m_CombatTimer <= p_time)
-                {
-                    if (!GetDamageTakenInPastSecs(5) && !GetDamageDoneInPastSecs(5) && !getVictim())
-                        ClearInCombat();
-                    m_CombatTimer = 5100;
-                }
-                else
-                    m_CombatTimer -= p_time;
-            }
         }
     }
 
@@ -12563,17 +12545,15 @@ bool Unit::IsImmunedToDamage(SpellSchoolMask shoolMask)
 {
     // If m_immuneToSchool type contain this school type, IMMUNE damage.
     SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
-    if (!schoolList.empty())
-        for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
-            if (itr->type & shoolMask)
-                return true;
+    for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
+        if (itr->type & shoolMask)
+            return true;
 
     // If m_immuneToDamage type contain magic, IMMUNE damage.
     SpellImmuneList const& damageList = m_spellImmune[IMMUNITY_DAMAGE];
-    if (!damageList.empty())
-        for (SpellImmuneList::const_iterator itr = damageList.begin(); itr != damageList.end(); ++itr)
-            if (itr->type & shoolMask)
-                return true;
+    for (SpellImmuneList::const_iterator itr = damageList.begin(); itr != damageList.end(); ++itr)
+        if (itr->type & shoolMask)
+            return true;
 
     return false;
 }
@@ -17451,19 +17431,16 @@ void Unit::SetControlled(bool apply, UnitState state)
         switch (state)
         {
             case UNIT_STATE_STUNNED:
-            {
                 SetStunned(true);
+                if (HasUnitState(UNIT_STATE_FLEEING))
+                    SetFeared(false);
                 CastStop();
                 break;
-            }
             case UNIT_STATE_ROOT:
-            {
                 if (!HasUnitState(UNIT_STATE_STUNNED))
                     SetRooted(true);
                 break;
-            }
             case UNIT_STATE_CONFUSED:
-            {
                 if (!HasUnitState(UNIT_STATE_STUNNED))
                 {
                     ClearUnitState(UNIT_STATE_MELEE_ATTACKING);
@@ -17472,9 +17449,7 @@ void Unit::SetControlled(bool apply, UnitState state)
                     CastStop();
                 }
                 break;
-            }
             case UNIT_STATE_FLEEING:
-            {
                 if (!HasUnitState(UNIT_STATE_STUNNED | UNIT_STATE_CONFUSED))
                 {
                     ClearUnitState(UNIT_STATE_MELEE_ATTACKING);
@@ -17484,7 +17459,6 @@ void Unit::SetControlled(bool apply, UnitState state)
                     CastStop();
                 }
                 break;
-            }
             default:
                 break;
         }
@@ -17494,37 +17468,29 @@ void Unit::SetControlled(bool apply, UnitState state)
         switch (state)
         {
             case UNIT_STATE_STUNNED:
-            {
                 if (HasAuraType(SPELL_AURA_MOD_STUN))
                     return;
 
                 SetStunned(false);
                 break;
-            }
             case UNIT_STATE_ROOT:
-            {
                 if (HasAuraType(SPELL_AURA_MOD_ROOT) || GetVehicle())
                     return;
 
                 SetRooted(false);
                 break;
-            }
             case UNIT_STATE_CONFUSED:
-            {
                 if (HasAuraType(SPELL_AURA_MOD_CONFUSE))
                     return;
 
                 SetConfused(false);
                 break;
-            }
             case UNIT_STATE_FLEEING:
-            {
                 if (HasAuraType(SPELL_AURA_MOD_FEAR))
                     return;
 
                 SetFeared(false);
                 break;
-            }
             default:
                 break;
         }

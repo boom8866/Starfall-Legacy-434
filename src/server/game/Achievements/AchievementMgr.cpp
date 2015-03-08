@@ -2730,7 +2730,8 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
                 if (!unit || !unit->HasAura(reqValue))
                     return false;
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_HAS_AURA_TYPE: // 11
-                return false;
+                if (!unit || !unit->HasAuraType(AuraType(reqValue)))
+                    return false;
                 break;
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_ITEM_QUALITY_MIN: // 14
             {
