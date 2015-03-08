@@ -6690,6 +6690,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -9919,7 +9922,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             me->DespawnCreaturesInArea(NPC_TITANIC_GUARDIAN_METEOR);
             me->DespawnCreaturesInArea(NPC_TITANIC_METEOR);
@@ -10863,6 +10865,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
