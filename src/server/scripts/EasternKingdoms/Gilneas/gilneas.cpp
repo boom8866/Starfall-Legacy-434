@@ -1168,7 +1168,7 @@ public:
         void WaypointReached(uint32 point)
         {
             if (point == 2)
-                if (me->GetEntry() == NPC_WORGEN_ALPHA_SW || NPC_WORGEN_RUNT_SW)
+                if (me->GetEntry() == NPC_WORGEN_ALPHA_SW ||  me->GetEntry() == NPC_WORGEN_RUNT_SW)
                     StartAttack();
 
             if (point == 5)
