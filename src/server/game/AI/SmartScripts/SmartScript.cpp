@@ -1074,7 +1074,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
         }
         case SMART_ACTION_SET_INVINCIBILITY_HP_LEVEL:
         {
-            if (!me || !me->isAlive())
+            if (!me)
                 break;
 
             SmartAI* ai = CAST_AI(SmartAI, me->AI());
@@ -1082,9 +1082,10 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             if (!ai)
                 break;
 
-            ai->SetInvincibilityHpLevel(me->GetMaxHealth());
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_SCHOOL_DAMAGE, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INSTAKILL, true);
+            if (e.action.invincHP.percent)
+                ai->SetInvincibilityHpLevel(me->CountPctFromMaxHealth(e.action.invincHP.percent));
+            else
+                ai->SetInvincibilityHpLevel(e.action.invincHP.minHP);
             break;
         }
         case SMART_ACTION_SET_DATA:
