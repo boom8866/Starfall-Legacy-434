@@ -27,7 +27,7 @@ enum Spells
     SPELL_TOXIC_LINK                = 96475,
     SPELL_TOXIC_LINK_AURA           = 96477,
     SPELL_TOXIC_EXPLOSION           = 96489,
-    SPELL_BLESSING_OF_THE_SNAKE_GOD = 96512,
+    SPELL_BLESSING_OF_THE_SNAKE_GOD = 97354,
     SPELL_POOL_OF_ACRID_TEARS       = 96515,
     SPELL_BREATH_OF_HETHISS         = 96509,
     SPELL_TRANSFORM_REMOVAL_PRIMER  = 96617,
@@ -64,6 +64,8 @@ enum Events
     EVENT_ABSORB_ACRID,
     EVENT_BLOODVENOM,
     EVENT_VENOM_WITHDRAWAL,
+    EVENT_FALL,
+    EVENT_ATTACK,
 
     // Venomous Effusion
     EVENT_CAST_EFFUSION,
@@ -286,8 +288,11 @@ class boss_high_priest_venoxis : public CreatureScript
                             events.ScheduleEvent(EVENT_TRANSFORM_REMOVAL_PRIMER, 34000);
                             break;
                         case EVENT_BREATH_OF_HETHISS:
+                            me->SetReactState(REACT_PASSIVE);
+                            me->AttackStop();
                             DoCast(me, SPELL_BREATH_OF_HETHISS);
                             events.ScheduleEvent(EVENT_BREATH_OF_HETHISS, 23500);
+                            events.ScheduleEvent(EVENT_ATTACK, 3100);
                             break;
                         case EVENT_POOL_OF_ACRID_TEARS:
                             if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 0, true, 0))
@@ -297,6 +302,7 @@ class boss_high_priest_venoxis : public CreatureScript
                         case EVENT_TRANSFORM_REMOVAL_PRIMER:
                             events.CancelEvent(EVENT_BREATH_OF_HETHISS);
                             events.CancelEvent(EVENT_POOL_OF_ACRID_TEARS);
+                            events.CancelEvent(EVENT_ATTACK);
                             DoCast(me, SPELL_TRANSFORM_REMOVAL_PRIMER, true);
                             me->SetReactState(REACT_PASSIVE);
                             me->CastStop();
@@ -327,8 +333,31 @@ class boss_high_priest_venoxis : public CreatureScript
                             events.ScheduleEvent(EVENT_VENOM_WITHDRAWAL, 17000);
                             break;
                         case EVENT_VENOM_WITHDRAWAL:
+                        {
                             Talk(SAY_ANNOUNCE_EXHAUSTED);
+                            me->RemoveAurasDueToSpell(SPELL_BLESSING_OF_THE_SNAKE_GOD);
                             DoCast(me, SPELL_VENOM_WITHDRAWAL);
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            events.ScheduleEvent(EVENT_FALL, 750);
+                            events.ScheduleEvent(EVENT_VENOMOUS_EFFUSION, 13000);
+                            events.ScheduleEvent(EVENT_WHISPERS_OF_HETHISS, 15000);
+                            events.ScheduleEvent(EVENT_TOXIC_LINK, 41000);
+                            events.ScheduleEvent(EVENT_BLESSING_OF_THE_SNAKE_GOD, 60500);
+
+                            std::list<Creature*> units;
+                            GetCreatureListWithEntryInGrid(units, me, NPC_VENOMOUS_EFFUSION, 300.0f);
+                            if (units.empty())
+                                break;
+
+                            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                                (*itr)->RemoveAllAuras();
+                            break;
+                        }
+                        case EVENT_FALL:
+                            me->GetMotionMaster()->MoveFall(0);
+                            break;
+                        case EVENT_ATTACK:
+                            me->SetReactState(REACT_AGGRESSIVE);
                             break;
                         default:
                             break;
@@ -416,6 +445,7 @@ public:
                 venoxis->AI()->JustSummoned(me);
             }
 
+            me->MonsterYell("Hey, listen! Im working... more or less...", LANG_UNIVERSAL, 0);
             me->GetMotionMaster()->MoveFollow(summoner, 0.0f, 0.0f);
         }
 
