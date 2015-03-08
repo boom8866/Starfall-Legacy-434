@@ -3844,6 +3844,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->TargetA = TARGET_SRC_CASTER;
                 spellInfo->TargetB = TARGET_UNIT_TARGET_ANY;
                 break;
+            // Zul'Gurub Spells
+            case 96653:
+                spellInfo->Effects[EFFECT_2].MiscValue = 900;
+                break;
             // Halls Of Origination spells
             // * Temple Guardian Anhuur
             case 76606: // Disable Beacon Beams L

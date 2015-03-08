@@ -56,6 +56,13 @@ enum CreatureIds
     NPC_ZANZIL                      = 52053,
     NPC_JINDO                       = 52148,
 
+    // Venoxis
+    NPC_BLOODVENOM                  = 52525,
+    NPC_VENOMOUS_EFFUSION_STALKER   = 52302,
+    NPC_VENOMOUS_EFFUSION           = 52288,
+    NPC_GENERAL_PURPOSE_BUNNY       = 45979,
+    NPC_POOL_OF_ACRID_TEARS         = 52197,
+
     // Cache of Madness
     NPC_HAZZARAH                    = 52271,
     NPC_RENATAKI                    = 52269,
