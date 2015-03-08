@@ -269,7 +269,7 @@ public:
                     summons.Summon(summon);
                     break;
                 case NPC_WING_TENTACLE:
-                    if (wingRight = NULL)
+                    if (wingRight == NULL)
                     {
                         wingRight = summon;
                         summon->CastSpell(summon, SPELL_REDUCE_DODGE_PARRY, true);

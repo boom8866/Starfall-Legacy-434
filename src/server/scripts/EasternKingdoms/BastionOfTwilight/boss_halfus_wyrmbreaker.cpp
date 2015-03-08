@@ -214,7 +214,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 InitializeDragons();
                 instance->SetBossState(DATA_HALFUS_WYRMBREAKER, NOT_STARTED);
                 if (GameObject* cage = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_CAGE)))
-                    if (_combinationPicked != 2 || _combinationPicked != 3 || _combinationPicked != 4 || _combinationPicked != 5)
+                    if (_combinationPicked != 2 && _combinationPicked != 3 && _combinationPicked != 4 && _combinationPicked != 5)
                         cage->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE | GO_FLAG_IN_USE);
             }
 
@@ -380,7 +380,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
             {
                 // Slate Dragon Setup
                 me->SummonCreature(NPC_SLATE_DRAGON, SlateDragonSetup[0], TEMPSUMMON_MANUAL_DESPAWN);
-                for (uint8 i = 1; i < 7; i++)
+                for (uint8 i = 1; i < 6; i++)
                     me->SummonCreature(NPC_SPIKE, SlateDragonSetup[i], TEMPSUMMON_MANUAL_DESPAWN);
 
                 // Nether Scion Setup
