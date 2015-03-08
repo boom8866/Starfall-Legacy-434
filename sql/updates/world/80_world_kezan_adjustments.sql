@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `ScriptName`='npc_pirate_party_crasher' WHERE `entry`=35200;
