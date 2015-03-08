@@ -128,8 +128,8 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Seduction
             else if (spellproto->SpellFamilyFlags[1] & 0x10000000)
                 return DIMINISHING_FEAR;
-            // Curse of Exhaustion
-            else if (spellproto->Id == 18223)
+            // Curse of Exhaustion & Dragon's Breath
+            else if (spellproto->Id == 18223 || spellproto->Id == 31661)
                 return DIMINISHING_LIMITONLY;
             break;
         }
@@ -3981,8 +3981,8 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 88686: // Holy Word: Sanctuary 6yd Heal
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(29);
                 break;
-            case 81782: // Power Word: Barrier
-                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(39);
+            case 81781: // Power Word: Barrier
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
                 break;
             case 89485: // Inner Focus
                 spellInfo->ProcCharges = 1;
