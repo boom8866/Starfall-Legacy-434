@@ -1426,7 +1426,10 @@ public:
         void PassengerBoarded(Unit* passenger, int8 SeatId, bool apply)
         {
             if (apply)
-                TalkWithDelay(1000, 0, playerInvoker->GetGUID());
+            {
+                if (playerInvoker && playerInvoker != NULL && playerInvoker->isInWorld())
+                    TalkWithDelay(1000, 0, playerInvoker->GetGUID());
+            }
             else
                 me->DespawnOrUnsummon(1000);
         }
@@ -1437,7 +1440,10 @@ public:
             {
                 case ACTION_SUMMON_DEATHWING:
                 {
-                    if (!playerInvoker || playerInvoker == NULL || !playerInvoker->ToPlayer())
+                    if (!playerInvoker || playerInvoker == NULL || !playerInvoker->IsInWorld())
+                        return;
+
+                    if (playerInvoker->GetTypeId() != TYPEID_PLAYER)
                         return;
 
                     if (eventInProgress)
@@ -1467,8 +1473,9 @@ public:
                 {
                     case EVENT_PLAY_CHEER:
                     {
-                        if (playerInvoker && playerInvoker != NULL && playerInvoker->ToPlayer())
-                            me->PlayDirectSound(PLAY_SOUND_CHEER, playerInvoker->ToPlayer());
+                        if (playerInvoker && playerInvoker != NULL && playerInvoker->IsInWorld())
+                            if (playerInvoker->GetTypeId() == TYPEID_PLAYER)
+                                me->PlayDirectSound(PLAY_SOUND_CHEER, playerInvoker->ToPlayer());
                         events.ScheduleEvent(EVENT_PLAY_CHEER, urand (2000, 2500));
                         break;
                     }
@@ -1577,20 +1584,22 @@ public:
             {
                 case 1:
                 {
-                    if (playerInvoker && playerInvoker != NULL && playerInvoker->ToPlayer())
-                        me->PlayDirectSound(DEATHWING_APPEAR_2, playerInvoker->ToPlayer());
+                    if (playerInvoker && playerInvoker != NULL && playerInvoker->IsInWorld())
+                        if (playerInvoker->GetTypeId() == TYPEID_PLAYER)
+                            me->PlayDirectSound(DEATHWING_APPEAR_2, playerInvoker->ToPlayer());
                     break;
                 }
                 case 4:
                 case 5:
                 {
-                    if (playerInvoker && playerInvoker != NULL && playerInvoker->ToPlayer())
-                    {
-                        playerInvoker->CastSpell(playerInvoker, SPELL_DEATHWING_EARTHQUAKE, true);
-                        me->PlayDirectSound(DEATHWING_APPEAR_3, playerInvoker->ToPlayer());
-                        if (playerInvoker->GetVehicle())
-                            playerInvoker->GetVehicle()->RemoveAllPassengers();
-                    }
+                    if (playerInvoker && playerInvoker != NULL && playerInvoker->IsInWorld())
+                        if (playerInvoker->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            playerInvoker->CastSpell(playerInvoker, SPELL_DEATHWING_EARTHQUAKE, true);
+                            me->PlayDirectSound(DEATHWING_APPEAR_3, playerInvoker->ToPlayer());
+                            if (Vehicle* invokerVehicle = playerInvoker->GetVehicle())
+                                invokerVehicle->RemoveAllPassengers();
+                        }
                     break;
                 }
                 default:
@@ -1678,7 +1687,10 @@ public:
         void PassengerBoarded(Unit* passenger, int8 SeatId, bool apply)
         {
             if (apply)
-                TalkWithDelay(500, 0, playerInvoker->GetGUID());
+            {
+                if (playerInvoker && playerInvoker != NULL && playerInvoker->IsInWorld())
+                    TalkWithDelay(500, 0, playerInvoker->GetGUID());
+            }
         }
 
         void DoAction(int32 action)
@@ -1687,14 +1699,17 @@ public:
             {
                 case ACTION_SUMMON_SHARKS:
                 {
-                    playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_00, true);
-                    playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_01, true);
-                    playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_02, true);
-                    playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_03, true);
-                    playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_04, true);
-                    playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_05, true);
-                    playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_06, true);
-                    playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_07, true);
+                    if (playerInvoker && playerInvoker != NULL && playerInvoker->IsInWorld())
+                    {
+                        playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_00, true);
+                        playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_01, true);
+                        playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_02, true);
+                        playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_03, true);
+                        playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_04, true);
+                        playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_05, true);
+                        playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_06, true);
+                        playerInvoker->CastSpell(playerInvoker, SPELL_STEAMWHEEDLE_SHARK_07, true);
+                    }
                     break;
                 }
                 default:
@@ -1712,8 +1727,9 @@ public:
                 {
                     case EVENT_PLAY_CHEER:
                     {
-                        if (playerInvoker && playerInvoker != NULL && playerInvoker->ToPlayer())
-                            me->PlayDirectSound(PLAY_SOUND_CHEER, playerInvoker->ToPlayer());
+                        if (playerInvoker && playerInvoker != NULL && playerInvoker->IsInWorld())
+                            if (playerInvoker->GetTypeId() == TYPEID_PLAYER)
+                                me->PlayDirectSound(PLAY_SOUND_CHEER, playerInvoker->ToPlayer());
                         events.ScheduleEvent(EVENT_PLAY_CHEER, urand (2000, 2500));
                         break;
                     }
