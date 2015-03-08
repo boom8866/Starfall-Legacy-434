@@ -2869,11 +2869,11 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
         return SPELL_MISS_NONE;
 
     // All non-damaging interrupts off the global cooldown will now always hit the target. This includes Pummel, Kick, Mind Freeze, Rebuke, Skull Bash, Counterspell, Wind Shear, Solar Beam, Silencing Shot, and related player pet abilities.
-    if (spell->Effects[EFFECT_0].Effect == SPELL_EFFECT_INTERRUPT_CAST || spell->Effects[EFFECT_1].Effect == SPELL_EFFECT_INTERRUPT_CAST)
+    /*if (spell->Effects[EFFECT_0].Effect == SPELL_EFFECT_INTERRUPT_CAST || spell->Effects[EFFECT_1].Effect == SPELL_EFFECT_INTERRUPT_CAST)
     {
         if (spell->StartRecoveryCategory == 0 && spell->StartRecoveryTime == 0)
             return SPELL_MISS_NONE;
-    }
+    }*/
 
     // Chance resist mechanic (select max value from every mechanic spell effect)
     int32 resist_chance = victim->GetMechanicResistChance(spell) * 100;

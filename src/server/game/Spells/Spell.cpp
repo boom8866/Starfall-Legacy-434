@@ -6627,6 +6627,10 @@ SpellCastResult Spell::CheckPower()
     Powers powerType = Powers(m_spellInfo->PowerType);
     if (int32(m_caster->GetPower(powerType)) < m_powerCost)
     {
+        // Dark Simulacrum
+        if (powerType == POWER_MANA && m_caster->getClass() == CLASS_DEATH_KNIGHT && m_caster->HasAura(77616))
+            return SPELL_CAST_OK;
+
         // Exception for Explosive Shot when Lock and Load is active
         switch (m_spellInfo->Id)
         {
