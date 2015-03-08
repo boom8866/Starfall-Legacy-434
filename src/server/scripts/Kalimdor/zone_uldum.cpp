@@ -516,7 +516,8 @@ public:
                         {
                             if (Vehicle* veh = playerOwner->GetVehicle())
                             {
-                                if (Unit* passenger = veh->GetPassenger(0))
+                                Unit* passenger = veh->GetPassenger(0);
+                                if (passenger && passenger != NULL && passenger->IsInWorld())
                                     passenger->ChangeSeat(2, true);
                             }
                         }
@@ -529,7 +530,8 @@ public:
                         {
                             if (Vehicle* veh = playerOwner->GetVehicle())
                             {
-                                if (Unit* passenger = veh->GetPassenger(2))
+                                Unit* passenger = veh->GetPassenger(2);
+                                if (passenger && passenger != NULL && passenger->IsInWorld())
                                     passenger->ChangeSeat(1, true);
                             }
                         }
@@ -563,9 +565,10 @@ public:
                         events.ScheduleEvent(EVENT_SEAT_UNDER_ATTACK, 6000);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
-                            if (Vehicle* vehicle = playerOwner->GetVehicle())
+                            if (Vehicle* veh = playerOwner->GetVehicle())
                             {
-                                if (Unit* passenger = vehicle->GetPassenger(1))
+                                Unit* passenger = veh->GetPassenger(1);
+                                if (passenger && passenger != NULL && passenger->IsInWorld())
                                     passenger->ChangeSeat(0, true);
                             }
                         }
@@ -578,9 +581,10 @@ public:
                         me->GetMotionMaster()->MoveJump(-8992.04f, -1663.47f, 108.99f, 25.0f, 25.0f, POINT_RIDGE);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
-                            if (Vehicle* vehicle = playerOwner->GetVehicle())
+                            if (Vehicle* veh = playerOwner->GetVehicle())
                             {
-                                if (Unit* passenger = vehicle->GetPassenger(0))
+                                Unit* passenger = veh->GetPassenger(0);
+                                if (passenger && passenger != NULL && passenger->IsInWorld())
                                     passenger->ChangeSeat(2, true);
                             }
                         }
@@ -2961,7 +2965,8 @@ public:
 
     enum spellId
     {
-        SPELL_COSMETIC_ROPE     = 87926
+        SPELL_COSMETIC_ROPE     = 87926,
+        SPELL_TAHET_IMPRISONED  = 101422
     };
 
     enum questId
@@ -2977,7 +2982,6 @@ public:
             creature->SetStandState(UNIT_STAND_STATE_DEAD);
             creature->RemoveAllAuras();
             creature->CastStop();
-            creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             if (!caimas)
                 player->SummonCreature(NPC_ENTRY_CAIMAS, -11450.20f, -1145.05f, 3.74f, 4.71f, TEMPSUMMON_DEAD_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
             return true;
@@ -2991,9 +2995,13 @@ public:
 
         EventMap events;
 
-        void Reset()
+        void InitializeAI()
         {
+            me->SetStandState(UNIT_STAND_STATE_STAND);
             me->SetReactState(REACT_PASSIVE);
+            me->CastSpell(me, SPELL_TAHET_IMPRISONED, true);
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             events.ScheduleEvent(EVENT_CAST_ROPE, 1000);
         }
 
@@ -3483,10 +3491,19 @@ public:
                     case EVENT_JUMP_ON_TARGET:
                     {
                         events.CancelEvent(EVENT_JUMP_ON_TARGET);
-                        if (targetInvoker && targetInvoker != NULL)
+                        if (targetInvoker && targetInvoker != NULL && targetInvoker->IsInWorld())
                         {
-                            if (targetInvoker->IsVehicle())
-                                me->EnterVehicle(targetInvoker, urand(0,8));
+                            if (targetInvoker->GetVehicleKit())
+                            {
+                                if (!targetInvoker->GetVehicleKit()->GetAvailableSeatCount())
+                                {
+                                    me->DisappearAndDie();
+                                    break;
+                                }
+
+                                me->GetMotionMaster()->MovementExpired(false);
+                                me->EnterVehicle(targetInvoker, urand(0, 7));
+                            }
                         }
                         break;
                     }
@@ -6673,6 +6690,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -9902,7 +9922,6 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             me->DespawnCreaturesInArea(NPC_TITANIC_GUARDIAN_METEOR);
             me->DespawnCreaturesInArea(NPC_TITANIC_METEOR);
@@ -10846,6 +10865,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())

@@ -6246,9 +6246,15 @@ public:
             MOVE_POINT_LAVAGROUND   = 1
         };
 
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        {
+            damage = 0;
+        }
+
         void Reset()
         {
             startTimer = 100;
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             me->SetSpeed(MOVE_RUN, 5.0f);
             me->SetSpeed(MOVE_WALK, 5.0f);
             me->GetHomePosition(x, y, z, o);

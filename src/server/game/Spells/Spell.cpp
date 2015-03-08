@@ -6651,6 +6651,11 @@ SpellCastResult Spell::CheckPower()
                 break;
             }
         }
+
+        // Divine Purpose will exclude holy power cost in any case
+        if (m_spellInfo->PowerType == POWER_HOLY_POWER && m_caster->HasAura(90174))
+            return SPELL_CAST_OK;
+
         return SPELL_FAILED_NO_POWER;
     }
     else
