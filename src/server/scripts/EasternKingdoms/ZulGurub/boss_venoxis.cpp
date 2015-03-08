@@ -24,17 +24,15 @@ enum Spells
     // Venoxis
     SPELL_WORD_OF_HETHISS           = 96560,
     SPELL_WHISPERS_OF_HETHIS        = 96466,
-
     SPELL_TOXIC_LINK                = 96475,
     SPELL_TOXIC_LINK_AURA           = 96477,
     SPELL_TOXIC_EXPLOSION           = 96489,
-
     SPELL_BLESSING_OF_THE_SNAKE_GOD = 96512,
     SPELL_POOL_OF_ACRID_TEARS       = 96515,
     SPELL_BREATH_OF_HETHISS         = 96509,
     SPELL_TRANSFORM_REMOVAL_PRIMER  = 96617,
-    SPELL_BLOOD_VENOM               = 96842, // Resize to 3 target
-    SPELL_VENOMOUS_WITHDRAWAL       = 96653,
+    SPELL_BLOODVENOM                = 96842,
+    SPELL_VENOM_WITHDRAWAL          = 96653,
 
     // Bloodvenom
     SPELL_BLOOD_VENOM_VISUAL        = 97110,
@@ -46,6 +44,9 @@ enum Spells
 
     // Venomous Effusion
     SPELL_VENOMOUS_EFFUSION         = 96681,
+
+    // Pool of Acrid Tears
+    SPELL_VENOXIS_ULT_MISSILE       = 96634,
 };
 
 enum Events
@@ -56,6 +57,13 @@ enum Events
     EVENT_WHISPERS_OF_HETHISS,
     EVENT_APPLY_IMMUNITY,
     EVENT_TOXIC_LINK,
+    EVENT_BLESSING_OF_THE_SNAKE_GOD,
+    EVENT_BREATH_OF_HETHISS,
+    EVENT_POOL_OF_ACRID_TEARS,
+    EVENT_TRANSFORM_REMOVAL_PRIMER,
+    EVENT_ABSORB_ACRID,
+    EVENT_BLOODVENOM,
+    EVENT_VENOM_WITHDRAWAL,
 
     // Venomous Effusion
     EVENT_CAST_EFFUSION,
@@ -86,15 +94,28 @@ private:
     Unit* caster;
 };
 
-class NoToxicLinkAura
+class NoToxicLinkAuraCheck
 {
 public:
-    NoToxicLinkAura() { }
+    NoToxicLinkAuraCheck() { }
 
     bool operator()(WorldObject* object)
     {
         return (!object->ToUnit()->HasAura(SPELL_TOXIC_LINK_AURA));
     }
+};
+
+class AcridTearsRangeCheck
+{
+public:
+    AcridTearsRangeCheck(Unit* caster) : caster(caster) { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->GetExactDist2d(caster->GetPositionX(), caster->GetPositionY()) > (2.0f * caster->GetObjectSize()));
+    }
+private:
+    Unit* caster;
 };
 
 class boss_high_priest_venoxis : public CreatureScript
@@ -127,6 +148,7 @@ class boss_high_priest_venoxis : public CreatureScript
                 events.ScheduleEvent(EVENT_VENOMOUS_EFFUSION, 3000);
                 events.ScheduleEvent(EVENT_WHISPERS_OF_HETHISS, 5000);
                 events.ScheduleEvent(EVENT_TOXIC_LINK, 14500);
+                events.ScheduleEvent(EVENT_BLESSING_OF_THE_SNAKE_GOD, 34000);
             }
 
             void EnterEvadeMode()
@@ -134,6 +156,7 @@ class boss_high_priest_venoxis : public CreatureScript
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 instance->SetBossState(DATA_VENOXIS, FAIL);
                 summons.DespawnAll();
+                me->SetReactState(REACT_AGGRESSIVE);
                 me->GetMotionMaster()->MoveTargetedHome();
                 _EnterEvadeMode();
                 _DespawnAtEvade();
@@ -155,6 +178,26 @@ class boss_high_priest_venoxis : public CreatureScript
             void JustRespawned()
             {
                 SpawnTotems();
+            }
+
+            void JustSummoned(Creature* summon)
+            {
+                summons.Summon(summon);
+            }
+
+            void MovementInform(uint32 type, uint32 point)
+            {
+                if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+                    return;
+
+                switch (point)
+                {
+                    case 1:
+                        events.ScheduleEvent(EVENT_ABSORB_ACRID, 1);
+                        break;
+                    default:
+                        break;
+                }
             }
 
             void SpawnTotems()
@@ -232,6 +275,61 @@ class boss_high_priest_venoxis : public CreatureScript
                         case EVENT_TOXIC_LINK:
                             DoCast(me, SPELL_TOXIC_LINK);
                             break;
+                        case EVENT_BLESSING_OF_THE_SNAKE_GOD:
+                            events.CancelEvent(EVENT_WHISPERS_OF_HETHISS);
+                            me->StopMoving();
+                            me->CastStop();
+                            Talk(SAY_TRANSFORM);
+                            DoCast(me, SPELL_BLESSING_OF_THE_SNAKE_GOD);
+                            events.ScheduleEvent(EVENT_BREATH_OF_HETHISS, 8500);
+                            events.ScheduleEvent(EVENT_POOL_OF_ACRID_TEARS, 3500);
+                            events.ScheduleEvent(EVENT_TRANSFORM_REMOVAL_PRIMER, 34000);
+                            break;
+                        case EVENT_BREATH_OF_HETHISS:
+                            DoCast(me, SPELL_BREATH_OF_HETHISS);
+                            events.ScheduleEvent(EVENT_BREATH_OF_HETHISS, 23500);
+                            break;
+                        case EVENT_POOL_OF_ACRID_TEARS:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 0, true, 0))
+                                DoCast(target, SPELL_POOL_OF_ACRID_TEARS);
+                            events.ScheduleEvent(EVENT_POOL_OF_ACRID_TEARS, 3700);
+                            break;
+                        case EVENT_TRANSFORM_REMOVAL_PRIMER:
+                            events.CancelEvent(EVENT_BREATH_OF_HETHISS);
+                            events.CancelEvent(EVENT_POOL_OF_ACRID_TEARS);
+                            DoCast(me, SPELL_TRANSFORM_REMOVAL_PRIMER, true);
+                            me->SetReactState(REACT_PASSIVE);
+                            me->CastStop();
+                            me->AttackStop();
+                            me->GetMotionMaster()->MovePoint(1, me->GetHomePosition());
+                            break;
+                        case EVENT_ABSORB_ACRID:
+                        {
+                            Talk(SAY_BLOODVENOM);
+                            me->SetFacingTo(me->GetHomePosition().GetOrientation());
+                            events.ScheduleEvent(EVENT_BLOODVENOM, 2500);
+                            std::list<Creature*> units;
+                            GetCreatureListWithEntryInGrid(units, me, NPC_POOL_OF_ACRID_TEARS, 200.0f);
+                            if (units.empty())
+                                break;
+
+                            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                            {
+                                (*itr)->AI()->DoCast(SPELL_VENOXIS_ULT_MISSILE);
+                                (*itr)->RemoveAllAuras();
+                                (*itr)->DespawnOrUnsummon(1000);
+                            }
+                            break;
+                        }
+                        case EVENT_BLOODVENOM:
+                            Talk(SAY_ANNOUNCE_BLOODVENOM);
+                            DoCast(me, SPELL_BLOODVENOM);
+                            events.ScheduleEvent(EVENT_VENOM_WITHDRAWAL, 17000);
+                            break;
+                        case EVENT_VENOM_WITHDRAWAL:
+                            Talk(SAY_ANNOUNCE_EXHAUSTED);
+                            DoCast(me, SPELL_VENOM_WITHDRAWAL);
+                            break;
                         default:
                             break;
                     }
@@ -256,14 +354,19 @@ public:
     {
         npc_venomous_effusionAI(Creature* creature) : ScriptedAI(creature)
         {
+            instance = me->GetInstanceScript();
         }
 
         EventMap events;
+        InstanceScript* instance;
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
             me->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 1.0f, me->GetOrientation());
             events.ScheduleEvent(EVENT_CAST_EFFUSION, 100);
+
+            if (Creature* venoxis = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VENOXIS)))
+                venoxis->AI()->JustSummoned(me);
         }
 
         void UpdateAI(uint32 diff)
@@ -286,6 +389,43 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_venomous_effusionAI(creature);
+    }
+};
+
+class npc_bloodvenom : public CreatureScript
+{
+public:
+    npc_bloodvenom() : CreatureScript("npc_bloodvenom") { }
+
+    struct npc_bloodvenomAI : public ScriptedAI
+    {
+        npc_bloodvenomAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = me->GetInstanceScript();
+        }
+
+        EventMap events;
+        InstanceScript* instance;
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            me->SetWalk(true);
+            if (Creature* venoxis = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VENOXIS)))
+            {
+                DoCast(venoxis, SPELL_VENOM_TOTAM_BEAM_CENTER, true);
+                venoxis->AI()->JustSummoned(me);
+            }
+
+            me->GetMotionMaster()->MoveFollow(summoner, 0.0f, 0.0f);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_bloodvenomAI(creature);
     }
 };
 
@@ -387,7 +527,7 @@ public:
                 return;
             }
 
-            targets.remove_if(NoToxicLinkAura());
+            targets.remove_if(NoToxicLinkAuraCheck());
 
             if (targets.empty())
             {
@@ -412,11 +552,83 @@ public:
     }
 };
 
+class spell_pool_of_acrid_tears : public SpellScriptLoader
+{
+public:
+    spell_pool_of_acrid_tears() : SpellScriptLoader("spell_pool_of_acrid_tears") { }
+
+    class spell_pool_of_acrid_tears_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pool_of_acrid_tears_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(AcridTearsRangeCheck(GetCaster()));
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pool_of_acrid_tears_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pool_of_acrid_tears_SpellScript();
+    }
+};
+
+class spell_bloodvenom : public SpellScriptLoader
+{
+public:
+    spell_bloodvenom() : SpellScriptLoader("spell_bloodvenom") { }
+
+    class spell_bloodvenom_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_bloodvenom_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            if (targets.size() >= 4)
+                Trinity::Containers::RandomResizeList(targets, 3);
+        }
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            PreventHitEffect(EFFECT_0);
+            if (Unit* target = GetHitUnit())
+                if (Unit* caster = GetCaster())
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                        target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_bloodvenom_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_bloodvenom_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_bloodvenom_SpellScript();
+    }
+};
+
 void AddSC_boss_venoxis()
 {
     new boss_high_priest_venoxis();
     new npc_venomous_effusion();
+    new npc_bloodvenom();
     new spell_whispers_of_sethiss();
     new spell_toxic_link_aoe();
     new spell_toxic_link_visual();
+    new spell_pool_of_acrid_tears();
+    new spell_bloodvenom();
 }

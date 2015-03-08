@@ -61,6 +61,7 @@ enum CreatureIds
     NPC_VENOMOUS_EFFUSION_STALKER   = 52302,
     NPC_VENOMOUS_EFFUSION           = 52288,
     NPC_GENERAL_PURPOSE_BUNNY       = 45979,
+    NPC_POOL_OF_ACRID_TEARS         = 52197,
 
     // Cache of Madness
     NPC_HAZZARAH                    = 52271,
