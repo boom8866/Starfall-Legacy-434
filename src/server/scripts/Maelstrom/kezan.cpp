@@ -1815,6 +1815,12 @@ public:
             events.Reset();
         }
 
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim() && me->isInCombat())
