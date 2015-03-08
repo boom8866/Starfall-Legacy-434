@@ -24551,9 +24551,6 @@ void Player::SendInitialPacketsAfterAddToMap()
 
     RestoreAllSpellMods();
 
-    phaseMgr.AddUpdateFlag(PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED);
-    phaseMgr.Update();
-
     // Remove all kinds of shapeshift to prevent exploits (Druids Only)
     if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_DRUID)
     {
