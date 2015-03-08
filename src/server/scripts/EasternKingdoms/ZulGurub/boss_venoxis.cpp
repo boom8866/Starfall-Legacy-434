@@ -1,4 +1,6 @@
 
+#include "ScriptMgr.h"
+#include "SpellScript.h"
 #include "zulgurub.h"
 
 enum Yells
@@ -24,6 +26,8 @@ enum Spells
     SPELL_WHISPERS_OF_HETHIS        = 96466,
 
     SPELL_TOXIC_LINK                = 96475,
+    SPELL_TOXIC_LINK_AURA           = 96477,
+    SPELL_TOXIC_EXPLOSION           = 96489,
 
     SPELL_BLESSING_OF_THE_SNAKE_GOD = 96512,
     SPELL_POOL_OF_ACRID_TEARS       = 96515,
@@ -50,6 +54,8 @@ enum Events
     EVENT_VENOMOUS_EFFUSION = 1,
     EVENT_RELEASE_TOTEMS,
     EVENT_WHISPERS_OF_HETHISS,
+    EVENT_APPLY_IMMUNITY,
+    EVENT_TOXIC_LINK,
 
     // Venomous Effusion
     EVENT_CAST_EFFUSION,
@@ -65,6 +71,30 @@ Position const venomousEffusionStalkerPos[] =
 {
     { -12013.51f, -1684.175f, 32.36689f, 2.490533f }, // Right Side
     { -12003.96f, -1698.644f, 32.36689f, 5.730771f }, // Left Side
+};
+
+class VictimCheck
+{
+public:
+    VictimCheck(Unit* caster) : caster(caster) { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (caster->getVictim() == object->ToUnit());
+    }
+private:
+    Unit* caster;
+};
+
+class NoToxicLinkAura
+{
+public:
+    NoToxicLinkAura() { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (!object->ToUnit()->HasAura(SPELL_TOXIC_LINK_AURA));
+    }
 };
 
 class boss_high_priest_venoxis : public CreatureScript
@@ -96,6 +126,7 @@ class boss_high_priest_venoxis : public CreatureScript
                 events.ScheduleEvent(EVENT_RELEASE_TOTEMS, 2000);
                 events.ScheduleEvent(EVENT_VENOMOUS_EFFUSION, 3000);
                 events.ScheduleEvent(EVENT_WHISPERS_OF_HETHISS, 5000);
+                events.ScheduleEvent(EVENT_TOXIC_LINK, 14500);
             }
 
             void EnterEvadeMode()
@@ -187,11 +218,19 @@ class boss_high_priest_venoxis : public CreatureScript
                             break;
                         case EVENT_WHISPERS_OF_HETHISS:
                             me->StopMoving();
+                            MakeInterruptable(true);
+                            events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 8000);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
                                 DoCast(target, SPELL_WHISPERS_OF_HETHIS);
                             else
                                 DoCastVictim(SPELL_WHISPERS_OF_HETHIS);
                             events.ScheduleEvent(EVENT_WHISPERS_OF_HETHISS, 10500);
+                            break;
+                        case EVENT_APPLY_IMMUNITY:
+                            MakeInterruptable(false);
+                            break;
+                        case EVENT_TOXIC_LINK:
+                            DoCast(me, SPELL_TOXIC_LINK);
                             break;
                         default:
                             break;
@@ -250,8 +289,134 @@ public:
     }
 };
 
+class spell_whispers_of_sethiss : public SpellScriptLoader
+{
+public:
+    spell_whispers_of_sethiss() : SpellScriptLoader("spell_whispers_of_sethiss") { }
+
+    class spell_whispers_of_sethiss_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_whispers_of_sethiss_AuraScript);
+
+        void OnPeriodic(AuraEffect const* /*aurEff*/)
+        {
+            PreventDefaultAction();
+            if (Unit* caster = GetCaster())
+            {
+                std::list<Player*> units = caster->GetNearestPlayersList(150.0f, true);
+                for (std::list<Player*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                    if ((*itr)->HasAura(GetSpellInfo()->Id))
+                        caster->CastSpell((*itr), GetSpellInfo()->Effects[EFFECT_1].TriggerSpell);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_whispers_of_sethiss_AuraScript::OnPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_whispers_of_sethiss_AuraScript();
+    }
+};
+
+class spell_toxic_link_aoe : public SpellScriptLoader
+{
+public:
+    spell_toxic_link_aoe() : SpellScriptLoader("spell_toxic_link_aoe") { }
+
+    class spell_toxic_link_aoe_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_toxic_link_aoe_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(VictimCheck(GetCaster()));
+
+            if (targets.empty())
+                return;
+
+            if (targets.size() >= 3)
+
+            Trinity::Containers::RandomResizeList(targets, 2);
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                if (Unit* caster = GetCaster())
+                    caster->CastSpell(target, GetSpellInfo()->Effects[EFFECT_0].BasePoints, true);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_toxic_link_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_toxic_link_aoe_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_toxic_link_aoe_SpellScript();
+    }
+};
+
+class spell_toxic_link_visual : public SpellScriptLoader
+{
+public:
+    spell_toxic_link_visual() : SpellScriptLoader("spell_toxic_link_visual") { }
+
+    class spell_toxic_link_visual_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_toxic_link_visual_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    caster->CastSpell(caster, SPELL_TOXIC_EXPLOSION, true);
+                    caster->RemoveAurasDueToSpell(SPELL_TOXIC_LINK_AURA);
+                }
+                return;
+            }
+
+            targets.remove_if(NoToxicLinkAura());
+
+            if (targets.empty())
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    caster->CastSpell(caster, SPELL_TOXIC_EXPLOSION, true);
+                    caster->RemoveAurasDueToSpell(SPELL_TOXIC_LINK_AURA);
+                }
+                return;
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_toxic_link_visual_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_toxic_link_visual_SpellScript();
+    }
+};
+
 void AddSC_boss_venoxis()
 {
     new boss_high_priest_venoxis();
     new npc_venomous_effusion();
+    new spell_whispers_of_sethiss();
+    new spell_toxic_link_aoe();
+    new spell_toxic_link_visual();
 }
