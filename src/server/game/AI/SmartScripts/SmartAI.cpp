@@ -647,8 +647,8 @@ void SmartAI::SpellHitTarget(Unit* target, const SpellInfo* spellInfo)
 void SmartAI::DamageTaken(Unit* doneBy, uint32& damage)
 {
     GetScript()->ProcessEventsFor(SMART_EVENT_DAMAGED, doneBy, damage);
-    if (mInvincibilityHpLevel && (damage >= me->GetHealth() - mInvincibilityHpLevel))
-        damage = me->GetHealth() - mInvincibilityHpLevel; // damage should not be nullified, because of player damage req.
+    if (mInvincibilityHpLevel && damage && doneBy && doneBy->GetTypeId() == TYPEID_UNIT && !doneBy->isPet())
+        damage = 0;
 }
 
 void SmartAI::HealReceived(Unit* doneBy, uint32& addhealth)
