@@ -3970,7 +3970,7 @@ public:
             summonTimer = 20*IN_MILLISECONDS;
             ogreTimer = 8*IN_MILLISECONDS;
             boatTimer = 8*IN_MILLISECONDS;
-            reinforcementsTimer = 2*IN_MILLISECONDS;
+            reinforcementsTimer = 12*IN_MILLISECONDS;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
         }
@@ -3984,11 +3984,11 @@ public:
                     if (reinforcementsTimer <= diff)
                     {
                         if (roll_chance_f(75))
-                            me->SummonCreature(NPC_ENTRY_STONETROG_REINFORCEMENT, me->GetPositionX()-(urand(1, 2)), me->GetPositionY()-(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 120000);
+                            me->SummonCreature(NPC_ENTRY_STONETROG_REINFORCEMENT, me->GetPositionX()-(urand(1, 2)), me->GetPositionY()-(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 45000);
                         else
-                            me->SummonCreature(NPC_ENTRY_FUNGAL_TERROR, me->GetPositionX()-(urand(1, 2)), me->GetPositionY()-(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 120000);
+                            me->SummonCreature(NPC_ENTRY_FUNGAL_TERROR, me->GetPositionX()-(urand(1, 2)), me->GetPositionY()-(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 45000);
 
-                        reinforcementsTimer = 3*IN_MILLISECONDS;
+                        reinforcementsTimer = 12*IN_MILLISECONDS;
                     }
                     else
                         reinforcementsTimer -= diff;
@@ -3999,11 +3999,11 @@ public:
                     if (reinforcementsTimer <= diff)
                     {
                         if (roll_chance_f(75))
-                            me->SummonCreature(NPC_ENTRY_FUNGAL_TERROR, me->GetPositionX()+(urand(1, 2)), me->GetPositionY()+(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 120000);
+                            me->SummonCreature(NPC_ENTRY_FUNGAL_TERROR, me->GetPositionX()+(urand(1, 2)), me->GetPositionY()+(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 45000);
                         else
-                            me->SummonCreature(NPC_ENTRY_STONETROG_REINFORCEMENT, me->GetPositionX()+(urand(1, 2)), me->GetPositionY()+(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 120000);
+                            me->SummonCreature(NPC_ENTRY_STONETROG_REINFORCEMENT, me->GetPositionX()+(urand(1, 2)), me->GetPositionY()+(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 45000);
 
-                        reinforcementsTimer = 3*IN_MILLISECONDS;
+                        reinforcementsTimer = 12*IN_MILLISECONDS;
                     }
                     else
                         reinforcementsTimer -= diff;
