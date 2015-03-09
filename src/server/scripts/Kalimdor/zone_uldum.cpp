@@ -514,7 +514,7 @@ public:
                         events.CancelEvent(EVENT_UPPER_VISUAL);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
-                            if (Vehicle* veh = playerOwner->GetVehicle())
+                            if (Vehicle* veh = me->GetVehicleKit())
                             {
                                 Unit* passenger = veh->GetPassenger(0);
                                 if (passenger && passenger != NULL && passenger->IsInWorld())
@@ -528,7 +528,7 @@ public:
                         events.CancelEvent(EVENT_SWITCH_SEAT);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
-                            if (Vehicle* veh = playerOwner->GetVehicle())
+                            if (Vehicle* veh = me->GetVehicleKit())
                             {
                                 Unit* passenger = veh->GetPassenger(2);
                                 if (passenger && passenger != NULL && passenger->IsInWorld())
@@ -565,7 +565,7 @@ public:
                         events.ScheduleEvent(EVENT_SEAT_UNDER_ATTACK, 6000);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
-                            if (Vehicle* veh = playerOwner->GetVehicle())
+                            if (Vehicle* veh = me->GetVehicleKit())
                             {
                                 Unit* passenger = veh->GetPassenger(1);
                                 if (passenger && passenger != NULL && passenger->IsInWorld())
@@ -581,7 +581,7 @@ public:
                         me->GetMotionMaster()->MoveJump(-8992.04f, -1663.47f, 108.99f, 25.0f, 25.0f, POINT_RIDGE);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
-                            if (Vehicle* veh = playerOwner->GetVehicle())
+                            if (Vehicle* veh = me->GetVehicleKit())
                             {
                                 Unit* passenger = veh->GetPassenger(0);
                                 if (passenger && passenger != NULL && passenger->IsInWorld())
@@ -618,7 +618,7 @@ public:
                         events.CancelEvent(EVENT_REMOVE_PASSENGERS);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
-                            if (Vehicle* vehicle = playerOwner->GetVehicle())
+                            if (Vehicle* vehicle = me->GetVehicleKit())
                                 vehicle->RemoveAllPassengers();
                         }
                         if (Creature* ambushers = me->FindNearestCreature(NPC_ENTRY_AMBUSHERS, 200.0f, true))
