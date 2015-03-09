@@ -4051,7 +4051,7 @@ void Spell::finish(bool ok)
             // Sanctity of Battle
             if (m_caster->HasAura(25956))
             {
-                float haste = (2 - m_caster->ToPlayer()->GetFloatValue(UNIT_MOD_CAST_SPEED));
+                float haste = (2 - m_caster->ToPlayer()->GetFloatValue(UNIT_MOD_CAST_HASTE));
                 int32 cooldown = 4500;
                 int32 difference = 0;
                 if (haste > 0)

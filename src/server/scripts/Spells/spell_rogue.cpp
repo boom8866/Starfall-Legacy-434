@@ -1086,7 +1086,9 @@ public:
                     {
                         if (caster->ToPlayer()->HasSpellCooldown(SPELL_STEALTH_EFFECT))
                             caster->ToPlayer()->RemoveSpellCooldown(SPELL_STEALTH_EFFECT, true);
+
                         caster->CastSpell(caster, SPELL_STEALTH_EFFECT, true);
+                        caster->GetMotionMaster()->MoveJump(caster->GetPositionX()+0.1f, caster->GetPositionY(), caster->GetPositionZ(), 1.0f, 0.0f, 100);
                     }
                 }
             }
@@ -1094,7 +1096,7 @@ public:
 
         void Register()
         {
-            OnEffectRemove += AuraEffectRemoveFn(spell_rog_vanish_secondary_AuraScript::HandleCleanup, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_rog_vanish_secondary_AuraScript::HandleCleanup, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
