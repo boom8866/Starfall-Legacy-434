@@ -1413,6 +1413,11 @@ public:
     {
         PrepareSpellScript(spell_warr_shattering_throw_damage_SpellScript);
 
+        enum spellId
+        {
+            SPELL_HEROIC_THROW_DISPEL   = 64340
+        };
+
         void CalculateDamage(SpellEffIndex effect)
         {
             if (Unit* caster = GetCaster())
@@ -1423,8 +1428,18 @@ public:
             }
         }
 
+        void HandleRemoveImmunities()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetExplTargetUnit())
+                    caster->CastSpell(target, SPELL_HEROIC_THROW_DISPEL, true);
+            }
+        }
+
         void Register()
         {
+            AfterCast += SpellCastFn(spell_warr_shattering_throw_damage_SpellScript::HandleRemoveImmunities);
             OnEffectHitTarget += SpellEffectFn(spell_warr_shattering_throw_damage::spell_warr_shattering_throw_damage_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };

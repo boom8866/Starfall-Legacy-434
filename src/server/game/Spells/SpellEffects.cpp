@@ -6727,6 +6727,22 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_WARRIOR:
+        {
+            // Shattering Throw
+            if (m_spellInfo->SpellFamilyFlags[1] & 0x00400000)
+            {
+                if (!unitTarget)
+                    return;
+
+                // Remove Immunities
+                unitTarget->RemoveAurasDueToSpell(642);     // Divine Shield
+                unitTarget->RemoveAurasDueToSpell(1022);    // Hand of Protection rank 1
+                unitTarget->RemoveAurasDueToSpell(45438);   // Ice Block
+                return;
+            }
+            break;
+        }
         case SPELLFAMILY_DEATHKNIGHT:
         {
             switch (m_spellInfo->Id)
