@@ -1861,28 +1861,6 @@ class spell_mage_pyroblast : public SpellScriptLoader
         }
 };
 
-class EligibleForFreeze
-{
-public:
-    EligibleForFreeze(Unit* caster) : caster(caster)
-    {
-    }
-
-    enum spellId
-    {
-        SPELL_RING_OF_FROST_FREEZE      = 82691,
-        SPELL_RING_OF_FROST_IMMUNITY    = 91264
-    };
-
-    bool operator()(WorldObject* object)
-    {
-        return (object->ToUnit()->HasAura(SPELL_RING_OF_FROST_FREEZE) || object->ToUnit()->HasAura(SPELL_RING_OF_FROST_IMMUNITY) || !caster->IsInRange(object, 2.0f, 4.7f));
-    }
-
-private:
-    Unit* caster;
-};
-
 class spell_mage_ring_of_frost : public SpellScriptLoader
 {
 public:
@@ -1894,12 +1872,48 @@ public:
     {
         PrepareSpellScript(spell_mage_ring_of_frost_SpellScript);
 
+        enum spellId
+        {
+            SPELL_RING_OF_FROST_FREEZE      = 82691,
+            SPELL_RING_OF_FROST_IMMUNITY    = 91264
+        };
+
+        enum npcId
+        {
+            NPC_RING_OF_FROST = 44199
+        };
+
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            if (targets.empty())
-                return;
+            std::list<WorldObject*> validTarget;
+            for (std::list<WorldObject*>::iterator target = targets.begin(); target != targets.end(); ++target)
+            {
+                if ((*target))
+                {
+                    if (Unit* unit = (*target)->ToUnit())
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, GetCaster(), NPC_RING_OF_FROST, 85.0f);
+                        if (creatures.empty())
+                            return;
 
-            targets.remove_if(EligibleForFreeze(GetCaster()));
+                        for (std::list<Creature*>::iterator ring = creatures.begin(); ring != creatures.end(); ++ring)
+                        {
+                            if ((*ring) && (*ring)->GetCharmerOrOwner() && (*ring)->GetCharmerOrOwner() == GetCaster())
+                            {
+                                // Exclude all targets with immunity or already frozen
+                                if (!unit->HasAura(SPELL_RING_OF_FROST_FREEZE) && !unit->HasAura(SPELL_RING_OF_FROST_IMMUNITY) && (*ring)->IsInRange(unit, 2.0f, 5.0f))
+                                    validTarget.push_back((*target));
+                            }
+                        }
+                    }
+                }
+            }
+
+            targets.clear();
+
+            for (std::list<WorldObject*>::iterator itr = validTarget.begin(); itr != validTarget.end(); ++itr)
+                targets.push_back((*itr));
         }
 
         void Register()

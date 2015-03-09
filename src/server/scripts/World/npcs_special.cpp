@@ -3354,7 +3354,7 @@ public:
 
         EventMap events;
 
-        void IsSummonedBy(Unit* /*owner*/)
+        void InitializeAI()
         {
             ScriptedAI::InitializeAI();
             Unit* owner = me->GetOwner();
@@ -3426,7 +3426,7 @@ public:
                             {
                                 if (!owner->HasBreakableByDamageCrowdControlAura(owner))
                                 {
-                                    DoCast(me, SPELL_RING_OF_FROST_TRIGGERED, true);
+                                    owner->CastSpell(me, SPELL_RING_OF_FROST_TRIGGERED, true);
                                     events.RescheduleEvent(EVENT_RECAST, 100);
                                     break;
                                 }

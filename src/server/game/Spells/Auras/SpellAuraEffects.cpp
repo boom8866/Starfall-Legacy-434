@@ -7223,10 +7223,6 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     // This will handle proc spells from absorbed DoT damage
     if (!damage)
     {
-        // Rage from absorbed damage
-        if (cleanDamage.absorbed_damage && target->getPowerType() == POWER_RAGE)
-            target->RewardRage(cleanDamage.absorbed_damage, false);
-
         switch (m_spellInfo->Id)
         {
             case 15407: // Mind Flay
@@ -7245,7 +7241,15 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             default:
                 break;
         }
+
+        // Rage from absorbed damage
+        if (cleanDamage.absorbed_damage && target->getPowerType() == POWER_RAGE)
+            target->RewardRage(cleanDamage.absorbed_damage, false);
     }
+
+    // Rage from normal damage
+    if (damage && target->getPowerType() == POWER_RAGE)
+        target->RewardRage(damage, false);
 
     // Bane of Havoc
     if (caster->m_havocTarget != NULL && caster->GetTypeId() == TYPEID_PLAYER && GetSpellInfo()->Id != 85455 && caster->m_havocTarget)

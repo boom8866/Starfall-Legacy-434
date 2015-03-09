@@ -685,6 +685,31 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         // Interrupt Flag Take (PvP Battlegrounds)
         if (!damage && damagetype != DOT && cleanDamage && cleanDamage->absorbed_damage)
         {
+            // For Autoattacks
+            if (damagetype == DIRECT_DAMAGE)
+            {
+                if (HasAura(20164) && roll_chance_i(5))         // Seal of Justice
+                    CastSpell(victim, 20170, true);
+                else if (HasAura(20165) && roll_chance_i(75))   // Seal of Insight
+                    CastSpell(victim, 20167, true);
+                else if (HasAura(31801))                        // Seal of Truth
+                    CastSpell(victim, 31803, true);
+            }
+
+            // For Spells
+            if (damagetype == SPELL_DIRECT_DAMAGE && spellProto)
+            {
+                if (!spellProto->IsAffectingArea())
+                {
+                    if (HasAura(20164) && roll_chance_i(5))         // Seal of Justice
+                        CastSpell(victim, 20170, true);
+                    else if (HasAura(20165) && roll_chance_i(75))   // Seal of Insight
+                        CastSpell(victim, 20167, true);
+                    else if (HasAura(31801))                        // Seal of Truth
+                        CastSpell(victim, 31803, true);
+                }
+            }
+
             if (victim != this && victim->GetTypeId() == TYPEID_PLAYER)
             {
                 if (Spell* spell = victim->m_currentSpells[CURRENT_GENERIC_SPELL])
