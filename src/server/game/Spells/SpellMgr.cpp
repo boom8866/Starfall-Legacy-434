@@ -4270,9 +4270,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 31803: // Censure
                 spellInfo->AttributesEx4 |= SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS;
                 break;
-            case 50796: // Chaos Bolt
-                spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
-                break;
             case 82691: // Ring of Frost
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(8);   // 5 yd
                 break;
