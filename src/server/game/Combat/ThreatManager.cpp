@@ -328,29 +328,25 @@ HostileReference* ThreatContainer::selectNextVictim(Creature* attacker, HostileR
         currentRef = (*iter);
 
         Unit* target = currentRef->getTarget();
-        if (!target)
-            continue;
+        ASSERT(target);                                     // if the ref has status online the target must be there !
 
         // some units are prefered in comparison to others
-        if (attacker && attacker != NULL && attacker->IsInWorld())
+        if (!noPriorityTargetFound || target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE))
         {
-            if (!noPriorityTargetFound && (target && target->IsImmunedToDamage(attacker->GetMeleeDamageSchoolMask()) || target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE)))
+            if (iter != lastRef)
             {
-                if (iter != lastRef)
-                {
-                    // current victim is a second choice target, so don't compare threat with it below
-                    if (currentRef == currentVictim)
-                        currentVictim = NULL;
-                    ++iter;
-                    continue;
-                }
-                else
-                {
-                    // if we reached to this point, everyone in the threatlist is a second choice target. In such a situation the target with the highest threat should be attacked.
-                    noPriorityTargetFound = true;
-                    iter = iThreatList.begin();
-                    continue;
-                }
+                // current victim is a second choice target, so don't compare threat with it below
+                if (currentRef == currentVictim)
+                    currentVictim = NULL;
+                ++iter;
+                continue;
+            }
+            else
+            {
+                // if we reached to this point, everyone in the threatlist is a second choice target. In such a situation the target with the highest threat should be attacked.
+                noPriorityTargetFound = true;
+                iter = iThreatList.begin();
+                continue;
             }
         }
 

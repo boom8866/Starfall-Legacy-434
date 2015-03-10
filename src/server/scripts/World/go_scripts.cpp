@@ -1671,9 +1671,9 @@ class go_twilight_portal_deepholm : public GameObjectScript
 
             go_twilight_portal_deepholmAI(GameObject* go) : GameObjectAI(go)
             {
-                events.ScheduleEvent(EVENT_SUMMON_HERETIC, urand(15000, 40000));
-                events.ScheduleEvent(EVENT_SUMMON_DEFILER, urand(25000, 45000));
-                events.ScheduleEvent(EVENT_SUMMON_EARTHRAGER, urand(40000, 60000));
+                events.ScheduleEvent(EVENT_SUMMON_HERETIC, urand(45000, 75000));
+                events.ScheduleEvent(EVENT_SUMMON_DEFILER, urand(55000, 85000));
+                events.ScheduleEvent(EVENT_SUMMON_EARTHRAGER, 90000);
             }
 
             void UpdateAI(uint32 diff)
@@ -1693,7 +1693,7 @@ class go_twilight_portal_deepholm : public GameObjectScript
                                 break;
                             }
                             SummonHeretics();
-                            events.ScheduleEvent(EVENT_SUMMON_HERETIC, urand(25000, 40000));
+                            events.ScheduleEvent(EVENT_SUMMON_HERETIC, urand(45000, 75000));
                             break;
                         }
                         case EVENT_SUMMON_DEFILER:
@@ -1705,7 +1705,7 @@ class go_twilight_portal_deepholm : public GameObjectScript
                                 break;
                             }
                             SummonDefilers();
-                            events.ScheduleEvent(EVENT_SUMMON_DEFILER, urand(45000, 55000));
+                            events.ScheduleEvent(EVENT_SUMMON_DEFILER, urand(55000, 85000));
                             break;
                         }
                         case EVENT_SUMMON_EARTHRAGER:
@@ -1716,7 +1716,7 @@ class go_twilight_portal_deepholm : public GameObjectScript
                             {
                                 break;
                             }
-                            go->SummonCreature(NPC_DESECRATED_EARTHRAGER, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            go->SummonCreature(NPC_DESECRATED_EARTHRAGER, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 45000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                             events.ScheduleEvent(EVENT_SUMMON_EARTHRAGER, urand(60000, 90000));
                             break;
                         }
@@ -1728,16 +1728,16 @@ class go_twilight_portal_deepholm : public GameObjectScript
 
             void SummonHeretics()
             {
-                go->SummonCreature(NPC_TWILIGHT_HERETIC, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
-                go->SummonCreature(NPC_TWILIGHT_HERETIC, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
-                go->SummonCreature(NPC_TWILIGHT_HERETIC, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                go->SummonCreature(NPC_TWILIGHT_HERETIC, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 45000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                go->SummonCreature(NPC_TWILIGHT_HERETIC, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 45000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                go->SummonCreature(NPC_TWILIGHT_HERETIC, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 45000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
             }
 
             void SummonDefilers()
             {
-                go->SummonCreature(NPC_TWILIGHT_DEFILER, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
-                go->SummonCreature(NPC_TWILIGHT_DEFILER, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
-                go->SummonCreature(NPC_TWILIGHT_DEFILER, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                go->SummonCreature(NPC_TWILIGHT_DEFILER, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 45000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                go->SummonCreature(NPC_TWILIGHT_DEFILER, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 45000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                go->SummonCreature(NPC_TWILIGHT_DEFILER, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 45000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
             }
         };
 

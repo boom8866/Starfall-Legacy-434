@@ -5213,7 +5213,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
 
                     // Sunder Armor
                     if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
-                        totalDamagePercentMod += totalDamagePercentMod * aur->GetStackAmount() / 2;
+                        totalDamagePercentMod += totalDamagePercentMod * aur->GetStackAmount() / 5;
                     break;
                 }
             }
@@ -6724,6 +6724,22 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         }
                     }
                 }
+            }
+            break;
+        }
+        case SPELLFAMILY_WARRIOR:
+        {
+            // Shattering Throw
+            if (m_spellInfo->SpellFamilyFlags[1] & 0x00400000)
+            {
+                if (!unitTarget)
+                    return;
+
+                // Remove Immunities
+                unitTarget->RemoveAurasDueToSpell(642);     // Divine Shield
+                unitTarget->RemoveAurasDueToSpell(1022);    // Hand of Protection rank 1
+                unitTarget->RemoveAurasDueToSpell(45438);   // Ice Block
+                return;
             }
             break;
         }

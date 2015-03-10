@@ -4082,9 +4082,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 34433: // Shadowfiend
                 spellInfo->Effects[EFFECT_0].MiscValueB = 67;
                 break;
-            case 20243: // Devastate
-                spellInfo->Effects[EFFECT_0].BasePoints = 150;
-                break;
             case 85107: // Impending Doom
             case 85108:
                 spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
