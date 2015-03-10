@@ -2276,7 +2276,6 @@ public:
             FireNova_Timer = 5000 + rand() % 15000; // 5-20 sec cd
             FireBlast_Timer = 5000 + rand() % 15000; // 5-20 sec cd
             FireShield_Timer = 0;
-            me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
         }
 
         void UpdateAI(uint32 diff)
@@ -2340,7 +2339,6 @@ public:
         void Reset()
         {
             AngeredEarth_Timer = 0;
-            me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, true);
         }
 
         void UpdateAI(uint32 diff)
