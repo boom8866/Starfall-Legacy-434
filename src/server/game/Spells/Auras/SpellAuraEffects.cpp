@@ -2526,6 +2526,10 @@ void AuraEffect::HandleAuraModDisarm(AuraApplication const* aurApp, uint8 mode, 
 
     if (target->GetTypeId() == TYPEID_UNIT && target->ToCreature()->GetCurrentEquipmentId())
         target->UpdateDamagePhysical(attType);
+
+    // Bladestorm should be removed on disarm
+    if (target->HasAura(46924))
+        target->RemoveAurasDueToSpell(46924);
 }
 
 void AuraEffect::HandleAuraModSilence(AuraApplication const* aurApp, uint8 mode, bool apply) const
