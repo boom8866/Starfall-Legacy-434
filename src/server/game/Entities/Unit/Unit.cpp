@@ -21843,7 +21843,7 @@ void Unit::HandleDarkIntent()
         return;
 
     int32 bp0;
-    uint32 darkIntentId = 0;
+    uint32 darkIntentId;
 
     bp0 = target->HasAura(85768) ? 3 : (target->HasAura(85767) ? 1 : NULL);
     if (!bp0)
@@ -21865,7 +21865,7 @@ void Unit::HandleDarkIntent()
         }
     }
 
-    if (darkIntentId && darkIntentId != 0)
+    if (darkIntentId)
         CastCustomSpell(target, darkIntentId, &bp0, NULL, NULL, true);
 }
 
