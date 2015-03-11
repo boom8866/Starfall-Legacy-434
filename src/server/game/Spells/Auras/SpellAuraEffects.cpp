@@ -7684,7 +7684,7 @@ void AuraEffect::HandlePeriodicEnergizeAuraTick(Unit* target, Unit* caster) cons
 {
     Powers powerType = Powers(GetMiscValue());
 
-    if (!target->isAlive() || !target->GetMaxPower(powerType))
+    if (!caster || !caster->isAlive() || !target || !target->isAlive() || !target->GetMaxPower(powerType))
         return;
 
     if (target->HasUnitState(UNIT_STATE_ISOLATED))
@@ -7708,8 +7708,11 @@ void AuraEffect::HandlePeriodicEnergizeAuraTick(Unit* target, Unit* caster) cons
 
     int32 gain = target->ModifyPower(powerType, amount);
 
-    if (caster)
-        target->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f, GetSpellInfo());
+    if (GetSpellInfo())
+    {
+        if (caster && target)
+            target->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f, GetSpellInfo());
+    }
 }
 
 void AuraEffect::HandlePeriodicPowerBurnAuraTick(Unit* target, Unit* caster) const
