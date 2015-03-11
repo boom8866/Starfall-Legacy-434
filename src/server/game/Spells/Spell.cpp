@@ -1025,22 +1025,16 @@ void Spell::SelectImplicitNearbyTargets(SpellEffIndex effIndex, SpellImplicitTar
     }
 
     CallScriptObjectTargetSelectHandlers(target, effIndex);
-    if (!target)
-        return;
 
     switch (targetType.GetObjectType())
     {
         case TARGET_OBJECT_TYPE_UNIT:
             if (Unit* unitTarget = target->ToUnit())
                 AddUnitTarget(unitTarget, effMask, true, false);
-            else
-                return;
             break;
         case TARGET_OBJECT_TYPE_GOBJ:
             if (GameObject* gobjTarget = target->ToGameObject())
                 AddGOTarget(gobjTarget, effMask);
-            else
-                return;
             break;
         case TARGET_OBJECT_TYPE_DEST:
             m_targets.SetDst(*target);
