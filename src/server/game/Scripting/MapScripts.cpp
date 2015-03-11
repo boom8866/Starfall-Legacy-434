@@ -820,8 +820,7 @@ void Map::ScriptsProcess()
                 }
 
                 Creature* cTarget = NULL;
-                WorldObject* wSource = dynamic_cast <WorldObject*> (source);
-                if (wSource) //using grid searcher
+                if (source) //using grid searcher
                 {
                     WorldObject* wSource = dynamic_cast <WorldObject*> (source);
 
