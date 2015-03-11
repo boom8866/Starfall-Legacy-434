@@ -7481,6 +7481,18 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     }
                     break;
                 }
+                case 974:   // Earth Shield
+                {
+                    if (Player* player = ToPlayer())
+                    {
+                        if (player->HasSpellCooldown(dummySpell->Id))
+                            return false;
+
+                        triggered_spell_id = 379;
+                        player->AddSpellCooldown(dummySpell->Id, 0, time(NULL) + 3.5);
+                    }
+                    break;
+                }
                 break;
             }
             // Flametongue Weapon (Passive)
