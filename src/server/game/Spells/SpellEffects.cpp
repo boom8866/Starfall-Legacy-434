@@ -801,7 +801,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             if (m_caster->GetCharmerOrOwner())
                             {
                                 float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
-                                damage += int32(spellpower * 0.4322f);
+                                damage += int32(spellpower * 0.258f);
                             }
                         }
                         break;
@@ -835,7 +835,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         if (m_caster->GetCharmerOrOwner())
                         {
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
-                            damage += int32((spellpower * 0.307f));
+                            damage += int32((spellpower * 0.614f));
                         }
                         break;
                     }
