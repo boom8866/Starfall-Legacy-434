@@ -12455,7 +12455,7 @@ public:
                         if (player->HasSpell(discoverSpell[checkSpell]))
                             continue;
 
-                        player->learnSpell(discoverSpell[checkSpell], true);
+                        player->learnSpell(discoverSpell[checkSpell], false);
                         return;
                     }
                 }
