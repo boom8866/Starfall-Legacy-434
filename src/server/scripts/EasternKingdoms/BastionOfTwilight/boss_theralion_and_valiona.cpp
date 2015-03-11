@@ -618,7 +618,7 @@ public:
                     else if (_breathCounter == 2)
                     {
                         me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -763.181f, -626.995f, me->GetPositionZ(), false);
-                        for (uint16 i = 61; i < 91; i++)
+                        for (uint16 i = 61; i < 90; i++)
                             me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
                     }
                     break;
