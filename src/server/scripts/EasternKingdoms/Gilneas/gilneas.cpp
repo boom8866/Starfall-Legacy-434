@@ -1170,10 +1170,7 @@ public:
             if (point == 2)
             {
                 if (me->GetEntry() == NPC_WORGEN_ALPHA_SW || me->GetEntry() == NPC_WORGEN_RUNT_SW)
-                {
-                    if (me->GetEntry() == NPC_WORGEN_ALPHA_SW || me->GetEntry() == NPC_WORGEN_RUNT_SW)
-                        StartAttack();
-                }
+                    StartAttack();
             }
             if (point == 5)
                 StartAttack();
