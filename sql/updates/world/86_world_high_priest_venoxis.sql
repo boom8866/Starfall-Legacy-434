@@ -1,13 +1,10 @@
-/*
-14:42:49.625 -- aggro
-14:42:52.734 -- effusion stalker spawn
-14:42:49.625 -- word of hethis # 1
-
-14:42:55.891 -- whisper of hethis 1
-14:43:06.438 -- whispers of hethiss 2
-
-*/
-
+REPLACE INTO `spell_script_names` (`spell_id`, `scriptname`) VALUES
+(96466, 'spell_whispers_of_sethiss'),
+(96475, 'spell_toxic_link_aoe'),
+(96476, 'spell_toxic_link_visual'),
+(96521, 'spell_pool_of_acrid_tears'),
+(97089, 'spell_pool_of_acrid_tears'),
+(96842, 'spell_bloodvenom');
 
 DELETE FROM `creature` WHERE `id` IN (52525, 52302, 52288);
 DELETE FROM `creature_text` WHERE `entry`= 52155;
@@ -16,23 +13,29 @@ REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `languag
 (52155, 1, 0, 'Let the coils of death unfurl!', 14, 0, 100, 0, 0, 24319, 'Venoxis - Transform'),
 (52155, 2, 0, 'Hisss word, FILLS me, MY BLOOD IS VENOM, AND YOU WILL BATHE IN THE GLORY OF THE SNAKE GOD!!!', 14, 0, 100, 0, 0, 24321, 'Venoxis - Bloodvenom'),
 (52155, 3, 0, '|TInterface\\Icons\\ability_creature_poison_06.blp:20|t High Priest Venoxis begins casting |cFFFF0000|Hspell:96637|h[Bloodvenom]|h|r!', 41, 0, 100, 0, 0, 0, 'Venoxis - Announce Bloodvenom'),
-(52155, 3, 0, 'High Priest Venoxis is exhausted!', 41, 0, 100, 0, 0, 0, 'Venoxis - Announce Exhausted'),
+(52155, 4, 0, 'High Priest Venoxis is exhausted!', 41, 0, 100, 0, 0, 0, 'Venoxis - Announce Exhausted'),
 (52155, 5, 0, 'The mortal coil unwindsss...', 14, 0, 100, 0, 0, 24322, 'Venoxis - Slay 1'),
 (52155, 5, 1, 'Your sssacrifice pleases him.', 14, 0, 100, 0, 0, 24323, 'Venoxis - Slay 2'),
 (52155, 6, 0, 'My death means...nothing...', 14, 0, 100, 0, 0, 24318, 'Venoxis - Death');
 
 -- High Priest Venoxis
-UPDATE `creature_template` SET `scriptname`= 'boss_high_priest_venoxis' WHERE `entry`= 52155;
+UPDATE `creature_template` SET `scriptname`= 'boss_high_priest_venoxis', `mingold` = 19100, `maxgold`= 19300, `lootid`= 52155 WHERE `entry`= 52155;
 -- Bloodvenom
 UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction`= 14, `unit_flags`= 34078720, `unit_flags2`= 33556480, `flags_extra`= 128, `InhabitType`= 1 WHERE `entry`= 52525;
 -- Venomous Effusion Stalker
 UPDATE `creature_template` SET `speed_walk`= 2.5, `minlevel`= 87, `maxlevel`= 87, `faction`= 35, `unit_flags`= 33554432, `unit_flags2`= 2048, `flags_extra`= 128, `InhabitType`= 1 WHERE `entry`= 52302;
 -- Venomous Effusion
 UPDATE `creature_template` SET `modelid1`= 1126, `modelid2`= 11686, `minlevel`= 87, `maxlevel`= 87, `faction`= 14, `unit_flags`= 33554432, `unit_flags2`= 33556480, `flags_extra`= 128, `InhabitType`= 4, `Scriptname`= 'npc_venomous_effusion' WHERE `entry`= 52288;
+-- Pool of Acrid Tears
+UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction`= 14, `unit_flags`= 33554432, `unit_flags2`= 33556480, `flags_extra`= 128 WHERE `entry`= 52197;
+-- Blood Venom
+UPDATE `creature_template` SET `speed_walk`= 1.5, `minlevel`= 85, `maxlevel`= 85, `faction`= 14, `unit_flags`= 34078720, `unit_flags2`= 33556480, `flags_extra`= 128, `scriptname`= 'npc_bloodvenom' WHERE `entry`= 52525;
 
 REPLACE INTO `creature_template_addon` (`entry`, `bytes1`, `bytes2`, `auras`) VALUES
 (52302, 0, 0, '96678'),
-(52288, 0, 0, '0');
+(52288, 0, 0, ''),
+(52197, 0, 0, '96520'),
+(52525, 0, 0, '97110 97099');
 
 REPLACE INTO `creature_addon` (`guid`, `auras`) VALUES
 (219086, '96729'),
@@ -127,3 +130,22 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (@ID+1, 31, -11995.68, -1698.642, 32.31422),
 (@ID+1, 32, -11996.85, -1697.404, 32.56506),
 (@ID+1, 33, -11993.85, -1693.904, 32.56506);
+
+DELETE FROM `conditions` WHERE `SourceEntry` IN (96634);
+INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
+(13, 7, 96634, 0, 0, 31, 0, 3, 52155, 0, 0, 0, '', 'Venoxis Ult Missile - Target Venoxis');
+
+DELETE FROM `creature_loot_template` WHERE `entry`= 52155;
+INSERT INTO `creature_loot_template` (`entry`, `ChanceOrQuestChance`, `lootmode`, `mincountOrRef`, `maxcount`) VALUES
+(52155, 100, 1, -521550, 1);
+
+DELETE FROM `reference_loot_template` WHERE `entry`= 521550;
+INSERT INTO `reference_loot_template` (entry, item, ChanceOrQuestChance, lootmode, groupid, mincountOrRef, maxcount) VALUES
+(521550, 69600, 0, 1, 1, 1, 1), -- Belt of Slithering Serpents
+(521550, 69603, 0, 1, 1, 1, 1), -- Breastplate of Serenity
+(521550, 69604, 0, 1, 1, 1, 1), -- Coils of Hate
+(521550, 69601, 0, 1, 1, 1, 1), -- Serpentine Leggings
+(521550, 69602, 0, 1, 1, 1, 1); -- Signet of Venoxis
+
+REPLACE INTO `creature_onkill_reward` (`creature_id`, `CurrencyId1`, `CurrencyCount1`, `RewOnKillRepFaction1`, `RewOnKillRepValue1`, `MaxStanding1`) VALUES
+(52155, 395, 70, 0, 0, 0); -- Venoxis - 70 Justice Points

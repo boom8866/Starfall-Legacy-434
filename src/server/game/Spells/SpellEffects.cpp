@@ -801,7 +801,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             if (m_caster->GetCharmerOrOwner())
                             {
                                 float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
-                                damage += int32(spellpower * 0.129f);
+                                damage += int32(spellpower * 0.8645f);
                             }
                         }
                         break;
@@ -826,7 +826,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         if (m_caster->GetCharmerOrOwner())
                         {
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
-                            damage += int32((spellpower * 0.306f));
+                            damage += int32((spellpower * 0.153f));
                         }
                         break;
                     }
@@ -835,7 +835,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         if (m_caster->GetCharmerOrOwner())
                         {
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
-                            damage += int32((spellpower * 0.614f));
+                            damage += int32((spellpower * 0.307f));
                         }
                         break;
                     }
@@ -844,7 +844,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         if (m_caster->GetCharmerOrOwner())
                         {
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
-                            damage += int32((spellpower * 1.360f));
+                            damage += int32((spellpower * 0.68f));
                         }
                         break;
                     }
@@ -5424,7 +5424,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             // Blood Strike
             if (m_spellInfo->SpellFamilyFlags[0] & 0x400000)
             {
-                float bonusPct = m_spellInfo->Effects[EFFECT_2].CalcValue(m_caster) * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) / 2.0f;
+                float bonusPct = m_spellInfo->Effects[EFFECT_2].CalcValue(m_caster) * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) / 10;
                 // Death Knight T8 Melee 4P Bonus
                 if (AuraEffect const* aurEff = m_caster->GetAuraEffect(64736, EFFECT_0))
                     AddPct(bonusPct, aurEff->GetAmount());
