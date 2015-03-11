@@ -2674,6 +2674,7 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                 case 61734: // Noblegarden Bunny
                 case 62344: // Fists of Stone
                 case 78722: // Saviana Ragefire Enrage
+                case 89542: // Molten Barrier
                     return true;
                 default:
                     break;
