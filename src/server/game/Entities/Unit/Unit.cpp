@@ -169,7 +169,7 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     , m_AutoRepeatFirstCast(false)
     , m_procDeep(0)
     , m_removedAurasCount(0)
-    , i_motionMaster(this)
+    , i_motionMaster(new MotionMaster(this))
     , m_ThreatManager(this)
     , m_vehicle(NULL)
     , m_vehicleKit(NULL)
@@ -330,6 +330,7 @@ Unit::~Unit()
 
     _DeleteRemovedAuras();
 
+    delete i_motionMaster;
     delete m_charmInfo;
     delete movespline;
 
@@ -443,7 +444,7 @@ void Unit::Update(uint32 p_time)
     }
 
     UpdateSplineMovement(p_time);
-    i_motionMaster.UpdateMotion(p_time);
+    i_motionMaster->UpdateMotion(p_time);
 }
 
 bool Unit::haveOffhandWeapon() const

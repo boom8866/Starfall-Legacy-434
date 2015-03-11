@@ -72,7 +72,8 @@ MotionMaster::~MotionMaster()
     {
         MovementGenerator *curr = top();
         pop();
-        if (curr) DirectDelete(curr);
+        if (curr && !isStatic(curr))
+            delete curr; // Skip finalizing on delete, it might launch new movement
     }
 }
 
@@ -129,6 +130,9 @@ void MotionMaster::DirectClean(bool reset)
         if (curr) DirectDelete(curr);
     }
 
+    if (empty())
+        return;
+
     if (needInitTop())
         InitTop();
     else if (reset)
@@ -155,7 +159,7 @@ void MotionMaster::DirectExpire(bool reset)
         DirectDelete(curr);
     }
 
-    while (!top())
+    while (!empty() && !top())
         --_top;
 
     if (empty())
@@ -175,7 +179,7 @@ void MotionMaster::DelayedExpire()
         DelayedDelete(curr);
     }
 
-    while (!top())
+    while (!empty() && !top())
         --_top;
 }
 
@@ -333,6 +337,9 @@ void MotionMaster::MoveKnockbackFrom(float srcX, float srcY, float speedXY, floa
     if (_owner->GetTypeId() == TYPEID_PLAYER)
         return;
 
+    if (speedXY <= 0.1f)
+        return;
+
     float x, y, z;
     float moveTimeHalf = speedZ / Movement::gravity;
     float dist = 2 * moveTimeHalf * speedXY;
@@ -366,6 +373,9 @@ void MotionMaster::MoveJumpTo(float angle, float speedXY, float speedZ)
 void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float speedZ, uint32 id)
 {
     sLog->outDebug(LOG_FILTER_GENERAL, "Unit (GUID: %u) jump to point (X: %f Y: %f Z: %f)", _owner->GetGUIDLow(), x, y, z);
+
+    if (speedXY <= 0.1f)
+        return;
 
     float moveTimeHalf = speedZ / Movement::gravity;
     float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -speedZ);
