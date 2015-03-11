@@ -5470,7 +5470,7 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 void Player::KillPlayer()
 {
     if (IsFlying() && !GetTransport())
-        GetMotionMaster()->MoveFall();
+        i_motionMaster.MoveFall();
 
     SetRooted(true);
 

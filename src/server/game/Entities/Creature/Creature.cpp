@@ -827,16 +827,16 @@ bool Creature::AIM_Initialize(CreatureAI* ai)
 void Creature::Motion_Initialize()
 {
     if (!m_formation)
-        GetMotionMaster()->Initialize();
+        i_motionMaster.Initialize();
     else if (m_formation->getLeader() == this)
     {
         m_formation->FormationReset(false);
-        GetMotionMaster()->Initialize();
+        i_motionMaster.Initialize();
     }
     else if (m_formation->isFormed())
-        GetMotionMaster()->MoveIdle();
+        i_motionMaster.MoveIdle(); //wait the order of leader
     else
-        GetMotionMaster()->Initialize();
+        i_motionMaster.Initialize();
 }
 
 bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, uint32 vehId, uint32 team, float x, float y, float z, float ang, const CreatureData* data)
@@ -1717,7 +1717,7 @@ void Creature::setDeathState(DeathState s)
         if ((CanFly() || IsFlying()) && GetEntry() != 41570)
         {
             SetDisableGravity(false);
-            GetMotionMaster()->MoveFall();
+            i_motionMaster.MoveFall();
         }
 
         Unit::setDeathState(CORPSE);
