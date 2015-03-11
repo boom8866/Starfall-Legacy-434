@@ -2068,7 +2068,7 @@ void AddSC_priest_spell_scripts()
     new spell_pri_fade();
     new spell_pri_holy_fire();
     new spell_pri_mass_dispel();
-    new spell_pri_mind_control();
+    //new spell_pri_mind_control();
     new spell_pri_vampiric_embrace();
     new spell_pri_inner_fire();
     new spell_pri_inner_focus();
