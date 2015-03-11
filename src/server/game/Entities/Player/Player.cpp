@@ -24625,8 +24625,7 @@ void Player::SendInitialPacketsAfterAddToMap()
         case CLASS_ROGUE:
         {
             // Vigor
-            if (HasAura(21975))
-                SetMaxPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY) + 10);
+            SetMaxPower(POWER_ENERGY, HasAura(21975) ? 110 : 100);
             break;
         }
     }

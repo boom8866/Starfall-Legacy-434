@@ -7767,13 +7767,15 @@ public:
                                 return;
                             }
 
+                            me->GetMotionMaster()->MovementExpired(false);
+                            me->RemoveAllAuras();
                             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_NON_ATTACKABLE);
                             me->SetHealth(me->GetMaxHealth() * 0.45f);
                             events.ScheduleEvent(EVENT_HP_PCT_33, 1000);
                             me->SetReactState(REACT_PASSIVE);
                             me->AttackStop();
                             me->CastStop();
-                            SetNextWaypoint(9, true, false);
+                            SetNextWaypoint(9, false, false);
                             SetEscortPaused(false);
                             me->m_Events.AddEvent(new restartNextWaypoint(me), me->m_Events.CalculateTime(3000));
                             TalkWithDelay(8500, 2);
@@ -7790,13 +7792,15 @@ public:
                                 return;
                             }
 
+                            me->RemoveAllAuras();
+                            me->GetMotionMaster()->MovementExpired(false);
                             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_NON_ATTACKABLE);
                             me->SetHealth(me->GetMaxHealth() * 0.20f);
                             me->SetReactState(REACT_PASSIVE);
                             me->AttackStop();
                             me->CastStop();
                             me->m_Events.AddEvent(new restartFinalWaypoint(me), me->m_Events.CalculateTime(2000));
-                            SetNextWaypoint(20, true, false);
+                            SetNextWaypoint(20, false, false);
                             SetEscortPaused(false);
                             events.CancelEvent(EVENT_HP_PCT_66);
                             events.CancelEvent(EVENT_HP_PCT_33);
