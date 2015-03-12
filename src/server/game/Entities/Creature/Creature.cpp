@@ -1849,17 +1849,16 @@ void Creature::Respawn(bool force)
         if (poolid)
             sPoolMgr->UpdatePool<Creature>(poolid, GetDBTableGUIDLow());
 
+        // Reset original flags
+        if (CreatureTemplate const* cinfo = GetCreatureTemplate())
+        {
+            SetFlag(UNIT_NPC_FLAGS, cinfo->npcflag);
+            SetFlag(UNIT_FIELD_FLAGS, cinfo->unit_flags);
+        }
+
         //Re-initialize reactstate that could be altered by movementgenerators
         InitializeReactState();
     }
-
-    if (GetAI() && GetAIName() == "SmartAI")
-        AI()->EnterEvadeMode();
-    else
-        GetMotionMaster()->MoveTargetedHome();
-
-    if (CreatureTemplate const* cinfo = GetCreatureTemplate())
-        HandleInhabitType(cinfo->InhabitType);
 
     UpdateObjectVisibility();
 }
