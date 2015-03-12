@@ -255,8 +255,11 @@ void ThreatContainer::clearReferences()
 {
     for (ThreatContainer::StorageType::const_iterator i = iThreatList.begin(); i != iThreatList.end(); ++i)
     {
-        (*i)->unlink();
-        delete (*i);
+        if (!iThreatList.empty())
+        {
+            (*i)->unlink();
+            delete (*i);
+        }
     }
 
     iThreatList.clear();
