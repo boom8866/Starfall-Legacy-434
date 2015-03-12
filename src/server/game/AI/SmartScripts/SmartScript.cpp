@@ -1434,7 +1434,11 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
             {
                 if (IsCreature(*itr))
-                    (*itr)->ToCreature()->Respawn();
+                {
+                    (*itr)->ToCreature()->SetCorpseDelay(1);
+                    (*itr)->ToCreature()->SetRespawnDelay(10);
+                    (*itr)->ToCreature()->DespawnOrUnsummon();
+                }
                 else if (IsGameObject(*itr))
                     (*itr)->ToGameObject()->SetRespawnTime(e.action.RespawnTarget.goRespawnTime);
             }
