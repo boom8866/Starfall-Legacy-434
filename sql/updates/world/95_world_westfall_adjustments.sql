@@ -55,5 +55,3 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 -- Deletes creature Defias Pillager (id: 589, guid: 772520) in zone: 40, area: 108
 DELETE FROM `creature` WHERE `guid` = 772520; DELETE FROM creature_addon WHERE guid = 772520;
-
-UPDATE `vehicle_template_accessory` SET `summontype`=4 WHERE `entry`=47186 AND `seat_id`=0;
