@@ -9596,7 +9596,7 @@ public:
 
     struct npc_warlock_doomguardAI : public ScriptedAI
     {
-        npc_warlock_doomguardAI(Creature* creature) : ScriptedAI(creature) {targetVictim = NULL;}
+        npc_warlock_doomguardAI(Creature* creature) : ScriptedAI(creature) { }
 
         EventMap events;
 
@@ -9609,14 +9609,13 @@ public:
 
         enum eventId
         {
-            EVENT_CHECK_TARGET_DEBUFF   = 1,
-            EVENT_CAST_DOOM_BOLT
+            EVENT_CHECK_TARGET_DEBUFF   = 1
         };
 
-        void IsSummonedBy(Unit* summoner)
+        void IsSummonedBy(Unit* /*summoner*/)
         {
             events.ScheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 1);
-            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetReactState(REACT_PASSIVE);
         }
 
         void UpdateAI(uint32 diff)
@@ -9629,45 +9628,27 @@ public:
                 {
                     case EVENT_CHECK_TARGET_DEBUFF:
                     {
-                        if (!me->HasUnitState(UNIT_STATE_CASTING))
-                        {
-                            if (Unit* owner = me->GetCharmerOrOwner())
-                            {
-                                if (Unit* target = owner->getAttackerForHelper())
-                                {
-                                    if (target->HasAura(SPELL_BANE_OF_AGONY, owner->GetGUID()) || target->HasAura(SPELL_BANE_OF_DOOM, owner->GetGUID()))
-                                    {
-                                        targetVictim = target;
-                                        events.ScheduleEvent(EVENT_CAST_DOOM_BOLT, 1);
-                                    }
-                                }
-                            }
-                        }
-                        events.ScheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 500);
-                        break;
-                    }
-                    case EVENT_CAST_DOOM_BOLT:
-                    {
                         RESCHEDULE_IF_CASTING;
-                        if (targetVictim && targetVictim != NULL)
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 45.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(45.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
-                            if (Unit* owner = me->GetCharmerOrOwner())
+                            if ((*itr))
                             {
-                                if (!targetVictim->HasAura(SPELL_BANE_OF_AGONY, owner->GetGUID()) && !targetVictim->HasAura(SPELL_BANE_OF_DOOM, owner->GetGUID()))
+                                if (Unit* owner = me->GetCharmerOrOwner())
                                 {
-                                    targetVictim = NULL;
-                                    if (me->isInCombat())
+                                    if ((*itr)->HasAura(SPELL_BANE_OF_AGONY, owner->GetGUID()) || (*itr)->HasAura(SPELL_BANE_OF_DOOM, owner->GetGUID()))
                                     {
-                                        DoStopAttack();
-                                        EnterEvadeMode();
+                                        DoCast((*itr), SPELL_DOOM_BOLT);
+                                        events.RescheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 3100);
+                                        break;
                                     }
                                 }
-                                else
-                                    DoCast(targetVictim, SPELL_DOOM_BOLT);
                             }
                         }
-                        events.ScheduleEvent(EVENT_CAST_DOOM_BOLT, 3100);
-                        events.ScheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 500);
+                        events.RescheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 1000);
                         break;
                     }
                     default:
@@ -9675,9 +9656,6 @@ public:
                 }
             }
         }
-
-    protected:
-        Unit* targetVictim;
     };
 
     CreatureAI* GetAI(Creature* creature) const

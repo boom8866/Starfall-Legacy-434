@@ -12750,6 +12750,98 @@ public:
     }
 };
 
+class spell_eng_synapse_springs : public SpellScriptLoader
+{
+public:
+    spell_eng_synapse_springs() : SpellScriptLoader("spell_eng_synapse_springs")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_SYNAPSE_AGILITY       = 96228,
+        SPELL_SYNAPSE_STRENGTH      = 96229,
+        SPELL_SYNAPSE_INTELLECT     = 96230,
+
+        SPELL_MENTAL_QUICKNESS      = 30814,
+        SPELL_AGGRESSION            = 84735,
+        SPELL_WALK_IN_THE_LIGHT     = 85102
+    };
+
+    class spell_eng_synapse_springs_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_eng_synapse_springs_SpellScript);
+
+        void HandleSynapseBuff()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                switch (caster->getClass())
+                {
+                    case CLASS_PRIEST:
+                    case CLASS_WARLOCK:
+                    case CLASS_MAGE:
+                    {
+                        caster->CastSpell(caster, SPELL_SYNAPSE_INTELLECT, true);
+                        break;
+                    }
+                    case CLASS_DEATH_KNIGHT:
+                    case CLASS_WARRIOR:
+                    {
+                        caster->CastSpell(caster, SPELL_SYNAPSE_STRENGTH, true);
+                        break;
+                    }
+                    case CLASS_ROGUE:
+                    case CLASS_HUNTER:
+                    {
+                        caster->CastSpell(caster, SPELL_SYNAPSE_AGILITY, true);
+                        break;
+                    }
+                    case CLASS_SHAMAN:
+                    {
+                        if (caster->HasAura(SPELL_MENTAL_QUICKNESS))
+                            caster->CastSpell(caster, SPELL_SYNAPSE_AGILITY, true);
+                        else
+                            caster->CastSpell(caster, SPELL_SYNAPSE_INTELLECT, true);
+                        break;
+                    }
+                    case CLASS_DRUID:
+                    {
+                        if (caster->HasAura(SPELL_AGGRESSION))
+                            caster->CastSpell(caster, SPELL_SYNAPSE_AGILITY, true);
+                        else
+                            caster->CastSpell(caster, SPELL_SYNAPSE_INTELLECT, true);
+                        break;
+                    }
+                    case CLASS_PALADIN:
+                    {
+                        if (caster->HasAura(SPELL_WALK_IN_THE_LIGHT))
+                            caster->CastSpell(caster, SPELL_SYNAPSE_INTELLECT, true);
+                        else
+                            caster->CastSpell(caster, SPELL_SYNAPSE_STRENGTH, true);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_eng_synapse_springs_SpellScript::HandleSynapseBuff);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_eng_synapse_springs_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -13004,4 +13096,5 @@ void AddSC_generic_spell_scripts()
     new spell_racial_will_of_the_forsaken();
     new spell_jc_stardust_no_2();
     new spell_jc_stardust_no_2_triggered();
+    new spell_eng_synapse_springs();
 }
