@@ -6417,6 +6417,21 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
         if (new_value > max)
             new_value = max;
 
+        uint32 temporarySkillId = 0;
+
+        // Check for Fishing temporary skill improvemement auras
+        if (skill_id == 356)
+        {
+            Unit::AuraEffectList const& modFishingSkillTemp = GetAuraEffectsByType(SPELL_AURA_MOD_SKILL);
+            for (Unit::AuraEffectList::const_iterator i = modFishingSkillTemp.begin(); i != modFishingSkillTemp.end(); ++i)
+                if ((*i)->GetMiscValue() == 356)
+                    temporarySkillId = (*i)->GetId();
+        }
+
+        // Cleanup
+        if (temporarySkillId != 0 && skill_id == 356)
+            RemoveAurasDueToSpell(temporarySkillId);
+
         SetUInt16Value(PLAYER_SKILL_RANK_0 + field, offset, new_value);
         if (itr->second.uState != SKILL_NEW)
             itr->second.uState = SKILL_CHANGED;
@@ -6426,6 +6441,10 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
 
         if (skill_id == SKILL_ARCHAEOLOGY)
             archaeology.Update();
+
+        if (temporarySkillId != 0 && skill_id == 356)
+            CastWithDelay(100, this, temporarySkillId, true);
+
         return true;
     }
 
