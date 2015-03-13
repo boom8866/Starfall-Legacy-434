@@ -1654,7 +1654,7 @@ public:
                     }
                     case EVENT_QUEST_COMPLETE:
                     {
-                        if (playerOwner && playerOwner != NULL && playerOwner->GetTypeId() == TYPEID_PLAYER)
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->GetTypeId() == TYPEID_PLAYER)
                         {
                             playerOwner->ToPlayer()->KilledMonsterCredit(47466);
                             if (Vehicle* playerCamera = playerOwner->GetVehicle())
@@ -11731,7 +11731,7 @@ public:
                         events.CancelEvent(EVENT_INFORM_TAILGUNNER_RIDE);
                         if (Unit* turret = me->GetVehicleKit()->GetPassenger(2))
                         {
-                            if (playerOwner && playerOwner != NULL && playerOwner->GetVehicleBase())
+                            if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->GetVehicleBase())
                                 playerOwner->GetVehicleBase()->GetVehicleKit()->RemoveAllPassengers();
                             playerOwner->EnterVehicle(turret, 0);
                         }
