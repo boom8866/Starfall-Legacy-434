@@ -434,7 +434,8 @@ public:
         EVENT_SEAT_UNDER_ATTACK,
         EVENT_AMBUSHER_CAMERA,
         EVENT_TELEPORT_CAMERA,
-        EVENT_REMOVE_PASSENGERS
+        EVENT_REMOVE_PASSENGERS,
+        EVENT_CHECK_OWNER
     };
 
     enum npcId
@@ -498,6 +499,17 @@ public:
             {
                 switch (eventId)
                 {
+                    case EVENT_CHECK_OWNER:
+                    {
+                        Unit* owner = me->GetCharmerOrOwner();
+                        if (!owner)
+                        {
+                            events.Reset();
+                            me->DespawnOrUnsummon(1);
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_OWNER, 1000);
+                        break;
+                    }
                     case EVENT_BEHIND_CARAVAN:
                     {
                         events.CancelEvent(EVENT_BEHIND_CARAVAN);

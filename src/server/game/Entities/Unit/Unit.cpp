@@ -21829,7 +21829,8 @@ void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool trigge
         bool const triggered;
     };
 
-    m_Events.AddEvent(new CastDelayEvent(this, victim, spellid, triggered), m_Events.CalculateTime(delay));
+    if (this && victim)
+        m_Events.AddEvent(new CastDelayEvent(this, victim, spellid, triggered), m_Events.CalculateTime(delay));
 }
 
 //set the last casted spell for Improved steady shot talent
