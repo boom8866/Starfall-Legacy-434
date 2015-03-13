@@ -3525,20 +3525,23 @@ public:
                     {
                         DoCast(me, SPELL_FIRE_POWER_TRIGGERED, true);
                         DoCast(me, SPELL_FIRE_POWER_VISUAL, true);
+                        me->DespawnOrUnsummon(1000);
                     }
-                    else if (owner->HasAura(TALENT_FIRE_POWER_R2) && roll_chance_i(66))
+                    if (owner->HasAura(TALENT_FIRE_POWER_R2) && roll_chance_i(66))
                     {
                         DoCast(me, SPELL_FIRE_POWER_TRIGGERED, true);
                         DoCast(me, SPELL_FIRE_POWER_VISUAL, true);
+                        me->DespawnOrUnsummon(1000);
                     }
-                    else if (owner->HasAura(TALENT_FIRE_POWER_R3))
+                    if (owner->HasAura(TALENT_FIRE_POWER_R3))
                     {
                         DoCast(me, SPELL_FIRE_POWER_TRIGGERED, true);
                         DoCast(me, SPELL_FIRE_POWER_VISUAL, true);
+                        me->DespawnOrUnsummon(1000);
                     }
                 }
 
-                me->DespawnOrUnsummon(1500);
+                DespawnTimer = 10 * IN_MILLISECONDS;
             }
             else
                 DespawnTimer -= diff;
