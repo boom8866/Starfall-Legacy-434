@@ -557,6 +557,39 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
         ItemTemplate const* pProto = pItem->GetTemplate();
         if (pProto)
         {
+            /* TEMP START: This is needed to send a custom mail when level 85 is reached for imported players */
+            if (pProto->ItemId == 100000)
+            {
+                class eventTalk : public BasicEvent
+                {
+                public:
+                    explicit eventTalk(Creature* vendor) : vendor(vendor)
+                    {
+                    }
+
+                    bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+                    {
+                        if (vendor)
+                        {
+                            vendor->MonsterSay("Valar Dohaeris", 0);
+                            vendor->HandleEmoteCommand(EMOTE_ONESHOT_BOW);
+                        }
+                        return true;
+                    }
+
+                private:
+                    Creature* vendor;
+                };
+
+                if (creature && _player)
+                {
+                    _player->MonsterSay("Valar Morghulis", 0);
+                    _player->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);
+                    creature->m_Events.AddEvent(new eventTalk(creature), (creature)->m_Events.CalculateTime(2500));
+                }
+            }
+            /* TEMP END */
+
             if (pProto->SellPrice > 0)
             {
                 if (count < pItem->GetCount())               // need split items
@@ -588,6 +621,35 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
                 }
 
                 uint32 money = pProto->SellPrice * count;
+
+                // WoTLK Items (Sell price nerfed)
+                if (pProto->ItemId <= 56806)
+                {
+                    switch (pProto->Quality)
+                    {
+                        case ITEM_QUALITY_UNCOMMON:
+                        {
+                            if (money >= 25000)
+                                money = 25000;
+                            break;
+                        }
+                        case ITEM_QUALITY_RARE:
+                        {
+                            if (money >= 35000)
+                                money = 35000;
+                            break;
+                        }
+                        case ITEM_QUALITY_EPIC:
+                        {
+                            if (money >= 50000)
+                                money = 50000;
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+
                 _player->ModifyMoney(money);
                 _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_VENDORS, money);
             }

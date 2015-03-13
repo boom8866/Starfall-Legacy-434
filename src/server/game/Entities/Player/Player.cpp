@@ -133,6 +133,30 @@ enum CharacterCustomizeFlags
     CHAR_CUSTOMIZE_FLAG_RACE            = 0x00100000        // name, gender, race, etc...
 };
 
+class anniversaryAchievement : public BasicEvent
+{
+public:
+    explicit anniversaryAchievement(Player* player) : player(player)
+    {
+    }
+
+    bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+    {
+        if (player && player->IsInWorld())
+        {
+            if (AchievementEntry const* anniversary = sAchievementMgr->GetAchievement(5512))
+            {
+                if (!player->HasAchieved(5512))
+                    player->CompletedAchievement(anniversary);
+            }
+        }
+        return true;
+    }
+
+private:
+    Player* player;
+};
+
 // corpse reclaim times
 #define DEATH_EXPIRE_STEP (5*MINUTE)
 #define MAX_DEATH_COUNT 3
@@ -3751,12 +3775,11 @@ bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
         // do character spell book cleanup (all characters)
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Non-existed in SpellStore spell #%u request, deleting for all characters in `character_spell`.", spellId);
-
-            DeleteSpellFromAllPlayers(spellId);
+            sLog->outError(LOG_FILTER_SPELLS_AURAS, "[OUTDATED SPELL] ID: [%u] Spell deleted from player.", spellId);
+            removeSpell(spellId, false, false);
         }
         else
-            sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Non-existed in SpellStore spell #%u request.", spellId);
+            sLog->outError(LOG_FILTER_SPELLS_AURAS, "[OUTDATED SPELL] ID: [%u] Spell deleted from player.", spellId);
 
         return false;
     }
@@ -3767,8 +3790,7 @@ bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
         if (!IsInWorld() && !learning)                       // spell load case
         {
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addTalent: Broken spell #%u learning not allowed, deleting for all characters in `character_talent`.", spellId);
-
-            DeleteSpellFromAllPlayers(spellId);
+            removeSpell(spellId, false, false);
         }
         else
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addTalent: Broken spell #%u learning not allowed.", spellId);
@@ -3816,12 +3838,11 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
         // do character spell book cleanup (all characters)
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Non-existed in SpellStore spell #%u request, deleting for all characters in `character_spell`.", spellId);
-
-            DeleteSpellFromAllPlayers(spellId);
+            sLog->outError(LOG_FILTER_SPELLS_AURAS, "[OUTDATED SPELL] ID: [%u] Spell deleted from player.", spellId);
+            removeSpell(spellId, false, false);
         }
         else
-            sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Non-existed in SpellStore spell #%u request.", spellId);
+            sLog->outError(LOG_FILTER_SPELLS_AURAS, "[OUTDATED SPELL] ID: [%u] Spell deleted from player.", spellId);
 
         return false;
     }
@@ -3832,8 +3853,7 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
         if (!IsInWorld() && !learning)                       // spell load case
         {
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Broken spell #%u learning not allowed, deleting for all characters in `character_spell`.", spellId);
-
-            DeleteSpellFromAllPlayers(spellId);
+            removeSpell(spellId, false, false);
         }
         else
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Broken spell #%u learning not allowed.", spellId);
@@ -8761,6 +8781,26 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     UpdateZoneDependentAuras(newZone);
 
+    // Temp switch: This switch is needed to inform players that they're entering an unfixed and untested zone so he can't do anything
+    switch (newZone)
+    {
+        case 16:    // Azshara (*)
+        case 405:   // Desolace
+        case 618:   // Winterspring
+        case 361:   // Felwood (*)
+        case 406:   // Stonetalon Mountains
+        case 357:   // Feralas
+        case 5144:  // Vashj'ir
+        case 5145:  // Vashj'ir
+        case 4815:  // Vashj'ir
+        {
+            ChatHandler(GetSession()).PSendSysMessage("|cffff0000[WARNING]: |cffffffffYou are in a non-fixed quest zone, you are not able to take quests or kill creatures!");
+            break;
+        }
+        default:
+            break;
+    }
+
     phaseMgr.RemoveUpdateFlag(PHASE_UPDATE_FLAG_ZONE_UPDATE);
 }
 
@@ -13588,8 +13628,22 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
         // Delete rolled money / loot from db.
         // MUST be done before RemoveFromWorld() or GetTemplate() fails
         if (ItemTemplate const* pTmp = pItem->GetTemplate())
+        {
+            // Switch for nonworking items that should loot money
+            switch (pTmp->ItemId)
+            {
+                case 64491: // Royal Reward
+                {
+                    ModifyMoney(2000000);
+                    break;
+                }
+                default:
+                    break;
+            }
+
             if (pTmp->Flags & ITEM_PROTO_FLAG_OPENABLE)
                 pItem->ItemContainerDeleteLootMoneyAndLootItemsFromDB();
+        }
 
         if (IsInWorld() && update)
         {
@@ -14341,7 +14395,6 @@ void Player::AddItemToBuyBackSlot(Item* pItem)
 {
     if (pItem)
     {
-        // Test
         uint32 slot = m_currentBuybackSlot;
         // if current back slot non-empty search oldest or free
         if (m_items[slot])
@@ -24591,6 +24644,10 @@ void Player::SendInitialPacketsAfterAddToMap()
             break;
         }
     }
+
+    // WoW Anniversary!
+    if (sGameEventMgr->IsActiveEvent(101) && !HasAchieved(5512))
+        m_Events.AddEvent(new anniversaryAchievement(this), (this)->m_Events.CalculateTime(10000));
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()

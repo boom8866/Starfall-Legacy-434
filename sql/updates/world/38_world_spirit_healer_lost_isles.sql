@@ -1,0 +1,2 @@
+-- Position update for Spirit Healer (id: 39660) in zone: 4720, area: 4899
+UPDATE `creature` SET `position_x` = 1480.328, `position_y` = 2062.924, `position_z` = 225.234, `orientation`= 3.761 WHERE `guid` = 832845;
