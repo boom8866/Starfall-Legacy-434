@@ -6770,6 +6770,12 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                                 bp0 += bp0 * frostFever->GetAmount() / 100;
                                 m_caster->CastCustomSpell(unitTarget, 55095, &bp0, NULL, NULL, true);
                             }
+                            // Ebon Plague
+                            if (AuraEffect* ebonPlague = m_targets.GetUnitTarget()->GetAuraEffect(65142, EFFECT_0, m_caster->GetGUID()))
+                            {
+                                bp0 += bp0 * ebonPlague->GetAmount() / 100;
+                                m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true);
+                            }
 
                             // Spread visual effect!
                             m_caster->CastSpell(unitTarget, 91939, true);
