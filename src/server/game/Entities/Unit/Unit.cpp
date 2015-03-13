@@ -1938,6 +1938,11 @@ uint32 Unit::CalcArmorReducedDamage(Unit* victim, const uint32 damage, SpellInfo
             armorBypassPct += (*i)->GetAmount();
     armor = CalculatePct(armor, 100 - std::min(armorBypassPct, 100));
 
+    // Colossus Smash should only reduce armory by 50% in PvP
+    if (spellInfo && spellInfo->Id == 86346)
+        if (victim && victim->GetTypeId() == TYPEID_PLAYER)
+            armorBypassPct = 50;
+
     // Ignore enemy armor by SPELL_AURA_MOD_TARGET_RESISTANCE aura
     armor += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, SPELL_SCHOOL_MASK_NORMAL);
 
@@ -11068,12 +11073,15 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
             {
                 // Check target HP
                 if (victim && victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
-                {
                     chance += aurEff->GetAmount();
-                    if (roll_chance_i(chance))
-                        CastSpell(victim, 51945, true); // Earthliving
-                }
             }
+
+            // Healing Rain and Chain Heal exceptions
+            if (spellInfo->Id == 73921 || spellInfo->Id == 1064)
+                chance = 1;
+
+            if (roll_chance_i(chance))
+                CastSpell(victim, 51945, true); // Earthliving
         }
     }
 

@@ -2950,11 +2950,6 @@ void SpellMgr::LoadSpellCustomAttr()
 
         switch (spellInfo->SpellFamilyName)
         {
-            case SPELLFAMILY_WARRIOR:
-                // Shout
-                if (spellInfo->SpellFamilyFlags[0] & 0x20000 || spellInfo->SpellFamilyFlags[1] & 0x20)
-                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
-                break;
             case SPELLFAMILY_DRUID:
                 // Roar
                 if (spellInfo->SpellFamilyFlags[0] & 0x8)

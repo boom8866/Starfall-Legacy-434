@@ -1306,8 +1306,6 @@ public:
             if (GetCaster()->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
             {
                 totHeal = GetHitHeal() * 3;
-                totHeal += CalculatePct(caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_MAGIC), 21);
-                totHeal += CalculatePct(int32(caster->GetTotalAttackPowerValue(BASE_ATTACK)), 20);
 
                 // Selfless Healer
                 if (AuraEffect const* auraEff = caster->GetDummyAuraEffect(SPELLFAMILY_PALADIN, 3924, EFFECT_0))
@@ -1337,9 +1335,6 @@ public:
                 default:
                     break;
             }
-
-            totHeal += CalculatePct(caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_MAGIC), 21);
-            totHeal += CalculatePct(int32(caster->GetTotalAttackPowerValue(BASE_ATTACK)), 20);
 
             // Selfless Healer
             if (AuraEffect const* auraEff = caster->GetDummyAuraEffect(SPELLFAMILY_PALADIN, 3924, EFFECT_0))
