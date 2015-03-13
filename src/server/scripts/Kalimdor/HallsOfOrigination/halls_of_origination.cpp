@@ -800,14 +800,14 @@ public:
                     case EVENT_WHIRLING_WINDS:
                     {
                         DoCast(me, SPELL_WHIRLING_WINDS, true);
-                        events.RescheduleEvent(EVENT_WHIRLING_WINDS, 12000);
+                        events.RescheduleEvent(EVENT_WHIRLING_WINDS, 10000);
                         break;
                     }
                     case EVENT_WIND_SHEAR:
                     {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 125.0f, true))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_BOTTOMAGGRO, 0, 60.0f, true))
                             DoCast(target, SPELL_WIND_SHEAR);
-                        events.RescheduleEvent(EVENT_WIND_SHEAR, 12000);
+                        events.RescheduleEvent(EVENT_WIND_SHEAR, 14000);
                         break;
                     }
                     default:
@@ -854,6 +854,8 @@ public:
         {
             me->SetReactState(REACT_PASSIVE);
             me->SetWalk(true);
+            me->SetSpeed(MOVE_WALK, 0.5f, true);
+            me->SetSpeed(MOVE_RUN, 0.5f, true);
             DoCast(me, SPELL_WHIRLING_WIND_AURA, true);
             events.ScheduleEvent(EVENT_FOLLOW_PLAYER, 100);
         }
@@ -868,13 +870,16 @@ public:
                 {
                     case EVENT_FOLLOW_PLAYER:
                     {
-                        if (Player* target = me->FindNearestPlayer(125.0f, true))
+                        if (me->isMoving())
                         {
-                            me->GetMotionMaster()->Clear();
-                            me->GetMotionMaster()->MovementExpired(false);
-                            me->GetMotionMaster()->MoveFollow(target, 0.0f, 0);
+                            events.RescheduleEvent(EVENT_FOLLOW_PLAYER, 1000);
+                            break;
                         }
-                        events.RescheduleEvent(EVENT_FOLLOW_PLAYER, 1000);
+
+                        me->GetMotionMaster()->MovementExpired();
+                        if (Player* target = me->FindNearestPlayer(125.0f, true))
+                            me->GetMotionMaster()->MoveChase(target, 0.0f, 0.0f);
+                        events.RescheduleEvent(EVENT_FOLLOW_PLAYER, 2000);
                         break;
                     }
                     default:

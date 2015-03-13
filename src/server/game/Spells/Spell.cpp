@@ -4997,6 +4997,19 @@ void Spell::TakeRunePower(bool didHit)
         }
     }
 
+    // Some spells shouldn't generate runic power on hit if some special auras are present
+    switch (GetSpellInfo()->Id)
+    {
+        case 45477: // Icy Touch
+        case 49184: // Howling Blast
+        {
+            // Rime
+            if (m_caster->HasAura(59052))
+                didHit = false;
+            break;
+        }
+    }
+
     // you can gain some runic power when use runes
     if (didHit)
     {

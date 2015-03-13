@@ -1426,12 +1426,12 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
         if (isHunterPet())
         {
             float mod = 0.425f;                                                 //Hunter contribution modifier
-            bonusAP += owner->GetTotalAttackPowerValue(RANGED_ATTACK) * mod;
+            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * mod;
             SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0687f));
         }
         else if (IsPetGhoul()) //ghouls benefit from deathknight's attack power (may be summon pet or not)
         {
-            bonusAP += owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.12f;
+            bonusAP = owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.12f;
             SetBonusDamage(int32(owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.06287f));
         }
         else if (IsSpiritWolf()) //wolf benefit from shaman's attack power

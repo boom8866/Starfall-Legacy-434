@@ -7671,6 +7671,19 @@ void AuraEffect::HandleObsModPowerAuraTick(Unit* target, Unit* caster) const
     sLog->outInfo(LOG_FILTER_SPELLS_AURAS, "PeriodicTick: %u (TypeId: %u) energize %u (TypeId: %u) for %u dmg inflicted by %u",
         GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), target->GetGUIDLow(), target->GetTypeId(), amount, GetId());
 
+    switch (m_spellInfo->Id)
+    {
+        case 6117:  // Mage Armor
+        {
+            // Glyph of Mage Armor
+            if (target->HasAura(56383))
+                amount += amount * 0.20f;
+            break;
+        }
+        default:
+            break;
+    }
+
     SpellPeriodicAuraLogInfo pInfo(this, amount, 0, 0, 0, 0.0f, false);
     target->SendPeriodicAuraLog(&pInfo);
 
