@@ -1755,6 +1755,10 @@ void Creature::Respawn(bool force)
             setDeathState(CORPSE);
     }
 
+    float x, y, z, o;
+    GetHomePosition(x, y, z, o);
+    NearTeleportTo(x, y, z, o);
+
     RemoveCorpse(false);
 
     if (getDeathState() == DEAD)
@@ -1789,7 +1793,10 @@ void Creature::Respawn(bool force)
 
         //Call AI respawn virtual function
         if (IsAIEnabled)
+        {
+            AI()->Reset();
             TriggerJustRespawned = true;//delay event to next tick so all creatures are created on the map before processing
+        }
 
         uint32 poolid = GetDBTableGUIDLow() ? sPoolMgr->IsPartOfAPool<Creature>(GetDBTableGUIDLow()) : 0;
         if (poolid)
@@ -1800,6 +1807,7 @@ void Creature::Respawn(bool force)
         {
             SetFlag(UNIT_NPC_FLAGS, cinfo->npcflag);
             SetFlag(UNIT_FIELD_FLAGS, cinfo->unit_flags);
+            LoadCreaturesAddon();
         }
 
         //Re-initialize reactstate that could be altered by movementgenerators
