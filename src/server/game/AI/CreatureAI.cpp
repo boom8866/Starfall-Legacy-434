@@ -67,7 +67,7 @@ void CreatureAI::TalkWithDelay(uint32 const& delay, uint32 const& groupId, uint6
 
         bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
         {
-            if (whisperGuid != 0)
+            if (whisperGuid != 0 && me && me->IsInWorld())
             {
                 if (Unit* target = ObjectAccessor::GetUnit(*me, whisperGuid))
                     if (target->IsInWorld() && target->IsInMap(me))
@@ -84,7 +84,8 @@ void CreatureAI::TalkWithDelay(uint32 const& delay, uint32 const& groupId, uint6
         uint64 const whisperGuid;
     };
 
-    me->m_Events.AddEvent(new TalkDelayEvent(me, groupId, whisperGuid), me->m_Events.CalculateTime(delay));
+    if (me && whisperGuid != 0)
+        me->m_Events.AddEvent(new TalkDelayEvent(me, groupId, whisperGuid), me->m_Events.CalculateTime(delay));
 }
 
 void CreatureAI::TalkToFarWithDelay(uint32 const& delay, uint32 const& groupId, CreatureTextRange const& range, uint64 const& whisperGuid)

@@ -434,7 +434,8 @@ public:
         EVENT_SEAT_UNDER_ATTACK,
         EVENT_AMBUSHER_CAMERA,
         EVENT_TELEPORT_CAMERA,
-        EVENT_REMOVE_PASSENGERS
+        EVENT_REMOVE_PASSENGERS,
+        EVENT_CHECK_OWNER
     };
 
     enum npcId
@@ -498,6 +499,17 @@ public:
             {
                 switch (eventId)
                 {
+                    case EVENT_CHECK_OWNER:
+                    {
+                        Unit* owner = me->GetCharmerOrOwner();
+                        if (!owner)
+                        {
+                            events.Reset();
+                            me->DespawnOrUnsummon(1);
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_OWNER, 1000);
+                        break;
+                    }
                     case EVENT_BEHIND_CARAVAN:
                     {
                         events.CancelEvent(EVENT_BEHIND_CARAVAN);
@@ -1642,7 +1654,7 @@ public:
                     }
                     case EVENT_QUEST_COMPLETE:
                     {
-                        if (playerOwner && playerOwner != NULL && playerOwner->GetTypeId() == TYPEID_PLAYER)
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->GetTypeId() == TYPEID_PLAYER)
                         {
                             playerOwner->ToPlayer()->KilledMonsterCredit(47466);
                             if (Vehicle* playerCamera = playerOwner->GetVehicle())
@@ -11719,7 +11731,7 @@ public:
                         events.CancelEvent(EVENT_INFORM_TAILGUNNER_RIDE);
                         if (Unit* turret = me->GetVehicleKit()->GetPassenger(2))
                         {
-                            if (playerOwner && playerOwner != NULL && playerOwner->GetVehicleBase())
+                            if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->GetVehicleBase())
                                 playerOwner->GetVehicleBase()->GetVehicleKit()->RemoveAllPassengers();
                             playerOwner->EnterVehicle(turret, 0);
                         }

@@ -7548,6 +7548,24 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
                 caster->ToPlayer()->AddSpellCooldown(89182, 0, time(NULL) + 1.5);
             }
         }
+        // Gale of Shadows (Normal)
+        if (caster->HasAura(90943))
+        {
+            if (!caster->ToPlayer()->HasSpellCooldown(90953))
+            {
+                caster->CastSpell(caster, 90953, true);
+                caster->ToPlayer()->AddSpellCooldown(90953, 0, time(NULL) + 3);
+            }
+        }
+        // Gale of Shadows (Heroic)
+        if (caster->HasAura(90986))
+        {
+            if (!caster->ToPlayer()->HasSpellCooldown(90985))
+            {
+                caster->CastSpell(caster, 90985, true);
+                caster->ToPlayer()->AddSpellCooldown(90985, 0, time(NULL) + 3);
+            }
+        }
     }
 
     float minval = (float)caster->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);

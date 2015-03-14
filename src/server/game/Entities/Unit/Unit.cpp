@@ -1936,12 +1936,13 @@ uint32 Unit::CalcArmorReducedDamage(Unit* victim, const uint32 damage, SpellInfo
     for (AuraEffectList::const_iterator i = reductionAuras.begin(); i != reductionAuras.end(); ++i)
         if ((*i)->GetCasterGUID() == GetGUID())
             armorBypassPct += (*i)->GetAmount();
-    armor = CalculatePct(armor, 100 - std::min(armorBypassPct, 100));
 
     // Colossus Smash should only reduce armory by 50% in PvP
     if (spellInfo && spellInfo->Id == 86346)
         if (victim && victim->GetTypeId() == TYPEID_PLAYER)
             armorBypassPct = 50;
+
+    armor = CalculatePct(armor, 100 - std::min(armorBypassPct, 100));
 
     // Ignore enemy armor by SPELL_AURA_MOD_TARGET_RESISTANCE aura
     armor += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, SPELL_SCHOOL_MASK_NORMAL);
@@ -11078,7 +11079,10 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
 
             // Healing Rain and Chain Heal exceptions
             if (spellInfo->Id == 73921 || spellInfo->Id == 1064)
-                chance = 1;
+            {
+                if (victim->CountPctFromMaxHealth(35))
+                    chance = 5;
+            }
 
             if (roll_chance_i(chance))
                 CastSpell(victim, 51945, true); // Earthliving
@@ -21829,7 +21833,8 @@ void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool trigge
         bool const triggered;
     };
 
-    m_Events.AddEvent(new CastDelayEvent(this, victim, spellid, triggered), m_Events.CalculateTime(delay));
+    if (this && victim)
+        m_Events.AddEvent(new CastDelayEvent(this, victim, spellid, triggered), m_Events.CalculateTime(delay));
 }
 
 //set the last casted spell for Improved steady shot talent

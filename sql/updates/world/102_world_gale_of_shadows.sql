@@ -1,0 +1,1 @@
+UPDATE `spell_proc_event` SET `Cooldown`=3 WHERE `entry` IN (90943, 90986);
