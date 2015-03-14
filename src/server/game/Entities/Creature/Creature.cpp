@@ -1759,6 +1759,10 @@ void Creature::Respawn(bool force)
             setDeathState(CORPSE);
     }
 
+    Position pos = GetHomePosition();
+    NearTeleportTo(pos);
+    Relocate(pos);
+
     RemoveCorpse(false);
 
     if (getDeathState() == DEAD)

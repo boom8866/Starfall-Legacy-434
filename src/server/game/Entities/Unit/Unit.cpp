@@ -7237,23 +7237,30 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     {
                         if (Player* caster = triggeredByAura->GetCaster()->ToPlayer())
                         {
-                            if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 4628, 0))
+                            if (!caster->HasSpellCooldown(86185) && !caster->HasSpellCooldown(86184) && !caster->HasSpellCooldown(86183))
                             {
-                                if (caster->HasSpellCooldown(16166))
+                                if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 4628, 0))
                                 {
-                                    uint32 coolDimin = (aurEff->GetAmount() / 1000) * -1;
-                                    uint32 newCooldownDelay = caster->GetSpellCooldownDelay(16166);
-                                    if (newCooldownDelay <= coolDimin)
-                                        newCooldownDelay = 0;
-                                    else
-                                        newCooldownDelay -= coolDimin;
+                                    if (caster->HasSpellCooldown(16166))
+                                    {
+                                        uint32 coolDimin = (aurEff->GetAmount() / 1000) * -1;
+                                        uint32 newCooldownDelay = caster->GetSpellCooldownDelay(16166);
+                                        if (newCooldownDelay <= coolDimin)
+                                            newCooldownDelay = 0;
+                                        else
+                                            newCooldownDelay -= coolDimin;
 
-                                    caster->AddSpellCooldown(16166, 0, uint32(time(NULL) + newCooldownDelay));
-                                    WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
-                                    data << uint32(16166);
-                                    data << uint64(caster->GetGUID());
-                                    data << int32(aurEff->GetAmount());
-                                    caster->GetSession()->SendPacket(&data);
+                                        caster->AddSpellCooldown(16166, 0, uint32(time(NULL) + newCooldownDelay));
+                                        WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+                                        data << uint32(16166);
+                                        data << uint64(caster->GetGUID());
+                                        data << int32(aurEff->GetAmount());
+                                        caster->GetSession()->SendPacket(&data);
+
+                                        caster->AddSpellCooldown(86185, 0, uint32(time(NULL) + 1));
+                                        caster->AddSpellCooldown(86184, 0, uint32(time(NULL) + 1));
+                                        caster->AddSpellCooldown(86183, 0, uint32(time(NULL) + 1));
+                                    }
                                 }
                             }
                         }
