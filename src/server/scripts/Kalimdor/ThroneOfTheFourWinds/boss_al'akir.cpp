@@ -153,7 +153,7 @@ public:
             events.SetPhase(PHASE_1);
             //events.ScheduleEvent(EVENT_WIND_BURST, urand(25000, 30000));
             //events.ScheduleEvent(EVENT_SUMMON_ICE_STORM, 5000);
-            //events.ScheduleEvent(EVENT_SUMMON_SQUALL_LINE_1, 10000);
+            events.ScheduleEvent(EVENT_SUMMON_SQUALL_LINE_1, 10000);
             events.ScheduleEvent(EVENT_LIGHTNING_STRIKE, 9000);
         }
 
@@ -545,21 +545,15 @@ class npc_totfw_squall_line_vehicle : public CreatureScript
                             switch (me->GetEntry())
                             {
                                 case NPC_SQUALL_LINE_VEHICLE_SW:
-                                {
-                                    float base = me->GetAngle(alakir) - 0.1189866f;
-                                    me->GetMotionMaster()->MovePoint(0, alakir->GetPositionX()+cos(base + M_PI)*50, alakir->GetPositionY()+sin(base + M_PI)*50, alakir->GetPositionZ(), false);
+                                    me->GetMotionMaster()->MoveCirclePath(alakir->GetPositionX(), me->GetPositionY(), alakir->GetPositionZ(), 50.0f, true);
                                     break;
-                                }
                                 case NPC_SQUALL_LINE_VEHICLE_SE:
-                                {
-                                    float base = me->GetAngle(alakir) + 0.1189866f;
-                                    me->GetMotionMaster()->MovePoint(0, alakir->GetPositionX()+cos(base + M_PI)*50, alakir->GetPositionY()+sin(base + M_PI)*50, alakir->GetPositionZ(), false);
+                                    me->GetMotionMaster()->MoveCirclePath(alakir->GetPositionX(), me->GetPositionY(), alakir->GetPositionZ(), 50.0f, false);
                                     break;
-                                }
                                 default:
                                     break;
                             }
-                            events.ScheduleEvent(EVENT_MOVE_IN_CIRCLE, 100);
+                            //events.ScheduleEvent(EVENT_MOVE_IN_CIRCLE, 100);
                             break;
                         }
                         default:

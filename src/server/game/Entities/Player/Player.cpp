@@ -28456,6 +28456,9 @@ void Player::_fillGearScoreData(Item* item, GearScore* gearScore, uint32& twoHan
             twoHandScore = std::max(twoHandScore, level);
             break;
         case INVTYPE_WEAPON:
+            item->GetSlot() == SLOT_MAIN_HAND ? (*gearScore)[SLOT_MAIN_HAND] = std::max((*gearScore)[SLOT_MAIN_HAND], level) :
+                (*gearScore)[EQUIPMENT_SLOT_OFFHAND] = std::max((*gearScore)[EQUIPMENT_SLOT_OFFHAND], level);
+            break;
         case INVTYPE_WEAPONMAINHAND:
             (*gearScore)[SLOT_MAIN_HAND] = std::max((*gearScore)[SLOT_MAIN_HAND], level);
             break;

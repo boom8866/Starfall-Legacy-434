@@ -38,7 +38,7 @@ UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 14, `u
 
 UPDATE `creature_template` SET `VehicleId`= 1358 WHERE `entry`= 47034; -- squall line vehicle SW
 UPDATE `creature_template` SET `VehicleId`= 1360 WHERE `entry`= 48852; -- squall line vehicle SE
-UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 131, `scriptname`= 'npc_totfw_squall_line_vehicle' WHERE `entry` IN (47034, 48852); -- squall line vehicles
+UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 131, `InhabitType`= 4, `scriptname`= 'npc_totfw_squall_line_vehicle' WHERE `entry` IN (47034, 48852); -- squall line vehicles
 
 UPDATE `creature_template` SET `VehicleId`= 1246 WHERE `entry`= 48854; -- squall lines SW
 UPDATE `creature_template` SET `VehicleId`= 1359 WHERE `entry`= 48855; -- squall lines SE
