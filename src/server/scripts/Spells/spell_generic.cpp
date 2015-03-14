@@ -12842,6 +12842,106 @@ public:
     }
 };
 
+class spell_eng_grounded_plasma_shield : public SpellScriptLoader
+{
+public:
+    spell_eng_grounded_plasma_shield() : SpellScriptLoader("spell_eng_grounded_plasma_shield")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_GROUNDED_PLASMA_SHIELD    = 82627,
+        SPELL_PLASMA_MISFIRE            = 82407,
+        SPELL_MAGNETIZED                = 82403,
+        SPELL_REVERSED_SHIELD           = 82406
+    };
+
+    class spell_eng_grounded_plasma_shield_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_eng_grounded_plasma_shield_SpellScript);
+
+        void HandleSynapseBuff()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                if (roll_chance_f(1))
+                    caster->CastSpell(caster, SPELL_PLASMA_MISFIRE, true);
+                else if (roll_chance_f(2))
+                    caster->CastSpell(caster, SPELL_MAGNETIZED, true);
+                else if (roll_chance_f(3))
+                    caster->CastSpell(caster, SPELL_REVERSED_SHIELD, true);
+                else
+                    caster->CastSpell(caster, SPELL_GROUNDED_PLASMA_SHIELD, true);
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_eng_grounded_plasma_shield_SpellScript::HandleSynapseBuff);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_eng_grounded_plasma_shield_SpellScript();
+    }
+};
+
+class spell_eng_invisibility_field : public SpellScriptLoader
+{
+public:
+    spell_eng_invisibility_field() : SpellScriptLoader("spell_eng_invisibility_field")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_INVISIBILITY_FIELD    = 82820
+    };
+
+    class spell_eng_invisibility_field_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_eng_invisibility_field_SpellScript);
+
+        SpellCastResult CheckInCombat()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->isInCombat())
+                    return SPELL_FAILED_AFFECTING_COMBAT;
+            }
+
+            return SPELL_CAST_OK;
+        }
+
+        void HandleInvisibilityField()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                caster->CastSpell(caster, SPELL_INVISIBILITY_FIELD, true);
+            }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_eng_invisibility_field_SpellScript::CheckInCombat);
+            AfterCast += SpellCastFn(spell_eng_invisibility_field_SpellScript::HandleInvisibilityField);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_eng_invisibility_field_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -13097,4 +13197,6 @@ void AddSC_generic_spell_scripts()
     new spell_jc_stardust_no_2();
     new spell_jc_stardust_no_2_triggered();
     new spell_eng_synapse_springs();
+    new spell_eng_grounded_plasma_shield();
+    new spell_eng_invisibility_field();
 }
