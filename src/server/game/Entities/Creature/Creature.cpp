@@ -1733,6 +1733,7 @@ void Creature::setDeathState(DeathState s)
         SetLootRecipient(NULL);
         ResetPlayerDamageReq();
         CreatureTemplate const* cinfo = GetCreatureTemplate();
+        UpdatePosition(GetHomePosition(), true);
         SetWalk(true);
         HandleInhabitType(cinfo->InhabitType);
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
@@ -1814,11 +1815,6 @@ void Creature::Respawn(bool force)
     }
 
     UpdateObjectVisibility();
-
-    float x, y, z, o;
-    GetHomePosition(x, y, z, o);
-    NearTeleportTo(x, y, z, o);
-    Relocate(x, y, z, o);
 }
 
 void Creature::ForcedDespawn(uint32 timeMSToDespawn)
