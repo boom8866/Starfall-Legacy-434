@@ -2482,7 +2482,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             procEx |= PROC_EX_NORMAL_HIT;
 
         int32 gain = caster->HealBySpell(unitTarget, m_spellInfo, addhealth, target->crit);
-        unitTarget->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f, m_spellInfo);
+        if (unitTarget && caster)
+            unitTarget->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f, m_spellInfo);
         m_healing = gain;
 
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)

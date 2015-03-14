@@ -3457,7 +3457,8 @@ enum FlameOrb
     TALENT_FIRE_POWER_R1            = 18459,
     TALENT_FIRE_POWER_R2            = 18460,
     TALENT_FIRE_POWER_R3            = 54734,
-    SPELL_FIRE_POWER_TRIGGERED      = 83619
+    SPELL_FIRE_POWER_TRIGGERED      = 83619,
+    SPELL_FIRE_POWER_VISUAL         = 30934
 };
 
 class npc_flame_orb : public CreatureScript
@@ -3521,14 +3522,26 @@ public:
                 if (owner)
                 {
                     if (owner->HasAura(TALENT_FIRE_POWER_R1) && roll_chance_i(33))
+                    {
                         DoCast(me, SPELL_FIRE_POWER_TRIGGERED, true);
-                    else if (owner->HasAura(TALENT_FIRE_POWER_R2) && roll_chance_i(66))
+                        DoCast(me, SPELL_FIRE_POWER_VISUAL, true);
+                        me->DespawnOrUnsummon(1000);
+                    }
+                    if (owner->HasAura(TALENT_FIRE_POWER_R2) && roll_chance_i(66))
+                    {
                         DoCast(me, SPELL_FIRE_POWER_TRIGGERED, true);
-                    else if (owner->HasAura(TALENT_FIRE_POWER_R3))
+                        DoCast(me, SPELL_FIRE_POWER_VISUAL, true);
+                        me->DespawnOrUnsummon(1000);
+                    }
+                    if (owner->HasAura(TALENT_FIRE_POWER_R3))
+                    {
                         DoCast(me, SPELL_FIRE_POWER_TRIGGERED, true);
+                        DoCast(me, SPELL_FIRE_POWER_VISUAL, true);
+                        me->DespawnOrUnsummon(1000);
+                    }
                 }
-                me->SetVisible(false);
-                me->DisappearAndDie();
+
+                DespawnTimer = 10 * IN_MILLISECONDS;
             }
             else
                 DespawnTimer -= diff;
