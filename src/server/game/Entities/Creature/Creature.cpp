@@ -1733,7 +1733,6 @@ void Creature::setDeathState(DeathState s)
         SetLootRecipient(NULL);
         ResetPlayerDamageReq();
         CreatureTemplate const* cinfo = GetCreatureTemplate();
-        UpdatePosition(GetHomePosition(), true);
         SetWalk(true);
         HandleInhabitType(cinfo->InhabitType);
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
@@ -1749,6 +1748,7 @@ void Creature::setDeathState(DeathState s)
 
 void Creature::Respawn(bool force)
 {
+    UpdatePosition(GetHomePosition(), true);
     DestroyForNearbyPlayers();
 
     if (force)
