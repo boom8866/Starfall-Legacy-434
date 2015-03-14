@@ -1610,7 +1610,7 @@ LfgLockMap const LFGMgr::GetLockedDungeons(uint64 guid)
     }
     uint8 level = player->getLevel();
     uint8 expansion = player->GetSession()->Expansion();
-    uint32 gearScore = player->GetEquipGearScore(true, true);
+    uint32 gearScore = player->GetEquipGearScore(false, false);
     LfgDungeonSet const& dungeons = GetDungeonsByRandom(0);
 
     for (LfgDungeonSet::const_iterator it = dungeons.begin(); it != dungeons.end(); ++it)

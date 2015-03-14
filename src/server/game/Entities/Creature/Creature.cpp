@@ -1697,6 +1697,9 @@ void Creature::setDeathState(DeathState s)
         SetTarget(0);                // remove target selection in any cases (can be set at aura remove in Unit::setDeathState)
         SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
+        if (GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID)) // if creature is mounted on a virtual mount display id, remove it
+            SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
+
         setActive(false);
 
         if (!isPet() && GetCreatureTemplate()->SkinLootId)
