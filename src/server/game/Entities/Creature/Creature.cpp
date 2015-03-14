@@ -1755,6 +1755,10 @@ void Creature::Respawn(bool force)
             setDeathState(CORPSE);
     }
 
+    Position pos = GetHomePosition();
+    NearTeleportTo(pos);
+    Relocate(pos);
+
     RemoveCorpse(false);
 
     if (getDeathState() == DEAD)
@@ -1811,11 +1815,6 @@ void Creature::Respawn(bool force)
     }
 
     UpdateObjectVisibility();
-
-    float x, y, z, o;
-    GetHomePosition(x, y, z, o);
-    NearTeleportTo(x, y, z, o);
-    Relocate(x, y, z, o);
 }
 
 void Creature::ForcedDespawn(uint32 timeMSToDespawn)
