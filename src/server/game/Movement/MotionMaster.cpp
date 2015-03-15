@@ -333,9 +333,6 @@ void MotionMaster::MoveKnockbackFrom(float srcX, float srcY, float speedXY, floa
     if (_owner->GetTypeId() == TYPEID_PLAYER)
         return;
 
-    if (speedXY <= 0.1f)
-        return;
-
     float x, y, z;
     float moveTimeHalf = speedZ / Movement::gravity;
     float dist = 2 * moveTimeHalf * speedXY;
