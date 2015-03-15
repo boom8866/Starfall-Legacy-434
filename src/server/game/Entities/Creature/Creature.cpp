@@ -1732,25 +1732,35 @@ void Creature::setDeathState(DeathState s)
         SetFullHealth();
         SetLootRecipient(NULL);
         ResetPlayerDamageReq();
-        CreatureTemplate const* cinfo = GetCreatureTemplate();
-        SetWalk(true);
-        HandleInhabitType(cinfo->InhabitType);
-        SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
-        ClearUnitState(uint32(UNIT_STATE_ALL_STATE & ~UNIT_STATE_IGNORE_PATHFINDING));
-        SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
-        LoadCreaturesAddon(true);
-        Motion_Initialize();
+
         if (GetCreatureData() && GetPhaseMask() != GetCreatureData()->phaseMask)
             SetPhaseMask(GetCreatureData()->phaseMask, false);
+
         Unit::setDeathState(ALIVE);
+
+        if (CreatureTemplate const* cinfo = GetCreatureTemplate())
+        {
+            HandleInhabitType(cinfo->InhabitType);
+            SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
+            SetUInt32Value(UNIT_FIELD_FLAGS, cinfo->unit_flags);
+            SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
+        }
+
+        SetWalk(true);
+        ClearUnitState(uint32(UNIT_STATE_ALL_STATE & ~UNIT_STATE_IGNORE_PATHFINDING));
+        LoadCreaturesAddon(true);
+
+        Motion_Initialize();
+
+        // Be sure that the creature is in world, alive and motionmaster is loaded before
+        if (GetMotionMaster() && IsInWorld() && isAlive())
+            GetMotionMaster()->MoveTargetedHome();
     }
 }
 
 void Creature::Respawn(bool force)
 {
     DestroyForNearbyPlayers();
-
-    UpdatePosition(GetHomePosition(), true);
 
     if (force)
     {
@@ -1776,10 +1786,8 @@ void Creature::Respawn(bool force)
         if (m_originalEntry != GetEntry())
             UpdateEntry(m_originalEntry);
 
-        CreatureTemplate const* cinfo = GetCreatureTemplate();
-        SelectLevel(cinfo);
-
-        setDeathState(JUST_RESPAWNED);
+        if (CreatureTemplate const* cinfo = GetCreatureTemplate())
+            SelectLevel(cinfo);
 
         uint32 displayID = GetNativeDisplayId();
         CreatureModelInfo const* minfo = sObjectMgr->GetCreatureModelRandomGender(&displayID);
@@ -1803,16 +1811,10 @@ void Creature::Respawn(bool force)
         if (poolid)
             sPoolMgr->UpdatePool<Creature>(poolid, GetDBTableGUIDLow());
 
-        // Reset original flags
-        if (CreatureTemplate const* cinfo = GetCreatureTemplate())
-        {
-            SetFlag(UNIT_NPC_FLAGS, cinfo->npcflag);
-            SetFlag(UNIT_FIELD_FLAGS, cinfo->unit_flags);
-            LoadCreaturesAddon();
-        }
-
-        //Re-initialize reactstate that could be altered by movementgenerators
+        // Re-initialize reactstate that could be altered by movementgenerators
         InitializeReactState();
+
+        setDeathState(JUST_RESPAWNED);
     }
 
     UpdateObjectVisibility();
