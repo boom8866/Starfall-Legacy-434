@@ -633,7 +633,7 @@ class spell_warl_haunt : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warl_haunt_SpellScript);
 
-            void HandleOnHit()
+            void HandleAfterHit()
             {
                 if (Aura* aura = GetHitAura())
                     if (AuraEffect* aurEff = aura->GetEffect(EFFECT_1))
@@ -642,7 +642,7 @@ class spell_warl_haunt : public SpellScriptLoader
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_warl_haunt_SpellScript::HandleOnHit);
+                AfterHit += SpellHitFn(spell_warl_haunt_SpellScript::HandleAfterHit);
             }
         };
 
@@ -668,7 +668,7 @@ class spell_warl_haunt : public SpellScriptLoader
 
             void Register()
             {
-                OnEffectRemove += AuraEffectApplyFn(spell_warl_haunt_AuraScript::HandleRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                AfterEffectRemove += AuraEffectApplyFn(spell_warl_haunt_AuraScript::HandleRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             }
         };
 

@@ -3110,7 +3110,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 28542: // Life Drain - Sapphiron
             case 66588: // Flaming Spear
             case 54171: // Divine Storm
+                spellInfo->MaxAffectedTargets = 3;
+                break;
             case 44461: // Living Bomb (Damage)
+                spellInfo->AttributesEx4 |= SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS;
                 spellInfo->MaxAffectedTargets = 3;
                 break;
             case 38310: // Multi-Shot
@@ -4289,6 +4292,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 75145: // Dream of Ragnaros
             case 75146: // Dream of Azshara
             case 94743: // Dream of Destruction
+                spellInfo->Category = 0;
                 spellInfo->SpellCooldownsId = 1439; // 7 Days
                 spellInfo->CategoryRecoveryTime = 604800000; // 7 Days
                 spellInfo->RecoveryTime = 0;
