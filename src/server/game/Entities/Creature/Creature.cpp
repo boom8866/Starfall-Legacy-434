@@ -1812,10 +1812,6 @@ void Creature::Respawn(bool force)
             setDeathState(CORPSE);
     }
 
-    Position pos = GetHomePosition();
-    NearTeleportTo(pos);
-    Relocate(pos);
-
     RemoveCorpse(false);
 
     if (getDeathState() == DEAD)
@@ -1869,6 +1865,14 @@ void Creature::Respawn(bool force)
 
         //Re-initialize reactstate that could be altered by movementgenerators
         InitializeReactState();
+    }
+
+    if (isAlive())
+    {
+        if (GetAIName() == "SmartAI")
+            AI()->EnterEvadeMode();
+        else
+            GetMotionMaster()->MoveTargetedHome();
     }
 
     UpdateObjectVisibility();
