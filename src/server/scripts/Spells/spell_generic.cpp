@@ -12942,6 +12942,40 @@ public:
     }
 };
 
+class spell_generic_swift_magic_broom : public SpellScriptLoader
+{
+public:
+    spell_generic_swift_magic_broom() : SpellScriptLoader("spell_generic_swift_magic_broom")
+    {
+    }
+
+    class spell_generic_swift_magic_broom_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_generic_swift_magic_broom_SpellScript);
+
+        SpellCastResult CheckMap()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetMap()->IsBattlegroundOrArena())
+                    return SPELL_FAILED_NOT_IN_BATTLEGROUND;
+            }
+
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_generic_swift_magic_broom_SpellScript::CheckMap);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_generic_swift_magic_broom_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -13199,4 +13233,5 @@ void AddSC_generic_spell_scripts()
     new spell_eng_synapse_springs();
     new spell_eng_grounded_plasma_shield();
     new spell_eng_invisibility_field();
+    new spell_generic_swift_magic_broom();
 }

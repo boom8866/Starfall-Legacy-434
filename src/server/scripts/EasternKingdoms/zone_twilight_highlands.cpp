@@ -9105,7 +9105,7 @@ public:
                         me->SummonCreature(NPC_GUARDSMAN, -3917.54f, -4014.48f, 169.57f, 3.02f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                         me->SummonCreature(NPC_GUARDSMAN, -3915.76f, -4029.01f, 167.34f, 2.85f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                         me->SummonCreature(NPC_GUARDSMAN, -3923.07f, -4048.07f, 169.55f, 2.30f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
-                        events.RescheduleEvent(EVENT_SUMMON_ASSAULTERS, urand(8000, 10000));
+                        events.RescheduleEvent(EVENT_SUMMON_ASSAULTERS, urand(20000, 25000));
                         break;
                     }
                     case EVENT_DEMOLITIONIST_DONE:

@@ -1882,6 +1882,74 @@ public:
     }
 };
 
+class spell_dru_feral_charge_cat : public SpellScriptLoader
+{
+public:
+    spell_dru_feral_charge_cat() : SpellScriptLoader("spell_dru_feral_charge_cat")
+    {
+    }
+
+    class spell_dru_feral_charge_cat_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_feral_charge_cat_SpellScript);
+
+        SpellCastResult CheckMap()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAuraType(SPELL_AURA_MOD_ROOT))
+                    return SPELL_FAILED_ROOTED;
+            }
+
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_dru_feral_charge_cat_SpellScript::CheckMap);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_feral_charge_cat_SpellScript();
+    }
+};
+
+class spell_dru_feral_charge_bear : public SpellScriptLoader
+{
+public:
+    spell_dru_feral_charge_bear() : SpellScriptLoader("spell_dru_feral_charge_bear")
+    {
+    }
+
+    class spell_dru_feral_charge_bear_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_feral_charge_bear_SpellScript);
+
+        SpellCastResult CheckMap()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAuraType(SPELL_AURA_MOD_ROOT))
+                    return SPELL_FAILED_ROOTED;
+            }
+
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_dru_feral_charge_bear_SpellScript::CheckMap);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_feral_charge_bear_SpellScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1920,4 +1988,6 @@ void AddSC_druid_spell_scripts()
     new spell_dru_rejuvenation();
     new spell_dru_lifebloom_tol();
     new spell_dru_skull_bash();
+    new spell_dru_feral_charge_cat();
+    new spell_dru_feral_charge_bear();
 }

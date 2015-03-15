@@ -33,7 +33,6 @@ class PetHandlingScripts : public PlayerScript
             {
                 case CLASS_HUNTER:
                     player->GetSession()->SendStablePet(0);
-                    return;
                 case CLASS_DEATH_KNIGHT:
                 case CLASS_MAGE:
                 case CLASS_WARLOCK:

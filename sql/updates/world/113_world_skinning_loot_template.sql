@@ -1,0 +1,1 @@
+UPDATE `skinning_loot_template` SET `ChanceOrQuestChance`=9 WHERE `entry`=70200 AND `item`=33568;
