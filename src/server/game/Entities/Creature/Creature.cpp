@@ -1750,6 +1750,8 @@ void Creature::Respawn(bool force)
 {
     DestroyForNearbyPlayers();
 
+    UpdatePosition(GetHomePosition(), true);
+
     if (force)
     {
         if (isAlive())
@@ -1812,9 +1814,6 @@ void Creature::Respawn(bool force)
         //Re-initialize reactstate that could be altered by movementgenerators
         InitializeReactState();
     }
-
-    if (isAlive())
-        GetMotionMaster()->MoveTargetedHome();
 
     UpdateObjectVisibility();
 }
