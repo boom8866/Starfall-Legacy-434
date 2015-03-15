@@ -1748,7 +1748,6 @@ void Creature::setDeathState(DeathState s)
 
 void Creature::Respawn(bool force)
 {
-    UpdatePosition(GetHomePosition(), true);
     DestroyForNearbyPlayers();
 
     if (force)
@@ -1812,6 +1811,14 @@ void Creature::Respawn(bool force)
 
         //Re-initialize reactstate that could be altered by movementgenerators
         InitializeReactState();
+    }
+
+    if (isAlive())
+    {
+        if (GetAIName() == "SmartAI")
+            AI()->EnterEvadeMode();
+        else
+            GetMotionMaster()->MoveTargetedHome();
     }
 
     UpdateObjectVisibility();

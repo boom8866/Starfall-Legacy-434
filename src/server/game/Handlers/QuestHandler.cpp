@@ -292,7 +292,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
         object = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT);
         if (!IS_PLAYER_GUID(guid))
         {
-            if (!object->hasInvolvedQuest(questId))
+            if (object && !object->hasInvolvedQuest(questId))
                 return;
         }
 
