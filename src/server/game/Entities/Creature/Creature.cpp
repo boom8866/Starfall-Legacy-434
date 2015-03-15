@@ -1868,12 +1868,7 @@ void Creature::Respawn(bool force)
     }
 
     if (isAlive())
-    {
-        if (GetAIName() == "SmartAI")
-            AI()->EnterEvadeMode();
-        else
-            GetMotionMaster()->MoveTargetedHome();
-    }
+        GetMotionMaster()->MoveTargetedHome();
 
     UpdateObjectVisibility();
 }
