@@ -311,13 +311,18 @@ public:
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
             if (Unit* ally = GetHitUnit())
+            {
                 if (Player* caster = GetCaster()->ToPlayer())
+                {
                     if (Pet* target = caster->GetPet())
                     {
-                TriggerCastFlags castMask = TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_CASTER_AURASTATE);
-                target->CastSpell(ally, GetEffectValue(), castMask);
-                target->CastSpell(ally, GetSpellInfo()->Effects[EFFECT_0].CalcValue(), castMask);
+                        TriggerCastFlags castMask = TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_CASTER_AURASTATE);
+                        target->CastSpell(ally, GetEffectValue(), castMask);
+                        target->CastSpell(ally, GetSpellInfo()->Effects[EFFECT_0].CalcValue(), castMask);
                     }
+                    caster->RemoveMovementImpairingAuras();
+                }
+            }
         }
 
         void HandleScriptEffect(SpellEffIndex /*effIndex*/)
