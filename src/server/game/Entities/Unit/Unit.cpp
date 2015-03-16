@@ -1935,12 +1935,7 @@ uint32 Unit::CalcArmorReducedDamage(Unit* victim, const uint32 damage, SpellInfo
     AuraEffectList const & reductionAuras = victim->GetAuraEffectsByType(SPELL_AURA_BYPASS_ARMOR_FOR_CASTER);
     for (AuraEffectList::const_iterator i = reductionAuras.begin(); i != reductionAuras.end(); ++i)
         if ((*i)->GetCasterGUID() == GetGUID())
-            armorBypassPct += (*i)->GetAmount();
-
-    // Colossus Smash should only reduce armory by 50% in PvP
-    if (spellInfo && spellInfo->Id == 86346)
-        if (victim && victim->GetTypeId() == TYPEID_PLAYER)
-            armorBypassPct = 50;
+            armorBypassPct += victim->ToPlayer() ? ((*i)->GetAmount() * 0.50f) : (*i)->GetAmount();
 
     armor = CalculatePct(armor, 100 - std::min(armorBypassPct, 100));
 
