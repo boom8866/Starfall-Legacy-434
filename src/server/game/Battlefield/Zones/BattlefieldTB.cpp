@@ -150,7 +150,7 @@ bool BattlefieldTB::SetupBattlefield()
             BuildingsInZone.insert(b);
         }
 
-        for (uint8 i = 0; i < 4; i++)
+        /*for (uint8 i = 0; i < 4; i++)
             if (Creature* creature = SpawnCreature(QuestGivers[i].entrya, QuestGivers[i].x, QuestGivers[i].y, QuestGivers[i].z, QuestGivers[i].o, TEAM_ALLIANCE))
             {
                 HideNpc(creature);
@@ -215,7 +215,7 @@ bool BattlefieldTB::SetupBattlefield()
                                 go->ToGameObject()->SetLootState(GO_READY);
                                 go->ToGameObject()->UseDoorOrButton();
                                 goDoors.insert(go);
-                            }
+                            }*/
 
                             return true;
 }
