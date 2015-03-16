@@ -2086,7 +2086,6 @@ MovementStatusElements MoveSetCanFly[] =
     MSEPositionZ,
     MSEPositionX,
     MSEPositionY,
-
     MSEHasTransportData,
     MSEHasGuidByte1,
     MSEHasGuidByte6,
@@ -2105,22 +2104,19 @@ MovementStatusElements MoveSetCanFly[] =
     MSEHasGuidByte7,
     MSEZeroBit,
     MSEHasPitch,
-
     MSEHasTransportGuidByte3,
     MSEHasTransportTime2,
     MSEHasTransportGuidByte6,
     MSEHasTransportGuidByte0,
     MSEHasTransportGuidByte7,
     MSEHasTransportGuidByte4,
-    MSEHasTransportGuidByte1,
     MSEHasTransportTime3,
+    MSEHasTransportGuidByte1,
     MSEHasTransportGuidByte2,
     MSEHasTransportGuidByte5,
-
     MSEMovementFlags2,
     MSEHasFallDirection,
     MSEMovementFlags,
-
     MSEGuidByte2,
     MSEGuidByte0,
     MSEGuidByte4,
@@ -2129,7 +2125,6 @@ MovementStatusElements MoveSetCanFly[] =
     MSEGuidByte1,
     MSEGuidByte3,
     MSEGuidByte6,
-
     MSETransportPositionZ,
     MSETransportGuidByte3,
     MSETransportGuidByte5,
@@ -2146,19 +2141,15 @@ MovementStatusElements MoveSetCanFly[] =
     MSETransportOrientation,
     MSETransportGuidByte6,
     MSETransportVehicleId,
-
     MSESplineElevation,
-
-    MSEFallCosAngle,
     MSEFallSinAngle,
+    MSEFallCosAngle,
     MSEFallHorizontalSpeed,
     MSEFallVerticalSpeed,
     MSEFallTime,
-
     MSEPitch,
     MSETimestamp,
     MSEOrientation,
-
     MSEEnd,
 };
 
