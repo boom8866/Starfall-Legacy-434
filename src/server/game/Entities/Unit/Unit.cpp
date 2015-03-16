@@ -11999,6 +11999,10 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                         // Searing Pain
                         if (spellProto->Id == 5676)
                         {
+                            // Soulburn: Searing Pain (100% crit)
+                            if (HasAura(74434))
+                                return true;
+
                             // Improved Searing Pain
                             if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 816, 0))
                             {
