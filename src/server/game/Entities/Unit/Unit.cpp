@@ -9324,9 +9324,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 53228:
         case 53232:
         {
-            // This effect only from Rapid Fire (ability cast)
-            if (!(procSpell->SpellFamilyFlags[0] & 0x20))
-                return false;
+            // Handled using SpellScripts
+            return false;
             break;
         }
         // Decimation

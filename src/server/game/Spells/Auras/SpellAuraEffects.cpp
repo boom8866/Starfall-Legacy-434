@@ -5124,9 +5124,8 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
                     float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                     if (target->HasAura(77219))
                     {
-                        int32 amount = GetBase()->GetEffect(EFFECT_2)->GetAmount();
-                        amount += amount * (masteryPoints * 0.023f);
-                        GetBase()->GetEffect(EFFECT_2)->SetAmount(GetBase()->GetEffect(EFFECT_2)->GetAmount() * (0.18f + (0.023f * masteryPoints)) + amount);
+                        uint32 amount = GetBase()->GetEffect(EFFECT_2)->GetAmount();
+                        GetBase()->GetEffect(EFFECT_2)->SetAmount(amount + (amount * 0.18f + (0.023f * masteryPoints)) + (amount * 2));
                     }
                     break;
                 }
