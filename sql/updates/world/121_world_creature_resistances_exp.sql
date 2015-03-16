@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `resistance1`=0, `resistance2`=0, `resistance3`=0, `resistance4`=0, `resistance5`=0, `resistance6`=0 WHERE `exp`='3';
