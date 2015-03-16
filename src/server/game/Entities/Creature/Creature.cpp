@@ -1790,8 +1790,6 @@ void Creature::setDeathState(DeathState s)
         if (GetCreatureData() && GetPhaseMask() != GetCreatureData()->phaseMask)
             SetPhaseMask(GetCreatureData()->phaseMask, false);
 
-        Unit::setDeathState(ALIVE);
-
         if (CreatureTemplate const* cinfo = GetCreatureTemplate())
         {
             HandleInhabitType(cinfo->InhabitType);
@@ -1803,6 +1801,8 @@ void Creature::setDeathState(DeathState s)
         SetWalk(true);
         ClearUnitState(uint32(UNIT_STATE_ALL_STATE & ~UNIT_STATE_IGNORE_PATHFINDING));
         LoadCreaturesAddon(true);
+
+        Unit::setDeathState(ALIVE);
 
         Motion_Initialize();
 
