@@ -645,17 +645,15 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            if (!targets.empty())
+            if (targets.empty())
+                return;
+
+            if (Unit* caster = GetCaster())
             {
-                if (Unit* caster = GetCaster())
-                {
-                    targets.remove_if(EvolutionTargetSelector(caster->ToUnit(), caster->getVictim()));
-                    if (WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets))
-                    {
-                        targets.clear();
-                        targets.push_back(target);
-                    }
-                }
+                targets.remove_if(EvolutionTargetSelector(caster->ToUnit(), caster->getVictim()));
+
+                if (!targets.empty())
+                    Trinity::Containers::RandomResizeList(targets, 1);
             }
         }
 
