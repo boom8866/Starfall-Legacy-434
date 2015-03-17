@@ -649,12 +649,13 @@ public:
                 return;
 
             if (Unit* caster = GetCaster())
-            {
-                targets.remove_if(EvolutionTargetSelector(caster->ToUnit(), caster->getVictim()));
+                if (Unit* victim = caster->getVictim())
+                {
+                    targets.remove_if(EvolutionTargetSelector(caster, victim));
 
-                if (!targets.empty())
-                    Trinity::Containers::RandomResizeList(targets, 1);
-            }
+                    if (!targets.empty())
+                        Trinity::Containers::RandomResizeList(targets, 1);
+                }
         }
 
         void Register()
