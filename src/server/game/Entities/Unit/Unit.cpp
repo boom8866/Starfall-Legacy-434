@@ -9811,13 +9811,18 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 if (Aura const* maelstrom = GetAura(53817))
                     if ((maelstrom->GetStackAmount() == maelstrom->GetSpellInfo()->StackAmount - 1) && roll_chance_i(aurEff->GetAmount()))
                         CastSpell(this, 70831, true, castItem, triggeredByAura);
+
+            // Visual effect
+            if (Aura* maelstromWeapon = GetAura(53817))
+                if (maelstromWeapon->GetStackAmount() >= 4)
+                    CastSpell(this, 60349, true);
             break;
         }
         // Glyph of Death's Embrace
         case 58679:
         {
             // Proc only from healing part of Death Coil. Check is essential as all Death Coil spells have 0x2000 mask in SpellFamilyFlags
-            if (!procSpell || !(procSpell->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && procSpell->SpellFamilyFlags[0] == 0x80002000))
+            if (!procSpell || !(procSpell->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && procSpell->SpellFamilyFlags[0] == 0x80002000) || victim->GetTypeId() == TYPEID_PLAYER)
                 return false;
             break;
         }
