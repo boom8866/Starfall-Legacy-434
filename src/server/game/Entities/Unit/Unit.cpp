@@ -17871,7 +17871,8 @@ void Unit::SetFeared(bool apply)
             else
             {
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-                AddUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
+                AddUnitState(UNIT_STATE_FLEEING);
+                ClearUnitState(UNIT_STATE_FLEEING_MOVE);
             }
         }
     }

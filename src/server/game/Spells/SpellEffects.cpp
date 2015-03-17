@@ -2086,6 +2086,15 @@ void Spell::EffectTriggerSpell (SpellEffIndex effIndex)
                 }
                 return;
             }
+            case 20511:  // Intimidating Shout
+            {
+                if (!m_caster || unitTarget)
+                    return;
+
+                // Glyph of Intimidating Shout
+                if (!m_caster->HasAura(63327))
+                    return;
+            }
         }
     }
 

@@ -4286,6 +4286,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 61780: // Polymorph (other animal)
             case 28271: // Polymorph (other animal)
             case 20511: // Intimidating Shout
+            case 5246:
                 spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
                 break;
             case 75141: // Dream of Skywall
