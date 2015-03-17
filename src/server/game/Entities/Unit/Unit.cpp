@@ -9811,13 +9811,18 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 if (Aura const* maelstrom = GetAura(53817))
                     if ((maelstrom->GetStackAmount() == maelstrom->GetSpellInfo()->StackAmount - 1) && roll_chance_i(aurEff->GetAmount()))
                         CastSpell(this, 70831, true, castItem, triggeredByAura);
+
+            // Visual effect
+            if (Aura* maelstromWeapon = GetAura(53817))
+                if (maelstromWeapon->GetStackAmount() >= 4)
+                    CastSpell(this, 60349, true);
             break;
         }
         // Glyph of Death's Embrace
         case 58679:
         {
             // Proc only from healing part of Death Coil. Check is essential as all Death Coil spells have 0x2000 mask in SpellFamilyFlags
-            if (!procSpell || !(procSpell->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && procSpell->SpellFamilyFlags[0] == 0x80002000))
+            if (!procSpell || !(procSpell->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && procSpell->SpellFamilyFlags[0] == 0x80002000) || victim->GetTypeId() == TYPEID_PLAYER)
                 return false;
             break;
         }
@@ -12134,6 +12139,7 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                 case 56641: // Steady Shot
                 case 77767: // Cobra Shot
                 case 19434: // Aimed Shot
+                case 82928: // Aimed Shot!
                 {
                     uint32 targetHP = victim->GetHealthPct() >= 90;
                     // Careful Aim
@@ -13153,7 +13159,6 @@ void Unit::Mount(uint32 mount, uint32 VehicleId, uint32 creatureEntry)
         }
 
         player->SendMovementSetCollisionHeight(player->GetCollisionHeight(true));
-        player->HandleEmoteCommand(0);
     }
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOUNT);
@@ -14434,7 +14439,26 @@ void Unit::setDeathState(DeathState s)
         // without this when removing IncreaseMaxHealth aura player may stuck with 1 hp
         // do not why since in IncreaseMaxHealth currenthealth is checked
         SetHealth(0);
-        SetPower(getPowerType(), 0);
+
+        if (GetTypeId() == TYPEID_PLAYER)
+        {
+            switch (getClass())
+            {
+                case CLASS_HUNTER:
+                {
+                    // Feign Death
+                    if (HasAura(5384))
+                        break;
+
+                    SetPower(getPowerType(), 0);
+                }
+                default:
+                    SetPower(getPowerType(), 0);
+                    break;
+            }
+        }
+        else
+            SetPower(getPowerType(), 0);
 
         // players in instance don't have ZoneScript, but they have InstanceScript
         if (ZoneScript* zoneScript = GetZoneScript() ? GetZoneScript() : GetInstanceScript())
@@ -17867,7 +17891,8 @@ void Unit::SetFeared(bool apply)
             else
             {
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-                AddUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
+                AddUnitState(UNIT_STATE_FLEEING);
+                ClearUnitState(UNIT_STATE_FLEEING_MOVE);
             }
         }
     }

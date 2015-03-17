@@ -1279,6 +1279,41 @@ class spell_sha_improved_lava_lash : public SpellScriptLoader
         }
 };
 
+class spell_sha_earth_shield_heal : public SpellScriptLoader
+{
+public:
+    spell_sha_earth_shield_heal() : SpellScriptLoader("spell_sha_earth_shield_heal")
+    {
+    }
+
+    class spell_sha_earth_shield_heal_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_earth_shield_heal_SpellScript);
+
+        void HandleGlyph(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_SHAMAN_GLYPH_OF_EARTH_SHIELD))
+                {
+                    int32 healGlyph = GetHitHeal() * 0.20f;
+                    SetHitHeal(GetHitHeal() + healGlyph);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_sha_earth_shield_heal_SpellScript::HandleGlyph, EFFECT_0, SPELL_EFFECT_HEAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_sha_earth_shield_heal_SpellScript();
+    }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_ancestral_awakening_proc();
@@ -1303,4 +1338,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_totemic_wrath();
     new spell_sha_searing_bolt();
     new spell_sha_improved_lava_lash();
+    new spell_sha_earth_shield_heal();
 }
