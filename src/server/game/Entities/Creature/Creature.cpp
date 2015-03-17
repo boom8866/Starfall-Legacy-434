@@ -1874,7 +1874,7 @@ void Creature::Respawn(bool force)
         InitializeReactState();
     }
 
-    if (GetMotionMaster() && IsInWorld() && isAlive() && CanFreeMove())
+    if (GetMotionMaster() && IsInWorld() && isAlive())
         GetMotionMaster()->MoveTargetedHome();
 
     UpdateObjectVisibility();
