@@ -224,7 +224,6 @@ void CreatureAI::EnterEvadeMode()
         {
             // Required to prevent attacking creatures that are evading and cause them to reenter combat
             // Does not apply to MoveFollow
-            me->AddUnitState(UNIT_STATE_EVADE);
             me->GetMotionMaster()->MoveTargetedHome();
         }
     }
