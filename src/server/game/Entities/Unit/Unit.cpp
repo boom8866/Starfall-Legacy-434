@@ -13158,7 +13158,6 @@ void Unit::Mount(uint32 mount, uint32 VehicleId, uint32 creatureEntry)
         }
 
         player->SendMovementSetCollisionHeight(player->GetCollisionHeight(true));
-        player->HandleEmoteCommand(0);
     }
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOUNT);
