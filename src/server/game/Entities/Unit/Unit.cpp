@@ -12139,6 +12139,7 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                 case 56641: // Steady Shot
                 case 77767: // Cobra Shot
                 case 19434: // Aimed Shot
+                case 82928: // Aimed Shot!
                 {
                     uint32 targetHP = victim->GetHealthPct() >= 90;
                     // Careful Aim
