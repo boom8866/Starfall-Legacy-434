@@ -3359,7 +3359,7 @@ public:
             if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
                 return;
 
-            events.ScheduleEvent(EVENT_FULLY_FORMED, 2000);
+            events.ScheduleEvent(EVENT_FULLY_FORMED, 1500);
 
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);

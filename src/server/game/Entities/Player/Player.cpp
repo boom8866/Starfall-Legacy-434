@@ -29098,6 +29098,9 @@ void Player::RemoveCurrentPet(bool abandon)
 
     pet->CombatStop();
 
+    if (getClass() == CLASS_WARLOCK)
+        pet->RemoveAllAuras();
+
     if (abandon)
         petHolder->DeleteFromDB(PET_SLOT_CURRENT_PET);
     else if (petHolder && petHolder->GetSlotForPet(pet->GetEntry()) != PET_SLOT_NULL_SLOT)

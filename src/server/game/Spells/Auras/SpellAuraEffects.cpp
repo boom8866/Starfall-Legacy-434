@@ -2426,6 +2426,7 @@ void AuraEffect::HandleFeignDeath(AuraApplication const* aurApp, uint8 mode, boo
 
         target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
         target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+        target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
         target->AddUnitState(UNIT_STATE_DIED);
     }
     else
@@ -2437,6 +2438,7 @@ void AuraEffect::HandleFeignDeath(AuraApplication const* aurApp, uint8 mode, boo
 
         target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
         target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+        target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
         target->ClearUnitState(UNIT_STATE_DIED);
     }
 }
@@ -2803,8 +2805,6 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
         if (mode & AURA_EFFECT_HANDLE_REAL)
             if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(GetAmount()))
                 target->CastSpell(target, mountCapability->SpeedModSpell, true);
-
-        target->SetStandState(UNIT_STAND_STATE_STAND);
     }
     else
     {
@@ -5124,9 +5124,8 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
                     float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                     if (target->HasAura(77219))
                     {
-                        int32 amount = GetBase()->GetEffect(EFFECT_2)->GetAmount();
-                        amount += amount * (masteryPoints * 0.023f);
-                        GetBase()->GetEffect(EFFECT_2)->SetAmount(GetBase()->GetEffect(EFFECT_2)->GetAmount() * (0.18f + (0.023f * masteryPoints)) + amount);
+                        uint32 amount = GetBase()->GetEffect(EFFECT_2)->GetAmount();
+                        GetBase()->GetEffect(EFFECT_2)->SetAmount(amount + (amount * 0.18f + (0.023f * masteryPoints)) + (amount * 2));
                     }
                     break;
                 }

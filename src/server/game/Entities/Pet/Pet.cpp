@@ -257,18 +257,14 @@ void Pet::Update(uint32 diff)
                     }
 
                     // Demonic Pact
-                    if (owner->HasAura(47236))
+                    if (owner->HasSpell(47236))
                     {
                         // Check if Pet still have Demonic Pact aura
                         if (!HasAura(53646))
-                            AddAura(53646, this);
+                            CastSpell(this, 53646, true);
                     }
                     else
-                    {
-                        // Check if Pet still have Demonic Pact aura
-                        if (HasAura(53646))
-                            RemoveAurasDueToSpell(53646);
-                    }
+                        RemoveAurasDueToSpell(53646);
                 }
             }
             break;

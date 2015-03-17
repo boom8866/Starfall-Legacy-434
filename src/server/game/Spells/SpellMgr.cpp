@@ -2891,10 +2891,12 @@ void SpellMgr::LoadSpellCustomAttr()
             case 72505: // Ooze Eruption
             case 72624: // Ooze Eruption
             case 72625: // Ooze Eruption
-            case 86014: // Thwilight Meteorite
+            case 86014: // Twilight Meteorite
             case 92863:
             case 92864:
             case 92865:
+            case 30213: // Legion Strike
+            case 109388:// Legion Strike
                 // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 break;
@@ -4477,7 +4479,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 61780: // Polymorph (other animal)
             case 28271: // Polymorph (other animal)
             case 20511: // Intimidating Shout
+            case 5246:
                 spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
+                break;
+            case 7001:  // Lightwell
+                spellInfo->Attributes = SPELL_ATTR2_CANT_CRIT;
                 break;
             case 75141: // Dream of Skywall
             case 75142: // Dream of Deepholm

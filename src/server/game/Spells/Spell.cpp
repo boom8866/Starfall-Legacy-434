@@ -4037,6 +4037,17 @@ void Spell::finish(bool ok)
             }
             break;
         }
+        case 48707: // Anti-Magic Shell
+        {
+            // Magic Suppression
+            if (m_caster->HasSpell(49224) && !m_caster->HasAura(49224))
+                m_caster->CastSpell(m_caster, 49224, true);
+            if (m_caster->HasSpell(49610) && !m_caster->HasAura(49610))
+                m_caster->CastSpell(m_caster, 49610, true);
+            if (m_caster->HasSpell(49611) && !m_caster->HasAura(49611))
+                m_caster->CastSpell(m_caster, 49611, true);
+            break;
+        }
         case 35395: // Crusader Strike
         case 53385: // Divine Storm
         {

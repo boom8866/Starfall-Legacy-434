@@ -564,6 +564,20 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
     // While the validity of the following may be arguable, it is possible that when such a passenger
     // exits the vehicle will dismiss. That's why the actual adding the passenger to the vehicle is scheduled
     // asynchronously, so it can be cancelled easily in case the vehicle is uninstalled meanwhile.
+
+    // Vehicles in Battlegrounds (except Strand of the Ancients or Isle of Conquest) and Arena can't take passengers
+    if (unit->GetTypeId() == TYPEID_PLAYER && unit->GetMap()->IsBattlegroundOrArena())
+    {
+        switch (unit->GetMapId())
+        {
+            case 607:   // Strand of the Ancients
+            case 628:   // Isle of Conquest
+                break;
+            default:
+                return false;
+        }
+    }
+
     SeatMap::iterator seat;
     VehicleJoinEvent* e = new VehicleJoinEvent(this, unit);
     unit->m_Events.AddEvent(e, unit->m_Events.CalculateTime(0));

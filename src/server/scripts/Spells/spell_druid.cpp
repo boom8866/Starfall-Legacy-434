@@ -65,7 +65,9 @@ enum DruidSpells
     DRUID_SPELL_WILD_MUSHROOM_SUICIDE       = 92853,
     DRUID_SPELL_WILD_MUSHROOM_DAMAGE        = 78777,
     DRUID_SPELL_REGROWTH                    = 8936,
-    DRUID_SPELL_REGROWTH_REFRESH            = 93036
+    DRUID_SPELL_REGROWTH_REFRESH            = 93036,
+    SPELL_DRUID_REJUVENATION                = 774,
+    SPELL_DRUID_REJUVENATION_INSTANT        = 64801
 };
 
 // 2912, 5176, 78674 - Starfire, Wrath, and Starsurge
@@ -1715,58 +1717,6 @@ public:
     }
 };
 
-class spell_dru_rejuvenation : public SpellScriptLoader
-{
-public:
-    spell_dru_rejuvenation() : SpellScriptLoader("spell_dru_rejuvenation")
-    {
-    }
-
-    class spell_dru_rejuvenation_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_dru_rejuvenation_AuraScript);
-
-        enum spellId
-        {
-            SPELL_DRUID_REJUVENATION_INSTANT    = 64801
-        };
-
-        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* caster = GetCaster();
-            Unit* target = GetTarget();
-
-            if (!caster || !target)
-                return;
-
-            // Gift of the Earthmother
-            if (caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 3186, EFFECT_0))
-            {
-                if (Aura* rejuvenation = target->GetAura(GetSpellInfo()->Id, caster->GetGUID()))
-                {
-                    if (AuraEffect* earthmother = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 3186, EFFECT_1))
-                    {
-                        int32 rejHeal = caster->SpellHealingBonusDone(target, rejuvenation->GetSpellInfo(), rejuvenation->GetEffect(EFFECT_0)->GetAmount(), HEAL);
-                        int32 hpAmount = (rejHeal * rejuvenation->GetEffect(EFFECT_0)->GetTotalTicks()) * earthmother->GetAmount() / 100;
-
-                        caster->CastCustomSpell(target, SPELL_DRUID_REJUVENATION_INSTANT, &hpAmount, NULL, NULL, true, NULL, NULL, caster->GetGUID());
-                    }
-                }
-            }
-        }
-
-        void Register()
-        {
-            AfterEffectApply += AuraEffectApplyFn(spell_dru_rejuvenation_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_dru_rejuvenation_AuraScript();
-    }
-};
-
 class spell_dru_lifebloom_tol : public SpellScriptLoader
 {
 public:
@@ -1950,6 +1900,85 @@ public:
     }
 };
 
+class spell_dru_instant_rejuvenation : public SpellScriptLoader
+{
+public:
+    spell_dru_instant_rejuvenation() : SpellScriptLoader("spell_dru_instant_rejuvenation")
+    {
+    }
+
+    class spell_dru_instant_rejuvenation_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_instant_rejuvenation_SpellScript);
+
+        void ChangeHeal(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetExplTargetUnit();
+
+            if (!caster || !target)
+                return;
+
+            if (Aura* rejAura = target->GetAura(SPELL_DRUID_REJUVENATION, caster->GetGUID()))
+            {
+                // Gift of the Earthmother
+                if (AuraEffect* earthmother = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 3186, EFFECT_0))
+                {
+                    int32 rejuvenationTickHeal = caster->SpellHealingBonusDone(target, rejAura->GetSpellInfo(), rejAura->GetEffect(EFFECT_0)->GetAmount(), HEAL);
+                    int32 healAmount = (rejuvenationTickHeal * 5) * earthmother->GetAmount() / 100;
+                    SetHitHeal(healAmount);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dru_instant_rejuvenation_SpellScript::ChangeHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_instant_rejuvenation_SpellScript();
+    }
+};
+
+// 774 - Rejuvenation
+class spell_dru_rejuvenation : public SpellScriptLoader
+{
+public:
+    spell_dru_rejuvenation() : SpellScriptLoader("spell_dru_rejuvenation")
+    {
+    }
+
+    class spell_dru_rejuvenation_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_rejuvenation_AuraScript);
+
+        void HandleGift(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetTarget();
+            if (!caster || !target)
+                return;
+
+            // Gift of the Earthmother
+            if (caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 3186, EFFECT_0))
+                caster->CastSpell(target, SPELL_DRUID_REJUVENATION_INSTANT, true);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_dru_rejuvenation_AuraScript::HandleGift, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dru_rejuvenation_AuraScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1985,9 +2014,10 @@ void AddSC_druid_spell_scripts()
     new spell_dru_ravage_stampede();
     new spell_dru_cyclone();
     new spell_dru_mangle_cat();
-    new spell_dru_rejuvenation();
     new spell_dru_lifebloom_tol();
     new spell_dru_skull_bash();
     new spell_dru_feral_charge_cat();
     new spell_dru_feral_charge_bear();
+    new spell_dru_instant_rejuvenation();
+    new spell_dru_rejuvenation();
 }

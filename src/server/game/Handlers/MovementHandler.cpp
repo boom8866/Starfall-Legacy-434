@@ -489,6 +489,13 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
                 }
                 break;
             }
+            case 726:   // Twin Peaks
+            {
+                if (movementInfo.pos.GetPositionZ() < -90.0f)
+                    if (plrMover->isAlive())
+                        plrMover->Kill(plrMover);
+                break;
+            }
             default:
                 break;
         }
@@ -518,7 +525,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
                     // change the death state to CORPSE to prevent the death timer from
                     // starting in the next player update
                     if (!plrMover->isAlive())
-                        plrMover->KillPlayer();
+                        plrMover->Kill(plrMover);
                 }
             }
         }
