@@ -1,1 +1,1 @@
-UPDATE `creature` SET `phaseMask`=32768 WHERE `guid` IN (778879, 778980);
+UPDATE `creature` SET `phaseMask`=32768 WHERE `guid` IN (778879, 778980, 778878);

@@ -649,7 +649,7 @@ public:
             {
                 if (Unit* caster = GetCaster())
                 {
-                    targets.remove_if(EvolutionTargetSelector(caster->ToUnit(), caster->getVictim()));
+                    targets.remove_if(EvolutionTargetSelector(caster, caster->getVictim()));
                     if (WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets))
                     {
                         targets.clear();
