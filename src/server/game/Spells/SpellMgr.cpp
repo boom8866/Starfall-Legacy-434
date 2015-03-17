@@ -4289,6 +4289,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 5246:
                 spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
                 break;
+            case 7001:  // Lightwell
+                spellInfo->Attributes = SPELL_ATTR2_CANT_CRIT;
+                break;
             case 75141: // Dream of Skywall
             case 75142: // Dream of Deepholm
             case 75144: // Dream of Hyjal

@@ -14438,7 +14438,26 @@ void Unit::setDeathState(DeathState s)
         // without this when removing IncreaseMaxHealth aura player may stuck with 1 hp
         // do not why since in IncreaseMaxHealth currenthealth is checked
         SetHealth(0);
-        SetPower(getPowerType(), 0);
+
+        if (GetTypeId() == TYPEID_PLAYER)
+        {
+            switch (getClass())
+            {
+                case CLASS_HUNTER:
+                {
+                    // Feign Death
+                    if (HasAura(5384))
+                        break;
+
+                    SetPower(getPowerType(), 0);
+                }
+                default:
+                    SetPower(getPowerType(), 0);
+                    break;
+            }
+        }
+        else
+            SetPower(getPowerType(), 0);
 
         // players in instance don't have ZoneScript, but they have InstanceScript
         if (ZoneScript* zoneScript = GetZoneScript() ? GetZoneScript() : GetInstanceScript())
