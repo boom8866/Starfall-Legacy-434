@@ -3328,6 +3328,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 70650: // Death Knight T10 Tank 2P Bonus
                 spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
                 break;
+            case 49224: // Magic Suppression
+            case 49611:
+                spellInfo->ProcChance = 0;
+                spellInfo->ProcCharges = 0;
+                spellInfo->Effects[EFFECT_0].Mechanic = MECHANIC_NONE;
+                break;
             case 71838: // Drain Life - Bryntroll Normal
             case 71839: // Drain Life - Bryntroll Heroic
                 spellInfo->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;

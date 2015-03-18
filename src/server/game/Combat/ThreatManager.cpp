@@ -331,11 +331,10 @@ HostileReference* ThreatContainer::selectNextVictim(Creature* attacker, HostileR
         currentRef = (*iter);
 
         Unit* target = currentRef->getTarget();
-        if (!target)
-            currentVictim = NULL;
+        ASSERT(target);                                     // if the ref has status online the target must be there !
 
         // some units are prefered in comparison to others
-        if (!noPriorityTargetFound && (target->isAlive() && attacker->isAlive() && target->IsImmunedToDamage(attacker->GetMeleeDamageSchoolMask()) || target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE)))
+        if (!noPriorityTargetFound && (target->IsImmunedToDamage(attacker->GetMeleeDamageSchoolMask()) || target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE)))
         {
             if (iter != lastRef)
             {
