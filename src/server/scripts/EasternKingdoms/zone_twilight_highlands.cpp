@@ -61,12 +61,6 @@ public:
             DoCast(who, SPELL_CHARGE, true);
         }
 
-        void EnterEvadeMode()
-        {
-            me->GetMotionMaster()->MoveTargetedHome();
-            events.Reset();
-        }
-
         void DamageTaken(Unit* attacker, uint32& damage)
         {
             if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
@@ -158,12 +152,6 @@ public:
                 damage = 0;
         }
 
-        void EnterEvadeMode()
-        {
-            me->GetMotionMaster()->MoveTargetedHome();
-            events.Reset();
-        }
-
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim() && me->isInCombat())
@@ -238,12 +226,6 @@ public:
         {
             events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 1000);
             events.CancelEvent(EVENT_SINISTER_STRIKE);
-        }
-
-        void EnterEvadeMode()
-        {
-            me->GetMotionMaster()->MoveTargetedHome();
-            events.Reset();
         }
 
         void EnterCombat(Unit* who)
@@ -332,12 +314,6 @@ public:
         {
             events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 1000);
             events.CancelEvent(SPELL_SHOOT);
-        }
-
-        void EnterEvadeMode()
-        {
-            me->GetMotionMaster()->MoveTargetedHome();
-            events.Reset();
         }
 
         void EnterCombat(Unit* who)
@@ -8507,12 +8483,6 @@ public:
             SPELL_FAKE_SHOT     = 69509
         };
 
-        void EnterEvadeMode()
-        {
-            me->GetMotionMaster()->MoveTargetedHome();
-            events.Reset();
-        }
-
         void Reset()
         {
             if (me->GetPositionZ() >= 81.75f || me->GetGUIDLow() == 841897 || me->GetGUIDLow() == 841892 ||
@@ -9227,13 +9197,7 @@ public:
 
         void Reset()
         {
-            events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 1000);
-        }
-
-        void EnterEvadeMode()
-        {
-            me->GetMotionMaster()->MoveTargetedHome();
-            events.Reset();
+            events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 2000);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -12791,15 +12755,9 @@ public:
             SPELL_SLAM          = 79881
         };
 
-        void EnterEvadeMode()
-        {
-            me->GetMotionMaster()->MoveTargetedHome();
-            events.Reset();
-        }
-
         void Reset()
         {
-            events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 1000);
+            events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 2000);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -19329,15 +19287,9 @@ public:
             EVENT_SEARCH_FOR_ENEMY  = 1
         };
 
-        void EnterEvadeMode()
-        {
-            me->GetMotionMaster()->MoveTargetedHome();
-            events.Reset();
-        }
-
         void Reset()
         {
-            events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 1000);
+            events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 2000);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -20083,15 +20035,9 @@ public:
             EVENT_SEARCH_FOR_ENEMY = 1
         };
 
-        void EnterEvadeMode()
-        {
-            me->GetMotionMaster()->MoveTargetedHome();
-            events.Reset();
-        }
-
         void Reset()
         {
-            events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 1000);
+            events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 2000);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -20563,12 +20509,6 @@ public:
             if (me->ToTempSummon())
                 Talk(0, who->GetGUID());
             events.ScheduleEvent(EVENT_FLAME_BREATH, 2000);
-        }
-
-        void EnterEvadeMode()
-        {
-            me->GetMotionMaster()->MoveTargetedHome();
-            events.Reset();
         }
 
         void UpdateAI(uint32 diff)
