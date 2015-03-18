@@ -1792,7 +1792,7 @@ void Creature::setDeathState(DeathState s)
         SetWalk(true);
         HandleInhabitType(cinfo->InhabitType);
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
-        ClearUnitState(uint32(UNIT_STATE_ALL_STATE & ~UNIT_STATE_IGNORE_PATHFINDING));
+        ClearUnitState(uint32(UNIT_STATE_ALL_STATE));
         SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
         LoadCreaturesAddon(true);
 
@@ -1808,8 +1808,6 @@ void Creature::setDeathState(DeathState s)
 void Creature::Respawn(bool force)
 {
     DestroyForNearbyPlayers();
-
-    UpdatePosition(GetHomePosition(), true);
 
     if (force)
     {
@@ -2208,10 +2206,6 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
     // skip fighting creature
     if (isInCombat())
         return false;
-
-    // only creature not moving home
-    if (GetMotionMaster()->GetCurrentMovementGeneratorType() == HOME_MOTION_TYPE)
-        return false; 
 
     // only free creature
     if (GetCharmerOrOwnerGUID())
