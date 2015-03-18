@@ -1541,6 +1541,50 @@ public:
     }
 };
 
+class spell_warl_felstorm : public SpellScriptLoader
+{
+public:
+    spell_warl_felstorm() : SpellScriptLoader("spell_warl_felstorm")
+    {
+    }
+
+    class spell_warl_felstorm_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_felstorm_SpellScript);
+
+        void CalculateDamage(SpellEffIndex effect)
+        {
+            Unit* target = GetHitUnit();
+            if (!target)
+                return;
+
+            if (Unit* caster = GetCaster())
+            {
+                uint32 damage = GetHitDamage();
+
+                if (Unit* owner = caster->GetCharmerOrOwner())
+                {
+                    float spellpower = (float)(owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + target->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
+                    uint32 damage = GetHitDamage();
+                    damage += int32((spellpower * 0.70f));
+                }
+
+                SetHitDamage(damage);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_warl_felstorm_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_WEAPON_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_felstorm_SpellScript();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_bane_of_doom();
@@ -1573,4 +1617,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_soul_link_trigger();
     new spell_warl_hellfire();
     new spell_warl_jinx_filter();
+    new spell_warl_felstorm();
 }
