@@ -816,7 +816,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
-                    case 89751: // Felstorm
+                    case 89753: // Felstorm
                     case 30213: // Legion Strike
                     {
                         if (m_caster->GetCharmerOrOwner())
