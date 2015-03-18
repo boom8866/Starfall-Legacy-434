@@ -3856,6 +3856,7 @@ void Spell::EffectEnergize (SpellEffIndex effIndex)
 
     switch (m_spellInfo->Id)
     {
+        case 2912:  // Starfire
         case 5176:  // Wrath
         case 35395: // Crusader Strike
         case 25912: // Holy Shock

@@ -1448,6 +1448,23 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
     {
         switch (spellProto->Id)
         {
+            case 2912:  // Starfire
+            {
+                int32 energizeAmount = 20;
+                // Euphoria
+                if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, EFFECT_0))
+                {
+                    if (!HasAura(48518))
+                    {
+                        if (roll_chance_i(aurEff->GetAmount()))
+                            energizeAmount = 40;
+                    }
+                }
+                // Only in Balance spec
+                if (HasSpell(78674) && !HasAura(48517) && solarEnabled == false)
+                    EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
+                break;
+            }
             case 5176:  // Wrath
             {
                 int32 energizeAmount = -13;
