@@ -11377,7 +11377,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     case 17253:    // Bite
                     case 49966:    // Smack
                     {
-                        DoneTotal += attackPower * 0.1952f;
                         // Spiked Collar
                         if (AuraEffect* spikedCollar = GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2934, EFFECT_0))
                             AddPct(DoneTotalMod, spikedCollar->GetAmount());
@@ -11386,6 +11385,8 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                         if (AuraEffect* wildHunt = GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_0))
                             if (GetPower(POWER_FOCUS) + spellProto->CalcPowerCost(this, spellProto->GetSchoolMask()) >= 50)
                                 AddPct(DoneTotal, wildHunt->GetAmount() / 100);
+
+                        DoneTotal += attackPower * 0.1952f;
                         break;
                     }
                 }
