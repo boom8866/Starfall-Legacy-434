@@ -147,22 +147,9 @@ public:
                     if (caster->HasAura(48517))
                         return;
 
-                    energizeAmount = GetSpellInfo()->Effects[effIndex].BasePoints; // 20
-
-                    // Euphoria
-                    if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, 0))
-                    {
-                        if (!caster->HasAura(48518))
-                        {
-                            if (roll_chance_i(aurEff->GetAmount()))
-                                energizeAmount *= 2;
-                        }
-                    }
-
                     // If we are set to fill the solar side or we've just logged in with 0 power..
                     if ((!caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER)) || caster->GetPower(POWER_ECLIPSE) == 0)
                     {
-                        caster->CastCustomSpell(caster, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, &energizeAmount, 0, 0, true);
                         // If the energize was due to 0 power, cast the eclipse marker aura
                         if (!caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER))
                             caster->CastSpell(caster, SPELL_DRUID_SOLAR_ECLIPSE_MARKER, true);

@@ -1448,6 +1448,23 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
     {
         switch (spellProto->Id)
         {
+            case 2912:  // Starfire
+            {
+                int32 energizeAmount = 20;
+                // Euphoria
+                if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, EFFECT_0))
+                {
+                    if (!HasAura(48518))
+                    {
+                        if (roll_chance_i(aurEff->GetAmount()))
+                            energizeAmount = 40;
+                    }
+                }
+                // Only in Balance spec
+                if (HasSpell(78674) && !HasAura(48517) && solarEnabled == false)
+                    EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
+                break;
+            }
             case 5176:  // Wrath
             {
                 int32 energizeAmount = -13;
@@ -11353,26 +11370,24 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
         {
             if (isPet())
             {
-                if (Unit* owner = GetCharmerOrOwner())
+                uint32 attackPower = GetTotalAttackPowerValue(BASE_ATTACK);
+                switch (spellProto->Id)
                 {
-                    int32 ownerRAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK);
-                    switch (spellProto->Id)
+                    case 16827:    // Claw
+                    case 17253:    // Bite
+                    case 49966:    // Smack
                     {
-                        case 16827:    // Claw
-                        case 17253:    // Bite
-                        case 49966:    // Smack
-                        {
-                            DoneTotal += ownerRAP * 0.168f;
-                            // Spiked Collar
-                            if (AuraEffect* spikedCollar = GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2934, EFFECT_0))
-                                AddPct(DoneTotalMod, spikedCollar->GetAmount());
+                        // Spiked Collar
+                        if (AuraEffect* spikedCollar = GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2934, EFFECT_0))
+                            AddPct(DoneTotalMod, spikedCollar->GetAmount());
 
-                            // Wild Hunt
-                            if (AuraEffect* wildHunt = GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_0))
-                                if (GetPower(POWER_FOCUS) + spellProto->CalcPowerCost(this, spellProto->GetSchoolMask()) >= 50)
-                                    AddPct(DoneTotal, wildHunt->GetAmount() / 100);
-                            break;
-                        }
+                        // Wild Hunt
+                        if (AuraEffect* wildHunt = GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_0))
+                            if (GetPower(POWER_FOCUS) + spellProto->CalcPowerCost(this, spellProto->GetSchoolMask()) >= 50)
+                                AddPct(DoneTotal, wildHunt->GetAmount() / 100);
+
+                        DoneTotal += attackPower * 0.1952f;
+                        break;
                     }
                 }
             }
@@ -21859,6 +21874,9 @@ void Unit::SetBaseAttackTime(WeaponAttackType att, uint32 time)
 
 void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool triggered)
 {
+    if (!this || !IsInWorld() || !victim || !victim->IsInWorld())
+        return;
+
     class CastDelayEvent : public BasicEvent
     {
     public:
@@ -21879,8 +21897,7 @@ void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool trigge
         bool const triggered;
     };
 
-    if (this && victim)
-        m_Events.AddEvent(new CastDelayEvent(this, victim, spellid, triggered), m_Events.CalculateTime(delay));
+    m_Events.AddEvent(new CastDelayEvent(this, victim, spellid, triggered), m_Events.CalculateTime(delay));
 }
 
 //set the last casted spell for Improved steady shot talent

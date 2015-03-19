@@ -1,0 +1,1 @@
+UPDATE `quest_template` SET `RewardMoneyMaxLevel`=94000 WHERE `ZoneOrSort`=5389;
