@@ -11370,7 +11370,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
         {
             if (isPet())
             {
-                uint32 attackPower = GetTotalAttackPowerValue(RANGED_ATTACK);
+                uint32 attackPower = GetTotalAttackPowerValue(BASE_ATTACK);
                 switch (spellProto->Id)
                 {
                     case 16827:    // Claw
@@ -21858,6 +21858,9 @@ void Unit::SetBaseAttackTime(WeaponAttackType att, uint32 time)
 
 void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool triggered)
 {
+    if (!this || !IsInWorld() || !victim || !victim->IsInWorld())
+        return;
+
     class CastDelayEvent : public BasicEvent
     {
     public:
@@ -21878,8 +21881,7 @@ void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool trigge
         bool const triggered;
     };
 
-    if (this && victim)
-        m_Events.AddEvent(new CastDelayEvent(this, victim, spellid, triggered), m_Events.CalculateTime(delay));
+    m_Events.AddEvent(new CastDelayEvent(this, victim, spellid, triggered), m_Events.CalculateTime(delay));
 }
 
 //set the last casted spell for Improved steady shot talent
