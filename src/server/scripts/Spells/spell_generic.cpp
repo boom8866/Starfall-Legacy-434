@@ -12785,43 +12785,43 @@ public:
                     case CLASS_WARLOCK:
                     case CLASS_MAGE:
                     {
-                        caster->CastSpell(caster, SPELL_SYNAPSE_INTELLECT, true);
+                        caster->CastSpell(caster, SPELL_SYNAPSE_INTELLECT);
                         break;
                     }
                     case CLASS_DEATH_KNIGHT:
                     case CLASS_WARRIOR:
                     {
-                        caster->CastSpell(caster, SPELL_SYNAPSE_STRENGTH, true);
+                        caster->CastSpell(caster, SPELL_SYNAPSE_STRENGTH);
                         break;
                     }
                     case CLASS_ROGUE:
                     case CLASS_HUNTER:
                     {
-                        caster->CastSpell(caster, SPELL_SYNAPSE_AGILITY, true);
+                        caster->CastSpell(caster, SPELL_SYNAPSE_AGILITY);
                         break;
                     }
                     case CLASS_SHAMAN:
                     {
                         if (caster->HasAura(SPELL_MENTAL_QUICKNESS))
-                            caster->CastSpell(caster, SPELL_SYNAPSE_AGILITY, true);
+                            caster->CastSpell(caster, SPELL_SYNAPSE_AGILITY);
                         else
-                            caster->CastSpell(caster, SPELL_SYNAPSE_INTELLECT, true);
+                            caster->CastSpell(caster, SPELL_SYNAPSE_INTELLECT);
                         break;
                     }
                     case CLASS_DRUID:
                     {
                         if (caster->HasAura(SPELL_AGGRESSION))
-                            caster->CastSpell(caster, SPELL_SYNAPSE_AGILITY, true);
+                            caster->CastSpell(caster, SPELL_SYNAPSE_AGILITY);
                         else
-                            caster->CastSpell(caster, SPELL_SYNAPSE_INTELLECT, true);
+                            caster->CastSpell(caster, SPELL_SYNAPSE_INTELLECT);
                         break;
                     }
                     case CLASS_PALADIN:
                     {
                         if (caster->HasAura(SPELL_WALK_IN_THE_LIGHT))
-                            caster->CastSpell(caster, SPELL_SYNAPSE_INTELLECT, true);
+                            caster->CastSpell(caster, SPELL_SYNAPSE_INTELLECT);
                         else
-                            caster->CastSpell(caster, SPELL_SYNAPSE_STRENGTH, true);
+                            caster->CastSpell(caster, SPELL_SYNAPSE_STRENGTH);
                         break;
                     }
                     default:
@@ -12869,13 +12869,13 @@ public:
                     return;
 
                 if (roll_chance_f(1))
-                    caster->CastSpell(caster, SPELL_PLASMA_MISFIRE, true);
+                    caster->CastSpell(caster, SPELL_PLASMA_MISFIRE);
                 else if (roll_chance_f(2))
-                    caster->CastSpell(caster, SPELL_MAGNETIZED, true);
+                    caster->CastSpell(caster, SPELL_MAGNETIZED);
                 else if (roll_chance_f(3))
-                    caster->CastSpell(caster, SPELL_REVERSED_SHIELD, true);
+                    caster->CastSpell(caster, SPELL_REVERSED_SHIELD);
                 else
-                    caster->CastSpell(caster, SPELL_GROUNDED_PLASMA_SHIELD, true);
+                    caster->CastSpell(caster, SPELL_GROUNDED_PLASMA_SHIELD);
             }
         }
 

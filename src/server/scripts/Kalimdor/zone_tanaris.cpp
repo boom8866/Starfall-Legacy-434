@@ -1008,6 +1008,8 @@ class spell_emergency_rocket_pack : public SpellScriptLoader
                 {
                     if (Unit* passenger = caster->GetVehicleKit()->GetPassenger(0))
                     {
+                        if (Vehicle* vehicle = caster->GetVehicleKit())
+                            vehicle->GetBase()->ToCreature()->DespawnOrUnsummon(2000);
                         passenger->ExitVehicle();
                         passenger->CastSpell(caster, SPELL_EMERGENCY_ROCKET_PACK, true);
                         passenger->GetMotionMaster()->MoveJump(-7114.65f, -3888.82f, 75.0f, 45.0f, 25.0f, 10);

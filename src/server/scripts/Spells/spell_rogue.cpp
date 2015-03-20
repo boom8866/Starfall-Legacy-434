@@ -1088,7 +1088,8 @@ public:
                             caster->ToPlayer()->RemoveSpellCooldown(SPELL_STEALTH_EFFECT, true);
 
                         caster->CastSpell(caster, SPELL_STEALTH_EFFECT, true);
-                        caster->GetMotionMaster()->MoveJump(caster->GetPositionX()+0.1f, caster->GetPositionY(), caster->GetPositionZ(), 1.0f, 0.0f, 100);
+                        caster->AddUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
+                        caster->RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
                     }
                 }
             }

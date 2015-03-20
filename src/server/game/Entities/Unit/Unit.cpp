@@ -3171,6 +3171,13 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit* victi
 
     crit += victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
 
+    if (attackType != RANGED_ATTACK)
+    {
+        // Glyph of barkskin
+        if (victim->HasAura(63057) && victim->HasAura(22812))
+            crit -= 25.0f;
+    }
+
     if (crit < 0.0f)
         crit = 0.0f;
     return crit;
@@ -11902,10 +11909,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                         AddPct(crit_chance, aurEff->GetAmount());
                 }
 
-                // Glyph of Barkskin
-                if (victim->HasAura(63057) && victim->HasAura(22812))
-                    AddPct(crit_chance, -25);
-
                 if (!spellProto->IsPositive())
                 {
                     // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE
@@ -12076,10 +12079,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
 
             if (victim)
             {
-                // Glyph of Barkskin
-                if (victim->HasAura(63057) && victim->HasAura(22812))
-                    AddPct(crit_chance, -25);
-
                 // Custom crit by class
                 switch (spellProto->SpellFamilyName)
                 {
