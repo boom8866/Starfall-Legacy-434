@@ -108,6 +108,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Ring of Frost and Deep Freeze
             else if (spellproto->Id == 82691 || spellproto->Id == 44572)
                 return DIMINISHING_CONTROLLED_STUN;
+            // Dragon's Breath
+            else if (spellproto->Id == 31661)
+                return DIMINISHING_LIMITONLY;
             break;
         }
         case SPELLFAMILY_WARRIOR:
@@ -128,9 +131,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Seduction
             else if (spellproto->SpellFamilyFlags[1] & 0x10000000)
                 return DIMINISHING_FEAR;
-            // Curse of Exhaustion & Dragon's Breath
-            else if (spellproto->Id == 18223 || spellproto->Id == 31661)
-                return DIMINISHING_LIMITONLY;
             break;
         }
         case SPELLFAMILY_DRUID:
@@ -315,6 +315,9 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellInfo const
             // Curse of Elements - limit to 120 seconds in PvP
             else if (spellproto->SpellFamilyFlags[1] & 0x200)
                return 120 * IN_MILLISECONDS;
+            // Curse of Exhaustion
+            else if (spellproto->Id == 18223)
+                return 10 * IN_MILLISECONDS;
             break;
         }
         default:
