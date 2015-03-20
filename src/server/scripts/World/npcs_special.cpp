@@ -3715,7 +3715,7 @@ public:
 
         void Reset()
         {
-            timerEffect = 800;
+            timerEffect = 200;  // CC Delay (PvP)
             timerStun = 6000;
         }
 

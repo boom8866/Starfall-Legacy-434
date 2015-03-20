@@ -6304,6 +6304,22 @@ uint32 Spell::GetCCDelay(SpellInfo const* _spell)
             if (_spell->Id == 82691)
                 return 0;
             break;
+        case SPELLFAMILY_WARLOCK:
+        {
+            switch (_spell->Id)
+            {
+                // Hand of Gul'Dan (Root and Stun)
+                case 85526:
+                case 93974:
+                case 93987:
+                case 93975:
+                case 93986:
+                    return 0;
+                default:
+                    break;
+            }
+            break;
+        }
         case SPELLFAMILY_HUNTER:
         {
             // Traps
