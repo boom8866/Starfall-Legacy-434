@@ -5436,6 +5436,19 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Felstorm
+            if (Unit* owner = m_caster->GetCharmerOrOwner())
+            {
+                if (m_spellInfo->Id == 89753 && unitTarget)
+                {
+                    float spellPower = (float)(owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
+                    fixed_bonus += uint32(spellPower * 0.50f);
+                }
+            }
+            break;
+        }
         case SPELLFAMILY_DEATHKNIGHT:
         {
             // Blood Strike

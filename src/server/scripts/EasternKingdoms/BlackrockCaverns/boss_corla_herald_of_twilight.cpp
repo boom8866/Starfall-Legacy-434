@@ -384,6 +384,7 @@ public:
                 if (isEvolved == true)
                     corla->AI()->DoAction(1);
             }
+            me->RemoveAllAuras();
         }
 
     protected:
@@ -444,8 +445,16 @@ public:
             if (channelTarget == NULL || zealot == NULL)
                 return;
 
-            if (zealot && (zealot->HasAura(SPELL_TWILIGHT_EVOLUTION) || !zealot->isAlive()))
-                return;
+            if (zealot && zealot->IsInWorld())
+            {
+                if (zealot->isAlive())
+                {
+                    if (zealot->HasAura(SPELL_TWILIGHT_EVOLUTION))
+                        return;
+                }
+                else
+                    return;
+            }
 
             events.Update(diff);
 
@@ -462,15 +471,18 @@ public:
                         }
                         channelTarget = zealot;
 
-                        std::list<Player*> targets;
-                        Trinity::AnyPlayerInObjectRangeCheck u_check(me, 100.0f);
-                        Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, targets, u_check);
+                        std::list<WorldObject*> targets;
+                        Trinity::AllWorldObjectsInRange u_check(me, 100.0f);
+                        Trinity::WorldObjectListSearcher<Trinity::AllWorldObjectsInRange> searcher(me, targets, u_check);
                         me->VisitNearbyObject(100.0f, searcher);
-                        for (std::list<Player*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        for (std::list<WorldObject*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
+                            if ((*itr)->GetTypeId() != TYPEID_PLAYER)
+                                continue;
+
                             if (zealot && (*itr) && (*itr)->IsInBetween(me, zealot, 1.0f))
                             {
-                                channelTarget = (*itr);
+                                channelTarget = (*itr)->ToUnit();
                                 if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && !channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
                                     DoCast(channelTarget, SPELL_EVOLUTION_VISUAL, true);
                             }
@@ -570,7 +582,7 @@ public:
 class EvolutionTargetSelector : public std::unary_function<Unit *, bool>
 {
 public:
-    EvolutionTargetSelector(Unit* me, const Unit* victim) : _me(me), _victim(victim)
+    EvolutionTargetSelector(Unit* me, const WorldObject* victim) : _me(me), _victim(victim)
     {
     }
 
@@ -629,7 +641,7 @@ public:
     }
 
     Unit* _me;
-    Unit const* _victim;
+    WorldObject const* _victim;
 };
 
 class spell_brc_evolution : public SpellScriptLoader

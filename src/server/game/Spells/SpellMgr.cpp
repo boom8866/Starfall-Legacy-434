@@ -2895,8 +2895,6 @@ void SpellMgr::LoadSpellCustomAttr()
             case 92863:
             case 92864:
             case 92865:
-            case 30213: // Legion Strike
-            case 109388:// Legion Strike
                 // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 break;
@@ -2953,15 +2951,27 @@ void SpellMgr::LoadSpellCustomAttr()
         switch (spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_DRUID:
+            {
                 // Roar
                 if (spellInfo->SpellFamilyFlags[0] & 0x8)
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
                 break;
+            }
             case SPELLFAMILY_WARLOCK:
-                // Nether Ward
-                if (spellInfo->Id == 687 || spellInfo->Id == 28176)
-                    spellInfo->Effects[2].BasePoints = 6229;
+            {
+                switch (spellInfo->Id)
+                {
+                    case 30213:     // Legion Strike
+                    case 109388:
+                        spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+                        break;
+                    case 687:       // Nether Ward
+                    case 28176:
+                        spellInfo->Effects[EFFECT_2].BasePoints = 6229;
+                        break;
+                }
                 break;
+            }
             default:
                 break;
         }
