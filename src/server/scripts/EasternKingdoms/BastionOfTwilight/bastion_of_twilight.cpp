@@ -1,9 +1,6 @@
 #include "ScriptPCH.h"
 #include "bastion_of_twilight.h"
 
-/* Automatic rescheduling if creature is already casting */
-#define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
-
 enum actionId
 {
     ACTION_CHECK_CHANNELERS     = 1
@@ -111,7 +108,6 @@ public:
                     }
                     case EVENT_SHADOW_BOLT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (me->isInCombat())
                         {
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true))
@@ -217,13 +213,15 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_PHASED_BURN:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(me, SPELL_PHASED_BURN, true);
                         events.RescheduleEvent(EVENT_PHASED_BURN, 10000);
                         break;

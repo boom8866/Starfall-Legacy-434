@@ -33,9 +33,6 @@
 #include "GameObject.h"
 #include "GameObjectAI.h"
 
-/* Automatic rescheduling if creature is already casting */
-#define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
-
 class npc_geargrinder_gizmo_intro : public CreatureScript
 {
 public:
@@ -818,13 +815,15 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_ENABLE_THRALL_LIGHTNING:
                     {
-                        RESCHEDULE_IF_CASTING
                         if (Creature* thrall = me->FindNearestCreature(NPC_ENTRY_THRALL, 70.0f, true))
                         {
                             thrall->AI()->DoCast(me, SPELL_THRALL_LIGHTNING_COSMETIC);
@@ -1816,6 +1815,9 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -1853,7 +1855,6 @@ public:
                     }
                     case EVENT_SHADOW_CRASH:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                             DoCast(playerOwner, SPELL_SHADOW_CRASH_EFF, true);
                         events.RescheduleEvent(EVENT_SHADOW_CRASH, urand(2000, 3500));
@@ -2849,13 +2850,15 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CAST_DOWNSIZING:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 25.0f, false))
                         {
                             DoCast(target, SPELL_DOWNSIZING);
@@ -2866,7 +2869,6 @@ public:
                     }
                     case EVENT_CAST_REVENUE_STREAM:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 25.0f, false))
                         {
                             DoCast(target, SPELL_REVENUE_STREAM);
@@ -2877,7 +2879,6 @@ public:
                     }
                     case EVENT_CAST_UNLOAD_TOXIC_ASSETS:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 25.0f, false))
                         {
                             DoCast(target, SPELL_UNLOAD_TOXIC_ASSETS);
@@ -2888,7 +2889,6 @@ public:
                     }
                     case EVENT_CAST_YOU_RE_FIRED:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 25.0f, false))
                         {
                             DoCast(SPELL_YOU_RE_FIRED);
@@ -2995,27 +2995,27 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_LAVA_BURST:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCastVictim(SPELL_LAVA_BURST);
                         events.RescheduleEvent(EVENT_LAVA_BURST, urand(5000,8000));
                         break;
                     }
                     case EVENT_CHAIN_LIGHTNING:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCastVictim(SPELL_CHAIN_LIGHTNING);
                         events.RescheduleEvent(EVENT_CHAIN_LIGHTNING, urand(9000,12500));
                         break;
                     }
                     case EVENT_THUNDER:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_THUNDER);
                         events.RescheduleEvent(EVENT_THUNDER, urand(6000,10000));
                         break;

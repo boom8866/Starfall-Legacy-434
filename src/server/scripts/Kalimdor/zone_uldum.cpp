@@ -33,10 +33,6 @@
 #include "Player.h"
 #include "AchievementMgr.h"
 
-
-/* Automatic rescheduling if creature is already casting */
-#define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
-
 // Quest 28250: Thieving Little Pluckers
 class spell_uldum_hammer : public SpellScriptLoader
 {
@@ -6589,7 +6585,6 @@ public:
                 {
                     case EVENT_CAST_SHADOW_BOLT:
                     {
-                        RESCHEDULE_IF_CASTING
                         if (Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 0, 50.0f, true))
                             DoCast(target, SPELL_SHADOW_BOLT);
                         events.RescheduleEvent(EVENT_CAST_SHADOW_BOLT, 3100);
@@ -6597,7 +6592,6 @@ public:
                     }
                     case EVENT_CAST_PACT_OF_DARKNESS:
                     {
-                        RESCHEDULE_IF_CASTING
                         if (Unit* target = me->getVictim())
                         {
                             if (me->IsWithinCombatRange(target, 7.0f))
@@ -6608,7 +6602,6 @@ public:
                     }
                     case EVENT_CAST_DARK_RUNE:
                     {
-                        RESCHEDULE_IF_CASTING
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, false))
                             DoCast(target, SPELL_DARK_RUNE);
                         events.RescheduleEvent(EVENT_CAST_DARK_RUNE, 6500);
@@ -6707,20 +6700,21 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CAST_BLAZING_ERUPTION:
                     {
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_BLAZING_ERUPTION);
                         events.RescheduleEvent(EVENT_CAST_BLAZING_ERUPTION, urand(8500, 12500));
                         break;
                     }
                     case EVENT_CAST_BURNING_GAZE_SUMMON:
                     {
-                        RESCHEDULE_IF_CASTING
                         events.RescheduleEvent(EVENT_CAST_BURNING_GAZE_SUMMON, urand(12000, 18000));
                         me->CastStop();
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 75.0f, false))
@@ -6730,7 +6724,6 @@ public:
                     }
                     case EVENT_CAST_BURNING_GAZE:
                     {
-                        RESCHEDULE_IF_CASTING
                         events.CancelEvent(EVENT_CAST_BURNING_GAZE);
                         if (Creature* burningGaze = me->FindNearestCreature(NPC_BURNING_GAZE, 200.0f, true))
                         {
@@ -9953,13 +9946,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_BLAZING_ERUPTION:
                     {
-                        RESCHEDULE_IF_CASTING;
                         me->SetControlled(true, UNIT_STATE_ROOT);
                         me->CastStop();
                         DoCast(SPELL_BLAZING_ERUPTION);
@@ -9975,7 +9970,6 @@ public:
                     }
                     /*case EVENT_BURNING_GAZE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_BURNING_GAZE, urand(8000, 21000));
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_BURNING_GAZE_SUMMON);
@@ -9984,7 +9978,6 @@ public:
                     }*/
                     case EVENT_SUMMON_METEOR:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_SUMMON_METEOR, urand(10000, 25000));
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_SUMMON_METEOR);
@@ -9992,7 +9985,6 @@ public:
                     }
                     /*case EVENT_ENABLE_GAZES:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.CancelEvent(EVENT_ENABLE_GAZES);
                         DoCast(SPELL_BURNING_GAZE);
                         break;
@@ -10882,13 +10874,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CAST_BLAZING_ERUPTION:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_CAST_BLAZING_ERUPTION, 8000);
                         DoCast(SPELL_BLAZING_ERUPTION);
                         break;
@@ -13971,7 +13965,6 @@ public:
                     }
                     case EVENT_FIRE_SPIT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_FIRE_SPIT, urand(6000, 12000));
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_FIRE_SPIT);
@@ -13979,7 +13972,6 @@ public:
                     }
                     case EVENT_BLACK_CLEAVE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_BLACK_CLEAVE, urand(4000, 12500));
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_BLACK_CLEAVE);
@@ -13987,7 +13979,6 @@ public:
                     }
                     case EVENT_BLAST_WAVE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_BLAST_WAVE, urand(5500, 10500));
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_BLAST_WAVE);
@@ -13995,7 +13986,6 @@ public:
                     }
                     case EVENT_TAIL_SWEEP:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_TAIL_SWEEP, urand(16500, 21250));
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_TAIL_SWEEP);
@@ -14003,7 +13993,6 @@ public:
                     }
                     case EVENT_RUPTURE_LINE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_RUPTURE_LINE, urand(8500, 9500));
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_RUPTURE_LINE);
@@ -15923,13 +15912,15 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_FORCE_PUNCH:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_FORCE_PUNCH, urand(17900, 18500));
                         DoCast(SPELL_FORCE_PUNCH);
                         break;
