@@ -27,6 +27,7 @@
 #include "Chat.h"
 #include "Spell.h"
 #include "BattlegroundMgr.h"
+#include "CreatureAI.h"
 #include "MapManager.h"
 #include "BattlegroundIC.h"
 #include "BattlefieldWG.h"
@@ -108,6 +109,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Ring of Frost and Deep Freeze
             else if (spellproto->Id == 82691 || spellproto->Id == 44572)
                 return DIMINISHING_CONTROLLED_STUN;
+            // Dragon's Breath
+            else if (spellproto->Id == 31661)
+                return DIMINISHING_LIMITONLY;
             break;
         }
         case SPELLFAMILY_WARRIOR:
@@ -128,9 +132,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Seduction
             else if (spellproto->SpellFamilyFlags[1] & 0x10000000)
                 return DIMINISHING_FEAR;
-            // Curse of Exhaustion & Dragon's Breath
-            else if (spellproto->Id == 18223 || spellproto->Id == 31661)
-                return DIMINISHING_LIMITONLY;
             break;
         }
         case SPELLFAMILY_DRUID:
@@ -315,6 +316,9 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellInfo const
             // Curse of Elements - limit to 120 seconds in PvP
             else if (spellproto->SpellFamilyFlags[1] & 0x200)
                return 120 * IN_MILLISECONDS;
+            // Curse of Exhaustion
+            else if (spellproto->Id == 18223)
+                return 10 * IN_MILLISECONDS;
             break;
         }
         default:
@@ -2895,8 +2899,6 @@ void SpellMgr::LoadSpellCustomAttr()
             case 92863:
             case 92864:
             case 92865:
-            case 30213: // Legion Strike
-            case 109388:// Legion Strike
                 // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 break;
@@ -2953,19 +2955,33 @@ void SpellMgr::LoadSpellCustomAttr()
         switch (spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_DRUID:
+            {
                 // Roar
                 if (spellInfo->SpellFamilyFlags[0] & 0x8)
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
                 break;
+            }
             case SPELLFAMILY_WARLOCK:
-                // Nether Ward
-                if (spellInfo->Id == 687 || spellInfo->Id == 28176)
-                    spellInfo->Effects[2].BasePoints = 6229;
+            {
+                switch (spellInfo->Id)
+                {
+                    case 30213:     // Legion Strike
+                    case 109388:
+                        spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+                        break;
+                    case 687:       // Nether Ward
+                    case 28176:
+                        spellInfo->Effects[EFFECT_2].BasePoints = 6229;
+                        break;
+                }
                 break;
+            }
             default:
                 break;
         }
     }
+
+    CreatureAI::FillAISpellInfo();
 
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded spell custom attributes in %u ms", GetMSTimeDiffToNow(oldMSTime));
 }
@@ -3327,6 +3343,12 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 70650: // Death Knight T10 Tank 2P Bonus
                 spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
+                break;
+            case 49224: // Magic Suppression
+            case 49611:
+                spellInfo->ProcChance = 0;
+                spellInfo->ProcCharges = 0;
+                spellInfo->Effects[EFFECT_0].Mechanic = MECHANIC_NONE;
                 break;
             case 71838: // Drain Life - Bryntroll Normal
             case 71839: // Drain Life - Bryntroll Heroic
@@ -4940,7 +4962,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_NONE;
                 break;
             case 75610: // Evolution
-                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(28);
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_50_YARDS);
                 break;
             // * Karsh Steelbender
             case 90406: // Lava Pool

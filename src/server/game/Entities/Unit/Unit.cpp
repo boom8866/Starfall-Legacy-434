@@ -1448,6 +1448,23 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
     {
         switch (spellProto->Id)
         {
+            case 2912:  // Starfire
+            {
+                int32 energizeAmount = 20;
+                // Euphoria
+                if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, EFFECT_0))
+                {
+                    if (!HasAura(48518))
+                    {
+                        if (roll_chance_i(aurEff->GetAmount()))
+                            energizeAmount = 40;
+                    }
+                }
+                // Only in Balance spec
+                if (HasSpell(78674) && !HasAura(48517) && solarEnabled == false)
+                    EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
+                break;
+            }
             case 5176:  // Wrath
             {
                 int32 energizeAmount = -13;
@@ -3153,6 +3170,13 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit* victi
         crit += victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE);
 
     crit += victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
+
+    if (attackType != RANGED_ATTACK)
+    {
+        // Glyph of barkskin
+        if (victim->HasAura(63057) && victim->HasAura(22812))
+            crit -= 25.0f;
+    }
 
     if (crit < 0.0f)
         crit = 0.0f;
@@ -6826,69 +6850,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     victim->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
                 basepoints0 = (int32)GetBaseAttackTime(BASE_ATTACK) * int32(ap * 0.011f + 0.022f * holy) / 1000;
                 break;
-            }
-            // Light's Beacon - Beacon of Light
-            if (dummySpell->Id == 53651)
-            {
-                if (!victim)
-                    return false;
-                triggered_spell_id = 0;
-                Unit* beaconTarget = NULL;
-                if (GetTypeId() != TYPEID_PLAYER)
-                {
-                    beaconTarget = triggeredByAura->GetBase()->GetCaster();
-                    if (!beaconTarget || beaconTarget == this || !(beaconTarget->GetAura(53563, victim->GetGUID())))
-                        return false;
-                    basepoints0 = int32(damage);
-                    triggered_spell_id = procSpell->IsRankOf(sSpellMgr->GetSpellInfo(635)) ? 53652 : 53654;
-                }
-                else
-                {    // Check Party/Raid Group
-                    if (Group* group = ToPlayer()->GetGroup())
-                    {
-                        for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-                        {
-                            if (Player* member = itr->getSource())
-                            {
-                                // check if it was heal by paladin which casted this beacon of light
-                                if (member->GetAura(53563, victim->GetGUID()))
-                                {
-                                    // do not proc when target of beacon of light is healed
-                                    if (member == this)
-                                        return false;
-
-                                    beaconTarget = member;
-                                    basepoints0 = int32(damage);
-                                    triggered_spell_id = 53652;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                if (beaconTarget)
-                {
-                    int32 percent = 0;
-                    switch (procSpell->Id)
-                    {
-                        case 85673: // Word of Glory
-                        case 25914: // Holy Shock
-                        case 19750: // Flash of Light
-                        case 82326: // Divine Light
-                        case 85222: // Light of Dawn
-                        case 87188: // Enlightened Judgements
-                        case 87189: // Enlightened Judgements
-                            percent = triggerAmount; // 50% heal from these spells
-                            break;
-                        case 635:   // Holy Light
-                            percent = triggerAmount * 2; // 100% heal from Holy Light
-                            break;
-                    }
-                    basepoints0 = CalculatePct(damage, percent);
-                    victim->CastCustomSpell(beaconTarget, triggered_spell_id, &basepoints0, NULL, NULL, true, 0, triggeredByAura);
-                    return true;
-                }
-                return false;
             }
             switch (dummySpell->Id)
             {
@@ -11353,26 +11314,24 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
         {
             if (isPet())
             {
-                if (Unit* owner = GetCharmerOrOwner())
+                uint32 attackPower = GetTotalAttackPowerValue(BASE_ATTACK);
+                switch (spellProto->Id)
                 {
-                    int32 ownerRAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK);
-                    switch (spellProto->Id)
+                    case 16827:    // Claw
+                    case 17253:    // Bite
+                    case 49966:    // Smack
                     {
-                        case 16827:    // Claw
-                        case 17253:    // Bite
-                        case 49966:    // Smack
-                        {
-                            DoneTotal += ownerRAP * 0.168f;
-                            // Spiked Collar
-                            if (AuraEffect* spikedCollar = GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2934, EFFECT_0))
-                                AddPct(DoneTotalMod, spikedCollar->GetAmount());
+                        // Spiked Collar
+                        if (AuraEffect* spikedCollar = GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2934, EFFECT_0))
+                            AddPct(DoneTotalMod, spikedCollar->GetAmount());
 
-                            // Wild Hunt
-                            if (AuraEffect* wildHunt = GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_0))
-                                if (GetPower(POWER_FOCUS) + spellProto->CalcPowerCost(this, spellProto->GetSchoolMask()) >= 50)
-                                    AddPct(DoneTotal, wildHunt->GetAmount() / 100);
-                            break;
-                        }
+                        // Wild Hunt
+                        if (AuraEffect* wildHunt = GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_0))
+                            if (GetPower(POWER_FOCUS) + spellProto->CalcPowerCost(this, spellProto->GetSchoolMask()) >= 50)
+                                AddPct(DoneTotal, wildHunt->GetAmount());
+
+                        DoneTotal += attackPower * 0.1952f;
+                        break;
                     }
                 }
             }
@@ -11887,10 +11846,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                         AddPct(crit_chance, aurEff->GetAmount());
                 }
 
-                // Glyph of Barkskin
-                if (victim->HasAura(63057) && victim->HasAura(22812))
-                    AddPct(crit_chance, -25);
-
                 if (!spellProto->IsPositive())
                 {
                     // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE
@@ -12061,10 +12016,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
 
             if (victim)
             {
-                // Glyph of Barkskin
-                if (victim->HasAura(63057) && victim->HasAura(22812))
-                    AddPct(crit_chance, -25);
-
                 // Custom crit by class
                 switch (spellProto->SpellFamilyName)
                 {
@@ -12769,9 +12720,9 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
         // Check for immune to application of harmful magical effects
         AuraEffectList const& immuneAuraApply = GetAuraEffectsByType(SPELL_AURA_MOD_IMMUNE_AURA_APPLY_SCHOOL);
         for (AuraEffectList::const_iterator iter = immuneAuraApply.begin(); iter != immuneAuraApply.end(); ++iter)
-            if (spellInfo->Dispel == DISPEL_MAGIC &&                                      // Magic debuff
-                ((*iter)->GetMiscValue() & spellInfo->GetSchoolMask()) &&  // Check school
-                !spellInfo->IsPositiveEffect(index))                                  // Harmful
+            if (((*iter)->GetId() == 48707 || spellInfo->Dispel == DISPEL_MAGIC) &&         // Magic debuff
+                ((*iter)->GetMiscValue() & spellInfo->GetSchoolMask()) &&                   // Check school
+                !spellInfo->IsPositiveEffect(index))                                        // Harmful
                 return true;
     }
 
@@ -13291,7 +13242,7 @@ void Unit::SetInCombatWith(Unit* enemy)
 
 void Unit::CombatStart(Unit* target, bool initialAggro)
 {
-    if (initialAggro)
+    if (initialAggro && !target->HasUnitState(UNIT_STATE_EVADE))
     {
         if (!target->IsStandState())
             target->SetStandState(UNIT_STAND_STATE_STAND);
@@ -15897,7 +15848,7 @@ void CharmInfo::LoadPetActionBar(const std::string& data)
 
     Tokenizer tokens(data, ' ');
 
-    if (tokens.size() != (ACTION_BAR_INDEX_END-ACTION_BAR_INDEX_START) * 2)
+    if (tokens.size() != (ACTION_BAR_INDEX_END - ACTION_BAR_INDEX_START) * 2)
         return;                                             // non critical, will reset to default
 
     uint8 index = ACTION_BAR_INDEX_START;
@@ -15905,7 +15856,7 @@ void CharmInfo::LoadPetActionBar(const std::string& data)
     for (; index < ACTION_BAR_INDEX_END; ++iter, ++index)
     {
         // use unsigned cast to avoid sign negative format use at long-> ActiveStates (int) conversion
-        ActiveStates type  = ActiveStates(atol(*iter));
+        ActiveStates type = ActiveStates(atol(*iter));
         ++iter;
         uint32 action = uint32(atol(*iter));
 
@@ -21844,6 +21795,9 @@ void Unit::SetBaseAttackTime(WeaponAttackType att, uint32 time)
 
 void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool triggered)
 {
+    if (!this || !IsInWorld() || !victim || !victim->IsInWorld())
+        return;
+
     class CastDelayEvent : public BasicEvent
     {
     public:
@@ -21864,8 +21818,7 @@ void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool trigge
         bool const triggered;
     };
 
-    if (this && victim)
-        m_Events.AddEvent(new CastDelayEvent(this, victim, spellid, triggered), m_Events.CalculateTime(delay));
+    m_Events.AddEvent(new CastDelayEvent(this, victim, spellid, triggered), m_Events.CalculateTime(delay));
 }
 
 //set the last casted spell for Improved steady shot talent

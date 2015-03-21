@@ -14498,7 +14498,6 @@ public:
                         me->SetCanFly(true);
                         me->SetDisableGravity(true);
                         me->NearTeleportTo(-8863.19f, 203.45f, -8.46f, 0.99f);
-                        me->Relocate(-8863.19f, 203.45f, -8.46f, 0.99f);
                         events.ScheduleEvent(EVENT_CHECK_DUMMY, 1000);
                         break;
                     }
@@ -15069,7 +15068,6 @@ public:
                         me->SetCanFly(true);
                         me->SetDisableGravity(true);
                         me->NearTeleportTo(-8921.04f, -54.95f, 308.35f, 2.63f);
-                        me->Relocate(-9076.75f, 34.23f, 296.64f, 2.63f);
                         events.ScheduleEvent(EVENT_QUEST_COMPLETE, 10000);
                         if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
                             passenger->ChangeSeat(1, true);

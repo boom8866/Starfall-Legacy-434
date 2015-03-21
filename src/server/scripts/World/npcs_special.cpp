@@ -3715,7 +3715,7 @@ public:
 
         void Reset()
         {
-            timerEffect = 800;
+            timerEffect = 200;  // CC Delay (PvP)
             timerStun = 6000;
         }
 
@@ -8733,7 +8733,7 @@ public:
                 // Respawn if dead!
                 if (Creature* maruut = creature->FindNearestCreature(NPC_ENTRY_MARUUT, 85.0f, false))
                     maruut->Respawn();
-                player->SummonCreature(NPC_HIGH_PRIESTESS_LORTHUNA, 978.70f, 562.99f, -49.28f, 5.44f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                player->SummonCreature(NPC_HIGH_PRIESTESS_LORTHUNA, 978.70f, 562.99f, -49.28f, 5.44f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
                 creature->m_Events.AddEvent(new eventUnmergeFragments(creature), creature->m_Events.CalculateTime(2000));
             }
         }
@@ -8872,8 +8872,8 @@ public:
 
             bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
             {
-                creature->SummonCreature(NPC_ENTRY_THERAZANE, 971.21f, 523.53f, -49.33f, 0.22f, TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
-                creature->SummonCreature(NPC_ENTRY_MAHAAT, 974.32f, 508.67f, -49.33f, 0.19f, TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                creature->SummonCreature(NPC_ENTRY_THERAZANE, 971.21f, 523.53f, -49.33f, 0.22f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
+                creature->SummonCreature(NPC_ENTRY_MAHAAT, 974.32f, 508.67f, -49.33f, 0.19f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
                 return true;
             }
 
@@ -9043,9 +9043,9 @@ public:
                 torunscar->AI()->TalkWithDelay(12000, 3);
             }
             if (Creature* therazane = me->FindNearestCreature(NPC_ENTRY_THERAZANE, 200.0f, true))
-                therazane->DespawnOrUnsummon(5000);
+                therazane->DisappearAndDie();
             if (Creature* mahaat = me->FindNearestCreature(NPC_ENTRY_MAHAAT, 200.0f, true))
-                mahaat->DespawnOrUnsummon(5000);
+                mahaat->DisappearAndDie();
 
             std::list<Unit*> targets;
             Trinity::AnyUnitInObjectRangeCheck u_check(me, 200.0f);

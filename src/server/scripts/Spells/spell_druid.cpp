@@ -147,22 +147,9 @@ public:
                     if (caster->HasAura(48517))
                         return;
 
-                    energizeAmount = GetSpellInfo()->Effects[effIndex].BasePoints; // 20
-
-                    // Euphoria
-                    if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, 0))
-                    {
-                        if (!caster->HasAura(48518))
-                        {
-                            if (roll_chance_i(aurEff->GetAmount()))
-                                energizeAmount *= 2;
-                        }
-                    }
-
                     // If we are set to fill the solar side or we've just logged in with 0 power..
                     if ((!caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER)) || caster->GetPower(POWER_ECLIPSE) == 0)
                     {
-                        caster->CastCustomSpell(caster, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, &energizeAmount, 0, 0, true);
                         // If the energize was due to 0 power, cast the eclipse marker aura
                         if (!caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER))
                             caster->CastSpell(caster, SPELL_DRUID_SOLAR_ECLIPSE_MARKER, true);
@@ -1979,6 +1966,45 @@ public:
     }
 };
 
+class spell_dru_barkskin : public SpellScriptLoader
+{
+public:
+    spell_dru_barkskin() : SpellScriptLoader("spell_dru_barkskin")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_GLYPH_OF_BARKSKIN             = 63057,
+        SPELL_GLYPH_OF_BARKSKIN_TRIGGERED   = 63058
+    };
+
+    class spell_dru_barkskin_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_barkskin_AuraScript);
+
+        void HandleGlyph(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                // Glyph of Barkskin
+                if (caster->HasAura(SPELL_GLYPH_OF_BARKSKIN))
+                    caster->CastSpell(caster, SPELL_GLYPH_OF_BARKSKIN_TRIGGERED, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_dru_barkskin_AuraScript::HandleGlyph, EFFECT_1, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dru_barkskin_AuraScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -2020,4 +2046,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_feral_charge_bear();
     new spell_dru_instant_rejuvenation();
     new spell_dru_rejuvenation();
+    new spell_dru_barkskin();
 }

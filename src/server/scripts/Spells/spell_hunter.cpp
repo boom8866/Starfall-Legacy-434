@@ -1789,40 +1789,6 @@ public:
     }
 };
 
-// 1543 - Flare
-class spell_hun_flare : public SpellScriptLoader
-{
-public:
-    spell_hun_flare() : SpellScriptLoader("spell_hun_flare")
-    {
-    }
-
-    class spell_hun_flare_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_hun_flare_AuraScript);
-
-        void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            if (Unit* target = GetTarget())
-            {
-                if (target->GetAuraEffectsByType(SPELL_AURA_MOD_CAMOUFLAGE).size())
-                    PreventDefaultAction();
-            }
-        }
-
-        void Register()
-        {
-            OnEffectApply += AuraEffectApplyFn(spell_hun_flare_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DISPEL_IMMUNITY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
-        }
-    };
-
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_hun_flare_AuraScript();
-    }
-};
-
 class spell_hun_snake_trap : public SpellScriptLoader
 {
 public:
@@ -2036,7 +2002,7 @@ public:
 
         void Register()
         {
-            OnEffectApply += AuraEffectApplyFn(spell_hun_rapid_killing_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_hun_rapid_killing_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
         }
     };
 
@@ -2124,7 +2090,6 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_black_arrow();
     new spell_hun_revive_pet();
     new spell_hun_camouflage();
-    new spell_hun_flare();
     new spell_hun_snake_trap();
     new spell_hun_lock_and_load();
     new spell_hun_attack_basic();

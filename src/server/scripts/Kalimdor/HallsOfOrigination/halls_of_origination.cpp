@@ -18,28 +18,32 @@ public:
 
     bool OnGossipSelect(Player* player, GameObject* go, uint32 sender, uint32 action)
     {
-            if (sender != GOSSIP_SENDER_MAIN)
-                return false;
-            if (!player->getAttackers().empty())
-                return false;
+        if (sender != GOSSIP_SENDER_MAIN)
+            return false;
+
+        if (!player->getAttackers().empty())
+            return false;
+
         switch (action)
         {
-            case 200: // Bring to first floor
-                if (player->GetPositionZ() > 90.0f)
-                    if (GameObject* elevator = go->FindNearestGameObject(GO_LIFT_OF_THE_MAKERS, 500.0f))
-                    {
-                        elevator->SetLootState(GO_READY);
-                        elevator->UseDoorOrButton(5000);
-                    }
+            case 200: // Bring to base floor
+            {
+                if (GameObject* elevator = go->FindNearestGameObject(GO_LIFT_OF_THE_MAKERS, 1000.0f))
+                    elevator->SetGoState(GO_STATE_ACTIVE);
                 break;
-            case 201: // Bring to second floor
-                if (player->GetPositionZ() < 90.0f)
-                    if (GameObject* elevator = go->FindNearestGameObject(GO_LIFT_OF_THE_MAKERS, 500.0f))
-                    {
-                        elevator->SetLootState(GO_READY);
-                        elevator->UseDoorOrButton(5000);
-                    }
+            }
+            case 201: // Bring to first floor
+            {
+                if (GameObject* elevator = go->FindNearestGameObject(GO_LIFT_OF_THE_MAKERS, 1000.0f))
+                    elevator->SetGoState(GO_STATE_READY);
                 break;
+            }
+            case 202: // Bring to 2nd floor
+            {
+                if (GameObject* elevator = go->FindNearestGameObject(GO_LIFT_OF_THE_MAKERS, 1000.0f))
+                    elevator->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                break;
+            }
         }
         player->CLOSE_GOSSIP_MENU();
         return true;
@@ -47,12 +51,14 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* go)
     {
-
         if (InstanceScript* instance = go->GetInstanceScript())
         {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bring elevator to first floor.", GOSSIP_SENDER_MAIN, 200);
-            if (instance->GetBossState(DATA_ANRAPHET) == DONE || instance->GetBossState(DATA_EARTHRAGER_PTAH) == DONE) // if anraphet or ptah is defeated
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bring elevator to second floor.", GOSSIP_SENDER_MAIN, 201);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bring elevator to base floor", GOSSIP_SENDER_MAIN, 200);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bring elevator to first floor.", GOSSIP_SENDER_MAIN, 201);
+
+            // Only if Ptah or Anraphet are dead
+            if (instance->GetBossState(DATA_ANRAPHET) == DONE || instance->GetBossState(DATA_EARTHRAGER_PTAH) == DONE)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bring elevator to second floor.", GOSSIP_SENDER_MAIN, 202);
         }
 
         player->SEND_GOSSIP_MENU(go->GetGOInfo()->GetGossipMenuId(), go->GetGUID());

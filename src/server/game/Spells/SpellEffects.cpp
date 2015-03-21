@@ -816,7 +816,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
-                    case 89751: // Felstorm
                     case 30213: // Legion Strike
                     {
                         if (m_caster->GetCharmerOrOwner())
@@ -3857,6 +3856,7 @@ void Spell::EffectEnergize (SpellEffIndex effIndex)
 
     switch (m_spellInfo->Id)
     {
+        case 2912:  // Starfire
         case 5176:  // Wrath
         case 35395: // Crusader Strike
         case 25912: // Holy Shock
@@ -5432,6 +5432,19 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                             fixed_bonus += fixed_bonus * uint32(hunterMark->GetAmount() / 100) / 100;
                     }
                     break;
+                }
+            }
+            break;
+        }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Felstorm
+            if (Unit* owner = m_caster->GetCharmerOrOwner())
+            {
+                if (m_spellInfo->Id == 89753 && unitTarget)
+                {
+                    float spellPower = (float)(owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
+                    fixed_bonus += uint32(spellPower * 0.50f);
                 }
             }
             break;

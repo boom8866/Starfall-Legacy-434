@@ -22162,6 +22162,8 @@ void Player::PetSpellInitialize()
     }
 
     GetSession()->SendPacket(&data);
+    if (pet->GetCharmInfo())
+        pet->GetCharmInfo()->InitPetActionBar();
 }
 
 void Player::PossessSpellInitialize()
@@ -29042,7 +29044,7 @@ void Player::RemoveCurrentPet(bool abandon)
     pet->CombatStop();
 
     if (getClass() == CLASS_WARLOCK)
-        pet->RemoveAllAuras();
+        pet->RemoveAllAurasExceptType(SPELL_AURA_SPLIT_DAMAGE_PCT);
 
     if (abandon)
         petHolder->DeleteFromDB(PET_SLOT_CURRENT_PET);

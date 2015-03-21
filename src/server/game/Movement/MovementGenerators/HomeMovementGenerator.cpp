@@ -30,13 +30,12 @@ void HomeMovementGenerator<Creature>::DoInitialize(Creature* owner)
 
 void HomeMovementGenerator<Creature>::DoFinalize(Creature* owner)
 {
+    owner->ClearUnitState(UNIT_STATE_EVADE);
     if (arrived)
     {
-        owner->ClearUnitState(UNIT_STATE_EVADE);
         owner->SetWalk(true);
         owner->LoadCreaturesAddon(true);
         owner->AI()->JustReachedHome();
-        owner->NearTeleportTo(owner->GetHomePosition());
     }
 }
 
@@ -63,7 +62,7 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature* owner)
 
     arrived = false;
 
-    owner->ClearUnitState(uint32(UNIT_STATE_ALL_STATE & ~(UNIT_STATE_EVADE | UNIT_STATE_IGNORE_PATHFINDING)));
+    owner->ClearUnitState(uint32(UNIT_STATE_ALL_STATE & ~UNIT_STATE_EVADE));
 }
 
 bool HomeMovementGenerator<Creature>::DoUpdate(Creature* owner, const uint32 /*time_diff*/)

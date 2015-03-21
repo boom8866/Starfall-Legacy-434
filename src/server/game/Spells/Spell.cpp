@@ -825,8 +825,7 @@ void Spell::SelectEffectImplicitTargets(SpellEffIndex effIndex, SpellImplicitTar
             for (uint32 j = effIndex + 1; j < MAX_SPELL_EFFECTS; ++j)
             {
                 SpellEffectInfo const* effects = GetSpellInfo()->Effects;
-                if (effects[j].IsEffect() &&
-                    effects[effIndex].TargetA.GetTarget() == effects[j].TargetA.GetTarget() &&
+                if (effects[effIndex].TargetA.GetTarget() == effects[j].TargetA.GetTarget() &&
                     effects[effIndex].TargetB.GetTarget() == effects[j].TargetB.GetTarget() &&
                     effects[effIndex].ImplicitTargetConditions == effects[j].ImplicitTargetConditions &&
                     effects[effIndex].CalcRadius(m_caster) == effects[j].CalcRadius(m_caster) &&
@@ -1199,10 +1198,13 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
     // TODO: remove this
     for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
     {
-        if (Unit* unitTarget = (*itr)->ToUnit())
-            unitTargets.push_back(unitTarget);
-        else if (GameObject* gObjTarget = (*itr)->ToGameObject())
-            gObjTargets.push_back(gObjTarget);
+        if ((*itr))
+        {
+            if (Unit* unitTarget = (*itr)->ToUnit())
+                unitTargets.push_back(unitTarget);
+            else if (GameObject* gObjTarget = (*itr)->ToGameObject())
+                gObjTargets.push_back(gObjTarget);
+        }
     }
 
     if (!unitTargets.empty())
@@ -4037,17 +4039,6 @@ void Spell::finish(bool ok)
             }
             break;
         }
-        case 48707: // Anti-Magic Shell
-        {
-            // Magic Suppression
-            if (m_caster->HasSpell(49224) && !m_caster->HasAura(49224))
-                m_caster->CastSpell(m_caster, 49224, true);
-            if (m_caster->HasSpell(49610) && !m_caster->HasAura(49610))
-                m_caster->CastSpell(m_caster, 49610, true);
-            if (m_caster->HasSpell(49611) && !m_caster->HasAura(49611))
-                m_caster->CastSpell(m_caster, 49611, true);
-            break;
-        }
         case 35395: // Crusader Strike
         case 53385: // Divine Storm
         {
@@ -6313,6 +6304,22 @@ uint32 Spell::GetCCDelay(SpellInfo const* _spell)
             if (_spell->Id == 82691)
                 return 0;
             break;
+        case SPELLFAMILY_WARLOCK:
+        {
+            switch (_spell->Id)
+            {
+                // Hand of Gul'Dan (Root and Stun)
+                case 85526:
+                case 93974:
+                case 93987:
+                case 93975:
+                case 93986:
+                    return 0;
+                default:
+                    break;
+            }
+            break;
+        }
         case SPELLFAMILY_HUNTER:
         {
             // Traps
@@ -7304,7 +7311,7 @@ bool Spell::CheckEffectTarget(Unit const* target, uint32 eff) const
     // Line of Sight check for AoE ground-pointing spells (Only for PvP for now to prevent problems in PvE)
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        if (m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+        if (m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION && !(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS))
         {
             if (m_targets.GetDstPos() && !target->IsWithinLOS(m_targets.GetDstPos()->GetPositionX(), m_targets.GetDstPos()->GetPositionY(), m_targets.GetDstPos()->GetPositionZ()))
                 return false;

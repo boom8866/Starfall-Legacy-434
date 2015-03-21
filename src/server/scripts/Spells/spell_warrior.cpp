@@ -935,7 +935,7 @@ class spell_warr_sweeping_strikes : public SpellScriptLoader
                 {
                     if (Unit* target = GetTarget())
                     {
-                        if (_procTarget && _procTarget != NULL && caster->IsValidAttackTarget(target))
+                        if (_procTarget && _procTarget->IsInWorld())
                             target->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, true, NULL, aurEff);
                     }
                 }

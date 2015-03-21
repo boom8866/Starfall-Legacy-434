@@ -1884,6 +1884,76 @@ public:
     }
 };
 
+// 53651 - Light's Beacon - Beacon of Light
+class spell_pal_lights_beacon : public SpellScriptLoader
+{
+public:
+    spell_pal_lights_beacon() : SpellScriptLoader("spell_pal_lights_beacon")
+    {
+    }
+
+    class spell_pal_lights_beacon_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pal_lights_beacon_AuraScript);
+
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+
+            Unit* beaconOwner = GetCaster();
+            Unit* healTarget = GetTarget();
+            Unit* owner = eventInfo.GetProcTarget();
+
+            if (!beaconOwner || !healTarget || !owner)
+                return;
+
+            // Check if it was heal by paladin which casted this beacon of light
+            if (beaconOwner->GetAura(53563, owner->GetGUID()))
+            {
+                if (beaconOwner->IsWithinLOSInMap(owner))
+                {
+                    int32 mod = 100;
+
+                    switch (eventInfo.GetDamageInfo()->GetSpellInfo()->Id)
+                    {
+                        case 19750: // Flash of Light
+                        case 82326: // Divine Light
+                        case 85673: // Word of Glory
+                        case 25914: // Holy Shock
+                        case 85222: // Light of Dawn
+                        case 87188: // Enlightened Judgements
+                        case 87189: // Enlightened Judgements
+                            mod = 50; // 50% heal from these spells
+                            break;
+                        case 635:   // Holy Light
+                            mod = 100; // 100% heal from Holy Light
+                            break;
+                        default:
+                            return;
+                    }
+
+                    // False when target of heal is beaconed
+                    if (beaconOwner == healTarget)
+                        return;
+
+                    int32 basepoints0 = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), mod);
+                    owner->CastCustomSpell(beaconOwner, 53652, &basepoints0, NULL, NULL, true);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(spell_pal_lights_beacon_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_pal_lights_beacon_AuraScript();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_ardent_defender();
@@ -1912,4 +1982,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_holy_radiance();
     new spell_pal_shield_of_the_righteous();
     new spell_pal_sanctuary();
+    new spell_pal_lights_beacon();
 }
