@@ -2029,7 +2029,7 @@ void AddSC_kezan()
     new npc_deathwing_goal();
     new npc_buccaneer_roughness();
     new spell_awesome_party_ensemble();
-    new npc_frightened_partygoer();
+    //new npc_frightened_partygoer();
     new npc_pirate_party_crasher();
     new spell_hobart_ingenious_cap();
     new go_first_bank_of_kezan();

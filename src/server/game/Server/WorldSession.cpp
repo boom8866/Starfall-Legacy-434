@@ -407,7 +407,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                     break;
             }
         }
-        catch (ByteBufferException const&)
+        catch (ByteBufferException &)
         {
             sLog->outError(LOG_FILTER_NETWORKIO, "WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.",
                     packet->GetOpcode(), GetRemoteAddress().c_str(), GetAccountId());
@@ -416,8 +416,6 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 
         if (deletePacket)
             delete packet;
-
-        deletePacket = true;
     }
 
     if (m_Socket && !m_Socket->IsClosed() && _warden)
