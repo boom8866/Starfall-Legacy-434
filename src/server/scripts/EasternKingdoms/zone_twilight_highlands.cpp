@@ -19,9 +19,6 @@
 #include "ScriptedEscortAI.h"
 #include "Vehicle.h"
 
-/* Automatic rescheduling if creature is already casting */
-#define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
-
 class npc_th_axebite_infantry : public CreatureScript
 {
 public:
@@ -800,6 +797,9 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -848,7 +848,6 @@ public:
                     }
                     case EVENT_FROSTBOLT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_FROSTBOLT);
                         events.RescheduleEvent(EVENT_FROSTBOLT, urand(4000, 6000));
@@ -856,14 +855,12 @@ public:
                     }
                     case EVENT_FROST_NOVA:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(me, SPELL_FROST_NOVA, true);
                         events.RescheduleEvent(EVENT_FROST_NOVA, urand(8000, 18000));
                         break;
                     }
                     case EVENT_ACIDIC_SPLASH:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_ACIDIC_SPLASH);
                         events.RescheduleEvent(EVENT_ACIDIC_SPLASH, urand(9000, 20000));
@@ -871,7 +868,6 @@ public:
                     }
                     case EVENT_ICE_LANCE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_ICE_LANCE);
                         events.RescheduleEvent(EVENT_ICE_LANCE, urand(2000, 3500));
@@ -1739,6 +1735,9 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -1756,7 +1755,6 @@ public:
                     }
                     case EVENT_SCORCH:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_SCORCH);
                         events.RescheduleEvent(EVENT_SCORCH, urand(2500, 3500));
@@ -1764,7 +1762,6 @@ public:
                     }
                     case EVENT_FIRE_NOVA:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (me->getVictim())
                             DoCast(SPELL_FIRE_NOVA);
                         events.RescheduleEvent(EVENT_FIRE_NOVA, urand(7500, 15000));
@@ -2747,6 +2744,9 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -2766,7 +2766,6 @@ public:
                     }
                     case EVENT_STATIC_CHARGE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (roll_chance_f(30.0f))
                         {
                             if (Unit* victim = me->getVictim())
@@ -2780,7 +2779,6 @@ public:
                     }
                     case EVENT_TWILIGHT_BOLT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_TWILIGHT_BOLT);
                         events.RescheduleEvent(EVENT_TWILIGHT_BOLT, urand(6000, 15000));
@@ -2878,13 +2876,15 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_STATIC_FLUX:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                         {
                             if (me->GetHealth() >= me->GetMaxHealth() * 0.75f)
@@ -2895,7 +2895,6 @@ public:
                     }
                     case EVENT_COMING_OF_THE_WINDTERROR:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.CancelEvent(EVENT_STATIC_FLUX);
                         events.CancelEvent(EVENT_COMING_OF_THE_WINDTERROR);
                         break;
@@ -5988,20 +5987,21 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_SHADOW_BOLT_VOLLEY:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_SHADOW_BOLT_VOLLEY);
                         events.RescheduleEvent(EVENT_SHADOW_BOLT_VOLLEY, urand(3000, 8000));
                         break;
                     }
                     case EVENT_WEDDING_CRASH:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_WEDDING_CRASH);
                         events.RescheduleEvent(EVENT_WEDDING_CRASH, urand(4500, 9000));
@@ -6009,7 +6009,6 @@ public:
                     }
                     case EVENT_AURA_OF_DARKNESS:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_AURA_OF_DARKNESS);
                         if (Unit* invoker = me->ToTempSummon()->GetSummoner())
                             invoker->AddAura(SPELL_DARKNESS_AROUND, invoker);
@@ -6301,13 +6300,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_HEAVING_STOMP:
                     {
-                        RESCHEDULE_IF_CASTING;
                         Talk(0);
                         DoCast(SPELL_HEAVING_STOMP);
                         events.RescheduleEvent(EVENT_HEAVING_STOMP, urand(10000, 25000));
@@ -6315,7 +6316,6 @@ public:
                     }
                     case EVENT_HURL_BOULDER:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_HURL_BOULDER);
                         events.RescheduleEvent(EVENT_HURL_BOULDER, urand(4500, 15000));
@@ -7537,6 +7537,9 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -7576,7 +7579,6 @@ public:
                     }
                     case EVENT_CHAIN_HEAL:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* owner = me->ToTempSummon()->GetSummoner())
                         {
                             if (owner->GetHealth() <= owner->GetMaxHealth() * 0.65f)
@@ -7587,7 +7589,6 @@ public:
                     }
                     case EVENT_LAVA_BURST:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_LAVA_BURST);
                         events.RescheduleEvent(EVENT_LAVA_BURST, 3000);
@@ -7595,7 +7596,6 @@ public:
                     }
                     case EVENT_LIGHTNING_BOLT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_LIGHTNING_BOLT);
                         events.RescheduleEvent(EVENT_LIGHTNING_BOLT, urand(3500, 7000));
@@ -7603,7 +7603,6 @@ public:
                     }
                     case EVENT_STORMSTRIKE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_STORMSTRIKE);
                         events.RescheduleEvent(EVENT_STORMSTRIKE, urand(3500, 5000));
@@ -7611,7 +7610,6 @@ public:
                     }
                     case EVENT_LAVA_LASH:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_LAVA_LASH);
                         events.RescheduleEvent(EVENT_LAVA_LASH, urand(3500, 5000));
@@ -7619,7 +7617,6 @@ public:
                     }
                     case EVENT_HEALING_WAVE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* owner = me->ToTempSummon()->GetSummoner())
                         {
                             if (owner->GetHealth() <= (owner->GetMaxHealth() * 0.65f))
@@ -7630,7 +7627,6 @@ public:
                     }
                     case EVENT_THUNDERSTORM:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* nearestVictim = me->SelectNearbyTarget(me, 5.0f))
                             DoCast(SPELL_THUNDERSTORM);
                         events.RescheduleEvent(EVENT_THUNDERSTORM, 15000);
@@ -7638,7 +7634,6 @@ public:
                     }
                     case EVENT_FROST_SHOCK:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_FROST_SHOCK);
                         events.RescheduleEvent(EVENT_FROST_SHOCK, urand(3500, 5000));
@@ -7869,13 +7864,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_MIND_FLAY:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_MIND_FLAY);
                         events.RescheduleEvent(EVENT_MIND_FLAY, urand(6000, 9000));
@@ -8844,13 +8841,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_SHOOT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_SHOOT, true);
                         events.RescheduleEvent(EVENT_SHOOT, urand(3000, 4500));
@@ -8858,7 +8857,6 @@ public:
                     }
                     case EVENT_LOB_FIRE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_LOB_FIRE, true);
                         events.RescheduleEvent(EVENT_SHOOT, urand(8000, 20000));
@@ -8866,7 +8864,6 @@ public:
                     }
                     case EVENT_GRENADE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_GRENADE, true);
                         events.RescheduleEvent(EVENT_GRENADE, urand(9000, 15000));
@@ -8874,7 +8871,6 @@ public:
                     }
                     case EVENT_HEAL:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (!me->isInCombat())
                         {
                             events.RescheduleEvent(EVENT_HEAL, 10000);
@@ -8887,7 +8883,6 @@ public:
                     }
                     case EVENT_HOOKED_NET:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_HOOKED_NET);
                         events.RescheduleEvent(EVENT_HOOKED_NET, urand(12500, 13000));
@@ -9254,6 +9249,9 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -9270,7 +9268,6 @@ public:
                     }
                     case EVENT_FROSTBOLT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_FROSTBOLT);
                         events.RescheduleEvent(EVENT_FROSTBOLT, urand(5000, 8000));
@@ -9278,7 +9275,6 @@ public:
                     }
                     case EVENT_FROST_NOVA:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                         {
                             if (victim->IsWithinCombatRange(me, 5.0f))
@@ -9289,7 +9285,6 @@ public:
                     }
                     case EVENT_LAVA_BURST:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_LAVA_BURST);
                         events.RescheduleEvent(EVENT_LAVA_BURST, urand(3500, 4500));
@@ -9297,7 +9292,6 @@ public:
                     }
                     case EVENT_BLIZZARD:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_BLIZZARD);
                         events.RescheduleEvent(EVENT_BLIZZARD, urand(5000, 8500));
@@ -9305,7 +9299,6 @@ public:
                     }
                     case EVENT_RAPID_SHOT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_RAPID_SHOT);
                         events.RescheduleEvent(EVENT_RAPID_SHOT, urand(10000, 15500));
@@ -9313,7 +9306,6 @@ public:
                     }
                     case EVENT_ICE_LANCE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_ICE_LANCE);
                         events.RescheduleEvent(EVENT_ICE_LANCE, urand(2500, 5000));
@@ -9321,7 +9313,6 @@ public:
                     }
                     case EVENT_BACKSTAB:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_BACKSTAB);
                         events.RescheduleEvent(EVENT_BACKSTAB, urand(2500, 5000));
@@ -9329,7 +9320,6 @@ public:
                     }
                     case EVENT_HEMORRHAGE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_HEMORRHAGE);
                         events.RescheduleEvent(EVENT_HEMORRHAGE, urand(4000, 6500));
@@ -12487,13 +12477,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CLEAVE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_CLEAVE);
                         events.RescheduleEvent(EVENT_CLEAVE, urand(4000, 7000));
@@ -12503,7 +12495,6 @@ public:
                     }
                     case EVENT_SHIELD_SLAM:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_SHIELD_SLAM);
                         events.RescheduleEvent(EVENT_SHIELD_SLAM, urand(9000, 15000));
@@ -12511,7 +12502,6 @@ public:
                     }
                     case EVENT_SUNDER_ARMOR:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_SUNDER_ARMOR);
                         events.RescheduleEvent(EVENT_SUNDER_ARMOR, urand(2500, 5000));
@@ -12651,6 +12641,9 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -12687,21 +12680,18 @@ public:
                     }
                     case EVENT_FLAME_BREATH:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_FLAME_BREATH);
                         events.RescheduleEvent(EVENT_FLAME_BREATH, urand(6000, 12000));
                         break;
                     }
                     case EVENT_LAVA_POOL:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(me, SPELL_LAVA_POOL, true);
                         events.RescheduleEvent(EVENT_LAVA_POOL, urand(12000, 18000));
                         break;
                     }
                     case EVENT_SUMMON_WHELPS:
                     {
-                        RESCHEDULE_IF_CASTING;
                         Talk(1);
                         DoCast(SPELL_SUMMON_WHELPS);
                         events.RescheduleEvent(EVENT_SUMMON_WHELPS, urand(45000, 50000));
@@ -12783,6 +12773,9 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -12800,7 +12793,6 @@ public:
                     }
                     case EVENT_SLAM:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_SLAM);
                         events.RescheduleEvent(EVENT_SLAM, urand(3000, 8000));
@@ -12808,7 +12800,6 @@ public:
                     }
                     case EVENT_HEROIC_STRIKE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_HEROIC_STRIKE);
                         events.RescheduleEvent(EVENT_HEROIC_STRIKE, urand(4000, 6000));
@@ -12816,7 +12807,6 @@ public:
                     }
                     case EVENT_ENRAGE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (me->getVictim())
                             DoCast(SPELL_ENRAGE);
                         events.RescheduleEvent(EVENT_ENRAGE,urand(60000, 120000));
@@ -13758,20 +13748,21 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_SHOCKWAVE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_SHOCKWAVE);
                         events.RescheduleEvent(EVENT_SHOCKWAVE, urand(10000, 20000));
                         break;
                     }
                     case EVENT_HARDENED:
                     {
-                        RESCHEDULE_IF_CASTING;
                         me->RemoveAurasDueToSpell(SPELL_VULNERABLE);
                         DoCast(SPELL_HARDENED);
                         events.ScheduleEvent(EVENT_HARDENED, urand(15000, 18500));
@@ -13779,7 +13770,6 @@ public:
                     }
                     case EVENT_VULNERABLE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         me->RemoveAurasDueToSpell(SPELL_HARDENED);
                         DoCast(SPELL_VULNERABLE);
                         events.ScheduleEvent(EVENT_VULNERABLE, urand(20000, 35000));
@@ -13787,7 +13777,6 @@ public:
                     }
                     case EVENT_ROCK_BASH:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_ROCK_BASH);
                         events.RescheduleEvent(EVENT_ROCK_BASH, urand(3000, 9500));
@@ -13863,13 +13852,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_WIND_SHEAR:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_WIND_SHEAR);
                         events.RescheduleEvent(EVENT_WIND_SHEAR, urand(10000, 20000));
@@ -13877,14 +13868,12 @@ public:
                     }
                     case EVENT_LIGHTNING_SHIELD:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_LIGHTNING_SHIELD);
                         events.ScheduleEvent(EVENT_LIGHTNING_SHIELD, urand(20000, 35000));
                         break;
                     }
                     case EVENT_LIGHTNING_BOLT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_LIGHTNING_BOLT);
                         events.RescheduleEvent(EVENT_LIGHTNING_BOLT, urand(3000, 9500));
@@ -13957,20 +13946,21 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_SPLASH:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_SPLASH);
                         events.ScheduleEvent(EVENT_SPLASH, urand(20000, 35000));
                         break;
                     }
                     case EVENT_WATER_BOLT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_WATER_BOLT);
                         events.RescheduleEvent(EVENT_WATER_BOLT, urand(3000, 9500));
@@ -14083,13 +14073,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_FAERIE_FIRE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_FAERIE_FIRE);
                         events.RescheduleEvent(EVENT_FAERIE_FIRE, urand(10000, 15000));
@@ -14097,7 +14089,6 @@ public:
                     }
                     case EVENT_INSECT_SWARM:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_INSECT_SWARM);
                         events.RescheduleEvent(EVENT_INSECT_SWARM, urand(10000, 15000));
@@ -14105,7 +14096,6 @@ public:
                     }
                     case EVENT_STARFIRE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_STARFIRE);
                         events.RescheduleEvent(EVENT_STARFIRE, urand(2000, 6000));
@@ -14113,7 +14103,6 @@ public:
                     }
                     case EVENT_STARFALL:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_STARFALL);
                         events.RescheduleEvent(EVENT_STARFALL, urand(5000, 8500));
                         break;
@@ -14259,13 +14248,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_STEAL_WEAPON:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_STEAL_WEAPON);
                         events.RescheduleEvent(EVENT_STEAL_WEAPON, urand(10000, 15000));
@@ -14273,7 +14264,6 @@ public:
                     }
                     case EVENT_UPPERCUT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_UPPERCUT);
                         events.RescheduleEvent(EVENT_UPPERCUT, urand(10000, 15000));
@@ -14281,7 +14271,6 @@ public:
                     }
                     case EVENT_BRUTAL_FIST:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_BRUTAL_FIST);
                         events.RescheduleEvent(EVENT_BRUTAL_FIST, urand(2000, 6000));
@@ -14289,7 +14278,6 @@ public:
                     }
                     case EVENT_SWEEPING_WHIRLWIND:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_SWEEPING_WHIRLWIND);
                         events.RescheduleEvent(EVENT_SWEEPING_WHIRLWIND, urand(15000, 20000));
                         break;
@@ -14435,13 +14423,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_SHADOWSTEP:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_SHADOWSTEP);
                         events.RescheduleEvent(EVENT_SHADOWSTEP, urand(10000, 15000));
@@ -14449,7 +14439,6 @@ public:
                     }
                     case EVENT_SEDUCTION:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_SEDUCTION);
                         events.RescheduleEvent(EVENT_SEDUCTION, urand(10000, 15000));
@@ -14457,7 +14446,6 @@ public:
                     }
                     case EVENT_HEMORRHAGE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_HEMORRHAGE);
                         events.RescheduleEvent(EVENT_HEMORRHAGE, urand(2000, 6000));
@@ -14465,7 +14453,6 @@ public:
                     }
                     case EVENT_BACKSTAB:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_BACKSTAB);
                         events.RescheduleEvent(EVENT_BACKSTAB, urand(2000, 6000));
@@ -14473,7 +14460,6 @@ public:
                     }
                     case EVENT_DEADLY_THROW:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_DEADLY_THROW);
                         events.RescheduleEvent(EVENT_DEADLY_THROW, urand(15000, 20000));
                         break;
@@ -15264,6 +15250,9 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -15305,7 +15294,6 @@ public:
                     }
                     case EVENT_RUSH_OF_FLAME:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                         {
                             me->CastWithDelay(500, me, SPELL_RUSH_OF_FLAME, true);
@@ -15316,7 +15304,6 @@ public:
                     }
                     case EVENT_FLAME_SHOCK:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_FLAME_SHOCK);
                         events.ScheduleEvent(EVENT_FLAME_SHOCK, urand(3000, 4500));
@@ -15324,7 +15311,6 @@ public:
                     }
                     case EVENT_MAGMA_WAVE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_MAGMA_WAVE);
                         events.ScheduleEvent(EVENT_MAGMA_WAVE, urand(6000, 12000));
@@ -15926,27 +15912,27 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_WHIRLWIND:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_WHIRLWIND);
                         events.RescheduleEvent(EVENT_WHIRLWIND, urand(15000, 24000));
                         break;
                     }
                     case EVENT_OVERHEAD_SMASH:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_OVERHEAD_SMASH);
                         events.RescheduleEvent(EVENT_OVERHEAD_SMASH, 37500);
                         break;
                     }
                     case EVENT_INTIMIDATING_ROAR:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_INTIMIDATING_ROAR);
                         events.RescheduleEvent(EVENT_INTIMIDATING_ROAR, 35000);
@@ -16094,13 +16080,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CHARGE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 100.0f, true))
                         {
                             DoCast(target, SPELL_CHARGE);
@@ -16111,7 +16099,6 @@ public:
                     }
                     case EVENT_UPPERCUT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_UPPERCUT);
                         events.RescheduleEvent(EVENT_CHARGE, urand(18000, 25000));
@@ -16270,13 +16257,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CHARGE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 100.0f, true))
                         {
                             DoCast(target, SPELL_CHARGE);
@@ -16287,7 +16276,6 @@ public:
                     }
                     case EVENT_UPPERCUT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_UPPERCUT);
                         events.RescheduleEvent(EVENT_CHARGE, urand(18000, 25000));
@@ -16456,6 +16444,9 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -16468,7 +16459,6 @@ public:
                     }
                     case EVENT_REPULSIVE_KICK:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
                         {
                             DoCast(target, SPELL_REPULSIVE_KICK);
@@ -16479,14 +16469,12 @@ public:
                     }
                     case EVENT_POISON_CLOUD:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_POISON_CLOUD);
                         events.RescheduleEvent(EVENT_POISON_CLOUD, 12000);
                         break;
                     }
                     case EVENT_BELCH:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_BELCH);
                         events.RescheduleEvent(EVENT_BELCH, urand(8000, 12000));
                         break;
@@ -16834,6 +16822,9 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -16850,7 +16841,6 @@ public:
                     }
                     case EVENT_UPPERCUT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
                             DoCast(target, SPELL_UPPERCUT);
                         events.RescheduleEvent(EVENT_UPPERCUT, urand(20000, 25000));
@@ -16858,7 +16848,6 @@ public:
                     }
                     case EVENT_UNDYING_FRENZY:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_UNDYING_FRENZY);
                         events.RescheduleEvent(EVENT_UNDYING_FRENZY, urand(8000, 12500));
@@ -17187,6 +17176,9 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -17234,14 +17226,12 @@ public:
                     }
                     case EVENT_FIREBALL:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCastVictim(SPELL_FIREBALL);
                         events.RescheduleEvent(EVENT_FIREBALL, urand(4000, 7000));
                         break;
                     }
                     case EVENT_AOE_FIREBALL:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(me, SPELL_AOE_FIREBALL, true);
                         events.RescheduleEvent(EVENT_AOE_FIREBALL, 1500);
                         break;
@@ -17376,13 +17366,15 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_AOE_FIREBALL:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(me, SPELL_AOE_FIREBALL, true);
                         events.RescheduleEvent(EVENT_AOE_FIREBALL, 1000);
                         break;
@@ -18010,20 +18002,21 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_MASSIVE_SHOCKWAVE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_MASSIVE_SHOCKWAVE);
                         events.RescheduleEvent(EVENT_MASSIVE_SHOCKWAVE, urand(8000, 16000));
                         break;
                     }
                     case EVENT_GROUND_POUND:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
                             DoCast(target, SPELL_GROUND_POUND, true);
                         events.RescheduleEvent(EVENT_GROUND_POUND, urand(10000, 18000));
@@ -18310,6 +18303,9 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -18326,28 +18322,24 @@ public:
                     }
                     case EVENT_MOCKING_BLOW:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCastVictim(SPELL_MOCKING_BLOW);
                         events.RescheduleEvent(EVENT_MOCKING_BLOW, urand(3000, 10000));
                         break;
                     }
                     case EVENT_SUNDER_ARMOR:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCastVictim(SPELL_SUNDER_ARMOR);
                         events.RescheduleEvent(EVENT_SUNDER_ARMOR, 5000);
                         break;
                     }
                     case EVENT_SHOCKWAVE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_SHOCKWAVE);
                         events.RescheduleEvent(EVENT_SHOCKWAVE, urand(10000, 20000));
                         break;
                     }
                     case EVENT_GREATER_HEAL:
                     {
-                        RESCHEDULE_IF_CASTING;
                         std::list<Unit*> targets;
                         Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
                         Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
@@ -19041,6 +19033,9 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -19162,14 +19157,12 @@ public:
                     }
                     case EVENT_FEL_RAGAMANIA:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_FEL_RAGAMANIA);
                         events.RescheduleEvent(EVENT_FEL_RAGAMANIA, urand(8000, 18000));
                         break;
                     }
                     case EVENT_FURY:
                     {
-                        RESCHEDULE_IF_CASTING;
                         Talk(9);
                         DoCast(SPELL_FURY);
                         events.CancelEvent(EVENT_FURY);
@@ -19177,7 +19170,6 @@ public:
                     }
                     case EVENT_MORGHOR_SLAM:
                     {
-                        RESCHEDULE_IF_CASTING;
                         Talk(8);
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                         {
@@ -19197,7 +19189,6 @@ public:
                     }
                     case EVENT_SPINEBUSTER:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_SPINEBUSTER);
                         events.CancelEvent(EVENT_SPINEBUSTER);

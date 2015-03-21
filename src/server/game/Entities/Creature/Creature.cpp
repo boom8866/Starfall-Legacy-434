@@ -1633,7 +1633,7 @@ bool Creature::IsInvisibleDueToDespawn() const
     if (Unit::IsInvisibleDueToDespawn())
         return true;
 
-    if (isAlive() || m_corpseRemoveTime > time(NULL))
+    if (isAlive() || isDying() || m_corpseRemoveTime > time(NULL))
         return false;
 
     return true;

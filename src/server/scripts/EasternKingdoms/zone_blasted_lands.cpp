@@ -76,8 +76,6 @@ enum defiledEvents
     EVENT_CAST_SHADOW_BOLT_VOLLEY_2
 };
 
-#define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
-
 /*######
 ## Deathly Usher
 ######*/
@@ -201,14 +199,12 @@ public:
                 {
                     case EVENT_DEMON_HUNTER_RESOLVE:
                     {
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_DEMON_HUNTER_RESOLVE);
                         events.ScheduleEvent(EVENT_CAST_SHADOW_BOLT_VOLLEY, 6000);
                         break;
                     }
                     case EVENT_CAST_SHADOW_BOLT_VOLLEY:
                     {
-                        RESCHEDULE_IF_CASTING
                         DoCastVictim(SPELL_SHADOW_BOLT_VOLLEY);
                         events.ScheduleEvent(EVENT_CAST_SHADOW_BOLT_VOLLEY, 6000);
                         break;
@@ -265,59 +261,33 @@ public:
                 switch (eventId)
                 {
                     case EVENT_CAST_DECIMATE:
-                    {
-                        if (UpdateVictim())
-                        {
-                            RESCHEDULE_IF_CASTING
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
-                                DoCast(target, SPELL_DECIMATE, true);
-                            events.ScheduleEvent(EVENT_CAST_DECIMATE, urand(6000, 12000));
-                        }
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
+                            DoCast(target, SPELL_DECIMATE, true);
+                        events.ScheduleEvent(EVENT_CAST_DECIMATE, urand(6000, 12000));
                         break;
-                    }
                     case EVENT_CAST_FLAMES_OF_CHAOS:
-                    {
-                        if (UpdateVictim())
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
                         {
-                            RESCHEDULE_IF_CASTING
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
-                            {
-                                DoCast(target, SPELL_FLAMES_OF_CHAOS, true);
-                                if (Creature* thalipedes = me->FindNearestCreature(NPC_LORAMUS_THALIPEDES, 50.0f, true))
-                                {
-                                    if (Player* player = thalipedes->FindNearestPlayer(200.0f, true))
+                            DoCast(target, SPELL_FLAMES_OF_CHAOS, true);
+                            if (Creature* thalipedes = me->FindNearestCreature(NPC_LORAMUS_THALIPEDES, 50.0f, true))
+                                if (Player* player = thalipedes->FindNearestPlayer(200.0f, true))
+                                    if (player->HasAura(SPELL_FLAMES_OF_CHAOS_TRIGGER))
                                     {
-                                        if (player->HasAura(SPELL_FLAMES_OF_CHAOS_TRIGGER))
-                                        {
-                                            thalipedes->CastWithDelay(1500, player, SPELL_DEMON_HUNTER_RESOLVE_GRIP, false);
-                                            thalipedes->AI()->TalkWithDelay(1500, 3);
-                                        }
+                                        thalipedes->CastWithDelay(1500, player, SPELL_DEMON_HUNTER_RESOLVE_GRIP, false);
+                                        thalipedes->AI()->TalkWithDelay(1500, 3);
                                     }
-                                }
-                            }
-                            events.ScheduleEvent(EVENT_CAST_FLAMES_OF_CHAOS, urand(25500, 35000));
                         }
+                        events.ScheduleEvent(EVENT_CAST_FLAMES_OF_CHAOS, urand(25500, 35000));
                         break;
-                    }
                     case EVENT_CAST_SUMMON_MINION:
-                    {
-                        if (UpdateVictim())
-                        {
-                            RESCHEDULE_IF_CASTING
-                            DoCast(SPELL_SUMMON_MINION);
-                            events.ScheduleEvent(EVENT_CAST_SUMMON_MINION, urand(15500, 45000));
-                        }
+                        DoCast(SPELL_SUMMON_MINION);
+                        events.ScheduleEvent(EVENT_CAST_SUMMON_MINION, urand(15500, 45000));
                         break;
-                    }
                     case EVENT_CAST_STRONG_CLEAVE:
-                    {
-                        RESCHEDULE_IF_CASTING
                         DoCastVictim(SPELL_STRONG_CLEAVE);
                         events.ScheduleEvent(EVENT_CAST_STRONG_CLEAVE, 5000);
                         break;
-                    }
                     case EVENT_SWITCH_PHASE:
-                    {
                         if (me->GetHealthPct() <= 25)
                         {
                             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -335,21 +305,15 @@ public:
                         else
                             events.ScheduleEvent(EVENT_SWITCH_PHASE, 2500);
                         break;
-                    }
                     case EVENT_DEFILER_DIE:
-                    {
-                        if (!UpdateVictim())
-                        {
-                            me->SummonCreature(NPC_LORAMUS_THE_DEFILED, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
-                            me->Kill(me, false);
-                            me->DespawnOrUnsummon(2000);
-                            if (Player* player = me->FindNearestPlayer(100.0f, true))
-                                player->KilledMonsterCredit(NPC_RAZELIKH_THE_DEFILER);
-                            if (Creature* thalipedes = me->FindNearestCreature(NPC_LORAMUS_THALIPEDES, 100.0f, true))
-                                thalipedes->DespawnOrUnsummon(1);
-                        }
+                        me->SummonCreature(NPC_LORAMUS_THE_DEFILED, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                        me->Kill(me, false);
+                        me->DespawnOrUnsummon(2000);
+                        if (Player* player = me->FindNearestPlayer(100.0f, true))
+                            player->KilledMonsterCredit(NPC_RAZELIKH_THE_DEFILER);
+                        if (Creature* thalipedes = me->FindNearestCreature(NPC_LORAMUS_THALIPEDES, 100.0f, true))
+                            thalipedes->DespawnOrUnsummon(1);
                         break;
-                    }
                     default:
                         break;
                 }
@@ -434,7 +398,6 @@ public:
                     {
                         if (UpdateVictim())
                         {
-                            RESCHEDULE_IF_CASTING
                             DoCastVictim(SPELL_SHADOW_BOLT_VOLLEY);
                             events.ScheduleEvent(EVENT_CAST_SHADOW_BOLT_VOLLEY_2, 6000);
                         }
