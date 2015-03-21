@@ -22162,6 +22162,8 @@ void Player::PetSpellInitialize()
     }
 
     GetSession()->SendPacket(&data);
+    if (pet->GetCharmInfo())
+        pet->GetCharmInfo()->InitPetActionBar();
 }
 
 void Player::PossessSpellInitialize()

@@ -170,12 +170,6 @@ class ScriptRegistry
     if (!V) \
         return R;
 
-struct TSpellSummary
-{
-    uint8 Targets;                                          // set of enum SelectTarget
-    uint8 Effects;                                          // set of enum SelectEffect
-} *SpellSummary;
-
 ScriptMgr::ScriptMgr()
     : _scriptCount(0), _scheduledScripts(0)
 {
@@ -234,13 +228,6 @@ void ScriptMgr::Unload()
     SCR_CLEAR(UnitScript);
 
     #undef SCR_CLEAR
-
-    for (ExampleScriptContainer::iterator itr = ExampleScripts.begin(); itr != ExampleScripts.end(); ++itr)
-        delete *itr;
-    ExampleScripts.clear();
-
-    delete[] SpellSummary;
-    delete[] UnitAI::AISpellInfo;
 }
 
 void ScriptMgr::LoadDatabase()
@@ -248,10 +235,14 @@ void ScriptMgr::LoadDatabase()
     sScriptSystemMgr->LoadScriptWaypoints();
 }
 
+struct TSpellSummary
+{
+    uint8 Targets;                                          // set of enum SelectTarget
+    uint8 Effects;                                          // set of enum SelectEffect
+} *SpellSummary;
+
 void ScriptMgr::FillSpellSummary()
 {
-    UnitAI::FillAISpellInfo();
-
     SpellSummary = new TSpellSummary[sSpellMgr->GetSpellInfoStoreSize()];
 
     SpellInfo const* pTempSpell;
