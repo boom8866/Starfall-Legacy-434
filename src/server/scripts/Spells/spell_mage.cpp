@@ -855,7 +855,6 @@ class spell_mage_ignite : public SpellScriptLoader
                     int32 amount = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), pct) / igniteDot->GetMaxTicks());
                     if (Unit* procTarget = eventInfo.GetProcTarget())
                     {
-                        amount += procTarget->GetRemainingPeriodicAmount(eventInfo.GetActor()->GetGUID(), SPELL_MAGE_IGNITE, SPELL_AURA_PERIODIC_DAMAGE);
                         if (Unit* target = GetTarget())
                             target->CastCustomSpell(SPELL_MAGE_IGNITE, SPELLVALUE_BASE_POINT0, amount, eventInfo.GetProcTarget(), true, NULL, aurEff);
                     }
