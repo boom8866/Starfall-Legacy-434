@@ -821,7 +821,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         if (m_caster->GetCharmerOrOwner())
                         {
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
-                            damage += int32((spellpower * 0.70f));
+                            damage += int32((spellpower * 1.0f));
                             // Glyph of Felguard
                             if (m_spellInfo->Id == 30213 && m_caster->GetCharmerOrOwner()->HasAura(56246))
                                 damage += damage * 0.05f;

@@ -37,6 +37,7 @@ enum MageSpells
     SPELL_MAGE_FROST_WARDING_TRIGGERED           = 57776,
     SPELL_MAGE_INCANTERS_ABSORBTION_KNOCKBACK    = 86261,
     SPELL_MAGE_INCANTERS_ABSORBTION_R1           = 44394,
+    SPELL_MAGE_INCANTERS_ABSORBTION_R2           = 44395,
     SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED    = 44413,
     SPELL_MAGE_IGNITE                            = 12654,
     SPELL_MAGE_MASTER_OF_ELEMENTS_ENERGIZE       = 29077,
@@ -86,6 +87,9 @@ enum MageSpells
     SPELL_MAGE_REM_EARLY_FROST_R2                = 83239,
     SPELL_MAGE_INVISIBILITY_FADING               = 66,
     SPELL_MAGE_INVISIBILITY_INVISIBLE            = 32612,
+    SPELL_MAGE_MOLTEN_SHIELDS                    = 11094,
+    SPELL_MAGE_BLAZING_SPEED_R1                  = 31641,
+    SPELL_MAGE_BLAZING_SPEED_R2                  = 31642
 };
 
 enum MageIcons
@@ -884,33 +888,43 @@ class spell_mage_mage_ward : public SpellScriptLoader
 
            void HandleAbsorb(AuraEffect* /*aurEff*/, DamageInfo & /*dmgInfo*/, uint32 & absorbAmount)
            {
-               if (AuraEffect* aurEff = GetTarget()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, ICON_MAGE_INCANTER_S_ABSORPTION, EFFECT_0))
+               if (Unit* target = GetTarget())
                {
-                   int32 bp = CalculatePct(absorbAmount, aurEff->GetAmount());
-                   if (!GetTarget()->HasAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED))
-                        GetTarget()->CastCustomSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true);
-                   else
+                   if (AuraEffect* aurEff = GetTarget()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, ICON_MAGE_INCANTER_S_ABSORPTION, EFFECT_0))
                    {
-                       // Get old effect and increase
-                       if (AuraEffect* absorption = GetTarget()->GetAuraEffect(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, 0))
+                       int32 bp = CalculatePct(absorbAmount, aurEff->GetAmount());
+                       if (!target->HasAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED))
+                           target->CastCustomSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true);
+                       else
                        {
-                           bp += absorption->GetAmount();
-                           absorption->SetAmount(bp);
-                       }
+                           // Get old effect and increase
+                           if (AuraEffect* absorption = target->GetAuraEffect(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, 0))
+                           {
+                               bp += absorption->GetAmount();
+                               absorption->SetAmount(bp);
+                           }
 
-                       // Refresh duration
-                       if (Aura* aur = GetTarget()->GetAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, GetTarget()->GetGUID()))
-                           aur->RefreshDuration();
+                           // Refresh duration
+                           if (Aura* aur = GetTarget()->GetAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, target->GetGUID()))
+                               aur->RefreshDuration();
+                       }
                    }
                }
            }
 
            void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
            {
-               if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
+               if (Unit* target = GetTarget())
                {
-                   if (GetTarget() && GetTarget()->HasAura(SPELL_MAGE_INCANTERS_ABSORBTION_R1) || GetTarget()->HasAura(44395))
-                        GetTarget()->CastSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_KNOCKBACK, true);
+                   if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
+                   {
+                       if (target->HasAura(SPELL_MAGE_INCANTERS_ABSORBTION_R1) || target->HasAura(SPELL_MAGE_INCANTERS_ABSORBTION_R2))
+                           target->CastSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_KNOCKBACK, true);
+
+                       if (target->HasAura(SPELL_MAGE_MOLTEN_SHIELDS))
+                           if (target->HasAura(SPELL_MAGE_BLAZING_SPEED_R1) || target->HasAura(SPELL_MAGE_BLAZING_SPEED_R2))
+                                target->CastSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_KNOCKBACK, true);
+                   }
                }
            }
 
@@ -1948,10 +1962,14 @@ public:
         {
             if (Unit* caster = GetCaster())
             {
-                if (DynamicObject* flamestrike = caster->GetDynObject(SPELL_FLAMESTRIKE))
+                if (WorldLocation const* const position = GetExplTargetDest())
                 {
-                    if (flamestrike->GetCaster() && flamestrike->GetCaster() == caster)
-                        flamestrike->Remove();
+                    if (DynamicObject* flamestrike = caster->GetDynObject(SPELL_FLAMESTRIKE))
+                    {
+                        if (flamestrike->GetDistance2d(position->GetPositionX(), position->GetPositionY()) < 10.0f)
+                            if (flamestrike->GetCaster() && flamestrike->GetCaster() == caster)
+                                flamestrike->Remove();
+                    }
                 }
             }
         }
