@@ -8344,6 +8344,32 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     *handled = true;
                     return false;
                 }
+                // Will of the Necropolis
+                case 52284:
+                case 81163:
+                case 81164:
+                {
+                    *handled = true;
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+                    if (ToPlayer()->HasSpellCooldown(81162))
+                        return false;
+                    if (ToPlayer()->GetHealth() > (ToPlayer()->GetMaxHealth() * 0.30f))
+                        return false;
+
+                    // Check correct talent rank and apply right reduction %
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DEATHKNIGHT, 1762, 0))
+                    {
+                        int32 bp0 = aurEff->GetAmount();
+                        CastCustomSpell(this, 81162, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                        ToPlayer()->AddSpellCooldown(81162, 0, time(NULL) + 45);
+                    }
+
+                    // Reset Rune Tap cooldown
+                    ToPlayer()->RemoveSpellCooldown(48982, true);
+                    ToPlayer()->SendClearCooldown(48982, this);
+                    return true;
+                }
             }
             return false;
         }
@@ -9822,12 +9848,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             // check if we're procced by Claw, Bite or Smack (need to use the spell icon ID to detect it)
             if (!(procSpell->SpellIconID == 262 || procSpell->SpellIconID == 1680 || procSpell->SpellIconID == 473))
-                return false;
-            break;
-        }
-        case 81162: // Will of the necropolis - proc only if 30% health
-        {
-            if(GetHealth() - damage > CountPctFromMaxHealth(30))
                 return false;
             break;
         }
