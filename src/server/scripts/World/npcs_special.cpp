@@ -2212,6 +2212,11 @@ class npc_shadowfiend: public CreatureScript
 public:
     npc_shadowfiend() : CreatureScript("npc_shadowfiend") {}
 
+    enum spellId
+    {
+        SPELL_SHADOWFIEND_SHADOWCRAWL   = 63619
+    };
+
     struct npc_shadowfiendAI: public ScriptedAI
     {
         npc_shadowfiendAI(Creature* creature) : ScriptedAI(creature) {}
@@ -2229,6 +2234,14 @@ public:
                     }
                 }
             }
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            me->SetBaseAttackTime(BASE_ATTACK, 1250);
+            if (SpellInfo const* shadowCrawl = sSpellMgr->GetSpellInfo(SPELL_SHADOWFIEND_SHADOWCRAWL))
+                if (me->GetCharmInfo())
+                    me->GetCharmInfo()->SetSpellAutocast(shadowCrawl, 1);
         }
 
         void UpdateAI(uint32 /*diff*/)
