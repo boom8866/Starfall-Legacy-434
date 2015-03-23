@@ -297,7 +297,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
         }
 
         // some kind of WPE protection
-        if (!_player->CanInteractWithQuestGiver(object))
+        if (_player && object && !_player->CanInteractWithQuestGiver(object))
             return;
     }
 
