@@ -89,7 +89,8 @@ enum MageSpells
     SPELL_MAGE_INVISIBILITY_INVISIBLE            = 32612,
     SPELL_MAGE_MOLTEN_SHIELDS                    = 11094,
     SPELL_MAGE_BLAZING_SPEED_R1                  = 31641,
-    SPELL_MAGE_BLAZING_SPEED_R2                  = 31642
+    SPELL_MAGE_BLAZING_SPEED_R2                  = 31642,
+    SPELL_MAGE_BLAZING_SPEED_TRIGGERED           = 31643
 };
 
 enum MageIcons
@@ -922,7 +923,7 @@ class spell_mage_mage_ward : public SpellScriptLoader
 
                        if (target->HasAura(SPELL_MAGE_MOLTEN_SHIELDS))
                            if (target->HasAura(SPELL_MAGE_BLAZING_SPEED_R1) || target->HasAura(SPELL_MAGE_BLAZING_SPEED_R2))
-                                target->CastSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_KNOCKBACK, true);
+                                target->CastSpell(target, SPELL_MAGE_BLAZING_SPEED_TRIGGERED, true);
                    }
                }
            }
