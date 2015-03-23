@@ -1166,14 +1166,16 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 {
                     case 83381: // Kill Command
                     {
-                        if (!m_caster->GetOwner())
-                            return;
-
                         Unit* owner = m_caster->GetOwner();
                         if (!owner)
                             return;
 
-                        bool isCrit = m_caster->isSpellCrit(unitTarget, m_spellInfo, m_spellInfo->GetSchoolMask());
+                        if (owner->HasAura(94006))
+                            owner->RemoveAurasDueToSpell(94006);
+                        if (owner->HasAura(94007))
+                            owner->RemoveAurasDueToSpell(94007);
+
+                        bool isCrit = owner->isSpellCrit(unitTarget, m_spellInfo, m_spellInfo->GetSchoolMask());
                         if (isCrit)
                             ++owner->m_kStreakCount;
                         else

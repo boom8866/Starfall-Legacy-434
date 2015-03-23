@@ -4326,6 +4326,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->RecoveryTime = 0;
                 spellInfo->StartRecoveryTime = 0;
                 break;
+            case 34026: // Kill Command
+                spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MELEE;
+                break;
             // SPELLS QUESTS
             case 95869: // Wyvern Ride Aura [INTERNAL]
                 spellInfo->Effects[EFFECT_1].Effect = 0;
