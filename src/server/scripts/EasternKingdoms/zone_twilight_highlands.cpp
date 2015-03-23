@@ -1913,7 +1913,6 @@ public:
                             }
                             if (me->GetDistance(fire) < 8.0f)
                             {
-                                me->GetMotionMaster()->Clear();
                                 me->GetMotionMaster()->MovementExpired(false);
                                 fire->CastSpell(fire, SPELL_DOUSE_FIRE, true);
                                 me->CastSpell(fire, SPELL_DOUSE_FIRE, true);
@@ -2580,7 +2579,6 @@ public:
                             else
                             {
                                 me->GetMotionMaster()->MovementExpired(false);
-                                me->GetMotionMaster()->Clear();
                                 me->GetMotionMaster()->MoveJump(-3971.09f, -5538.34f, 236.33f, 20.0f, 20.0f, 30);
                                 me->DespawnOrUnsummon(2500);
                             }
@@ -8257,7 +8255,7 @@ public:
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ += 30.0f;
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                         events.CancelEvent(EVENT_MOVE_TAKEOFF);
                         break;
@@ -8892,7 +8890,6 @@ public:
                     {
                         if (GameObject* gate = me->FindNearestGameObject(GO_ENTRY_PHASED_GATE, 80.0f))
                         {
-                            me->GetMotionMaster()->Clear();
                             me->GetMotionMaster()->MovementExpired(false);
                             me->GetMotionMaster()->MovePoint(POINT_GATE, -3972.73f, -3991.29f, 175.08f);
                             events.CancelEvent(EVENT_SEARCH_FOR_GATE);
@@ -9950,7 +9947,7 @@ public:
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ += 21.5f;
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                         events.CancelEvent(EVENT_TAKEOFF);
                         break;
@@ -10377,7 +10374,7 @@ public:
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ += 20.5f;
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                         me->RemoveAurasDueToSpell(SPELL_DEATHWING_FWALL);
                         // Move Camera Final
@@ -11238,7 +11235,7 @@ public:
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ += 20.5f;
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
 
                         std::list<Creature*> creatures;
@@ -11572,7 +11569,7 @@ public:
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ += 35.5f;
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                         me->RemoveAurasDueToSpell(SPELL_DEATHWING_FWALL);
                         events.CancelEvent(EVENT_TAKEOFF);
@@ -11988,7 +11985,7 @@ public:
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ += 10.5f;
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                         std::list<Unit*> targets;
                         Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
@@ -14731,7 +14728,7 @@ public:
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ += 20.5f;
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                         events.CancelEvent(EVENT_TAKEOFF);
                         break;
@@ -19458,7 +19455,6 @@ public:
             if (evadeForced == true)
             {
                 me->SetWalk(true);
-                me->GetMotionMaster()->Clear();
                 me->GetMotionMaster()->MovementExpired(false);
                 me->GetMotionMaster()->MoveTargetedHome();
                 me->SetOwnerGUID(0);

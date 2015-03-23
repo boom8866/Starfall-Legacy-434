@@ -11804,7 +11804,7 @@ public:
                     {
                         events.Reset();
                         me->CastSpell(me, SPELL_EXPLODE_AND_BURN);
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveJump(me->GetPositionX()-2, me->GetPositionY()+10, me->GetPositionZ()-80, 16.5f, 16.5f, POINT_CRASHED);
                         me->DespawnOrUnsummon(10000);
                     }
@@ -11843,7 +11843,7 @@ public:
                         events.CancelEvent(EVENT_FOLLOW_INVOKER);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
-                            me->GetMotionMaster()->Clear();
+                            me->GetMotionMaster()->MovementExpired(false);
                             me->GetMotionMaster()->MoveFollow(playerOwner, 20.0f, urand(0, 45));
                             events.ScheduleEvent(EVENT_RESTORE_SPEED, 2000);
                         }
@@ -12391,7 +12391,7 @@ public:
                     if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         TalkWithDelay(1000, 13, playerOwner->GetGUID());
                     me->SetWalk(false);
-                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MovementExpired(false);
                     me->GetMotionMaster()->MovePoint(POINT_AWAY, -10602.01f, 977.27f, 34.74f);
                     me->DespawnOrUnsummon(10000);
                     break;
@@ -12568,7 +12568,7 @@ public:
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ += 30.0f;
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                         me->SetCanFly(true);
                         me->SetDisableGravity(true);
@@ -12710,7 +12710,7 @@ public:
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ += 30.0f;
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                         me->SetCanFly(true);
                         me->SetDisableGravity(true);
@@ -13822,7 +13822,7 @@ public:
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ += 30.0f;
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                         me->SetCanFly(true);
                         me->SetDisableGravity(true);
@@ -14698,7 +14698,7 @@ public:
                 case 17:
                 {
                     SetEscortPaused(true);
-                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MovementExpired(false);
                     me->GetMotionMaster()->MoveJump(-8996.05f, 27.22f, -20.97f, 12.5f, 12.5f, POINT_JUMP_1);
                     events.ScheduleEvent(EVENT_JUMP_2, 4000);
                     break;
@@ -15808,7 +15808,7 @@ public:
                     case EVENT_ATTACK:
                     {
                         events.RescheduleEvent(EVENT_ATTACK, urand(4500, 12000));
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
                             std::list<Unit*> targets;
@@ -15828,7 +15828,7 @@ public:
                     case EVENT_FLEE:
                     {
                         events.RescheduleEvent(EVENT_FLEE, urand(8500, 18500));
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
                             std::list<Unit*> targets;
@@ -17283,7 +17283,7 @@ public:
                         events.CancelEvent(EVENT_CAST_BEAM);
                         events.CancelEvent(EVENT_INIT_COFFER);
                         me->CastStop();
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         DoCastAOE(SPELL_ENERGY_BEAM);
                         events.ScheduleEvent(EVENT_KILL_ALL, 5000);
                         break;
