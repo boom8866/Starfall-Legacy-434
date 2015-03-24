@@ -13321,6 +13321,126 @@ public:
     }
 };
 
+class spell_simulate_alliance_presence : public SpellScriptLoader
+{
+public:
+    spell_simulate_alliance_presence() : SpellScriptLoader("spell_simulate_alliance_presence")
+    {
+    }
+
+    enum goId
+    {
+        GO_TRIGGER  = 208828
+    };
+
+    class spell_simulate_alliance_presence_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_simulate_alliance_presence_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (GameObject* trigger = GetCaster()->FindNearestGameObject(GO_TRIGGER, 15.0f))
+                return SPELL_CAST_OK;
+
+            return SPELL_FAILED_BAD_TARGETS;
+        }
+
+        void HandleTalk()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                talkNumber = urand(0, 7);
+                switch (talkNumber)
+                {
+                    case 0:
+                        caster->MonsterSay("Tremble in fear you mighty members of the Horde, the Alliance is here!", 0);
+                        break;
+                    case 1:
+                        caster->MonsterSay("Our loss in Tol Barad will be avenged! I will try to bring death to this grand city. Cower as I try to remember a battle cry!", 0);
+                        break;
+                    case 2:
+                        caster->MonsterSay("I'm so angry that we lost Wintergrasp, again! I will try to kill your leader, the all powerful, Sylvanas, instead.", 0);
+                        break;
+                    case 3:
+                        caster->MonsterSay("Hey, look, there are people here. Nothing at all like that tree city that I, a night elf, live in.", 0);
+                        break;
+                    case 4:
+                        caster->MonsterSay("Where am I? I crashed with the Exodar and now stumbled into this imposing city...", 0);
+                        break;
+                    case 5:
+                        caster->MonsterSay("This city is so big, to me, a tiny, pathetic gnome.", 0);
+                        break;
+                    case 6:
+                        caster->MonsterSay("I am drunk, like many of my fellow dwarves. I've dug a tunnel and wound up here. Who wants to drink?", 0);
+                        break;
+                    case 7:
+                        caster->MonsterSay("Yoo hoo! I am here to slay Sylvanas!", 0);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_simulate_alliance_presence_SpellScript::CheckCast);
+            AfterCast += SpellCastFn(spell_simulate_alliance_presence_SpellScript::HandleTalk);
+        }
+
+    protected:
+        uint8 talkNumber;
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_simulate_alliance_presence_SpellScript();
+    }
+};
+
+class spell_throw_frog : public SpellScriptLoader
+{
+public:
+    spell_throw_frog() : SpellScriptLoader("spell_throw_frog")
+    {
+    }
+
+    enum npcId
+    {
+        NPC_MOAT_MONSTER    = 53590
+    };
+
+    class spell_throw_frog_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_throw_frog_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Creature* moatMonster = GetCaster()->FindNearestCreature(NPC_MOAT_MONSTER, 30.0f))
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->ToPlayer()->KilledMonsterCredit(53592);
+                    return SPELL_CAST_OK;
+                }
+            }
+
+            return SPELL_FAILED_BAD_TARGETS;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_throw_frog_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_throw_frog_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -13581,4 +13701,6 @@ void AddSC_generic_spell_scripts()
     new spell_generic_swift_magic_broom();
     new spell_gen_mixology_bonus();
     new spell_razgar_fillet_knife();
+    new spell_simulate_alliance_presence();
+    new spell_throw_frog();
 }
