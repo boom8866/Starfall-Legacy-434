@@ -1,0 +1,1 @@
+UPDATE `smart_scripts` SET `action_param1`=5000 WHERE `event_type` = '20' and `action_type` = '41';
