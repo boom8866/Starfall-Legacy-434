@@ -1541,6 +1541,41 @@ public:
     }
 };
 
+class spell_warl_incinerate : public SpellScriptLoader
+{
+public:
+    spell_warl_incinerate() : SpellScriptLoader("spell_warl_incinerate")
+    {
+    }
+
+    class spell_warl_incinerate_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_incinerate_SpellScript);
+
+        void RecalculateDamage()
+        {
+            if (!GetCaster() || !GetHitUnit())
+                return;
+
+            if (GetHitUnit()->HasAura(SPELL_WARLOCK_IMMOLATE, GetCaster()->GetGUID()))
+            {
+                int32 newDamage = GetHitDamage() + int32(GetHitDamage() / 6);
+                SetHitDamage(newDamage);
+            }
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_warl_incinerate_SpellScript::RecalculateDamage);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_incinerate_SpellScript();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_bane_of_doom();
@@ -1573,4 +1608,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_soul_link_trigger();
     new spell_warl_hellfire();
     new spell_warl_jinx_filter();
+    new spell_warl_incinerate();
 }
