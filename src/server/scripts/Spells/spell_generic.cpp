@@ -13283,6 +13283,44 @@ public:
     }
 };
 
+class spell_razgar_fillet_knife : public SpellScriptLoader
+{
+public:
+    spell_razgar_fillet_knife() : SpellScriptLoader("spell_razgar_fillet_knife")
+    {
+    }
+
+    enum npcId
+    {
+        NPC_DROWNED_THUNDER_LIZARD    = 39464
+    };
+
+    class spell_razgar_fillet_knife_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_razgar_fillet_knife_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* target = GetExplTargetUnit())
+            {
+                if (target->GetTypeId() == TYPEID_UNIT && target->GetEntry() == NPC_DROWNED_THUNDER_LIZARD)
+                    return SPELL_CAST_OK;
+            }
+            return SPELL_FAILED_BAD_TARGETS;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_razgar_fillet_knife_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_razgar_fillet_knife_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -13542,4 +13580,5 @@ void AddSC_generic_spell_scripts()
     new spell_eng_invisibility_field();
     new spell_generic_swift_magic_broom();
     new spell_gen_mixology_bonus();
+    new spell_razgar_fillet_knife();
 }
