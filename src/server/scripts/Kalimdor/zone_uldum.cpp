@@ -431,7 +431,8 @@ public:
         EVENT_AMBUSHER_CAMERA,
         EVENT_TELEPORT_CAMERA,
         EVENT_REMOVE_PASSENGERS,
-        EVENT_CHECK_OWNER
+        EVENT_CHECK_OWNER,
+        EVENT_FADE_SECOND
     };
 
     enum npcId
@@ -605,8 +606,14 @@ public:
                         me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveJump(-8950.93f, -1646.22f, 98.93f, 30.0f, 30.0f, POINT_AMBUSHER);
                         events.ScheduleEvent(EVENT_TELEPORT_CAMERA, 10000);
+                        events.ScheduleEvent(EVENT_FADE_SECOND, 8000);
+                        break;
+                    }
+                    case EVENT_FADE_SECOND:
+                    {
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
-                            playerOwner->CastWithDelay(8000, playerOwner, SPELL_FADE_TO_BLACK, true);
+                            playerOwner->CastSpell(playerOwner, SPELL_FADE_TO_BLACK, true);
+                        events.CancelEvent(EVENT_FADE_SECOND);
                         break;
                     }
                     case EVENT_TELEPORT_CAMERA:
