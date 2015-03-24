@@ -24641,9 +24641,24 @@ void Player::SendInitialPacketsAfterAddToMap()
         }
         case CLASS_ROGUE:
         {
-            // Vigor
-            SetMaxPower(POWER_ENERGY, HasAura(21975) ? 110 : 100);
+            // Vigor & Assassin's Resolve
+            if (HasAura(21975) && !HasAura(84601))
+                SetMaxPower(POWER_ENERGY, 110);
+            if (HasAura(21975) && HasAura(84601))
+                SetMaxPower(POWER_ENERGY, 130);
+            if (HasAura(84601) && !HasAura(84601))
+                SetMaxPower(POWER_ENERGY, 120);
             break;
+        }
+        case CLASS_HUNTER:
+        {
+            // Kindred Spirits
+            if (HasAura(56314))
+                SetMaxPower(POWER_FOCUS, 105);
+            else if (HasAura(56315))
+                SetMaxPower(POWER_FOCUS, 110);
+            else
+                SetMaxPower(POWER_FOCUS, 100);
         }
     }
 

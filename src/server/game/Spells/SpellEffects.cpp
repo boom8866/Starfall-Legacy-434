@@ -816,18 +816,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
-                    case 30213: // Legion Strike
-                    {
-                        if (m_caster->GetCharmerOrOwner())
-                        {
-                            float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
-                            damage += int32((spellpower * 1.0f));
-                            // Glyph of Felguard
-                            if (m_spellInfo->Id == 30213 && m_caster->GetCharmerOrOwner()->HasAura(56246))
-                                damage += damage * 0.05f;
-                        }
-                        break;
-                    }
                     case 7814:  // Lash of Pain
                     {
                         if (m_caster->GetCharmerOrOwner())
@@ -1166,14 +1154,16 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 {
                     case 83381: // Kill Command
                     {
-                        if (!m_caster->GetOwner())
-                            return;
-
                         Unit* owner = m_caster->GetOwner();
                         if (!owner)
                             return;
 
-                        bool isCrit = m_caster->isSpellCrit(unitTarget, m_spellInfo, m_spellInfo->GetSchoolMask());
+                        if (owner->HasAura(94006))
+                            owner->RemoveAurasDueToSpell(94006);
+                        if (owner->HasAura(94007))
+                            owner->RemoveAurasDueToSpell(94007);
+
+                        bool isCrit = owner->isSpellCrit(unitTarget, m_spellInfo, m_spellInfo->GetSchoolMask());
                         if (isCrit)
                             ++owner->m_kStreakCount;
                         else
@@ -5441,10 +5431,32 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             // Felstorm
             if (Unit* owner = m_caster->GetCharmerOrOwner())
             {
-                if (m_spellInfo->Id == 89753 && unitTarget)
+                switch (m_spellInfo->Id)
                 {
-                    float spellPower = (float)(owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
-                    fixed_bonus += uint32(spellPower * 0.50f);
+                    case 89753: // Felstorm
+                    {
+                        if (unitTarget)
+                        {
+                            float spellPower = (float)(owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
+                            fixed_bonus += uint32(spellPower * 0.50f);
+                        }
+                        break;
+                    }
+                    case 30213: // Legion Strike
+                    {
+                        if (m_caster->GetCharmerOrOwner())
+                        {
+                            if (unitTarget)
+                            {
+                                float spellpower = (float)(owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
+                                damage += int32((spellpower * 0.50f));
+                                // Glyph of Felguard
+                                if (owner->HasAura(56246))
+                                    damage += damage * 0.05f;
+                            }
+                        }
+                        break;
+                    }
                 }
             }
             break;

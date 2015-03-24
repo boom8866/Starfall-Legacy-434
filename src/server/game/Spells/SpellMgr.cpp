@@ -127,7 +127,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
         case SPELLFAMILY_WARLOCK:
         {
             // Curses/etc
-            if ((spellproto->SpellFamilyFlags[0] & 0x80000000) || (spellproto->SpellFamilyFlags[1] & 0x200))
+            if ((spellproto->SpellFamilyFlags[0] & 0x80000000) || (spellproto->SpellFamilyFlags[1] & 0x200) || spellproto->Id == 18223)
                 return DIMINISHING_LIMITONLY;
             // Seduction
             else if (spellproto->SpellFamilyFlags[1] & 0x10000000)
@@ -4518,6 +4518,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->CategoryRecoveryTime = 604800000; // 7 Days
                 spellInfo->RecoveryTime = 0;
                 spellInfo->StartRecoveryTime = 0;
+                break;
+            case 34026: // Kill Command
+                spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MELEE;
                 break;
             // SPELLS QUESTS
             case 95869: // Wyvern Ride Aura [INTERNAL]
