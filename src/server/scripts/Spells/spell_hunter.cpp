@@ -1988,15 +1988,9 @@ public:
             if (Unit* caster = GetCaster())
             {
                 if (caster->HasAura(SPELL_HUN_RAPID_RECUPERATION_R1))
-                {
-                    caster->CastSpell(caster, SPELL_HUN_RAPID_RECUPERATION_PROC_1, true);
                     caster->EnergizeBySpell(caster, SPELL_HUN_RAPID_RECUPERATION_ENERGIZE, 25, POWER_FOCUS);
-                }
                 if (caster->HasAura(SPELL_HUN_RAPID_RECUPERATION_R2))
-                {
-                    caster->CastSpell(caster, SPELL_HUN_RAPID_RECUPERATION_PROC_2, true);
                     caster->EnergizeBySpell(caster, SPELL_HUN_RAPID_RECUPERATION_ENERGIZE, 50, POWER_FOCUS);
-                }
             }
         }
 

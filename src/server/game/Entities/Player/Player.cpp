@@ -6446,7 +6446,7 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
                 if ((*i)->GetMiscValue() == 356)
                 {
                     RemoveAura((*i)->GetId());
-                    CastWithDelay(100, this, (*i)->GetId(), true);
+                    CastWithDelay(500, this, (*i)->GetId(), true);
                 }
             }
         }

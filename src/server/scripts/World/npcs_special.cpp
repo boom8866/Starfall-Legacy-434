@@ -10104,6 +10104,152 @@ public:
     }
 };
 
+class npc_cold_water_crayfish : public CreatureScript
+{
+public:
+    npc_cold_water_crayfish() : CreatureScript("npc_cold_water_crayfish")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_CRAYFISH_CATCH    = 99424
+    };
+
+    enum eventId
+    {
+        EVENT_CHECK_VEHICLE     = 1
+    };
+
+    struct npc_cold_water_crayfishAI : public ScriptedAI
+    {
+        npc_cold_water_crayfishAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* owner)
+        {
+            if (owner->HasAura(SPELL_CRAYFISH_CATCH))
+                me->EnterVehicle(owner, urand(0, 7));
+            events.ScheduleEvent(EVENT_CHECK_VEHICLE, 5000);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_VEHICLE:
+                    {
+                        if (Unit* vehicle = me->GetVehicleBase())
+                        {
+                            events.RescheduleEvent(EVENT_CHECK_VEHICLE, 2000);
+                            break;
+                        }
+                        else
+                        {
+                            events.CancelEvent(EVENT_CHECK_VEHICLE);
+                            me->DespawnOrUnsummon(1000);
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_cold_water_crayfishAI(creature);
+    }
+};
+
+class npc_cook_ghilm : public CreatureScript
+{
+public:
+    npc_cook_ghilm() : CreatureScript("npc_cook_ghilm")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_REMOVE_AURAS      = 99466,
+        SPELL_CRAYFISH_CATCH    = 99424
+    };
+
+    enum eventId
+    {
+        EVENT_CHECK_CRAYFISH    = 1
+    };
+
+    struct npc_cook_ghilmAI : public ScriptedAI
+    {
+        npc_cook_ghilmAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_CHECK_CRAYFISH, 5000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_CRAYFISH:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 6.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(6.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if ((*itr)->HasAura(SPELL_CRAYFISH_CATCH))
+                                {
+                                    me->SetFacingToObject((*itr));
+                                    (*itr)->CastSpell((*itr), SPELL_REMOVE_AURAS, true);
+                                    (*itr)->ToPlayer()->KilledMonsterCredit(53551);
+                                    Talk(0);
+                                    me->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_CRAYFISH, 3000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_cook_ghilmAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -10207,4 +10353,6 @@ void AddSC_npcs_special()
     new npc_generic_trigger_lab();
     new npc_muddy_tracks();
     new npc_flameward_activated();
+    new npc_cold_water_crayfish();
+    new npc_cook_ghilm();
 }

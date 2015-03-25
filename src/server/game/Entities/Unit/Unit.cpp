@@ -2408,7 +2408,15 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* victim, WeaponAttackTy
     float miss_chance = MeleeSpellMissChance(victim, attType, 0);
 
     // Critical hit chance
-    float crit_chance = GetUnitCriticalChance(attType, victim);
+    Unit const* caster = this;
+    if (isPet() && GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER)
+    {
+        uint8 ownerClass = GetOwner()->getClass();
+        if (ownerClass != CLASS_MAGE && ownerClass != CLASS_SHAMAN)
+            caster = GetOwner();
+    }
+
+    float crit_chance = caster->GetUnitCriticalChance(attType, victim);
 
     // stunned target cannot dodge and this is check in GetUnitDodgeChance() (returned 0 in this case)
     float dodge_chance = victim->GetUnitDodgeChance();
@@ -9787,12 +9795,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         // Maelstrom Weapon
         case 53817:
         {
-            // has rank dependant proc chance, ignore too often cases
-            // PPM = 2.5 * (rank of talent),
             uint32 rank = auraSpellInfo->GetRank();
-            // 5 rank -> 100% 4 rank -> 80% and etc from full rate
-            if (!roll_chance_i(20*rank))
+            if (!roll_chance_i(25 * rank))
                 return false;
+
             // Item - Shaman T10 Enhancement 4P Bonus
             if (AuraEffect const* aurEff = GetAuraEffect(70832, 0))
                 if (Aura const* maelstrom = GetAura(53817))

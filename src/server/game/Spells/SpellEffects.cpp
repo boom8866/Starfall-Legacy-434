@@ -724,13 +724,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 // Incinerate Rank 1 & 2
                 if ((m_spellInfo->SpellFamilyFlags[1] & 0x000040) && m_spellInfo->SpellIconID == 2128)
                 {
-                    // Incinerate does more dmg (dmg/6) if the target have Immolate debuff.
-                    // Check aura state for speed but aura state set not only for Immolate spell
-                    if (unitTarget->HasAuraState(AURA_STATE_CONFLAGRATE))
-                    {
-                        if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0x4, 0, 0))
-                            damage += damage / 6;
-                    }
                     // Shadow and Flame
                     if (m_caster->HasAura(17793) && roll_chance_i(33))
                         m_caster->AddAura(17800, unitTarget);
@@ -3372,10 +3365,17 @@ void Spell::EffectHealPct (SpellEffIndex /*effIndex*/)
         // Victory Rush
         case 34428:
         {
-            if (m_originalCaster->HasAura(80128) || m_originalCaster->HasAura(80129))
+            // Impending Victory
+            if (m_originalCaster->HasAura(82368))
                 halfHP = m_originalCaster->GetMaxHealth() * 0.05f;
             else
                 halfHP = m_originalCaster->GetMaxHealth() * 0.20f;
+
+            // Glyph of Victory Rush
+            if (m_originalCaster->HasAura(58382))
+                heal += heal * 0.50f;
+
+            // Final Heal
             heal = halfHP;
             break;
         }
