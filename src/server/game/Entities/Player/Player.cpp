@@ -13637,6 +13637,11 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
                     ModifyMoney(2000000);
                     break;
                 }
+                case 62062: // Bulging Sack of Gold (Inscription)
+                {
+                    ModifyMoney(urand(90445, 285200));
+                    break;
+                }
                 default:
                     break;
             }
