@@ -12845,12 +12845,15 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                         if (Player* player = ToPlayer())
                         {
                             float mod = 1.0f;
+                            int32 add = 12;
                             Item* mainHand = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
                             if (mainHand && (mainHand->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER))
+                            {
                                 mod = 1.447f;
-
+                                add = 12 * player->getLevel();
+                            }
                             int32 weaponDmg = CalculateDamage(BASE_ATTACK, true, false) * (1.9f * mod);
-                            pdamage = uint32(weaponDmg);
+                            pdamage = uint32(weaponDmg + add);
                         }
                         break;
                     }
