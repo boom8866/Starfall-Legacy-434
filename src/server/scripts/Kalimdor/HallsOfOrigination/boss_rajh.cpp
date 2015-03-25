@@ -210,7 +210,7 @@ public:
                 case ACTION_BLESSING_DONE:
                     _energized = true;
                     _achievement = false;
-                    me->GetMotionMaster()->MovementExpired();
+                    me->RemoveAurasDueToSpell(SPELL_BLESSING_OF_THE_SUN);
                     me->SetReactState(REACT_AGGRESSIVE);
                     events.ScheduleEvent(EVENT_SUN_STRIKE, 20000);
                     events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
@@ -267,7 +267,7 @@ public:
                         events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 3000);
                         break;
                     case EVENT_INFERNO_LEAP:
-                        me->GetMotionMaster()->MovementExpired();
+                        me->StopMoving();
                         MakeInterruptable(true);
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_SUMMON_INFERNO_LEAP);

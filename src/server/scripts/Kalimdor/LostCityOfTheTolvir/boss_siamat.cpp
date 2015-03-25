@@ -361,11 +361,11 @@ class npc_lct_servant_of_siamat : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage)
             {
-                if (me->HealthBelowPct(4) && _charged && IsHeroic() && !me->HasUnitState(UNIT_STATE_CASTING))
+                if (me->HealthBelowPct(4) && _charged && IsHeroic())
                 {
-                    DoCastAOE(SPELL_LIGHTNING_CHARGE);
+                    me->CastStop();
+                    DoCast(me, SPELL_LIGHTNING_CHARGE);
                     _charged = false;
-
                 }
             }
 
