@@ -9873,7 +9873,6 @@ class spell_activate_guardian : public SpellScriptLoader
                         titanicGuardian->AI()->AttackStart(caster);
                         titanicGuardian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         titanicGuardian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        caster->AddThreat(titanicGuardian, 1.0f);
                     }
                 }
             }
