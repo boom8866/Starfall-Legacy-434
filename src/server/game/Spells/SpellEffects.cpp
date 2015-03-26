@@ -5448,8 +5448,8 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                         {
                             if (unitTarget)
                             {
-                                float spellpower = (float)(owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
-                                damage += int32((spellpower * 0.50f));
+                                float spellPower = (float)(owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
+                                fixed_bonus += uint32(spellPower * 0.50f);
                                 // Glyph of Felguard
                                 if (owner->HasAura(56246))
                                     damage += damage * 0.05f;

@@ -723,7 +723,7 @@ public:
     {
     }
 
-    bool OnCheck(Player* player, Unit* /*target*/)
+    bool OnCheck(Player* /*player*/, Unit* /*target*/)
     {
         return false;
     }

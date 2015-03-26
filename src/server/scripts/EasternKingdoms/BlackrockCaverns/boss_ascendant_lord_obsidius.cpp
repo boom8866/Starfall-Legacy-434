@@ -333,7 +333,8 @@ public:
         enum eventId
         {
             EVENT_CREPUSCOLAR_VEIL  = 1,
-            EVENT_CHECK_POSITION
+            EVENT_CHECK_POSITION,
+            EVENT_CHECK_SHADOW
         };
 
         enum actionId
@@ -356,8 +357,13 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
             if (IsHeroic())
                 me->AddAura(SPELL_TWITCHY, me);
-            me->AddAura(SPELL_SHADOW_VISUAL, me);
+            DoCast(me, SPELL_SHADOW_VISUAL);
             _EnterEvadeMode();
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        {
+            damage = 0;
         }
 
         void ForceShadowsInCombat()
@@ -374,9 +380,10 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);
+            events.ScheduleEvent(EVENT_CHECK_SHADOW, 2000);
             if (IsHeroic())
                 me->AddAura(SPELL_TWITCHY, me);
-            me->AddAura(SPELL_SHADOW_VISUAL, me);
+            DoCast(me, SPELL_SHADOW_VISUAL);
             ForceShadowsInCombat();
         }
 
@@ -395,6 +402,13 @@ public:
                     {
                         DoCastVictim(SPELL_CREPUSCOLAR_VEIL);
                         events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);
+                        break;
+                    }
+                    case EVENT_CHECK_SHADOW:
+                    {
+                        if (me->HasAura(SPELL_SHADOW_VISUAL))
+                            DoCast(me, SPELL_SHADOW_VISUAL, true);
+                        events.RescheduleEvent(EVENT_CHECK_SHADOW, 3000);
                         break;
                     }
                     case EVENT_CHECK_POSITION:

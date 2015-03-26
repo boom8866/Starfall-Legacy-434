@@ -12765,7 +12765,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() && me->isInCombat())
+            if (!UpdateVictim())
                 return;
 
             events.Update(diff);
