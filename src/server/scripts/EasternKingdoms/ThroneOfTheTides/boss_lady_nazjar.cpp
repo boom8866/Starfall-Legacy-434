@@ -96,6 +96,8 @@ public:
             spoutCount = 0;
             _EnterCombat();
             Talk(SAY_AGGRO);
+            me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_GEYSER_DAMAGE_NPC_HC, true);
+            me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_GEYSER_DAMAGE_NPC, true);
             AddEncounterFrame();
             phase = 1;
             events.ScheduleEvent(EVENT_GEYSER, 11000);
@@ -327,7 +329,7 @@ public:
         void InitializeAI()
         {
             me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC); 
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
         }
 
         void KilledUnit(Unit* victim)
@@ -360,7 +362,7 @@ public:
             if (!isErrupted && uiErrupt <= diff)
             {
                 isErrupted = true;
-                DoCastAOE(SPELL_GEYSER_EFFECT, true);
+                DoCastAOE(SPELL_GEYSER_EFFECT);
                 NpcKillCheck(NPC_SUMMONED_WITCH, NPC_SUMMONED_GUARD);
                 me->DespawnOrUnsummon(3000);
             }
