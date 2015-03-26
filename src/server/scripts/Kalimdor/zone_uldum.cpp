@@ -16238,7 +16238,7 @@ public:
                         me->SetStandState(UNIT_STAND_STATE_STAND);
                         me->GetMotionMaster()->MovePoint(POINT_COFFER, -9297.09f, 483.28f, 242.81f);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
-                            Talk(0, playerOwner->GetGUID());
+                            Talk(0);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
                             std::list<Unit*> targets;
