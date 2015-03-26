@@ -5229,6 +5229,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 79021: // Seismic Shard
                 spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
                 break;
+            // Throne of the Tides
+            // * Lady Naz'Jar
+            case 75700: // Geyser N
+            case 91469: // Geyser H
+                spellInfo->Effects[EFFECT_2].Effect = 0;
+                break;
             // The Lost City of the Tol'Vir
             // * Lockmaw and Augh
             case 84799: // Paralytic Blow Dart
@@ -5338,10 +5344,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92412: // Sonar Pulse HC
             case 92413:
                 spellInfo->MaxAffectedTargets = 7;
-                break;
-            // Throne of the Tides
-            case 75700: // Geyser
-                spellInfo->Effects[EFFECT_2].Effect = 0;
                 break;
             case 76609: // Void Rip
                 spellInfo->Effects[EFFECT_0].MiscValue = 200;

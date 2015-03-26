@@ -356,11 +356,20 @@ class spell_anhuur_disable_beacon_beams : public SpellScriptLoader
             {
                 if (Unit* caster = GetCaster())
                 {
-                    if (GameObject* beacon = caster->FindNearestGameObject(GO_ANHUURS_LEFT_BEACON, 10.0f))
-                        beacon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-                    else if (GameObject* beacon = caster->FindNearestGameObject(GO_ANHUURS_RIGHT_BEACON, 10.0f))
-                        beacon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-
+                    if (!caster->GetMap()->IsHeroic())
+                    {
+                        if (GameObject* beacon = caster->FindNearestGameObject(GO_ANHUURS_LEFT_BEACON, 10.0f))
+                            beacon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        else if (GameObject* beacon = caster->FindNearestGameObject(GO_ANHUURS_RIGHT_BEACON, 10.0f))
+                            beacon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    }
+                    else
+                    {
+                        if (GameObject* beacon = caster->FindNearestGameObject(GO_ANHUURS_LEFT_BEACON_H, 10.0f))
+                            beacon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        else if (GameObject* beacon = caster->FindNearestGameObject(GO_ANHUURS_RIGHT_BEACON_H, 10.0f))
+                            beacon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    }
 
                     if (InstanceMap* instance = caster->GetMap()->ToInstanceMap())
                         if (InstanceScript* const script = instance->GetInstanceScript())
