@@ -1425,10 +1425,20 @@ class spell_dk_necrotic_strike : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dk_necrotic_strike_AuraScript);
 
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool & /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool & canBeRecalculated)
             {
-                if (Unit* caster = GetCaster())
-                    amount = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.7f) + necroticAmount;
+                Unit* caster = GetCaster();
+                Unit* target = GetUnitOwner();
+                if (caster && target)
+                {
+                    canBeRecalculated = false;
+                    int32 damage = caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.70f;
+                    // Amount absorbed scales with resilience
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                        damage -= target->ToPlayer()->GetRatingBonusValue(CR_RESILIENCE_PLAYER_DAMAGE_TAKEN);
+
+                    amount = necroticAmount + damage;
+                }
             }
 
             void Register()
