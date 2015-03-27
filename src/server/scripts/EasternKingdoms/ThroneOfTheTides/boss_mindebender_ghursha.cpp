@@ -23,7 +23,8 @@ enum Events
     EVENT_ABSORB_MAGIC              = 6,
     EVENT_MIND_FOG                  = 7,
     EVENT_UNRELENTING_AGONY         = 8,
-    EVENT_ENSLAVE_SPELL_CAST        = 9
+    EVENT_ENSLAVE_SPELL_CAST        = 9,
+    EVENT_KILL_PLAYER_HC            = 10
 };
 
 enum Spells
@@ -112,6 +113,7 @@ public:
                 return;
 
             events.Reset();
+            me->SetReactState(REACT_AGGRESSIVE);
             me->RemoveAurasDueToSpell(SPELL_KNEEL);
             instance->SetBossState(DATA_MINDEBENDER_GHURSHA, NOT_STARTED);
 
@@ -306,9 +308,9 @@ class boss_mindbender_ghursha : public CreatureScript
 public:
     boss_mindbender_ghursha() : CreatureScript("boss_mindbender_ghursha"){ }
 
-    struct boss_mindbender_ghurshaAI : public ScriptedAI
+    struct boss_mindbender_ghurshaAI : public BossAI
     {
-        boss_mindbender_ghurshaAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript())
+        boss_mindbender_ghurshaAI(Creature* creature) : BossAI(creature, DATA_MINDEBENDER_GHURSHA), instance(creature->GetInstanceScript())
         {
             Enslave = false;
             EnslavePlayer = NULL;
@@ -492,8 +494,8 @@ public:
                             EnslavePlayer = target;
                             EnslaveTarget(target, true);
                             DoCast(target, DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC));
+                            events.ScheduleEvent(EVENT_KILL_PLAYER_HC, 30000);
                         }
-                        events.RescheduleEvent(EVENT_ENSLAVE, 30000);
                         break;
                     }
                     case EVENT_ABSORB_MAGIC:
@@ -514,6 +516,12 @@ public:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.f, true))
                             DoCast(target, SPELL_UNRELENTING_AGONY);
                         events.ScheduleEvent(EVENT_UNRELENTING_AGONY, urand(23000, 30000));
+                        break;
+                    }
+                    case EVENT_KILL_PLAYER_HC:
+                    {
+                        if (Unit* enslavedPlayer = me->GetVehicleBase())
+                            me->Kill(enslavedPlayer);
                         break;
                     }
                     default:
@@ -549,9 +557,14 @@ public:
                     events.CancelEvent(EVENT_ABSORB_MAGIC);
                     events.CancelEvent(EVENT_MIND_FOG);
                     events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
+
+                    // Kill player if not freed within 30 seconds in heroic mode
+                    if (me->GetMap()->IsHeroic())
+                        events.ScheduleEvent(EVENT_KILL_PLAYER_HC, 29000);
                 }
                 else
                 {
+                    events.CancelEvent(EVENT_KILL_PLAYER_HC);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->ExitVehicle();
