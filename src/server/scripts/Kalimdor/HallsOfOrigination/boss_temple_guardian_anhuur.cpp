@@ -41,7 +41,6 @@ enum Events
     EVENT_SEAR,
     EVENT_SHIELD_OF_LIGHT,
     EVENT_ACHIEVEMENT_FAIL,
-    EVENT_CHECK_SONG
 };
 
 enum Spells
@@ -95,26 +94,11 @@ public:
         void Reset()
         {
             _Reset();
-        }
-
-        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
-        {
-            // Interrupt and Silence should remove Reverberating Hymn without the shield of light
-            if (spell->Effects[EFFECT_0].Effect == SPELL_EFFECT_INTERRUPT_CAST ||
-                spell->Effects[EFFECT_1].Effect == SPELL_EFFECT_INTERRUPT_CAST ||
-                spell->Effects[EFFECT_2].Effect == SPELL_EFFECT_INTERRUPT_CAST ||
-                spell->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_SILENCE ||
-                spell->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOD_SILENCE ||
-                spell->Effects[EFFECT_2].ApplyAuraName == SPELL_AURA_MOD_SILENCE)
-                if (!me->HasAura(SPELL_SHIELD_OF_LIGHT))
-                    me->RemoveAurasDueToSpell(SPELL_REVERBERATING_HYMN);
+            MakeInterruptable(false);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
-            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
             Talk(SAY_AGGRO);
             _EnterCombat();
@@ -148,6 +132,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
+            MakeInterruptable(false);
             _DespawnAtEvade();
         }
 
@@ -170,6 +155,33 @@ public:
             {
                 (*itr)->RemoveAurasDueToSpell(SPELL_BEAM_OF_LIGHT_RIGHT);
                 (*itr)->RemoveAurasDueToSpell(SPELL_BEAM_OF_LIGHT_LEFT);
+            }
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+        {
+            if (spell->IsInterruptSpell() && me->HasAura(SPELL_REVERBERATING_HYMN))
+            {
+                me->RemoveAurasDueToSpell(SPELL_REVERBERATING_HYMN);
+                MakeInterruptable(false);
+                events.Reset();
+                me->SetReactState(REACT_AGGRESSIVE);
+                events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
+                events.ScheduleEvent(EVENT_BURNING_LIGHT, 12000);
+            }
+        }
+
+        void MakeInterruptable(bool apply)
+        {
+            if (apply)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
+            }
+            else
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             }
         }
 
@@ -199,12 +211,9 @@ public:
                 --_beacons;
                 if (!_beacons)
                 {
+                    MakeInterruptable(true);
                     me->RemoveAura(SPELL_SHIELD_OF_LIGHT);
-                    me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
-                    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
-                    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, false);
                     Talk(EMOTE_UNSHIELD);
-                    events.ScheduleEvent(EVENT_CHECK_SONG, 1000);
                 }
             }
         }
@@ -298,23 +307,6 @@ public:
                     case EVENT_ACHIEVEMENT_FAIL:
                         _achievement = false;
                         break;
-                    case EVENT_CHECK_SONG:
-                    {
-                        if (!me->HasAura(SPELL_REVERBERATING_HYMN) && !me->HasAura(SPELL_SHIELD_OF_LIGHT))
-                        {
-                            events.CancelEvent(EVENT_CHECK_SONG);
-                            events.CancelEvent(EVENT_ACHIEVEMENT_FAIL);
-                            me->SetReactState(REACT_AGGRESSIVE);
-                            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
-                            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
-                            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
-                            events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
-                            events.ScheduleEvent(EVENT_BURNING_LIGHT, 12000);
-                            break;
-                        }
-                        events.RescheduleEvent(EVENT_CHECK_SONG, 1000);
-                        break;
-                    }
                     default:
                         break;
                 }
