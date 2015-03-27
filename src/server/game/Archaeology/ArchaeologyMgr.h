@@ -108,16 +108,16 @@ public:
 private:
     bool isSiteValid(SiteData *sites, uint16 entry);
 
-    std::map<uint32, std::vector<SiteEntry> > _siteMap;
-    std::map<uint16, SitePolygonGraph<float>* > _polygonMap;
-    std::map<uint16, uint32> _objectMap;
+    std::map<uint32, std::vector<SiteEntry> >   _siteMap;
+    std::map<uint16, SitePolygonGraph* >        _polygonMap;
+    std::map<uint16, uint32>                    _objectMap;
 
-    std::map<uint32, uint8> _currencyMap;       // currencyId -> branchId
-    std::map<uint8, BranchEntry> _branchMap;    // branchId -> BranchEntry
+    std::map<uint32, uint8>                     _currencyMap;       // currencyId -> branchId
+    std::map<uint8, BranchEntry>                _branchMap;    // branchId -> BranchEntry
 
-    std::map<uint16, ProjectEntry> _projects;
-    std::map<uint8, std::vector<uint16> > _commonProjects;
-    std::map<uint8, std::vector<uint16> > _rareProjects;
+    std::map<uint16, ProjectEntry>              _projects;
+    std::map<uint8, std::vector<uint16> >       _commonProjects;
+    std::map<uint8, std::vector<uint16> >       _rareProjects;
 };
 
 #define sArchaeologyMgr ACE_Singleton<ArchaeologyMgr, ACE_Null_Mutex>::instance()
