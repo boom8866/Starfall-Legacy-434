@@ -19,9 +19,6 @@
 #include "ScriptedEscortAI.h"
 #include "Vehicle.h"
 
-/* Automatic rescheduling if creature is already casting */
-#define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
-
 class npc_th_anduinn_wrynn : public CreatureScript
 {
 public:
@@ -855,27 +852,27 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_SHIELD:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCast(me, SPELL_POWER_WORD_SHIELD);
                         events.RescheduleEvent(EVENT_SHIELD, 12000);
                         break;
                     }
                     case EVENT_MIND_BLAST:
                     {
-                        RESCHEDULE_IF_CASTING;
                         DoCastVictim(SPELL_MIND_BLAST);
                         events.RescheduleEvent(EVENT_MIND_BLAST, urand(5000, 7500));
                         break;
                     }
                     case EVENT_PENANCE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (roll_chance_f(20))
                             Talk(1);
                         DoCastVictim(SPELL_PENANCE);
@@ -884,7 +881,6 @@ public:
                     }
                     case EVENT_DIAGONAL_SLIDE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         if (teleportCount > 5)
                         {
                             events.CancelEvent(EVENT_DIAGONAL_SLIDE);

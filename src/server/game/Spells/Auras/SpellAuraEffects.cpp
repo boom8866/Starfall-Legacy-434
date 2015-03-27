@@ -4435,34 +4435,18 @@ void AuraEffect::HandleAuraModIncreaseEnergy(AuraApplication const* aurApp, uint
         return;
 
     Unit* target = aurApp->GetTarget();
-    Powers powerType = Powers(GetMiscValue());
 
+    Powers powerType = Powers(GetMiscValue());
     // do not check power type, we can always modify the maximum
     // as the client will not see any difference
     // also, placing conditions that may change during the aura duration
     // inside effect handlers is not a good idea
     //if (int32(powerType) != GetMiscValue())
     //    return;
-    int32 actualPower = target->GetMaxPower(powerType);
-    int32 createPower = target->GetCreatePowers(powerType);
 
-    int32 spellGroupVal = target->GetHighestExclusiveSameEffectSpellGroupValue(this, SPELL_AURA_MOD_INCREASE_ENERGY);
-    if (abs(spellGroupVal) >= abs(GetAmount()))
-        return;
+    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + powerType);
 
-    if (spellGroupVal)
-    {
-        if (apply)
-            target->SetMaxPower(powerType, actualPower + float(spellGroupVal));
-        else
-            target->SetMaxPower(powerType, actualPower - float(spellGroupVal));
-        return;
-    }
-
-    if (apply)
-        target->SetMaxPower(powerType, actualPower + (float)GetAmount());
-    else
-        target->SetMaxPower(powerType, actualPower - (float)GetAmount());
+    target->HandleStatModifier(unitMod, TOTAL_VALUE, float(GetAmount()), apply);
 }
 
 void AuraEffect::HandleAuraModIncreaseEnergyPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const

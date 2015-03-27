@@ -6426,7 +6426,7 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
                 if ((*i)->GetMiscValue() == 356)
                 {
                     RemoveAura((*i)->GetId());
-                    CastWithDelay(100, this, (*i)->GetId(), true);
+                    CastWithDelay(500, this, (*i)->GetId(), true);
                 }
             }
         }
@@ -24588,9 +24588,24 @@ void Player::SendInitialPacketsAfterAddToMap()
         }
         case CLASS_ROGUE:
         {
-            // Vigor
-            SetMaxPower(POWER_ENERGY, HasAura(21975) ? 110 : 100);
+            // Vigor & Assassin's Resolve
+            if (HasAura(21975) && !HasAura(84601))
+                SetMaxPower(POWER_ENERGY, 110);
+            if (HasAura(21975) && HasAura(84601))
+                SetMaxPower(POWER_ENERGY, 130);
+            if (HasAura(84601) && !HasAura(84601))
+                SetMaxPower(POWER_ENERGY, 120);
             break;
+        }
+        case CLASS_HUNTER:
+        {
+            // Kindred Spirits
+            if (HasAura(56314))
+                SetMaxPower(POWER_FOCUS, 105);
+            else if (HasAura(56315))
+                SetMaxPower(POWER_FOCUS, 110);
+            else
+                SetMaxPower(POWER_FOCUS, 100);
         }
     }
 }
@@ -24660,6 +24675,11 @@ void Player::ApplyEquipCooldown(Item* pItem)
         // wrong triggering type (note: ITEM_SPELLTRIGGER_ON_NO_DELAY_USE not have cooldown)
         if (spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE)
             continue;
+
+        //! Don't replace longer cooldowns by equip cooldown if we have any.
+        SpellCooldowns::iterator itr = m_spellCooldowns.find(spellData.SpellId);
+        if (itr != m_spellCooldowns.end() && itr->second.itemid == pItem->GetEntry() && itr->second.end > time(NULL) + 30)
+            break;
 
         AddSpellCooldown(spellData.SpellId, pItem->GetEntry(), time(NULL) + 30);
 

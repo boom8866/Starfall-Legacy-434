@@ -100,7 +100,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
                 return;
 
             // Player summons should always take speed from owner
-            if (owner->isPet() || owner->isSummon())
+            if (owner->isGuardian() && !owner->isPet() && !owner->isSummon())
             {
                 // Use a switch to exclude some entries
                 switch (owner->GetEntry())
@@ -121,7 +121,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
                                         i_angle = frand(0, 4.5);
                                 }
 
-                                owner->SetSpeed(MOVE_RUN, unitOwner->GetSpeed(MOVE_RUN)*0.14f, true);
+                                owner->SetSpeed(MOVE_RUN, unitOwner->GetSpeed(MOVE_RUN) * 0.14f, true);
                             }
                             else
                             {
@@ -131,7 +131,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
                                     case 38455: // Ace (Surrender or Else event)
                                     {
                                         i_angle = frand(0, 4.5f);
-                                        owner->SetSpeed(MOVE_RUN, unitOwner->GetSpeed(MOVE_RUN)*0.14f, true);
+                                        owner->SetSpeed(MOVE_RUN, unitOwner->GetSpeed(MOVE_RUN) * 0.14f, true);
                                         break;
                                     }
                                     default:

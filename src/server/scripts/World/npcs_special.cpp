@@ -63,9 +63,6 @@ EndContentData */
 #include "AchievementMgr.h"
 #include "Vehicle.h"
 
-/* Automatic rescheduling if creature is already casting */
-#define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
-
 /* Abyssion and Matriarch */
 Position const abyssionLandingPos   = {179.46f, -508.27f, 171.84f, 5.33f};
 Position const matriarchLandingPos  = {-103.24f, 455.96f, 165.13f, 6.08f};
@@ -2215,6 +2212,11 @@ class npc_shadowfiend: public CreatureScript
 public:
     npc_shadowfiend() : CreatureScript("npc_shadowfiend") {}
 
+    enum spellId
+    {
+        SPELL_SHADOWFIEND_SHADOWCRAWL   = 63619
+    };
+
     struct npc_shadowfiendAI: public ScriptedAI
     {
         npc_shadowfiendAI(Creature* creature) : ScriptedAI(creature) {}
@@ -2232,6 +2234,14 @@ public:
                     }
                 }
             }
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            me->SetBaseAttackTime(BASE_ATTACK, 1250);
+            if (SpellInfo const* shadowCrawl = sSpellMgr->GetSpellInfo(SPELL_SHADOWFIEND_SHADOWCRAWL))
+                if (me->GetCharmInfo())
+                    me->GetCharmInfo()->SetSpellAutocast(shadowCrawl, 1);
         }
 
         void UpdateAI(uint32 /*diff*/)
@@ -6587,17 +6597,18 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_SAND_BREATH:
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_SAND_BREATH);
                         events.ScheduleEvent(EVENT_SAND_BREATH, urand(5000, 7500));
                         break;
                     case EVENT_STONE_SPIKE:
-                        RESCHEDULE_IF_CASTING
                         DoCastVictim(SPELL_STONE_SPIKE);
                         events.ScheduleEvent(EVENT_STONE_SPIKE, urand(3000, 4500));
                         break;
@@ -6780,28 +6791,27 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_TWILIGHT_BREATH:
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_TWILIGHT_BREATH);
                         events.ScheduleEvent(EVENT_TWILIGHT_BREATH, urand(3000, 7500));
                         break;
                     case EVENT_RIFT_BARRAGE:
-                        RESCHEDULE_IF_CASTING
                         DoCastVictim(SPELL_RIFT_BARRAGE);
                         events.ScheduleEvent(EVENT_RIFT_BARRAGE, 5000);
                         break;
                     case EVENT_SHADOW_NOVA:
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_SHADOW_NOVA);
                         TalkWithDelay(500, 3);
                         events.ScheduleEvent(EVENT_SHADOW_NOVA, urand(45000, 50000));
                         break;
                     case EVENT_TWILIGHT_SHIELD:
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_TWILIGHT_SHIELD);
                         events.ScheduleEvent(EVENT_TWILIGHT_SHIELD, 70000);
                         break;
@@ -6975,37 +6985,34 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CAST_FIREBOLT:
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_FIREBOLT);
                         events.ScheduleEvent(EVENT_CAST_FIREBOLT, urand(3000, 4000));
                         break;
                     case EVENT_CAST_AIRBOLT:
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_AIRBOLT);
                         events.ScheduleEvent(EVENT_CAST_AIRBOLT, urand(3000, 4000));
                         break;
                     case EVENT_CAST_WATERBOLT:
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_WATERBOLT);
                         events.ScheduleEvent(EVENT_CAST_WATERBOLT, urand(3000, 4000));
                         break;
                     case EVENT_CAST_EARTHBOLT:
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_EARTHBOLT);
                         events.ScheduleEvent(EVENT_CAST_EARTHBOLT, urand(3000, 4000));
                         break;
                     case EVENT_CAST_COA:
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_COA);
                         events.ScheduleEvent(EVENT_CAST_COA, 16000);
                         break;
                     case EVENT_CAST_SLOW:
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_SLOW);
                         events.ScheduleEvent(EVENT_CAST_SLOW, 10000);
                         break;
@@ -7241,21 +7248,21 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CAST_WING_BUFFET: // Wing Buffet only on land
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_WING_BUFFET);
                         break;
                     case EVENT_CAST_STONE_BREATH:
-                        RESCHEDULE_IF_CASTING
                         DoCastVictim(SPELL_STONE_BREATH);
                         events.ScheduleEvent(EVENT_CAST_STONE_BREATH, urand(9500, 13500));
                         break;
                     case EVENT_CAST_RENDING_SWOOP:
-                        RESCHEDULE_IF_CASTING
                         DoCastVictim(SPELL_RENDING_SWOOP);
                         events.ScheduleEvent(EVENT_CAST_RENDING_SWOOP, 30000);
                         break;
@@ -7516,21 +7523,18 @@ public:
                     {
                         case EVENT_CAST_LAVA_BURST:
                         {
-                            RESCHEDULE_IF_CASTING;
                             DoCastVictim(SPELL_LAVA_BURST);
                             events.ScheduleEvent(EVENT_CAST_LAVA_BURST, urand(4000, 6000));
                             break;
                         }
                         case EVENT_CAST_LIGHTNING_BOLT:
                         {
-                            RESCHEDULE_IF_CASTING;
                             DoCastVictim(SPELL_LIGHTNING_BOLT);
                             events.ScheduleEvent(EVENT_CAST_LIGHTNING_BOLT, urand(5000, 8500));
                             break;
                         }
                         case EVENT_CAST_CHAIN_HEAL:
                         {
-                            RESCHEDULE_IF_CASTING;
                             DoCast(SPELL_CHAIN_HEAL);
                             events.ScheduleEvent(EVENT_CAST_CHAIN_HEAL, urand(10000, 15000));
                             break;
@@ -8085,13 +8089,15 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CAST_CRYSTALLINE_SURGE:
                     {
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_CRYSTALLINE_SURGE);
                         events.ScheduleEvent(EVENT_CAST_CRYSTALLINE_SURGE, urand(5000, 10000));
                         events.CancelEvent(EVENT_CAST_CRYSTALLINE_SURGE);
@@ -8099,7 +8105,6 @@ public:
                     }
                     case EVENT_CAST_CRYSTALLINE_BARRIER:
                     {
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_CRYSTALLINE_BARRIER);
                         events.ScheduleEvent(EVENT_CAST_CRYSTALLINE_BARRIER, urand(5000, 10000));
                         events.CancelEvent(EVENT_CAST_CRYSTALLINE_BARRIER);
@@ -8530,14 +8535,12 @@ public:
                     }
                     case EVENT_DRAKE_BANE:
                     {
-                        RESCHEDULE_IF_CASTING
                         DoCastVictim(SPELL_DRAKE_BANE);
                         events.ScheduleEvent(EVENT_DRAKE_BANE, urand(3000, 8000));
                         break;
                     }
                     case EVENT_SHOOT:
                     {
-                        RESCHEDULE_IF_CASTING
                         DoCastVictim(SPELL_SHOOT);
                         events.ScheduleEvent(EVENT_SHOOT, urand(8500, 15500));
                         break;
@@ -9077,27 +9080,27 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_SHADOW_BOLT:
                     {
-                        RESCHEDULE_IF_CASTING
                         DoCastVictim(SPELL_SHADOW_BOLT);
                         events.ScheduleEvent(EVENT_SHADOW_BOLT, urand(4000, 6500));
                         break;
                     }
                     case EVENT_SHADOW_STRIDE:
                     {
-                        RESCHEDULE_IF_CASTING
                         DoCastVictim(SPELL_SHADOW_STRIDE);
                         events.ScheduleEvent(EVENT_SHADOW_STRIDE, urand(25000, 35000));
                         break;
                     }
                     case EVENT_SHADOW_FISSURE:
                     {
-                        RESCHEDULE_IF_CASTING
                         DoCastVictim(SPELL_SHADOW_FISSURE);
                         events.ScheduleEvent(EVENT_SHADOW_FISSURE, urand(12500, 21000));
                         break;
@@ -9211,13 +9214,15 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CAST_FIREBALL:
                     {
-                        RESCHEDULE_IF_CASTING
                         if (Player* aeonaxxRider = me->FindNearestPlayer(80.0f, true))
                         {
                             if (aeonaxxRider->GetVehicleBase() && aeonaxxRider->GetVehicleBase()->GetEntry() == NPC_ENTRY_AEONAXX)
@@ -9635,13 +9640,15 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CHECK_TARGET_DEBUFF:
                     {
-                        RESCHEDULE_IF_CASTING;
                         std::list<Unit*> targets;
                         Trinity::AnyUnitInObjectRangeCheck u_check(me, 45.0f);
                         Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
@@ -10097,6 +10104,152 @@ public:
     }
 };
 
+class npc_cold_water_crayfish : public CreatureScript
+{
+public:
+    npc_cold_water_crayfish() : CreatureScript("npc_cold_water_crayfish")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_CRAYFISH_CATCH    = 99424
+    };
+
+    enum eventId
+    {
+        EVENT_CHECK_VEHICLE     = 1
+    };
+
+    struct npc_cold_water_crayfishAI : public ScriptedAI
+    {
+        npc_cold_water_crayfishAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* owner)
+        {
+            if (owner->HasAura(SPELL_CRAYFISH_CATCH))
+                me->EnterVehicle(owner, urand(0, 7));
+            events.ScheduleEvent(EVENT_CHECK_VEHICLE, 5000);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_VEHICLE:
+                    {
+                        if (Unit* vehicle = me->GetVehicleBase())
+                        {
+                            events.RescheduleEvent(EVENT_CHECK_VEHICLE, 2000);
+                            break;
+                        }
+                        else
+                        {
+                            events.CancelEvent(EVENT_CHECK_VEHICLE);
+                            me->DespawnOrUnsummon(1000);
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_cold_water_crayfishAI(creature);
+    }
+};
+
+class npc_cook_ghilm : public CreatureScript
+{
+public:
+    npc_cook_ghilm() : CreatureScript("npc_cook_ghilm")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_REMOVE_AURAS      = 99466,
+        SPELL_CRAYFISH_CATCH    = 99424
+    };
+
+    enum eventId
+    {
+        EVENT_CHECK_CRAYFISH    = 1
+    };
+
+    struct npc_cook_ghilmAI : public ScriptedAI
+    {
+        npc_cook_ghilmAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_CHECK_CRAYFISH, 5000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_CRAYFISH:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 6.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(6.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if ((*itr)->HasAura(SPELL_CRAYFISH_CATCH))
+                                {
+                                    me->SetFacingToObject((*itr));
+                                    (*itr)->CastSpell((*itr), SPELL_REMOVE_AURAS, true);
+                                    (*itr)->ToPlayer()->KilledMonsterCredit(53551);
+                                    Talk(0);
+                                    me->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_CRAYFISH, 3000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_cook_ghilmAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -10200,4 +10353,6 @@ void AddSC_npcs_special()
     new npc_generic_trigger_lab();
     new npc_muddy_tracks();
     new npc_flameward_activated();
+    new npc_cold_water_crayfish();
+    new npc_cook_ghilm();
 }

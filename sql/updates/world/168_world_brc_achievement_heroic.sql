@@ -1,0 +1,1 @@
+UPDATE `achievement_criteria_data` SET `type`=11 WHERE `criteria_id` IN (5282, 5283, 5284);

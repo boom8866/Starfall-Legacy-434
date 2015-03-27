@@ -33,10 +33,6 @@
 #include "Player.h"
 #include "AchievementMgr.h"
 
-
-/* Automatic rescheduling if creature is already casting */
-#define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
-
 // Quest 28250: Thieving Little Pluckers
 class spell_uldum_hammer : public SpellScriptLoader
 {
@@ -435,7 +431,8 @@ public:
         EVENT_AMBUSHER_CAMERA,
         EVENT_TELEPORT_CAMERA,
         EVENT_REMOVE_PASSENGERS,
-        EVENT_CHECK_OWNER
+        EVENT_CHECK_OWNER,
+        EVENT_FADE_SECOND
     };
 
     enum npcId
@@ -609,8 +606,14 @@ public:
                         me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveJump(-8950.93f, -1646.22f, 98.93f, 30.0f, 30.0f, POINT_AMBUSHER);
                         events.ScheduleEvent(EVENT_TELEPORT_CAMERA, 10000);
+                        events.ScheduleEvent(EVENT_FADE_SECOND, 8000);
+                        break;
+                    }
+                    case EVENT_FADE_SECOND:
+                    {
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
-                            playerOwner->CastWithDelay(8000, playerOwner, SPELL_FADE_TO_BLACK, true);
+                            playerOwner->CastSpell(playerOwner, SPELL_FADE_TO_BLACK, true);
+                        events.CancelEvent(EVENT_FADE_SECOND);
                         break;
                     }
                     case EVENT_TELEPORT_CAMERA:
@@ -6589,7 +6592,6 @@ public:
                 {
                     case EVENT_CAST_SHADOW_BOLT:
                     {
-                        RESCHEDULE_IF_CASTING
                         if (Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 0, 50.0f, true))
                             DoCast(target, SPELL_SHADOW_BOLT);
                         events.RescheduleEvent(EVENT_CAST_SHADOW_BOLT, 3100);
@@ -6597,7 +6599,6 @@ public:
                     }
                     case EVENT_CAST_PACT_OF_DARKNESS:
                     {
-                        RESCHEDULE_IF_CASTING
                         if (Unit* target = me->getVictim())
                         {
                             if (me->IsWithinCombatRange(target, 7.0f))
@@ -6608,7 +6609,6 @@ public:
                     }
                     case EVENT_CAST_DARK_RUNE:
                     {
-                        RESCHEDULE_IF_CASTING
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, false))
                             DoCast(target, SPELL_DARK_RUNE);
                         events.RescheduleEvent(EVENT_CAST_DARK_RUNE, 6500);
@@ -6707,20 +6707,21 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CAST_BLAZING_ERUPTION:
                     {
-                        RESCHEDULE_IF_CASTING
                         DoCast(SPELL_BLAZING_ERUPTION);
                         events.RescheduleEvent(EVENT_CAST_BLAZING_ERUPTION, urand(8500, 12500));
                         break;
                     }
                     case EVENT_CAST_BURNING_GAZE_SUMMON:
                     {
-                        RESCHEDULE_IF_CASTING
                         events.RescheduleEvent(EVENT_CAST_BURNING_GAZE_SUMMON, urand(12000, 18000));
                         me->CastStop();
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 75.0f, false))
@@ -6730,7 +6731,6 @@ public:
                     }
                     case EVENT_CAST_BURNING_GAZE:
                     {
-                        RESCHEDULE_IF_CASTING
                         events.CancelEvent(EVENT_CAST_BURNING_GAZE);
                         if (Creature* burningGaze = me->FindNearestCreature(NPC_BURNING_GAZE, 200.0f, true))
                         {
@@ -9873,7 +9873,6 @@ class spell_activate_guardian : public SpellScriptLoader
                         titanicGuardian->AI()->AttackStart(caster);
                         titanicGuardian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         titanicGuardian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        caster->AddThreat(titanicGuardian, 1.0f);
                     }
                 }
             }
@@ -9953,13 +9952,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_BLAZING_ERUPTION:
                     {
-                        RESCHEDULE_IF_CASTING;
                         me->SetControlled(true, UNIT_STATE_ROOT);
                         me->CastStop();
                         DoCast(SPELL_BLAZING_ERUPTION);
@@ -9975,7 +9976,6 @@ public:
                     }
                     /*case EVENT_BURNING_GAZE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_BURNING_GAZE, urand(8000, 21000));
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_BURNING_GAZE_SUMMON);
@@ -9984,7 +9984,6 @@ public:
                     }*/
                     case EVENT_SUMMON_METEOR:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_SUMMON_METEOR, urand(10000, 25000));
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_SUMMON_METEOR);
@@ -9992,7 +9991,6 @@ public:
                     }
                     /*case EVENT_ENABLE_GAZES:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.CancelEvent(EVENT_ENABLE_GAZES);
                         DoCast(SPELL_BURNING_GAZE);
                         break;
@@ -10882,13 +10880,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CAST_BLAZING_ERUPTION:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_CAST_BLAZING_ERUPTION, 8000);
                         DoCast(SPELL_BLAZING_ERUPTION);
                         break;
@@ -11810,7 +11810,7 @@ public:
                     {
                         events.Reset();
                         me->CastSpell(me, SPELL_EXPLODE_AND_BURN);
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveJump(me->GetPositionX()-2, me->GetPositionY()+10, me->GetPositionZ()-80, 16.5f, 16.5f, POINT_CRASHED);
                         me->DespawnOrUnsummon(10000);
                     }
@@ -11849,7 +11849,7 @@ public:
                         events.CancelEvent(EVENT_FOLLOW_INVOKER);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
-                            me->GetMotionMaster()->Clear();
+                            me->GetMotionMaster()->MovementExpired(false);
                             me->GetMotionMaster()->MoveFollow(playerOwner, 20.0f, urand(0, 45));
                             events.ScheduleEvent(EVENT_RESTORE_SPEED, 2000);
                         }
@@ -12397,7 +12397,7 @@ public:
                     if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         TalkWithDelay(1000, 13, playerOwner->GetGUID());
                     me->SetWalk(false);
-                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MovementExpired(false);
                     me->GetMotionMaster()->MovePoint(POINT_AWAY, -10602.01f, 977.27f, 34.74f);
                     me->DespawnOrUnsummon(10000);
                     break;
@@ -12574,7 +12574,7 @@ public:
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ += 30.0f;
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                         me->SetCanFly(true);
                         me->SetDisableGravity(true);
@@ -12716,7 +12716,7 @@ public:
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ += 30.0f;
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                         me->SetCanFly(true);
                         me->SetDisableGravity(true);
@@ -13828,7 +13828,7 @@ public:
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ += 30.0f;
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                         me->SetCanFly(true);
                         me->SetDisableGravity(true);
@@ -13971,7 +13971,6 @@ public:
                     }
                     case EVENT_FIRE_SPIT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_FIRE_SPIT, urand(6000, 12000));
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_FIRE_SPIT);
@@ -13979,7 +13978,6 @@ public:
                     }
                     case EVENT_BLACK_CLEAVE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_BLACK_CLEAVE, urand(4000, 12500));
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_BLACK_CLEAVE);
@@ -13987,7 +13985,6 @@ public:
                     }
                     case EVENT_BLAST_WAVE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_BLAST_WAVE, urand(5500, 10500));
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_BLAST_WAVE);
@@ -13995,7 +13992,6 @@ public:
                     }
                     case EVENT_TAIL_SWEEP:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_TAIL_SWEEP, urand(16500, 21250));
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_TAIL_SWEEP);
@@ -14003,7 +13999,6 @@ public:
                     }
                     case EVENT_RUPTURE_LINE:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_RUPTURE_LINE, urand(8500, 9500));
                         if (Unit* victim = me->getVictim())
                             DoCast(victim, SPELL_RUPTURE_LINE);
@@ -14709,7 +14704,7 @@ public:
                 case 17:
                 {
                     SetEscortPaused(true);
-                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MovementExpired(false);
                     me->GetMotionMaster()->MoveJump(-8996.05f, 27.22f, -20.97f, 12.5f, 12.5f, POINT_JUMP_1);
                     events.ScheduleEvent(EVENT_JUMP_2, 4000);
                     break;
@@ -15819,7 +15814,7 @@ public:
                     case EVENT_ATTACK:
                     {
                         events.RescheduleEvent(EVENT_ATTACK, urand(4500, 12000));
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
                             std::list<Unit*> targets;
@@ -15839,7 +15834,7 @@ public:
                     case EVENT_FLEE:
                     {
                         events.RescheduleEvent(EVENT_FLEE, urand(8500, 18500));
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
                             std::list<Unit*> targets;
@@ -15923,13 +15918,15 @@ public:
         {
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_FORCE_PUNCH:
                     {
-                        RESCHEDULE_IF_CASTING;
                         events.RescheduleEvent(EVENT_FORCE_PUNCH, urand(17900, 18500));
                         DoCast(SPELL_FORCE_PUNCH);
                         break;
@@ -16241,7 +16238,7 @@ public:
                         me->SetStandState(UNIT_STAND_STATE_STAND);
                         me->GetMotionMaster()->MovePoint(POINT_COFFER, -9297.09f, 483.28f, 242.81f);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
-                            Talk(0, playerOwner->GetGUID());
+                            Talk(0);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
                             std::list<Unit*> targets;
@@ -17292,7 +17289,7 @@ public:
                         events.CancelEvent(EVENT_CAST_BEAM);
                         events.CancelEvent(EVENT_INIT_COFFER);
                         me->CastStop();
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         DoCastAOE(SPELL_ENERGY_BEAM);
                         events.ScheduleEvent(EVENT_KILL_ALL, 5000);
                         break;

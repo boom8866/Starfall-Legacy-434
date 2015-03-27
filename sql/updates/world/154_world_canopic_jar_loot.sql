@@ -1,0 +1,1 @@
+UPDATE `item_loot_template` SET `groupid`=1 WHERE `entry`=64657 AND `item`=67538;

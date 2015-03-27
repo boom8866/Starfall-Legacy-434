@@ -41,6 +41,7 @@ enum Events
     EVENT_SEAR,
     EVENT_SHIELD_OF_LIGHT,
     EVENT_ACHIEVEMENT_FAIL,
+    EVENT_CHECK_SONG
 };
 
 enum Spells
@@ -96,8 +97,24 @@ public:
             _Reset();
         }
 
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+        {
+            // Interrupt and Silence should remove Reverberating Hymn without the shield of light
+            if (spell->Effects[EFFECT_0].Effect == SPELL_EFFECT_INTERRUPT_CAST ||
+                spell->Effects[EFFECT_1].Effect == SPELL_EFFECT_INTERRUPT_CAST ||
+                spell->Effects[EFFECT_2].Effect == SPELL_EFFECT_INTERRUPT_CAST ||
+                spell->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_SILENCE ||
+                spell->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOD_SILENCE ||
+                spell->Effects[EFFECT_2].ApplyAuraName == SPELL_AURA_MOD_SILENCE)
+                if (!me->HasAura(SPELL_SHIELD_OF_LIGHT))
+                    me->RemoveAurasDueToSpell(SPELL_REVERBERATING_HYMN);
+        }
+
         void EnterCombat(Unit* /*who*/)
         {
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
             Talk(SAY_AGGRO);
             _EnterCombat();
@@ -173,14 +190,6 @@ public:
                 events.CancelEvent(EVENT_BURNING_LIGHT);
                 events.ScheduleEvent(EVENT_SHIELD_OF_LIGHT, 1000);
             }
-            else if (me->HasAura(SPELL_REVERBERATING_HYMN) && !me->HasAura(SPELL_SHIELD_OF_LIGHT))
-            {
-                me->RemoveAurasDueToSpell(SPELL_REVERBERATING_HYMN);
-                me->SetReactState(REACT_AGGRESSIVE);
-                events.CancelEvent(EVENT_ACHIEVEMENT_FAIL);
-                events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
-                events.ScheduleEvent(EVENT_BURNING_LIGHT, 12000);
-            }
         }
 
         void DoAction(int32 action)
@@ -191,7 +200,11 @@ public:
                 if (!_beacons)
                 {
                     me->RemoveAura(SPELL_SHIELD_OF_LIGHT);
+                    me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
+                    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, false);
                     Talk(EMOTE_UNSHIELD);
+                    events.ScheduleEvent(EVENT_CHECK_SONG, 1000);
                 }
             }
         }
@@ -285,6 +298,23 @@ public:
                     case EVENT_ACHIEVEMENT_FAIL:
                         _achievement = false;
                         break;
+                    case EVENT_CHECK_SONG:
+                    {
+                        if (!me->HasAura(SPELL_REVERBERATING_HYMN) && !me->HasAura(SPELL_SHIELD_OF_LIGHT))
+                        {
+                            events.CancelEvent(EVENT_CHECK_SONG);
+                            events.CancelEvent(EVENT_ACHIEVEMENT_FAIL);
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+                            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
+                            events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
+                            events.ScheduleEvent(EVENT_BURNING_LIGHT, 12000);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_SONG, 1000);
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -356,11 +386,20 @@ class spell_anhuur_disable_beacon_beams : public SpellScriptLoader
             {
                 if (Unit* caster = GetCaster())
                 {
-                    if (GameObject* beacon = caster->FindNearestGameObject(GO_ANHUURS_LEFT_BEACON, 10.0f))
-                        beacon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-                    else if (GameObject* beacon = caster->FindNearestGameObject(GO_ANHUURS_RIGHT_BEACON, 10.0f))
-                        beacon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-
+                    if (!caster->GetMap()->IsHeroic())
+                    {
+                        if (GameObject* beacon = caster->FindNearestGameObject(GO_ANHUURS_LEFT_BEACON, 10.0f))
+                            beacon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        else if (GameObject* beacon = caster->FindNearestGameObject(GO_ANHUURS_RIGHT_BEACON, 10.0f))
+                            beacon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    }
+                    else
+                    {
+                        if (GameObject* beacon = caster->FindNearestGameObject(GO_ANHUURS_LEFT_BEACON_H, 10.0f))
+                            beacon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        else if (GameObject* beacon = caster->FindNearestGameObject(GO_ANHUURS_RIGHT_BEACON_H, 10.0f))
+                            beacon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    }
 
                     if (InstanceMap* instance = caster->GetMap()->ToInstanceMap())
                         if (InstanceScript* const script = instance->GetInstanceScript())

@@ -1891,6 +1891,38 @@ protected:
     bool messageExpired;
 };
 
+class Areatrigger_at_helms_bed_lake : public AreaTriggerScript
+{
+public:
+    Areatrigger_at_helms_bed_lake() : AreaTriggerScript("at_helms_bed_lake")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_GRIMNURS_BAIT     = 99435,
+        SPELL_CRAYFISH_CATCH    = 99424
+    };
+
+    enum npcId
+    {
+        NPC_COLD_WATER_CRAYFISH     = 53540
+    };
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+    {
+        if (player->HasAura(SPELL_GRIMNURS_BAIT) && !player->HasAura(SPELL_CRAYFISH_CATCH))
+        {
+            player->CastSpell(player, SPELL_CRAYFISH_CATCH, true);
+            player->SummonCreature(NPC_COLD_WATER_CRAYFISH, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+            player->SummonCreature(NPC_COLD_WATER_CRAYFISH, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+            player->SummonCreature(NPC_COLD_WATER_CRAYFISH, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+            player->SummonCreature(NPC_COLD_WATER_CRAYFISH, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+        }
+        return false;
+    }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -1933,4 +1965,5 @@ void AddSC_areatrigger_scripts()
     new Areatrigger_at_deadmines_votp();
     new Areatrigger_at_crystal_formations();
     new Areatrigger_at_sfk_stone_sleeper();
+    new Areatrigger_at_helms_bed_lake();
 }

@@ -127,7 +127,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
         case SPELLFAMILY_WARLOCK:
         {
             // Curses/etc
-            if ((spellproto->SpellFamilyFlags[0] & 0x80000000) || (spellproto->SpellFamilyFlags[1] & 0x200))
+            if ((spellproto->SpellFamilyFlags[0] & 0x80000000) || (spellproto->SpellFamilyFlags[1] & 0x200) || spellproto->Id == 18223)
                 return DIMINISHING_LIMITONLY;
             // Seduction
             else if (spellproto->SpellFamilyFlags[1] & 0x10000000)
@@ -3368,10 +3368,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 12668:
                 spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
                 break;
-            case 30069: // Blood Frenzy
-            case 30070:
-                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(3);
-                break;
             // NAXXRAMAS SPELLS
             //
             case 29125: // Hopeless (Razuvious)
@@ -3883,6 +3879,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 75322: // Reverberating Hymn
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_OTHER_CASTS;
                 break;
+            case 75591: // Divine Reckoning
+            case 94950:
+                spellInfo->Effects[EFFECT_0].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_7_YARDS);
+                break;
             case 75323: // Reverberating Hymn Periodic
             case 90008:
                 // Aura is refreshed at 3 seconds, and the tick should happen at the fourth.
@@ -4074,6 +4074,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 54424: // Fel Intelligence
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
                 spellInfo->Effects[EFFECT_1].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
+                break;
+            case 89751: // Felstorm
+            case 89753:
+                spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
                 break;
             case 7814:  // Lash of Pain
                 spellInfo->RecoveryTime = 2000;
@@ -4326,6 +4330,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->RecoveryTime = 0;
                 spellInfo->StartRecoveryTime = 0;
                 break;
+            case 34026: // Kill Command
+                spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MELEE;
+                break;
             // SPELLS QUESTS
             case 95869: // Wyvern Ride Aura [INTERNAL]
                 spellInfo->Effects[EFFECT_1].Effect = 0;
@@ -4363,6 +4370,8 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 89314: // Orb of the Stars
             case 85720: // Attack Signal
             case 86499: // Water of Life
+            case 99511: // Simulate Alliance Presence
+            case 99508: // Throw Frog
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 83836: // Summon Twilight Striker
@@ -5031,6 +5040,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 79021: // Seismic Shard
                 spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
                 break;
+            // Throne of the Tides
+            // * Lady Naz'Jar
+            case 75700: // Geyser N
+            case 91469: // Geyser H
+                spellInfo->Effects[EFFECT_2].Effect = 0;
+                break;
             // The Lost City of the Tol'Vir
             // * Lockmaw and Augh
             case 84799: // Paralytic Blow Dart
@@ -5140,10 +5155,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92412: // Sonar Pulse HC
             case 92413:
                 spellInfo->MaxAffectedTargets = 7;
-                break;
-            // Throne of the Tides
-            case 75700: // Geyser
-                spellInfo->Effects[EFFECT_2].Effect = 0;
                 break;
             case 76609: // Void Rip
                 spellInfo->Effects[EFFECT_0].MiscValue = 200;

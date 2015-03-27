@@ -2408,7 +2408,15 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* victim, WeaponAttackTy
     float miss_chance = MeleeSpellMissChance(victim, attType, 0);
 
     // Critical hit chance
-    float crit_chance = GetUnitCriticalChance(attType, victim);
+    Unit const* caster = this;
+    if (isPet() && GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER)
+    {
+        uint8 ownerClass = GetOwner()->getClass();
+        if (ownerClass != CLASS_MAGE && ownerClass != CLASS_SHAMAN)
+            caster = GetOwner();
+    }
+
+    float crit_chance = caster->GetUnitCriticalChance(attType, victim);
 
     // stunned target cannot dodge and this is check in GetUnitDodgeChance() (returned 0 in this case)
     float dodge_chance = victim->GetUnitDodgeChance();
@@ -8344,6 +8352,32 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     *handled = true;
                     return false;
                 }
+                // Will of the Necropolis
+                case 52284:
+                case 81163:
+                case 81164:
+                {
+                    *handled = true;
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+                    if (ToPlayer()->HasSpellCooldown(81162))
+                        return false;
+                    if (ToPlayer()->GetHealth() > (ToPlayer()->GetMaxHealth() * 0.30f))
+                        return false;
+
+                    // Check correct talent rank and apply right reduction %
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DEATHKNIGHT, 1762, 0))
+                    {
+                        int32 bp0 = aurEff->GetAmount();
+                        CastCustomSpell(this, 81162, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                        ToPlayer()->AddSpellCooldown(81162, 0, time(NULL) + 45);
+                    }
+
+                    // Reset Rune Tap cooldown
+                    ToPlayer()->RemoveSpellCooldown(48982, true);
+                    ToPlayer()->SendClearCooldown(48982, this);
+                    return true;
+                }
             }
             return false;
         }
@@ -9761,12 +9795,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         // Maelstrom Weapon
         case 53817:
         {
-            // has rank dependant proc chance, ignore too often cases
-            // PPM = 2.5 * (rank of talent),
             uint32 rank = auraSpellInfo->GetRank();
-            // 5 rank -> 100% 4 rank -> 80% and etc from full rate
-            if (!roll_chance_i(20*rank))
+            if (!roll_chance_i(25 * rank))
                 return false;
+
             // Item - Shaman T10 Enhancement 4P Bonus
             if (AuraEffect const* aurEff = GetAuraEffect(70832, 0))
                 if (Aura const* maelstrom = GetAura(53817))
@@ -9822,12 +9854,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             // check if we're procced by Claw, Bite or Smack (need to use the spell icon ID to detect it)
             if (!(procSpell->SpellIconID == 262 || procSpell->SpellIconID == 1680 || procSpell->SpellIconID == 473))
-                return false;
-            break;
-        }
-        case 81162: // Will of the necropolis - proc only if 30% health
-        {
-            if(GetHealth() - damage > CountPctFromMaxHealth(30))
                 return false;
             break;
         }
@@ -12819,12 +12845,15 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                         if (Player* player = ToPlayer())
                         {
                             float mod = 1.0f;
+                            int32 add = 12;
                             Item* mainHand = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
                             if (mainHand && (mainHand->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER))
+                            {
                                 mod = 1.447f;
-
+                                add = 12 * player->getLevel();
+                            }
                             int32 weaponDmg = CalculateDamage(BASE_ATTACK, true, false) * (1.9f * mod);
-                            pdamage = uint32(weaponDmg);
+                            pdamage = uint32(weaponDmg + add);
                         }
                         break;
                     }
@@ -14338,6 +14367,9 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
 
 void Unit::setDeathState(DeathState s)
 {
+    // Death state needs to be updated before RemoveAllAurasOnDeath() is called, to prevent entering combat
+    m_deathState = s;
+
     if (s != ALIVE && s != JUST_RESPAWNED)
     {
         CombatStop();
@@ -14417,8 +14449,6 @@ void Unit::setDeathState(DeathState s)
     }
     else if (s == JUST_RESPAWNED)
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE); // clear skinnable for creature and player (at battleground)
-
-    m_deathState = s;
 }
 
 /*########################################
@@ -14426,14 +14456,14 @@ void Unit::setDeathState(DeathState s)
 ########       AGGRO SYSTEM       ########
 ########                          ########
 ########################################*/
-bool Unit::CanHaveThreatList() const
+bool Unit::CanHaveThreatList(bool skipAliveCheck) const
 {
     // only creatures can have threat list
     if (GetTypeId() != TYPEID_UNIT)
         return false;
 
     // only alive units can have threat list
-    if (!isAlive() || isDying())
+    if (!skipAliveCheck && !isAlive())
         return false;
 
     // totems can not have threat list
@@ -14472,7 +14502,7 @@ void Unit::AddThreat(Unit* victim, float fThreat, SpellSchoolMask schoolMask, Sp
 
 void Unit::DeleteThreatList()
 {
-    if (CanHaveThreatList() && !m_ThreatManager.isThreatListEmpty())
+    if (CanHaveThreatList(true) && !m_ThreatManager.isThreatListEmpty())
         SendClearThreatListOpcode();
     m_ThreatManager.clearReferences();
 }

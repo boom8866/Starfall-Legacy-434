@@ -58,9 +58,7 @@ std::string const DefaultPlayerName = "<none>";
 
 bool MapSessionFilter::Process(WorldPacket* packet)
 {
-    Opcodes opcode = DropHighBytes(packet->GetOpcode());
-    OpcodeHandler const* opHandle = opcodeTable[opcode];
-
+    OpcodeHandler const* opHandle = opcodeTable[packet->GetOpcode()];
     //let's check if our opcode can be really processed in Map::Update()
     if (opHandle->ProcessingPlace == PROCESS_INPLACE)
         return true;
@@ -81,8 +79,7 @@ bool MapSessionFilter::Process(WorldPacket* packet)
 //OR packet handler is not thread-safe!
 bool WorldSessionFilter::Process(WorldPacket* packet)
 {
-    Opcodes opcode = DropHighBytes(packet->GetOpcode());
-    OpcodeHandler const* opHandle = opcodeTable[opcode];
+    OpcodeHandler const* opHandle = opcodeTable[packet->GetOpcode()];
     //check if packet handler is supposed to be safe
     if (opHandle->ProcessingPlace == PROCESS_INPLACE)
         return true;
@@ -465,8 +462,15 @@ void WorldSession::LogoutPlayer(bool save)
             DoLootRelease(lguid);
 
         ///- If the player just died before logging out, make him appear as a ghost
-        //FIXME: logout must be delayed in case lost connection with client in time of combat
-        if (_player->GetDeathTimer())
+        if (_player->isAlive() && _player->isInCombat())
+        {
+            _player->Kill(_player, false);
+            _player->RemoveAurasByType(SPELL_AURA_SPIRIT_OF_REDEMPTION);
+            _player->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
+            _player->BuildPlayerRepop();
+            _player->RepopAtGraveyard();
+        }
+        else if (_player->GetDeathTimer())
         {
             _player->getHostileRefManager().deleteReferences();
             _player->BuildPlayerRepop();

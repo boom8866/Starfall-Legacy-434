@@ -1118,6 +1118,19 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
             continue;
         }
 
+        // This switch will disable scripted achievements, add entries here to prevent achievement unlock just killing
+        switch (achievement->ID)
+        {
+            /* Blackrock Caverns */
+            case 5281:  // Crushing Bones and Cracking Skulls
+            case 5282:  // Arrested Developement
+            case 5283:  // Too Hot To Handle
+            case 5284:  // Ascendant Descending
+                continue;
+            default:
+                break;
+        }
+
         if (!CanUpdateCriteria(achievementCriteria, achievement, miscValue1, miscValue2, miscValue3, unit, referencePlayer))
             continue;
 

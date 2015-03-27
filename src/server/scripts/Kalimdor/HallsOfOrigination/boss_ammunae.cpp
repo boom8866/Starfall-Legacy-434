@@ -2,9 +2,6 @@
 #include "ScriptedCreature.h"
 #include "halls_of_origination.h"
 
-/* Automatic rescheduling if creature is already casting */
-#define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
-
 enum Spells
 {
     //Ammunae
@@ -792,13 +789,15 @@ public:
 
             events.Update(diff);
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_ENTANGLING_SHOT:
                     {
-                        RESCHEDULE_IF_CASTING;
                         me->StopMoving();
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 125.0f, true))
                             DoCast(target, SPELL_ENTANGLING_SHOT);
@@ -806,7 +805,6 @@ public:
                     }
                     case EVENT_TRANQUILLITY:
                     {
-                        RESCHEDULE_IF_CASTING;
                         me->StopMoving();
                         DoCast(SPELL_TRANQUILLITY);
                         events.RescheduleEvent(EVENT_TRANQUILLITY, urand(35000, 40000));

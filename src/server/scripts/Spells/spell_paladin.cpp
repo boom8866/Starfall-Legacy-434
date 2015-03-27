@@ -1912,7 +1912,7 @@ public:
             {
                 if (beaconOwner->IsWithinLOSInMap(owner))
                 {
-                    int32 mod = 100;
+                    int32 mod = 0;
 
                     switch (eventInfo.GetDamageInfo()->GetSpellInfo()->Id)
                     {
@@ -1928,12 +1928,16 @@ public:
                         case 635:   // Holy Light
                             mod = 100; // 100% heal from Holy Light
                             break;
+                        case 82327: // Holy Radiance
+                        case 86452:
+                            mod = 0;
+                            break;
                         default:
                             return;
                     }
 
                     // False when target of heal is beaconed
-                    if (beaconOwner == healTarget)
+                    if (beaconOwner == healTarget || mod == 0)
                         return;
 
                     int32 basepoints0 = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), mod);
