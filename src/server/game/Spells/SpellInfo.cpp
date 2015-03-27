@@ -2623,6 +2623,11 @@ bool SpellInfo::IsMastery() const
     return SPELL_ATTR8_MASTERY == (SPELL_ATTR8_MASTERY & AttributesEx8);
 }
 
+bool SpellInfo::IsInterruptSpell() const
+{
+    return (HasEffect(SPELL_EFFECT_INTERRUPT_CAST) || Mechanic & MECHANIC_INTERRUPT);
+}
+
 uint32 SpellInfo::_GetExplicitTargetMask() const
 {
     bool srcSet = false;
