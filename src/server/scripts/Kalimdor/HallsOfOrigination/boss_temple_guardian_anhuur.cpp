@@ -310,6 +310,7 @@ public:
                             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
                             events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
                             events.ScheduleEvent(EVENT_BURNING_LIGHT, 12000);
+                            break;
                         }
                         events.RescheduleEvent(EVENT_CHECK_SONG, 1000);
                         break;
