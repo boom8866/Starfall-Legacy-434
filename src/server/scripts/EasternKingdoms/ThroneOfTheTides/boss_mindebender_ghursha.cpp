@@ -496,6 +496,7 @@ public:
                             DoCast(target, DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC));
                             events.ScheduleEvent(EVENT_KILL_PLAYER_HC, 30000);
                         }
+                        events.RescheduleEvent(EVENT_ENSLAVE, 30000);
                         break;
                     }
                     case EVENT_ABSORB_MAGIC:
