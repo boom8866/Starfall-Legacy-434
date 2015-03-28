@@ -1143,8 +1143,6 @@ public:
                         Creature* tempMushroom = (*i);
                         if (tempMushroom)
                         {
-                            tempMushroom->GetPosition(&pos);
-
                             if (player->HasAura(DRUID_TALENT_FUNGAL_GROWTH_1))  // Fungal Growth Rank 1
                                 player->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), DRUID_SPELL_FUNGAL_GROWTH_1, false);
                             else if (player->HasAura(DRUID_TALENT_FUNGAL_GROWTH_2))     // Fungal Growth Rank 2

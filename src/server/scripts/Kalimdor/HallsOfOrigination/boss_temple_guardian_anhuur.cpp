@@ -94,6 +94,7 @@ public:
         void Reset()
         {
             _Reset();
+            MakeInterruptable(false);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -131,6 +132,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
+            MakeInterruptable(false);
             _DespawnAtEvade();
         }
 
@@ -156,6 +158,33 @@ public:
             }
         }
 
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+        {
+            if (spell->IsInterruptSpell() && me->HasAura(SPELL_REVERBERATING_HYMN))
+            {
+                me->RemoveAurasDueToSpell(SPELL_REVERBERATING_HYMN);
+                MakeInterruptable(false);
+                events.Reset();
+                me->SetReactState(REACT_AGGRESSIVE);
+                events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
+                events.ScheduleEvent(EVENT_BURNING_LIGHT, 12000);
+            }
+        }
+
+        void MakeInterruptable(bool apply)
+        {
+            if (apply)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
+            }
+            else
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            }
+        }
+
         void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
             if ((me->HealthBelowPct(66) && _shieldCount == 0) ||
@@ -173,14 +202,6 @@ public:
                 events.CancelEvent(EVENT_BURNING_LIGHT);
                 events.ScheduleEvent(EVENT_SHIELD_OF_LIGHT, 1000);
             }
-            else if (me->HasAura(SPELL_REVERBERATING_HYMN) && !me->HasAura(SPELL_SHIELD_OF_LIGHT))
-            {
-                me->RemoveAurasDueToSpell(SPELL_REVERBERATING_HYMN);
-                me->SetReactState(REACT_AGGRESSIVE);
-                events.CancelEvent(EVENT_ACHIEVEMENT_FAIL);
-                events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
-                events.ScheduleEvent(EVENT_BURNING_LIGHT, 12000);
-            }
         }
 
         void DoAction(int32 action)
@@ -190,6 +211,7 @@ public:
                 --_beacons;
                 if (!_beacons)
                 {
+                    MakeInterruptable(true);
                     me->RemoveAura(SPELL_SHIELD_OF_LIGHT);
                     Talk(EMOTE_UNSHIELD);
                 }

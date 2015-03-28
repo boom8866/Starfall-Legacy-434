@@ -4072,6 +4072,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 75322: // Reverberating Hymn
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_OTHER_CASTS;
                 break;
+            case 75591: // Divine Reckoning
+            case 94950:
+                spellInfo->Effects[EFFECT_0].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_7_YARDS);
+                break;
             case 75323: // Reverberating Hymn Periodic
             case 90008:
                 // Aura is refreshed at 3 seconds, and the tick should happen at the fourth.

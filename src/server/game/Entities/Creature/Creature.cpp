@@ -1358,6 +1358,8 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
         {
             SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, attackPower);
             SetModifierValue(UNIT_MOD_ATTACK_POWER_NEG, BASE_VALUE, 0);
+            SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED_POS, BASE_VALUE, rangedAttackPower);
+            SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED_NEG, BASE_VALUE, 0);
             break;
         }
         case CLASS_MAGE:

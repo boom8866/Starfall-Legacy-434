@@ -8370,6 +8370,8 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     {
                         int32 bp0 = aurEff->GetAmount();
                         CastCustomSpell(this, 81162, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                        // Rune Tap (free)
+                        CastSpell(this, 96171, true);
                         ToPlayer()->AddSpellCooldown(81162, 0, time(NULL) + 45);
                     }
 
@@ -17757,19 +17759,13 @@ void Unit::SetStunned(bool apply)
         SetTarget(0);
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
-        // MOVEMENTFLAG_ROOT cannot be used in conjunction with MOVEMENTFLAG_MASK_MOVING (tested 3.3.5a)
-        // this will freeze clients. That's why we remove MOVEMENTFLAG_MASK_MOVING before
-        // setting MOVEMENTFLAG_ROOT
-        RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
-        AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
-
         // Creature specific
         if (GetTypeId() != TYPEID_PLAYER)
             ToCreature()->StopMoving();
         else
             SetStandState(UNIT_STAND_STATE_STAND);
 
-        SendMoveRoot(0);
+        SetRooted(true);
 
         CastStop();
     }
@@ -17784,10 +17780,7 @@ void Unit::SetStunned(bool apply)
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
         if (!HasUnitState(UNIT_STATE_ROOT))         // prevent moving if it also has root effect
-        {
-            SendMoveUnroot(0);
-            RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
-        }
+            SetRooted(false);
     }
 }
 

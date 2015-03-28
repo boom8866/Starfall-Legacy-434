@@ -78,6 +78,14 @@ public:
                 events.ScheduleEvent(EVENT_WRACKING_PAIN, 14000);
         }
 
+        void JustDied(Unit* /*killer*/)
+        {
+            _JustDied();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WRACKING_PAIN);
+            Talk(SAY_DEATH);
+        }
+
         void SpellHitUnit(Unit* unit, const SpellEntry* spell)
         {
             if (unit->GetTypeId() == TYPEID_PLAYER)
@@ -111,6 +119,20 @@ public:
             }
         }
 
+        void MakeInterruptable(bool apply)
+        {
+            if (apply)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
+            }
+            else
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            }
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
@@ -140,8 +162,7 @@ public:
                     case EVENT_STAY_OF_EXECUTION:
                         if (IsHeroic())
                         {
-                            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
-                            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                            MakeInterruptable(true);
                             events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 8100);
                         }
                         Talk(SAY_STAY_EXECUTION);
@@ -151,14 +172,11 @@ public:
                         _canAttack = true;
                         break;
                     case EVENT_PAIN_AND_SUFFERING:
-                        if (!me->HasUnitState(UNIT_STATE_CASTING))
-                        {
-                            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
-                            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
-                        }
+                        MakeInterruptable(true);
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_PAIN_AND_SUFFERING);
 
+                        events.ScheduleEvent(EVENT_APPLY_IMMUNITY, IsHeroic() ? 6100 : 8100);
                         events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 26500);
                         break;
                     case EVENT_WRACKING_PAIN:
@@ -166,7 +184,6 @@ public:
                         events.ScheduleEvent(EVENT_WRACKING_PAIN, 26500);
                         break;
                     case EVENT_DARK_ARCHANGEL:
-                    {
                         Talk(SAY_ARCHANGEL);
                         me->CastStop();
                         DoCastAOE(SPELL_DARK_ARCHANGEL);
@@ -178,24 +195,14 @@ public:
                             wings->CastSpell(me, SPELL_RIDE_VEHICLE_HARDCODED);
                         break;
                     case EVENT_APPLY_IMMUNITY:
-                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
-                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+                        MakeInterruptable(true);
                         break;
-                    }
                     default:
                         break;
                 }
             }
             if (_canAttack)
                 DoMeleeAttackIfReady();
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
-            _JustDied();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WRACKING_PAIN);
-            Talk(SAY_DEATH);
         }
     };
     CreatureAI* GetAI(Creature *creature) const
@@ -258,7 +265,7 @@ class spell_sfk_pain_and_suffering : public SpellScriptLoader
             {
                 if (Unit* owner = GetOwner()->ToUnit())
                     if (Creature* ashbury = owner->FindNearestCreature(BOSS_BARON_ASHBURY, 100.0f, true))
-                        owner->CastSpell(ashbury, SPELL_PAIN_AND_SUFFERING_DUMMY, false);
+                        owner->CastSpell(ashbury, SPELL_PAIN_AND_SUFFERING_DUMMY, true);
 
                 uint64 damage;
                 damage = aurEff->GetBaseAmount() * aurEff->GetTickNumber();
