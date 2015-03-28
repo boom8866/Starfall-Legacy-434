@@ -1872,7 +1872,7 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                             for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
                             {
                                 // Damage spell
-                                (*itr)->CastWithDelay(1100, (*iter), 78777, true);
+                                (*itr)->GetOwner()->CastSpell((*iter), 78777, true);
                             }
 
                             // Suicide spell
