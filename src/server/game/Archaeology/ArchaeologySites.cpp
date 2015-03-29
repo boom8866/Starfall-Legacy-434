@@ -6,8 +6,8 @@
 enum DigSiteDist
 {
     DIST_FAR            = 10000,    // 100 yards
-    DIST_MED            = 900,     // 30 yards
-    DIST_CLOSE          = 25,       // 5 yards
+    DIST_MED            = 900,      // 30  yards
+    DIST_CLOSE          = 100,      // 10  yards
 };
 
 enum SurveyBot
@@ -19,10 +19,7 @@ enum SurveyBot
 
 void Archaeology::LoadSitesFromDB()
 {
-    QueryResult result;
-
-    result = CharacterDatabase.PQuery(
-        "select site, type, finds from character_archaeology_sites where guid=%u", _player->GetGUIDLow());
+    QueryResult result = CharacterDatabase.PQuery("select site, type, finds from character_archaeology_sites where guid=%u", _player->GetGUIDLow());
 
     if (!result)
         return;
@@ -79,7 +76,6 @@ void Archaeology::UseSite()
     if (dist > DIST_CLOSE)
     {
         uint32 goID;
-
         float angle = atan2(_site[position].y - _player->GetPositionY(), _site[position].x - _player->GetPositionX());
 
         if (dist < DIST_MED)
@@ -100,12 +96,13 @@ void Archaeology::UseSite()
 
         while (angle < 0)
             angle += 2 * M_PI;
+
         while (angle > 2 * M_PI)
             angle -= 2 * M_PI;
 
-        float x = _player->GetPositionX() + cos(angle) * 1.5f;
-        float y = _player->GetPositionY() + sin(angle) * 1.5f;
-        float z = _player->GetPositionZ();
+        float x      = _player->GetPositionX() + cos(angle) * 2.0f;
+        float y      = _player->GetPositionY() + sin(angle) * 2.0f;
+        float z      = _player->GetPositionZ();
         float ground = _player->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground, false, true);
 
         if (abs(z - ground) < 1.5f)
@@ -121,15 +118,14 @@ void Archaeology::UseSite()
     }
 
     // Spawn the correct Find Object Here
-    uint32 goId = sArchaeologyMgr->GetSiteType(_site[position].entry);
-
-    float x = _player->GetPositionX() + cos(_player->GetOrientation()) * 1.5f;
-    float y = _player->GetPositionY() + sin(_player->GetOrientation()) * 1.5f;
-    float z = _player->GetPositionZ();
+    uint32 goId  = sArchaeologyMgr->GetSiteType(_site[position].entry);
+    float x      = _player->GetPositionX() + cos(_player->GetOrientation() + M_PI) * 2.0f;
+    float y      = _player->GetPositionY() + sin(_player->GetOrientation() + M_PI) * 2.0f;
+    float z      = _player->GetPositionZ();
     float ground = _player->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground, false, true);
 
+    // Spawn object
     _player->SummonGameObject(goId, x, y, ground, 0, 0, 0, 0, 0, 60);
-
     (_site[position].state)++;
 
     if (_site[position].state >= DIGS_PER_SITE)
