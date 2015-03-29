@@ -6559,7 +6559,8 @@ public:
                     EnableTraps();
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                     me->AddAura(SPELL_ENTRY_TRAP_SNARE, me);
-                    TalkWithDelay(3000, 1, playerCharmer->GetGUID());
+                    if (playerCharmer && playerCharmer != NULL && playerCharmer->IsInWorld())
+                        TalkWithDelay(3000, 1, playerCharmer->GetGUID());
                     me->SetControlled(true, UNIT_STATE_ROOT);
                     events.ScheduleEvent(EVENT_SAND_BREATH, urand(5000, 7500));
                     events.ScheduleEvent(EVENT_STONE_SPIKE, 1000);
@@ -6743,7 +6744,8 @@ public:
                     EnableTraps();
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                     me->AddAura(SPELL_ENTRY_TRAP_SNARE, me);
-                    TalkWithDelay(3000, 1, playerCharmer->GetGUID());
+                    if (playerCharmer && playerCharmer != NULL && playerCharmer->IsInWorld())
+                        TalkWithDelay(3000, 1, playerCharmer->GetGUID());
                     me->SetControlled(true, UNIT_STATE_ROOT);
                     events.ScheduleEvent(EVENT_TWILIGHT_BREATH, urand(5000, 12500));
                     events.ScheduleEvent(EVENT_RIFT_BARRAGE, urand(3000, 6000));
@@ -6780,7 +6782,8 @@ public:
         {
             DisableTraps();
             me->setFaction(FACTION_FRIENDLY);
-            TalkWithDelay(1000, 2, playerCharmer->GetGUID());
+            if (playerCharmer && playerCharmer != NULL && playerCharmer->IsInWorld())
+                TalkWithDelay(1000, 2, playerCharmer->GetGUID());
             me->SummonGameObject(GO_ENTRY_FIRST_FRAGMENT_OF_THE_WORLD_PILLAR, 185.20f, -502.89f, 171.70f, 0, 0, 0, 0, 1, 120);
         }
 
@@ -7114,8 +7117,9 @@ public:
                 {
                     if (opalStonethrower->GetGUIDLow() == OPAL_STONETHROWER_GUID)
                     {
-                        if (playerCharmer->GetTypeId() == TYPEID_PLAYER)
-                            playerCharmer->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_OPAL);
+                        if (playerCharmer && playerCharmer != NULL && playerCharmer->IsInWorld())
+                            if (playerCharmer->GetTypeId() == TYPEID_PLAYER)
+                                playerCharmer->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_OPAL);
                         me->DespawnOrUnsummon(1);
                     }
                 }
