@@ -53,6 +53,7 @@ enum Spells
     // SPELL_STEALTHED
     SPELL_RANDOM_AGGRO_TAUNT    = 50230,
     SPELL_WHIRLWIND             = 84784,
+    SPELL_WHIRLWIND_BATTLE      = 91408,
 
     // Augh Boss
     SPELL_DRAGONS_BREATH        = 83776,
@@ -240,9 +241,8 @@ class npc_lct_augh_battle : public CreatureScript
             {
                 if (me->GetEntry() == BOSS_AUGH)
                 {
-                    events.ScheduleEvent(EVENT_DRAGONS_BREATH, 12000);
-                    events.ScheduleEvent(EVENT_WHIRLWIND, 15000);
-                    events.ScheduleEvent(EVENT_FRENZY, 35000);
+                    events.ScheduleEvent(EVENT_WHIRLWIND, 5000);
+                    events.ScheduleEvent(EVENT_FRENZY, 1);
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->SetHomePosition(AughWP);
                 }
@@ -334,7 +334,7 @@ class npc_lct_augh_battle : public CreatureScript
                             me->SetReactState(REACT_PASSIVE);
                             me->AttackStop();
 
-                            DoCast(me, SPELL_WHIRLWIND);
+                            DoCast(me, me->GetEntry() == BOSS_AUGH ? SPELL_WHIRLWIND_BATTLE : SPELL_WHIRLWIND);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             {
                                 followTarget = target;
@@ -344,7 +344,11 @@ class npc_lct_augh_battle : public CreatureScript
                             if (me->GetEntry() != BOSS_AUGH)
                                 events.ScheduleEvent(EVENT_SMOKE_BOMB, 21000);
                             else
-                                events.ScheduleEvent(EVENT_CANCEL_FOLLOW, 21000);
+                            {
+                                events.ScheduleEvent(EVENT_WHIRLWIND, 23000);
+                                events.ScheduleEvent(EVENT_DRAGONS_BREATH, 8100);
+                                events.ScheduleEvent(EVENT_CANCEL_FOLLOW, 8000);
+                            }
                             events.ScheduleEvent(EVENT_PICK_RANDOM_VICTIM, 3000);
                             break;
                         case EVENT_PICK_RANDOM_VICTIM:
