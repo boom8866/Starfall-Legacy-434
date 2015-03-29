@@ -1860,11 +1860,12 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                     {
                         for (std::list<Creature*>::const_iterator itr = templist.begin(); itr != templist.end(); ++itr)
                         {
-                            //You cannot detonate other people's mushrooms
+                            // You cannot detonate other people's mushrooms
                             if ((*itr)->GetOwner() != m_caster || !(*itr)->IsVisible())
                                 continue;
 
-                            (*itr)->GetOwner()->CastSpell((*itr), 78777, true);
+                            if ((*itr)->GetOwner())
+                                (*itr)->GetOwner()->CastSpell((*itr), 78777, true);
 
                             // Suicide spell
                             (*itr)->CastSpell((*itr), 92853, true);
