@@ -471,16 +471,31 @@ public:
                         }
                         channelTarget = zealot;
 
-                        if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && !channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
+                        std::list<WorldObject*> targets;
+                        Trinity::AllWorldObjectsInRange u_check(me, 100.0f);
+                        Trinity::WorldObjectListSearcher<Trinity::AllWorldObjectsInRange> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(100.0f, searcher);
+                        for (std::list<WorldObject*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
+                            if ((*itr)->GetTypeId() != TYPEID_PLAYER)
+                                continue;
+
+                            if (zealot && (*itr) && (*itr)->IsInBetween(me, zealot, 1.0f))
+                            {
+                                channelTarget = (*itr)->ToUnit();
+                                if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && !channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
+                                    DoCast(channelTarget, SPELL_EVOLUTION_VISUAL, true);
+                            }
+                        }
+
+                        if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && !channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
                             DoCast(channelTarget, SPELL_EVOLUTION_VISUAL, true);
 
-                            // Refresh duration!
-                            if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && channelTarget->HasAura(SPELL_EVOLUTION))
-                                channelTarget->GetAura(SPELL_EVOLUTION)->RefreshDuration();
-                            else if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && channelTarget->HasAura(SPELL_EVOLUTION_H))
-                                channelTarget->GetAura(SPELL_EVOLUTION_H)->RefreshDuration();
-                        }
+                        // Refresh duration!
+                        if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && channelTarget->HasAura(SPELL_EVOLUTION))
+                            channelTarget->GetAura(SPELL_EVOLUTION)->RefreshDuration();
+                        else if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && channelTarget->HasAura(SPELL_EVOLUTION_H))
+                            channelTarget->GetAura(SPELL_EVOLUTION_H)->RefreshDuration();
 
                         // Ritual done, init transformations!
                         if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL)
@@ -517,7 +532,7 @@ public:
                                 }
                             }
                         }
-                        events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 600);
+                        events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 500);
                         break;
                     }
                     case EVENT_SEND_NETHER_VISUAL:
@@ -567,7 +582,7 @@ public:
 class EvolutionTargetSelector : public std::unary_function<Unit *, bool>
 {
 public:
-    EvolutionTargetSelector(Unit* me, const WorldObject* victim) : _me(me), _victim(victim)
+    EvolutionTargetSelector(Unit* me, const WorldObject* victim) : _me(me)
     {
     }
 
@@ -579,7 +594,7 @@ public:
 
     bool operator() (WorldObject* target)
     {
-        if (!target)
+        if (!target || target == NULL || !target->IsInWorld())
             return false;
 
         // Filtering for Units
@@ -590,15 +605,18 @@ public:
             {
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                 {
-                    if (i->getSource()->IsInBetween(_me, target, 1.0f))
+                    if (i->getSource()->IsInBetween(_me, target, 1.0f) && _me->isInFront(i->getSource()) && _me->canSeeOrDetect(i->getSource()))
+                    {
+                        target = i->getSource();
                         return true;
+                    }
                 }
             }
             return false;
         }
 
         // Filtering for Players
-        if (target && target->GetTypeId() == TYPEID_PLAYER && !target->ToUnit()->HasAura(SPELL_TWILIGHT_EVOLUTION))
+        if (target && target->GetTypeId() == TYPEID_PLAYER && !target->ToPlayer()->HasAura(SPELL_TWILIGHT_EVOLUTION))
         {
             std::list<Unit*> targets;
             Trinity::AnyUnitInObjectRangeCheck u_check(target, 80.0f);
@@ -613,20 +631,20 @@ public:
                     {
                         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                         {
-                            if (i->getSource()->IsInBetween(_me, target, 1.0f))
+                            if (i->getSource()->IsInBetween(_me, target, 1.0f) && _me->isInFront(i->getSource()) && _me->canSeeOrDetect(i->getSource()))
                                 return true;
                         }
                     }
-                    if (target->IsInBetween((*itr), _me, 1.0f))
+                    if (target->IsInBetween((*itr), _me, 1.0f) && _me->isInFront(target) && _me->canSeeOrDetect(target))
                         return false;
                 }
             }
         }
+
         return true;
     }
 
     Unit* _me;
-    WorldObject const* _victim;
 };
 
 class spell_brc_evolution : public SpellScriptLoader
