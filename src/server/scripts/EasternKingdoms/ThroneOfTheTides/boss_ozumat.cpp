@@ -210,6 +210,7 @@ public:
 
                     Talk(SAY_PHASE_1);
                     DoCast(SPELL_PURIFY);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TIDAL_SURGE);
                     break;
                 }
                 case INST_ACTION_NEPTULON_DO_INTRO:

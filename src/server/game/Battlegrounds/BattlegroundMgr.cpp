@@ -590,7 +590,8 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
     }
 
     data->PutBits(count_pos, count, 21);
-    data->WriteBit(bg->GetStatus() == STATUS_WAIT_LEAVE);    // If Ended
+    if (bg)
+        data->WriteBit(bg->GetStatus() == STATUS_WAIT_LEAVE);    // If Ended
 
     if (isRated)                                             // arena
     {

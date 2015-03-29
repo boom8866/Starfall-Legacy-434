@@ -532,7 +532,7 @@ public:
                                 }
                             }
                         }
-                        events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 800);
+                        events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 500);
                         break;
                     }
                     case EVENT_SEND_NETHER_VISUAL:
@@ -582,7 +582,7 @@ public:
 class EvolutionTargetSelector : public std::unary_function<Unit *, bool>
 {
 public:
-    EvolutionTargetSelector(Unit* me, const WorldObject* victim) : _me(me), _victim(victim)
+    EvolutionTargetSelector(Unit* me, const WorldObject* victim) : _me(me)
     {
     }
 
@@ -594,7 +594,7 @@ public:
 
     bool operator() (WorldObject* target)
     {
-        if (!target)
+        if (!target || target == NULL || !target->IsInWorld())
             return false;
 
         // Filtering for Units
@@ -605,15 +605,18 @@ public:
             {
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                 {
-                    if (i->getSource()->IsInBetween(_me, target, 1.0f))
+                    if (i->getSource()->IsInBetween(_me, target, 1.0f) && _me->isInFront(i->getSource()) && _me->canSeeOrDetect(i->getSource()))
+                    {
+                        target = i->getSource();
                         return true;
+                    }
                 }
             }
             return false;
         }
 
         // Filtering for Players
-        if (target && target->GetTypeId() == TYPEID_PLAYER && !target->ToUnit()->HasAura(SPELL_TWILIGHT_EVOLUTION))
+        if (target && target->GetTypeId() == TYPEID_PLAYER && !target->ToPlayer()->HasAura(SPELL_TWILIGHT_EVOLUTION))
         {
             std::list<Unit*> targets;
             Trinity::AnyUnitInObjectRangeCheck u_check(target, 80.0f);
@@ -628,20 +631,20 @@ public:
                     {
                         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                         {
-                            if (i->getSource()->IsInBetween(_me, target, 1.0f))
+                            if (i->getSource()->IsInBetween(_me, target, 1.0f) && _me->isInFront(i->getSource()) && _me->canSeeOrDetect(i->getSource()))
                                 return true;
                         }
                     }
-                    if (target->IsInBetween((*itr), _me, 1.0f))
+                    if (target->IsInBetween((*itr), _me, 1.0f) && _me->isInFront(target) && _me->canSeeOrDetect(target))
                         return false;
                 }
             }
         }
+
         return true;
     }
 
     Unit* _me;
-    WorldObject const* _victim;
 };
 
 class spell_brc_evolution : public SpellScriptLoader
