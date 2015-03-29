@@ -1871,6 +1871,9 @@ void World::SetInitialWorldSettings()
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Calculate next currency reset time...");
     InitCurrencyResetTime();
 
+    sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Removing Battleground/Dungeon Deserter auras...");
+    CharacterDatabase.PExecute("DELETE FROM character_aura WHERE spell IN (26013, 71041)");
+
     LoadCharacterNameData();
 
     sLog->outInfo(LOG_FILTER_GENERAL, "Initializing Opcodes...");
