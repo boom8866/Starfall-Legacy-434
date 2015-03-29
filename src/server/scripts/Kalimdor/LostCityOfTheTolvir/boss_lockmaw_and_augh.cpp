@@ -255,6 +255,7 @@ class npc_lct_augh_battle : public CreatureScript
                     me->RemoveAllAuras();
                     me->GetMotionMaster()->MovementExpired();
                     me->GetMotionMaster()->MoveTargetedHome();
+                    _EnterEvadeMode();
                     events.Reset();
                 }
             }
@@ -306,7 +307,7 @@ class npc_lct_augh_battle : public CreatureScript
                             events.ScheduleEvent(EVENT_PARALYTIC_BLOW, 1000);
                             break;
                         case EVENT_PARALYTIC_BLOW:
-                            DoCastAOE(SPELL_PARALYTIC_BLOW_DART);
+                            DoCast(SPELL_PARALYTIC_BLOW_DART);
                             events.ScheduleEvent(EVENT_TALK_2, 2500);
                             break;
                         case EVENT_TALK_2:
@@ -380,10 +381,10 @@ class npc_lct_augh_battle : public CreatureScript
                             TalkToMap(SAY_HAPPY);
                             break;
                         case EVENT_DRAGONS_BREATH:
-                            DoCastAOE(SPELL_DRAGONS_BREATH);
+                            DoCast(SPELL_DRAGONS_BREATH);
                             break;
                         case EVENT_FRENZY:
-                            DoCastAOE(SPELL_FRENZY);
+                            DoCast(SPELL_FRENZY);
                             break;
                         case EVENT_CANCEL_FOLLOW:
                             events.CancelEvent(EVENT_FOLLOW_PLAYER);
