@@ -1,4 +1,4 @@
-UPDATE `creature_template` SET `mechanic_immune_mask`=634339071 WHERE `entry` IN (39425, 49262);
+UPDATE `creature_template` SET `mechanic_immune_mask`= 634339071 | 256 WHERE `entry` IN (39425, 49262);
 UPDATE `creature_template` SET `flags_extra`=64 WHERE `entry` IN (39444, 48891);
 
 -- Pit Viper
