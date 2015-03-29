@@ -8476,7 +8476,9 @@ void Player::UpdateArea(uint32 newArea)
 
     /*** SPECIAL PHASE CHECK - START ***/
     // Update phase (Custom)
-    if (!HasAuraType(SPELL_AURA_CONTROL_VEHICLE) && !GetVehicleKit() && !GetVehicle() && !GetVehicleBase())
+    if (HasAuraType(SPELL_AURA_CONTROL_VEHICLE) || GetVehicleKit() || GetVehicle() || GetVehicleBase())
+        return;
+    else
     {
         // To Forsaken Forward Command (Head quest line)
         if (GetQuestStatus(27290) == QUEST_STATUS_REWARDED)
