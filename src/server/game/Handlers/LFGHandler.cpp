@@ -319,7 +319,7 @@ void WorldSession::SendLfgPlayerLockInfo()
         uint16 dungeonId = (*it & 0x00FFFFFF);
 
         bool weeklyLimitReached = false;
-        //bool valorPointsCap = false;
+        bool valorPointsCap = false;
 
         if (reward)
         {
@@ -327,10 +327,7 @@ void WorldSession::SendLfgPlayerLockInfo()
 
             if (quest)
             {
-                weeklyLimitReached = !player->CanRewardQuest(quest, false);
-                if (weeklyLimitReached)
-                    quest = sObjectMgr->GetQuestTemplate(reward->otherQuest);
-                /*switch (dungeonId)
+                switch (dungeonId)
                 {
                     case 301: // Random Cataclysm Heroic
                     case 434: // Random Hour of Twilight
@@ -345,7 +342,7 @@ void WorldSession::SendLfgPlayerLockInfo()
                         if (weeklyLimitReached)
                             quest = sObjectMgr->GetQuestTemplate(reward->otherQuest);
                         break;
-                }*/
+                }
             }
         }
 
