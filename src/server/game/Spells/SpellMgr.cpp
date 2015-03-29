@@ -5165,6 +5165,8 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 75610: // Evolution
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_50_YARDS);
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
                 break;
             // * Karsh Steelbender
             case 90406: // Lava Pool
