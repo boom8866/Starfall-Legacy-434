@@ -7956,7 +7956,9 @@ void Spell::EffectLeapBack (SpellEffIndex effIndex)
 
     //1891: Disengage
     if (GetSpellInfo()->Effects[effIndex].TargetB.GetTarget() == TARGET_UNIT_SRC_AREA_ENEMY)
-        unitTarget->JumpTo(speedxy, speedz, m_spellInfo->SpellIconID != 1891);
+        unitTarget->JumpTo(speedxy, speedz, false);
+    else if (GetSpellInfo()->Effects[effIndex].TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ENEMY)
+        unitTarget->JumpTo(speedxy, speedz, false);
     else
         m_caster->JumpTo(speedxy, speedz, m_spellInfo->SpellIconID != 1891);
 }

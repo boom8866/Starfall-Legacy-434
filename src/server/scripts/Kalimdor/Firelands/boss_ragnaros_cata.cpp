@@ -29,51 +29,55 @@ enum Texts
 
     // Ragnaros
     SAY_ARRIVE                  = 0,
-    SAY_DEATH_NORMAL            = 1,
-    SAY_DEATH_HEROIC            = 2,
-    SAY_SLAY                    = 3,
-    SAY_ANNOUNCE_SPLIT          = 4,
-    SAY_SUBMERGE                = 5,
-    SAY_EMERGE                  = 6,
-    SAY_SONS_OF_FLAME_1         = 7,
-    SAY_SONS_OF_FLAME_2         = 8,
-    SAY_ANNOUNCE_EMERGE         = 9,
-    SAY_MAGMA_TRAP              = 10,
-    SAY_ANNOUNCE_SULFURAS_SMASH = 11,
-    SAY_SUBMERGE_HEROIC         = 12,
-    SAY_INTRO_HEROIC_1          = 13,
-    SAY_INTRO_HEROIC_2          = 14,
-    SAY_ENGULFING_FLAMES        = 15,
-    SAY_WORLD_IN_FLAMES         = 16,
-    SAY_EMPOWER_SULFURAS        = 17,
-    SAY_DREADFLAME              = 18,
+    SAY_AGGRO                   = 1,
+    SAY_SLAY                    = 2,
+    SAY_WRATH_OF_RAGNAROS       = 3,
+    SAY_ANNOUNCE_SULFURAS_SMASH = 4,
+    SAY_ANNOUNCE_MAGMA_TRAP     = 5,
+
+    /*
+    SAY_DEATH_NORMAL            = 2,
+    SAY_DEATH_HEROIC            = 3,
+    SAY_ANNOUNCE_SPLIT          = 5,
+    SAY_SUBMERGE                = 6,
+    SAY_EMERGE                  = 7,
+    SAY_SONS_OF_FLAME_1         = 8,
+    SAY_SONS_OF_FLAME_2         = 9,
+    SAY_ANNOUNCE_EMERGE         = 10,
+    SAY_MAGMA_TRAP              = 11,
+    SAY_ANNOUNCE_SULFURAS_SMASH = 12,
+    SAY_SUBMERGE_HEROIC         = 13,
+    SAY_INTRO_HEROIC_1          = 14,
+    SAY_INTRO_HEROIC_2          = 15,
+    SAY_ENGULFING_FLAMES        = 16,
+    SAY_WORLD_IN_FLAMES         = 17,
+    SAY_EMPOWER_SULFURAS        = 18,
+    SAY_DREADFLAME              = 19,
+    */
 };
 
 enum Spells
 {
-    // Ragnaros Base Auras
+    // Ragnaros
     SPELL_BASE_VISUAL                       = 98860,
     SPELL_BURNING_WOUNDS_AURA               = 99401,
-
-    // Magma
     SPELL_MAGMA_PERIODIC                    = 99908,
-
-    // Spell Sulfuras Smash
-    SPELL_SULFURAS_SMASH_DUMMY              = 98703,
+    SPELL_SULFURAS_SMASH_AOE                = 98703,
     SPELL_SULFURAS_SMASH                    = 98710,
-    SPELL_SULFURAS_SMASH_MISSILE            = 98708,
-    SPELL_SULFURAS_SMASH_TARGET             = 98706,
+    SPELL_SUMMON_SULFURAS_SMASH_TARGET      = 98706,
+    SPELL_MAGMA_STRIKE                      = 98313,
+    SPELL_HAND_OF_RAGNAROS                  = 98237,
+    SPELL_WRATH_OF_RAGNAROS                 = 98263,
 
-    // Lava Wave Summons
-    SPELL_LAVA_WAVE_DUMMY_NORTH             = 98874,
-    SPELL_LAVA_WAVE_DUMMY_EAST              = 98875,
-    SPELL_LAVA_WAVE_DUMMY_WEST              = 98876,
+    // Sulfuras Smash
     SPELL_LAVA_POOL                         = 98712,
     SPELL_SCORCHED_GROUND                   = 98871,
-    SPELL_LAVA_WAVE_DAMAGE                  = 98928,
+    SPELL_LAVA_WAVE_N                       = 98874,
+    SPELL_LAVA_WAVE_E                       = 98875,
+    SPELL_LAVA_WAVE_W                       = 98876,
 
-    // Magma Strike
-    SPELL_MAGMA_STRIKE                      = 98313,
+    // Lava Wave
+    SPELL_LAVA_WAVE                         = 98873,
 
     // Magma Trap
     SPELL_MAGMA_TRAP                        = 98164,
@@ -82,16 +86,6 @@ enum Spells
     SPELL_MAGMA_TRAP_PERIODIC               = 98172,
     SPELL_MAGMA_TRAP_PERIODIC_TICK          = 98171,
     SPELL_MAGMA_TRAP_ERUPTION               = 98175,
-
-    // Hand of Ragnaros
-    SPELL_HAND_OF_RAGNAROS                  = 98237,
-
-    // Wrath of Ragnaros
-    SPELL_WRATH_OF_RAGNAROS                 = 98263,
-
-    // Lava Wave
-    SPELL_LAVA_WAVE                         = 98873,
-    SPELL_LAVA_WAVE_TRIGGERED               = 98928,
 
     // Splitting Blow
     SPELL_SUBMERGE                          = 100051,
@@ -222,18 +216,20 @@ enum Spells
 
 enum Phases
 {
-    PHASE_INTRO     = 1,
-    PHASE_1         = 2,
-    PHASE_2         = 3,
-    PHASE_3         = 4,
-    PHASE_SUBMERGED = 5,
-    PHASE_HEROIC    = 6,
+    PHASE_INTRO         = 1,
+    PHASE_1             = 2,
+    PHASE_2             = 3,
+    PHASE_3             = 4,
+    PHASE_SUBMERGE_1    = 5,
+    PHASE_SUBMERGE_2    = 6,
+    PHASE_HEROIC        = 7,
 };
 
 enum Events
 {
     // Ragnaros
     EVENT_INTRO = 1,
+    EVENT_BASE_VISUAL,
     EVENT_ATTACK,
     EVENT_SULFURAS_SMASH_TRIGGER,
     EVENT_SULFURAS_SMASH,
@@ -323,7 +319,10 @@ enum Events
 enum Actions
 {
     // Ragnaros
-    ACTION_SON_KILLED = 1,
+    ACTION_SUMMONED = 1,
+    ACTION_CAST_SULFURAS_SMASH,
+
+    ACTION_SON_KILLED,
     ACTION_ACTIVATE_SON,
     ACTION_INSTANT_EMERGE,
     ACTION_ACTIVATE_HEROIC,
@@ -359,7 +358,6 @@ enum RagnarosQuest
     QUEST_HEART_OF_FIRE = 29307,
 };
 
-Position const RagnarosSummonPosition = {1075.201f, -57.84896f, 55.42427f,  3.159046f   };
 Position const SplittingTriggerNorth  = {1023.55f,  -57.158f,   55.4215f,   3.12414f    };
 Position const SplittingTriggerEast   = {1035.45f,  -25.3646f,  55.4924f,   2.49582f    };
 Position const SplittingTriggerWest   = {1036.27f,  -89.2396f,  55.5098f,   3.83972f    };
@@ -510,9 +508,9 @@ class at_sulfuron_keep : public AreaTriggerScript
         bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
         {
             if (InstanceScript* instance = player->GetInstanceScript())
-                if (!instance->GetData64(DATA_RAGNAROS))
-                    if (!instance->GetData(DATA_RAGNAROS_KILLED))
-                        player->SummonCreature(BOSS_RAGNAROS, RagnarosSummonPosition, TEMPSUMMON_MANUAL_DESPAWN, 0);
+                if (instance->GetBossState(DATA_RAGNAROS) != DONE)
+                    if (!instance->GetData(DATA_RAGNAROS_SUMMONED))
+                        instance->SetData(DATA_RAGNAROS_SUMMONED, 1);
             return true;
         }
 };
@@ -538,50 +536,35 @@ public:
         bool _heartQuest;
         bool _encounterDone;
 
-        void Reset()
-        {
-            _Reset();
-            events.SetPhase(PHASE_1);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            me->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-            me->SetStandState(0);
-            me->SetReactState(REACT_PASSIVE);
-
-            if (GameObject* platform = me->FindNearestGameObject(GO_RAGNAROS_PLATFORM, 200.0f))
-                platform->SetDestructibleState(GO_DESTRUCTIBLE_INTACT);
-
-            _submergeCounter = 0;
-            _sonCounter = 0;
-        }
-
         void EnterCombat(Unit* /*who*/)
         {
+            Talk(SAY_AGGRO);
             _EnterCombat();
-            HandleDoor();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             me->SetReactState(REACT_AGGRESSIVE);
+            DoCast(me, SPELL_BURNING_WOUNDS_AURA, true);
             events.SetPhase(PHASE_1);
-            events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 30000, 0, PHASE_1);
-            events.ScheduleEvent(EVENT_MAGMA_TRAP, 15500, 0, PHASE_1);
-            events.ScheduleEvent(EVENT_HAND_OF_RAGNAROS, 25000, 0, PHASE_1);
+            events.ScheduleEvent(EVENT_WRATH_OF_RAGNAROS, 6000);
+            events.ScheduleEvent(EVENT_WRATH_OF_RAGNAROS, 18000);
+            events.ScheduleEvent(EVENT_SULFURAS_SMASH, 31000);
+            events.ScheduleEvent(EVENT_HAND_OF_RAGNAROS, 25000);
+            events.ScheduleEvent(EVENT_MAGMA_TRAP, 16000);
+        }
 
-            Map::PlayerList const& player = me->GetMap()->GetPlayers();
-                for (Map::PlayerList::const_iterator itr = player.begin(); itr != player.end(); ++itr)
-                    if (Player* player = itr->getSource())
-                        if (player->hasQuest(QUEST_HEART_OF_FIRE))
-                            _heartQuest = true;
+        void EnterEvadeMode()
+        {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->SetData(DATA_RAGNAROS_SUMMONED, SPECIAL);
+            instance->SetBossState(DATA_RAGNAROS, FAIL);
+            summons.DespawnAll();
+            me->DespawnOrUnsummon(1);
         }
 
         void JustDied(Unit* /*killer*/)
         {
-            HandleDoor();
-            Cleanup();
-            instance->SetData(DATA_RAGNAROS_KILLED, 1);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SUPERHEATED_TRIGGERED);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CLOUDBURST_PLAYER_AURA);
-            me->RemoveDynObjectInDistance(SPELL_DREADFLAME_DAMAGE_AURA, 200.0f);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            _JustDied();
+
             if (!IsHeroic())
             {
                 me->SetHealth(1);
@@ -589,93 +572,7 @@ public:
                 me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
                 me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
                 me->DespawnOrUnsummon(6000);
-
-                if (Is25ManRaid())
-                {
-                    if (GameObject* chest = me->FindNearestGameObject(GO_CACHE_OF_THE_FIRELORD_HC, 500.0f))
-                    {
-                        chest->SetPhaseMask(1, true);
-                        chest->SetGoState(GO_STATE_READY);
-                    }
-                }
-                else if (GameObject* chest = me->FindNearestGameObject(GO_CACHE_OF_THE_FIRELORD, 500.0f))
-                {
-                    chest->SetPhaseMask(1, true);
-                    chest->SetGoState(GO_STATE_READY);
-                }
-
-                if (_heartQuest)
-                    DoCast(SPELL_HEART_OF_RAGNAROS_SUMMON);
             }
-            else
-                Talk(SAY_DEATH_HEROIC);
-            
-            if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f, true))
-            {
-                malfurion->AI()->DoAction(ACTION_SCHEDULE_OUTRO);
-                malfurion->DespawnOrUnsummon(60000);
-            }
-
-            if (Creature* cenarius = me->FindNearestCreature(NPC_CENARIUS, 200.0f, true))
-            {
-                cenarius->AI()->DoAction(ACTION_SCHEDULE_OUTRO);
-                cenarius->DespawnOrUnsummon(60000);
-            }
-
-            if (Creature* hamuul = me->FindNearestCreature(NPC_HAMUUL, 200.0f, true))
-            {
-                hamuul->AI()->DoAction(ACTION_SCHEDULE_OUTRO);
-                hamuul->DespawnOrUnsummon(60000);
-            }
-
-            _JustDied();
-        }
-
-        void EnterEvadeMode()
-        {
-            HandleDoor();
-            Cleanup();
-            summons.DespawnAll();
-
-            if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f, true))
-                malfurion->DespawnOrUnsummon(0);
-            if (Creature* cenarius = me->FindNearestCreature(NPC_CENARIUS, 200.0f, true))
-                cenarius->DespawnOrUnsummon(0);
-            if (Creature* hamuul = me->FindNearestCreature(NPC_HAMUUL, 200.0f, true))
-                hamuul->DespawnOrUnsummon(0);
-
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SUPERHEATED_TRIGGERED);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CLOUDBURST_PLAYER_AURA);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            instance->SetBossState(DATA_RAGNAROS, NOT_STARTED);
-            me->RemoveDynObjectInDistance(SPELL_DREADFLAME_DAMAGE_AURA, 200.0f);
-            me->DespawnOrUnsummon(1);
-        }
-
-        void IsSummonedBy(Unit* /*summoner*/)
-        {
-            events.SetPhase(PHASE_INTRO);
-            events.ScheduleEvent(EVENT_INTRO, 5500, 0, PHASE_INTRO);
-            me->setActive(true);
-            me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            Position pos;
-            pos.Relocate(me);
-            me->SetHomePosition(pos);
-            me->SetHover(true);
-            me->SetDisableGravity(true);
-            if (magma = me->FindNearestCreature(NPC_MAGMA_POOL_TRIGGER, 20.0f, true))
-            {
-                magma->AddAura(SPELL_MAGMA_PERIODIC, magma);
-                magma->setFaction(me->getFaction());
-            }
-
-            std::list<Creature*> units;
-
-            GetCreatureListWithEntryInGrid(units, me, NPC_MOLTEN_SPEWER, 500.0f);
-            GetCreatureListWithEntryInGrid(units, me, NPC_MOLTEN_ERUPTER, 500.0f);
-            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                (*itr)->AI()->DoAction(ACTION_EMERGE_WORM);
         }
 
         void KilledUnit(Unit* killed)
@@ -686,66 +583,7 @@ public:
 
         void JustSummoned(Creature* summon)
         {
-            switch (summon->GetEntry())
-            {
-                case NPC_SULFURAS_SMASH_TARGET:
-                    summons.Summon(summon);
-                    summon->AddAura(SPELL_LAVA_POOL, summon);
-                    break;
-                case NPC_SON_OF_FLAME:
-                    summons.Summon(summon);
-                    summon->SetReactState(REACT_PASSIVE);
-                    summon->AddAura(SPELL_HIT_ME, summon);
-                    summon->AddAura(SPELL_PRE_VISUAL, summon);
-                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
-                    break;
-                case NPC_LIVING_METEOR:
-                case NPC_LAVA_SCION:
-                case NPC_DREADFLAME_SPAWN:
-                case NPC_DREADFLAME:
-                    summons.Summon(summon);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        void HandleDoor() // Needed because the instancescript needs db guids for door datas
-        {
-            if (GameObject* door = me->FindNearestGameObject(GO_RAGNAROS_DOOR, 200.0f))
-            {
-                if (door->GetGoState() == GO_STATE_ACTIVE)
-                    door->SetGoState(GO_STATE_READY);
-                else
-                    door->SetGoState(GO_STATE_ACTIVE);
-            }
-        }
-
-        void Cleanup()
-        {
-            std::list<Creature*> units;
-
-            GetCreatureListWithEntryInGrid(units, me, NPC_SULFURAS_HAND_OF_RAGNAROS, 200.0f);
-            GetCreatureListWithEntryInGrid(units, me, NPC_MAGMA_TRAP, 200.0f);
-            GetCreatureListWithEntryInGrid(units, me, NPC_DREADFLAME_SPAWN, 200.0f);
-            GetCreatureListWithEntryInGrid(units, me, NPC_MOLTEN_ELEMENTAL, 200.0f);
-            GetCreatureListWithEntryInGrid(units, me, NPC_CLOUDBURST, 200.0f);
-            GetCreatureListWithEntryInGrid(units, me, NPC_ENTRAPPING_ROOTS, 200.0f);
-            GetCreatureListWithEntryInGrid(units, me, NPC_BREADTH_OF_FROST, 200.0f);
-            GetCreatureListWithEntryInGrid(units, me, NPC_SPLITTING_BLOW_TRIGGER, 200.0f);
-
-            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                (*itr)->DespawnOrUnsummon();
-        }
-
-        void CleanSubmerge()
-        {
-            std::list<Creature*> units;
-
-            GetCreatureListWithEntryInGrid(units, me, NPC_SULFURAS_HAND_OF_RAGNAROS, 200.0f);
-            GetCreatureListWithEntryInGrid(units, me, NPC_SPLITTING_BLOW_TRIGGER, 200.0f);
-            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                (*itr)->DespawnOrUnsummon();
+            summons.Summon(summon);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -754,25 +592,15 @@ public:
             {
                 _submergeCounter++;
 
-                std::list<Creature*> units;
-                GetCreatureListWithEntryInGrid(units, me, NPC_SULFURAS_SMASH_TARGET, 200.0f);
-                for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                    (*itr)->DespawnOrUnsummon();
-
-                events.SetPhase(PHASE_SUBMERGED);
-                events.ScheduleEvent(EVENT_SPLITTING_BLOW, 1, 0, PHASE_SUBMERGED);
+                events.SetPhase(PHASE_SUBMERGE_1);
+                events.ScheduleEvent(EVENT_SPLITTING_BLOW, 1);
             }
             else if (me->HealthBelowPct(40) && _submergeCounter == 1)
             {
                 _submergeCounter++;
 
-                std::list<Creature*> units;
-                GetCreatureListWithEntryInGrid(units, me, NPC_SULFURAS_SMASH_TARGET, 200.0f);
-                for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                    (*itr)->DespawnOrUnsummon();
-
-                events.SetPhase(PHASE_SUBMERGED);
-                events.ScheduleEvent(EVENT_SPLITTING_BLOW, 1, 0, PHASE_SUBMERGED);
+                events.SetPhase(PHASE_SUBMERGE_2);
+                events.ScheduleEvent(EVENT_SPLITTING_BLOW, 1);
             }
             else if (me->HealthBelowPct(10) && _submergeCounter == 2)
             {
@@ -780,7 +608,6 @@ public:
 
                 if (!IsHeroic() && !_encounterDone)
                 {
-                    Talk(SAY_DEATH_NORMAL);
                     summons.DespawnAll();
                     me->Kill(me);
                     _encounterDone = true;
@@ -794,41 +621,25 @@ public:
         {
             switch (action)
             {
-                case ACTION_SON_KILLED:
-                {
-                    _sonCounter++;
-                    if (_sonCounter == 8)
-                    {
-                        DoAction(ACTION_INSTANT_EMERGE);
-                        _sonCounter = 0;
-                    }
-                    break;
-                }
-                case ACTION_INSTANT_EMERGE:
-                    events.CancelEvent(EVENT_ANNOUNCE_EMERGE);
-                    events.CancelEvent(EVENT_EMERGE);
-                    events.ScheduleEvent(EVENT_EMERGE, 1000);
-                    break;
-                case ACTION_ACTIVATE_HEROIC:
-                    if (Creature* cenarius = me->SummonCreature(NPC_CENARIUS, CenariusSummonPosition, TEMPSUMMON_MANUAL_DESPAWN, 0))
-                        me->SetFacingToObject(cenarius);
-                    events.Reset();
-                    me->SummonCreature(NPC_MALFURION, MalfurionSummonPosition, TEMPSUMMON_MANUAL_DESPAWN, 0);
-                    me->SummonCreature(NPC_HAMUUL, HamuulSummonPosition, TEMPSUMMON_MANUAL_DESPAWN, 0);
-                    break;
-                case ACTION_SUBMERGE:
-                    Talk(SAY_SUBMERGE_HEROIC);
-                    me->CastStop();
-                    me->AttackStop();
+                case ACTION_SUMMONED:
                     me->SetReactState(REACT_PASSIVE);
-                    events.Reset();
-                    me->RemoveAllAuras();
-                    me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
-                    me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
-                    me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
-                    events.ScheduleEvent(EVENT_TRANSFORM_RAGNAROS, 3000);
-                    events.ScheduleEvent(EVENT_EMERGE_HEROIC, 14500);
+                    events.SetPhase(PHASE_INTRO);
+                    events.ScheduleEvent(EVENT_BASE_VISUAL, 2000, 0);
+                    if (instance->GetData(DATA_FIRST_RAGNAROS_SUMMON) == 1)
+                    {
+                        events.ScheduleEvent(EVENT_INTRO, 6750, 0);
+                        instance->SetData(DATA_FIRST_RAGNAROS_SUMMON, 0);
+                    }
+                    me->setActive(true);
+                    me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    me->SetHover(true);
+                    me->SetDisableGravity(true);
+                    break;
+                case ACTION_CAST_SULFURAS_SMASH:
+                    Talk(SAY_ANNOUNCE_SULFURAS_SMASH);
+                    DoCast(me, SPELL_SULFURAS_SMASH);
+                    events.ScheduleEvent(EVENT_ATTACK, 5000);
                     break;
                 default:
                     break;
@@ -843,332 +654,46 @@ public:
 
             events.Update(diff);
             
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_INTRO:
                         Talk(SAY_ARRIVE);
-                        me->AddAura(SPELL_BASE_VISUAL, me);
                         me->AddAura(SPELL_BURNING_WOUNDS_AURA, me);
                         me->PlayOneShotAnimKit(ANIM_KIT_TAUNT);
                         break;
-                    case EVENT_ATTACK:
-                        me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
-                        me->SetReactState(REACT_AGGRESSIVE);
-                        me->Attack(me->getVictim(), false);
+                    case EVENT_BASE_VISUAL:
                         me->AddAura(SPELL_BASE_VISUAL, me);
-                        me->AddAura(SPELL_BURNING_WOUNDS_AURA, me);
-                        break;
-                    case EVENT_SULFURAS_SMASH_TRIGGER:
-                        if (me->HasAura(SPELL_WOLRD_IN_FLAMES) || me->HasUnitState(UNIT_STATE_CASTING))
-                            events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 1000);
-                        else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                        {
-                            me->AddUnitState(UNIT_STATE_CANNOT_TURN);
-                            me->SetFacingToObject(target);
-                            DoCast(SPELL_SULFURAS_SMASH_DUMMY);
-                            events.ScheduleEvent(EVENT_SULFURAS_SMASH, 500);
-                            if (events.IsInPhase(PHASE_1))
-                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 29500, 0, PHASE_1);
-                            else if (events.IsInPhase(PHASE_2))
-                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 39500, 0, PHASE_2);
-                            else if (events.IsInPhase(PHASE_3))
-                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 29500, 0, PHASE_3);
-                        }
-                        break;
-                    case EVENT_SULFURAS_SMASH:
-                        if (Unit* trigger = me->FindNearestCreature(NPC_SULFURAS_SMASH_TRIGGER, 60.0f, true))
-                        {
-                            Talk(SAY_ANNOUNCE_SULFURAS_SMASH);
-                            me->AttackStop();
-                            me->SetReactState(REACT_PASSIVE);
-                            DoCast(SPELL_SULFURAS_SMASH);
-                            DoCast(SPELL_SULFURAS_SMASH_TARGET);
-                            me->SetFacingToObject(trigger);
-                            events.ScheduleEvent(EVENT_ATTACK, 6000);
-                            events.ScheduleEvent(EVENT_WRATH_OF_RAGNAROS, 12000, 0, PHASE_1);
-                        }
-                        break;
-                    case EVENT_MAGMA_TRAP:
-                        Talk(SAY_MAGMA_TRAP);
-                        if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0))
-                            DoCast(target, SPELL_MAGMA_TRAP);
-                        events.ScheduleEvent(EVENT_MAGMA_TRAP, urand(25000, 30000), 0, PHASE_1);
                         break;
                     case EVENT_WRATH_OF_RAGNAROS:
-                        DoCastAOE(SPELL_WRATH_OF_RAGNAROS);
+                        Talk(SAY_WRATH_OF_RAGNAROS);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_WRATH_OF_RAGNAROS);
+                        break;
+                    case EVENT_SULFURAS_SMASH:
+                        DoCast(me, SPELL_SULFURAS_SMASH_AOE);
+                        events.ScheduleEvent(EVENT_SULFURAS_SMASH, !events.IsInPhase(PHASE_2) ? 31000 : 40000);
+                        events.ScheduleEvent(EVENT_WRATH_OF_RAGNAROS, 6000);
+                        events.ScheduleEvent(EVENT_WRATH_OF_RAGNAROS, 18000);
                         break;
                     case EVENT_HAND_OF_RAGNAROS:
-                        DoCastAOE(SPELL_HAND_OF_RAGNAROS);
+                        DoCast(me, SPELL_HAND_OF_RAGNAROS);
                         events.ScheduleEvent(EVENT_HAND_OF_RAGNAROS, 25000, 0, PHASE_1);
                         break;
-                    case EVENT_SPLITTING_BLOW:
-                    {
-                        if (me->HasUnitState(UNIT_STATE_CASTING))
-                            events.ScheduleEvent(EVENT_SPLITTING_BLOW, 1000);
-                        else
-                        {
-                            events.CancelEvent(EVENT_ATTACK);
-                            events.ScheduleEvent(EVENT_CALL_SONS, 10000, 0, PHASE_SUBMERGED);
-
-                            std::list<Creature*> units;
-                            GetCreatureListWithEntryInGrid(units, me, NPC_SULFURAS_SMASH_TARGET, 200.0f);
-                            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                                (*itr)->DespawnOrUnsummon(0);
-
-                            me->CastStop();
-                            me->AttackStop();
-                            me->SetReactState(REACT_PASSIVE);
-                            Talk(SAY_ANNOUNCE_SPLIT);
-                            Talk(SAY_SUBMERGE);
-                            DoCast(SPELL_SUBMERGE);
-
-                            switch (urand(0, 2))
-                            {
-                                case 0: // Splitting Blow East
-                                {
-                                    if (Creature* trigger = me->SummonCreature(NPC_SPLITTING_BLOW_TRIGGER, SplittingTriggerEast, TEMPSUMMON_MANUAL_DESPAWN))
-                                    {
-                                        me->SetFacingToObject(trigger);
-                                        DoCastAOE(SPELL_SPLITTING_BLOW_EAST);
-
-                                        for (uint32 x = 0; x < 8; ++x)
-                                            me->SummonCreature(NPC_SON_OF_FLAME, SonsOfFlameEast[x], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
-                                    }
-                                    break;
-                                }
-                                case 1: // Splitting Blow West
-                                {
-                                    if (Creature* trigger = me->SummonCreature(NPC_SPLITTING_BLOW_TRIGGER, SplittingTriggerWest, TEMPSUMMON_MANUAL_DESPAWN))
-                                    {
-                                        me->SetFacingToObject(trigger);
-                                        DoCastAOE(SPELL_SPLITTING_BLOW_WEST);
-
-                                        for (uint32 x = 0; x < 8; ++x)
-                                            me->SummonCreature(NPC_SON_OF_FLAME, SonsOfFlameWest[x], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
-                                    }
-                                    break;
-                                }
-                                case 2: // Splitting Blow North
-                                {
-                                    if (Creature* trigger = me->SummonCreature(NPC_SPLITTING_BLOW_TRIGGER, SplittingTriggerNorth, TEMPSUMMON_MANUAL_DESPAWN))
-                                    {
-                                        me->SetFacingToObject(trigger);
-                                        DoCastAOE(SPELL_SPLITTING_BLOW_NORTH);
-
-                                        for (uint32 x = 0; x < 8; ++x)
-                                            me->SummonCreature(NPC_SON_OF_FLAME, SonsOfFlameNorth[x], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
-                                    }
-                                    break;
-                                }
-                            }
-                        }
+                    case EVENT_MAGMA_TRAP:
+                        Talk(SAY_ANNOUNCE_MAGMA_TRAP);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 0, true, 0))
+                            DoCast(target, SPELL_MAGMA_TRAP);
+                        events.ScheduleEvent(EVENT_MAGMA_TRAP, 25000);
                         break;
-                    }
-                    case EVENT_CALL_SONS:
-                        if (_submergeCounter == 0)
-                            Talk(SAY_SONS_OF_FLAME_1);
-                        else
-                            Talk(SAY_SONS_OF_FLAME_2);
-
-                        me->RemoveAurasDueToSpell(SPELL_BASE_VISUAL);
-                        events.ScheduleEvent(EVENT_ANNOUNCE_EMERGE, 40000, 0, PHASE_SUBMERGED);
-                        events.ScheduleEvent(EVENT_EMERGE, 45000, 0, PHASE_SUBMERGED);
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                        if (_submergeCounter == 2)
-                            for (uint32 x = 0; x < 2; ++x)
-                                me->SummonCreature(NPC_LAVA_SCION, LavaScionPos[x], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
-                        break;
-                    case EVENT_ANNOUNCE_EMERGE:
-                        Talk(SAY_ANNOUNCE_EMERGE);
-                        break;
-                    case EVENT_EMERGE:
-                    {
-                        Talk(SAY_EMERGE);
-                        CleanSubmerge();
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                        me->RemoveAllAuras();
-                        me->AddAura(SPELL_BASE_VISUAL, me);
-                        me->PlayOneShotAnimKit(ANIM_KIT_RESURFACE);
-                        events.ScheduleEvent(EVENT_ATTACK, 4500);
-
-                        std::list<Creature*> units;
-                        GetCreatureListWithEntryInGrid(units, me, NPC_SON_OF_FLAME, 200.0f);
-                        for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                        {
-                            if (!(*itr)->isDead())
-                            {
-                                (*itr)->CastSpell(*itr, SPELL_SUPERNOVA);
-                                (*itr)->Kill(*itr);
-                            }
-                        }
-
-                        if (_submergeCounter == 1)
-                        {
-                            events.SetPhase(PHASE_2);
-                            if (IsHeroic())
-                            {
-                                events.ScheduleEvent(EVENT_MOLTEN_SEED, urand(14800, 16000), 0, PHASE_2);
-                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 6000, 0, PHASE_2);
-                            }
-                            else
-                            {
-                                events.ScheduleEvent(EVENT_MOLTEN_SEED, 21500, 0, PHASE_2);
-                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 15000, 0, PHASE_2);
-                            }
-                            events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 40000, 0, PHASE_2);
-                        }
-                        if (_submergeCounter == 2)
-                        {
-                            events.SetPhase(PHASE_3);
-                            events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 15500, 0, PHASE_3);
-                            events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 30000, 0, PHASE_3);
-                            events.ScheduleEvent(EVENT_LIVING_METEOR, 45000, 0, PHASE_3);
-                        }
-                        break;
-                    }
-                    case EVENT_ENGULFING_FLAMES:
-                        if (!IsHeroic())
-                        {
-                            Talk(SAY_ENGULFING_FLAMES);
-                            switch (urand(0, 2))
-                            {
-                                case 0: // Melee
-                                {
-                                    for (uint32 x = 0; x < 16; ++x)
-                                        me->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesMelee[x], TEMPSUMMON_TIMED_DESPAWN, 18000);
-
-                                    DoCastAOE(SPELL_ENGULFING_FLAMES_VISUAL_MELEE);
-                                    DoCastAOE(SPELL_ENGULFING_FLAMES_MELEE);
-                                    break;
-                                }
-                                case 1: // Range
-                                {
-                                    for (uint32 x = 0; x < 35; ++x)
-                                        me->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesRange[x], TEMPSUMMON_TIMED_DESPAWN, 18000);
-
-                                    DoCastAOE(SPELL_ENGULFING_FLAMES_VISUAL_BOTTOM);
-                                    DoCastAOE(SPELL_ENGULFING_FLAMES_BOTTOM);
-                                    break;
-                                }
-                                case 2: // Center
-                                {
-                                    for (uint32 x = 0; x < 17; ++x)
-                                        me->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesCenter[x], TEMPSUMMON_TIMED_DESPAWN, 18000);
-
-                                    DoCastAOE(SPELL_ENGULFING_FLAMES_VISUAL_CENTER);
-                                    DoCastAOE(SPELL_ENGULFING_FLAMES_CENTER);
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Talk(SAY_WORLD_IN_FLAMES);
-                            DoCastAOE(SPELL_WOLRD_IN_FLAMES);
-                        }
-
-                        if (_submergeCounter == 1)
-                            events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 60000, 0, PHASE_2);
-                        else if (_submergeCounter == 2)
-                            events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 30000, 0, PHASE_3);
-                        break;
-                    case EVENT_MOLTEN_SEED:
-                        DoCastAOE(SPELL_MOLTEN_SEED);
-                        events.ScheduleEvent(EVENT_MOLTEN_SEED, 30000, 0, PHASE_2);
-                        break;
-                    case EVENT_LIVING_METEOR:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                            DoCast(target, SPELL_LIVING_METEOR_MISSILE);
-                        events.ScheduleEvent(EVENT_LIVING_METEOR, 55000, 0, PHASE_3);
-                        break;
-                    case EVENT_EMERGE_HEROIC:
-                        me->SetStandState(0);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                        me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
-                        events.ScheduleEvent(EVENT_TALK, 3250);
-                        events.ScheduleEvent(EVENT_FREEZE_PLATFORM, 200);
-                        events.ScheduleEvent(EVENT_TAUNT_EMOTE, 5500);
-                        break;
-                    case EVENT_TALK:
-                        Talk(SAY_INTRO_HEROIC_1);
-                        me->SendSetPlayHoverAnim(true);
-                        me->SetHover(true);
-                        if (Creature* cenarius = me->FindNearestCreature(NPC_CENARIUS, 200.0f))
-                            cenarius->CastStop();
-                        if (Creature* hamuul = me->FindNearestCreature(NPC_HAMUUL, 200.0f))
-                            hamuul->CastStop();
-                        if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f))
-                            malfurion->CastStop();
-                        events.ScheduleEvent(EVENT_STANDUP, 9400);
-                        events.ScheduleEvent(EVENT_BREAK_PLATFORM, 9400);
-                        break;
-                    case EVENT_TAUNT_EMOTE:
-                        me->PlayOneShotAnimKit(ANIM_KIT_TAUNT);
-                        break;
-                    case EVENT_FREEZE_PLATFORM:
-                        if (GameObject* platform = me->FindNearestGameObject(GO_RAGNAROS_PLATFORM, 200.0f))
-                            platform->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);
-                        if (magma)
-                            magma->RemoveAllAuras();
-                        break;
-                    case EVENT_STANDUP:
-                        Talk(SAY_INTRO_HEROIC_2);
-                        me->RemoveAurasDueToSpell(SPELL_BASE_VISUAL);
-                        me->SendSetPlayHoverAnim(false);
-                        me->SetDisableGravity(false);
-                        me->PlayOneShotAnimKit(ANIM_KIT_STAND_UP);
-                        events.ScheduleEvent(EVENT_ATTACK_HEROIC, 7500);
-                        events.ScheduleEvent(EVENT_SUMMON_DREADFLAME, 20500);
-                        events.ScheduleEvent(EVENT_SCHEDULE_EMPOWER, 44000);
-                        if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f, true))
-                            malfurion->AI()->DoAction(ACTION_SCHEDULE_CLOUDBURST);
-                        if (Creature* cenarius = me->FindNearestCreature(NPC_CENARIUS, 200.0f, true))
-                            cenarius->AI()->DoAction(ACTION_SCHEDULE_BREADTH);
-                        break;
-                    case EVENT_BREAK_PLATFORM:
-                        if (GameObject* platform = me->FindNearestGameObject(GO_RAGNAROS_PLATFORM, 200.0f))
-                            platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
-                        break;
-                    case EVENT_ATTACK_HEROIC:
-                        me->SetBaseAttackTime(BASE_ATTACK, 1500);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    case EVENT_ATTACK:
                         me->SetReactState(REACT_AGGRESSIVE);
-                        DoCast(SPELL_SUPERHEATED);
                         break;
-                    case EVENT_TRANSFORM_RAGNAROS:
-                        DoCast(me, SPELL_LEGS_HEAL);
-                        DoCast(me, SPELL_TRANSFORM);
-                        break;
-                    case EVENT_SCHEDULE_EMPOWER:
-                        if (Creature* hamuul = me->FindNearestCreature(NPC_HAMUUL, 200.0f, true))
-                            hamuul->AI()->DoAction(ACTION_SCHEDULE_ROOTS);
-                        events.ScheduleEvent(EVENT_EMPOWER_SULFURAS, 16000);
-                        events.ScheduleEvent(EVENT_SCHEDULE_EMPOWER, 44000);
-                        break;
-                    case EVENT_EMPOWER_SULFURAS:
-                    {
-                        Talk(SAY_EMPOWER_SULFURAS);
-                        std::list<Creature*> units; // Temphack
-                        GetCreatureListWithEntryInGrid(units, me, NPC_MOLTEN_SEED_CASTER, 500.0f);
-                        for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                        (*itr)->AddAura(SPELL_EMPOWER_SULFURAS_TRIGGER, (*itr));
-
-                        DoCast(SPELL_EMPOWER_SULFURAS);
-                        events.ScheduleEvent(EVENT_SCHEDULE_EMPOWER, 44000);
-                        break;
-                    }
-                    case EVENT_SUMMON_DREADFLAME:
-                        Talk(SAY_DREADFLAME);
-                        for (uint8 i = 0; i < 2; i++)
-                        {
-                            float destX = me->GetPositionX() + frand(-40.0f, 40.0f);
-                            float destY = me->GetPositionY() + frand(-40.0f, 40.0f);
-                            float destZ = me->GetPositionZ() + 0.3f;
-                            me->CastSpell(destX, destY, destZ, SPELL_DREADFLAME_SUMMON_MISSILE, true);
-                        }
-                        events.ScheduleEvent(EVENT_SUMMON_DREADFLAME, 40000);
+                    case EVENT_SPLITTING_BLOW:
                         break;
                     default:
                         break;
@@ -1199,17 +724,11 @@ class npc_fl_magma_trap : public CreatureScript
 
             bool _exploded;
 
-            void InitializeAI()
-            {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_DISABLE_MOVE);
-            }
-
             void IsSummonedBy(Unit* /*summoner*/)
             {
                 events.ScheduleEvent(EVENT_PREPARE_TRAP, 1000);
                 me->AddAura(SPELL_MAGMA_TRAP_VISUAL, me);
                 me->SetReactState(REACT_PASSIVE);
-                SetCombatMovement(false);
             }
 
             void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
@@ -1259,69 +778,61 @@ class npc_fl_sulfuras_smash : public CreatureScript
         {
             npc_fl_sulfuras_smashAI(Creature* creature) : ScriptedAI(creature)
             {
-                _summonCounter = 0;
+                instance = me->GetInstanceScript();
             }
+            InstanceScript* instance;
 
-            uint8 _summonCounter;
-
-            void IsSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* /*summoner*/)
             {
-                events.ScheduleEvent(EVENT_SCORCH, 3400);
-                events.ScheduleEvent(EVENT_SUMMON_WAVE_1, 3400);
-                me->SetOrientation(summoner->GetOrientation());
-                me->setFaction(summoner->getFaction());
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_DISABLE_MOVE);
-            }
-
-            void JustSummoned(Creature* summon)
-            {
-                summon->setFaction(me->getFaction());
-                _summonCounter++;
-                if (_summonCounter == 2)
-                    summon->SetOrientation(me->GetOrientation() + M_PI/2);
-                else if (_summonCounter == 3)
+                if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 100.0f))
                 {
-                    summon->SetOrientation(me->GetOrientation() - M_PI/2);
-                    _summonCounter = 0;
+                    ragnaros->SetFacingToObject(me);
+                    ragnaros->AI()->DoCast(ragnaros, SPELL_SUMMON_SULFURAS_SMASH_TARGET);
                 }
             }
-
-            void UpdateAI(uint32 diff)
-            {
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_SCORCH:
-                            me->RemoveAurasDueToSpell(SPELL_LAVA_POOL);
-                            me->AddAura(SPELL_SCORCHED_GROUND, me);
-                            break;
-                        case EVENT_SUMMON_WAVE_1:
-                            DoCastAOE(SPELL_LAVA_WAVE_DUMMY_NORTH);
-                            events.ScheduleEvent(EVENT_SUMMON_WAVE_2, 50);
-                            break;
-                        case EVENT_SUMMON_WAVE_2:
-                            DoCastAOE(SPELL_LAVA_WAVE_DUMMY_WEST);
-                            events.ScheduleEvent(EVENT_SUMMON_WAVE_3, 50);
-                            break;
-                        case EVENT_SUMMON_WAVE_3:
-                            DoCastAOE(SPELL_LAVA_WAVE_DUMMY_EAST);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-    private:
-        EventMap events;
         };
 
         CreatureAI* GetAI(Creature* creature) const
         {
             return new npc_fl_sulfuras_smashAI(creature);
         }
+};
+
+class npc_fl_sulfuras_smash_target : public CreatureScript
+{
+public:
+    npc_fl_sulfuras_smash_target() : CreatureScript("npc_fl_sulfuras_smash_target") { }
+
+    struct npc_fl_sulfuras_smash_targetAI : public ScriptedAI
+    {
+        npc_fl_sulfuras_smash_targetAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            DoCast(me, SPELL_LAVA_POOL);
+            if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 100.0f))
+            {
+                ragnaros->SetReactState(REACT_PASSIVE);
+                ragnaros->AttackStop();
+                ragnaros->SetFacingToObject(me);
+                ragnaros->AI()->DoAction(ACTION_CAST_SULFURAS_SMASH);
+                DoCast(me, SPELL_LAVA_WAVE_N, true);
+                DoCast(me, SPELL_LAVA_WAVE_E, true);
+                DoCast(me, SPELL_LAVA_WAVE_W, true);
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_fl_sulfuras_smash_targetAI(creature);
+    }
 };
 
 class npc_fl_lava_wave : public CreatureScript
@@ -1337,32 +848,12 @@ class npc_fl_lava_wave : public CreatureScript
 
             void IsSummonedBy(Unit* summoner)
             {
-                events.ScheduleEvent(EVENT_MOVE_LAVA_WAVE, 100);
-                me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_LAVA_WAVE_TRIGGERED, true);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_DISABLE_MOVE);
-                me->SetSpeed(MOVE_RUN, 2.0f);
+                me->SetFacingTo(summoner->GetAngle(me->GetPositionX(), me->GetPositionY()));
             }
 
             void UpdateAI(uint32 diff)
             {
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_MOVE_LAVA_WAVE:
-                            DoCast(SPELL_LAVA_WAVE);
-                            me->GetMotionMaster()->MovePoint(0, me->GetPositionX()+cos(me->GetOrientation())*100, me->GetPositionY()+sin(me->GetOrientation())*100, me->GetPositionZ(), false);
-                            break;
-                        default:
-                            break;
-                    }
-                }
             }
-
-        private:
-            EventMap events;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -2200,127 +1691,76 @@ class npc_fl_cloudburst : public CreatureScript
     }
 };
 
-class npc_fl_molten_erupter : public CreatureScript
+class spell_fl_sulfuras_smash_aoe : public SpellScriptLoader
 {
-    public:
-        npc_fl_molten_erupter() : CreatureScript("npc_fl_molten_erupter") { }
+public:
+    spell_fl_sulfuras_smash_aoe() : SpellScriptLoader("spell_fl_sulfuras_smash_aoe") { }
 
-        struct npc_fl_molten_erupterAI : public ScriptedAI
-        {
-            npc_fl_molten_erupterAI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
-
-            EventMap events;
-
-            void Reset()
-            {
-                me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
-            }
-
-            void EnterCombat(Unit* /*who*/)
-            {
-            }
-
-            void DoAction(int32 action)
-            {
-                switch (action)
-                {
-                    case ACTION_EMERGE_WORM:
-                        me->SetStandState(UNIT_STAND_STATE_STAND);
-                        me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case 0:
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                DoMeleeAttackIfReady();
-            }
-        };
-
-    CreatureAI* GetAI(Creature* creature) const
+    class spell_fl_sulfuras_smash_aoe_SpellScript : public SpellScript
     {
-        return new npc_fl_molten_erupterAI(creature);
+        PrepareSpellScript(spell_fl_sulfuras_smash_aoe_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_fl_sulfuras_smash_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_fl_sulfuras_smash_aoe_SpellScript();
     }
 };
 
-class npc_fl_molten_spewer : public CreatureScript
+class spell_fl_sulfuras_smash : public SpellScriptLoader
 {
-    public:
-        npc_fl_molten_spewer() : CreatureScript("npc_fl_molten_spewer") { }
+public:
+    spell_fl_sulfuras_smash() : SpellScriptLoader("spell_fl_sulfuras_smash") { }
 
-        struct npc_fl_molten_spewerAI : public ScriptedAI
-        {
-            npc_fl_molten_spewerAI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
-
-            EventMap events;
-
-            void Reset()
-            {
-                me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
-            }
-
-            void EnterCombat(Unit* /*who*/)
-            {
-            }
-
-            void DoAction(int32 action)
-            {
-                switch (action)
-                {
-                    case ACTION_EMERGE_WORM:
-                        me->SetStandState(UNIT_STAND_STATE_STAND);
-                        me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case 0:
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                DoMeleeAttackIfReady();
-            }
-        };
-
-    CreatureAI* GetAI(Creature* creature) const
+    class spell_fl_sulfuras_smash_SpellScript : public SpellScript
     {
-        return new npc_fl_molten_spewerAI(creature);
+        PrepareSpellScript(spell_fl_sulfuras_smash_SpellScript);
+
+        void HandleSulfurasSmash(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+            {
+                target->RemoveAurasDueToSpell(SPELL_LAVA_POOL);
+                target->CastSpell(target, SPELL_SCORCHED_GROUND, false);
+            }
+        }
+
+        void HandleLavaWave(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+            {
+                target->CastSpell(target, SPELL_LAVA_WAVE, true);
+                target->GetMotionMaster()->MovePoint(0, target->GetPositionX() + cos(target->GetOrientation()) * 100,
+                    target->GetPositionY() + sin(target->GetOrientation()) * 100, target->GetPositionZ(), false);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_fl_sulfuras_smash_SpellScript::HandleSulfurasSmash, EFFECT_1, SPELL_EFFECT_DUMMY);
+            OnEffectHitTarget += SpellEffectFn(spell_fl_sulfuras_smash_SpellScript::HandleLavaWave, EFFECT_2, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_fl_sulfuras_smash_SpellScript();
     }
 };
 
@@ -2728,6 +2168,8 @@ void AddSC_boss_ragnaros_cata()
     new boss_ragnaros_cata();
     new npc_fl_magma_trap();
     new npc_fl_sulfuras_smash();
+    new npc_fl_sulfuras_smash_target();
+
     new npc_fl_lava_wave();
     new npc_fl_sulfuras_hammer();
     new npc_fl_son_of_flame();
@@ -2739,8 +2181,10 @@ void AddSC_boss_ragnaros_cata()
     new npc_fl_archdruids();
     new npc_fl_dreadflame();
     new npc_fl_cloudburst();
-    new npc_fl_molten_erupter();
-    new npc_fl_molten_spewer();
+
+    new spell_fl_sulfuras_smash_aoe();
+    new spell_fl_sulfuras_smash();
+
     new spell_fl_splitting_blow();
     new spell_fl_invoke_sons();
     new spell_fl_blazing_heat();

@@ -33,9 +33,15 @@ enum Datas
     DATA_MAJORDOMO_STANGHELM,
     DATA_RAGNAROS,
     DATA_SHANNOX_CONTROLLER,
-
     DATA_FIRELANDS_BRIDGE,
-    DATA_RAGNAROS_KILLED,
+
+    DATA_FIRST_RAGNAROS_SUMMON,
+    DATA_RAGNAROS_SUMMONED,
+};
+
+enum InstanceEvents
+{
+    EVENT_SUMMON_RAGNAROS = 1,
 };
 
 enum GameObjectIds
@@ -145,6 +151,8 @@ enum CreatureIds
     NPC_BLAZING_TALON_CLAWSHAPER    = 53734,
     NPC_MOLTEN_FEATHER              = 53089,
 };
+
+Position const RagnarosSummonPosition = { 1075.201f, -57.84896f, 55.42427f, 3.159046f };
 
 enum FirelandsMisc
 {
