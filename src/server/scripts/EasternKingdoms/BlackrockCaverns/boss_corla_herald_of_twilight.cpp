@@ -471,31 +471,16 @@ public:
                         }
                         channelTarget = zealot;
 
-                        std::list<WorldObject*> targets;
-                        Trinity::AllWorldObjectsInRange u_check(me, 100.0f);
-                        Trinity::WorldObjectListSearcher<Trinity::AllWorldObjectsInRange> searcher(me, targets, u_check);
-                        me->VisitNearbyObject(100.0f, searcher);
-                        for (std::list<WorldObject*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
-                        {
-                            if ((*itr)->GetTypeId() != TYPEID_PLAYER)
-                                continue;
-
-                            if (zealot && (*itr) && (*itr)->IsInBetween(me, zealot, 1.0f))
-                            {
-                                channelTarget = (*itr)->ToUnit();
-                                if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && !channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
-                                    DoCast(channelTarget, SPELL_EVOLUTION_VISUAL, true);
-                            }
-                        }
-
                         if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && !channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
+                        {
                             DoCast(channelTarget, SPELL_EVOLUTION_VISUAL, true);
 
-                        // Refresh duration!
-                        if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && channelTarget->HasAura(SPELL_EVOLUTION))
-                            channelTarget->GetAura(SPELL_EVOLUTION)->RefreshDuration();
-                        else if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && channelTarget->HasAura(SPELL_EVOLUTION_H))
-                            channelTarget->GetAura(SPELL_EVOLUTION_H)->RefreshDuration();
+                            // Refresh duration!
+                            if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && channelTarget->HasAura(SPELL_EVOLUTION))
+                                channelTarget->GetAura(SPELL_EVOLUTION)->RefreshDuration();
+                            else if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && channelTarget->HasAura(SPELL_EVOLUTION_H))
+                                channelTarget->GetAura(SPELL_EVOLUTION_H)->RefreshDuration();
+                        }
 
                         // Ritual done, init transformations!
                         if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL)
@@ -532,7 +517,7 @@ public:
                                 }
                             }
                         }
-                        events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 800);
+                        events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 600);
                         break;
                     }
                     case EVENT_SEND_NETHER_VISUAL:
