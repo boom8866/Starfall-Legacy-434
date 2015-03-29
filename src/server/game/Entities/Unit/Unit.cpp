@@ -8370,6 +8370,8 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     {
                         int32 bp0 = aurEff->GetAmount();
                         CastCustomSpell(this, 81162, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                        // Rune Tap (free)
+                        CastSpell(this, 96171, true);
                         ToPlayer()->AddSpellCooldown(81162, 0, time(NULL) + 45);
                     }
 

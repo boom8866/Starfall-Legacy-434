@@ -16831,7 +16831,7 @@ public:
                     }
                     case EVENT_UPPERCUT:
                     {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true))
                             DoCast(target, SPELL_UPPERCUT);
                         events.RescheduleEvent(EVENT_UPPERCUT, urand(20000, 25000));
                         break;

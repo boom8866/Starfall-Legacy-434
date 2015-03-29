@@ -77,7 +77,8 @@ void ArchaeologyMgr::LoadData()
                     break;
                 }
 
-                _polygonMap[site] = new SitePolygonGraph<float>();
+                // Create Site Polygon
+                _polygonMap[site] = new SitePolygonGraph();
                 _polygonMap[site]->add_node(entry->x, entry->y);
 
                 for (uint32 j = 1; j < 12; j++)
@@ -89,8 +90,14 @@ void ArchaeologyMgr::LoadData()
                         break;
                     }
 
+                    // Add new perimeter point
                     _polygonMap[site]->add_node(entry->x, entry->y);
                 }
+
+                // Generate ALL inscribed and boundary geometries for the polygon!
+                _polygonMap[site]->finalize_polygon();
+
+                // NEXT!
                 count++;
                 sites.erase(itr++);
             }
@@ -197,7 +204,7 @@ bool ArchaeologyMgr::isSiteValid(SiteData *sites, uint16 entry)
 uint16 ArchaeologyMgr::GetNewSite(Continent continent, SiteData *sites, bool extended, uint32 playerLevel)
 {
     std::vector<SiteEntry> *siteList;
-    uint32 offset = continent * CONTINENT_SITES; 
+    uint32 offset = continent * CONTINENT_SITES;
     uint16 entry;
 
     if (extended)
@@ -219,10 +226,12 @@ uint16 ArchaeologyMgr::GetNewSite(Continent continent, SiteData *sites, bool ext
 
 bool ArchaeologyMgr::SetSiteCoords(SiteData &site)
 {
-    if (SitePolygonGraph<float>* poly = _polygonMap[site.entry])
+    if (SitePolygonGraph* poly = _polygonMap[site.entry])
     {
-        SitePolygonGraphNode<float> node = poly->randomize_poi();
+        // Calculate random point of interest
+        SitePolygonGraphNode node = poly->randomize_poi();
 
+        // Get random point into Polygon
         site.x = node.getX();
         site.y = node.getY();
 
