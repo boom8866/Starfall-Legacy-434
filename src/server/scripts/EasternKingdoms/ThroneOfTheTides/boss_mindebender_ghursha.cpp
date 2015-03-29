@@ -308,9 +308,9 @@ class boss_mindbender_ghursha : public CreatureScript
 public:
     boss_mindbender_ghursha() : CreatureScript("boss_mindbender_ghursha"){ }
 
-    struct boss_mindbender_ghurshaAI : public BossAI
+    struct boss_mindbender_ghurshaAI : public ScriptedAI
     {
-        boss_mindbender_ghurshaAI(Creature* creature) : BossAI(creature, DATA_MINDEBENDER_GHURSHA), instance(creature->GetInstanceScript())
+        boss_mindbender_ghurshaAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript())
         {
             Enslave = false;
             EnslavePlayer = NULL;
