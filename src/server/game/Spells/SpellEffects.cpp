@@ -1860,20 +1860,12 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                     {
                         for (std::list<Creature*>::const_iterator itr = templist.begin(); itr != templist.end(); ++itr)
                         {
-                            //You cannot detonate other people's mushrooms
+                            // You cannot detonate other people's mushrooms
                             if ((*itr)->GetOwner() != m_caster || !(*itr)->IsVisible())
                                 continue;
 
-                            // Find all the enemies
-                            std::list<Unit*> targets;
-                            Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check((*itr), (*itr), 6.0f);
-                            Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher((*itr), targets, u_check);
-                            (*itr)->VisitNearbyObject(6.0f, searcher);
-                            for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
-                            {
-                                // Damage spell
-                                (*itr)->GetOwner()->CastSpell((*iter), 78777, true);
-                            }
+                            if ((*itr)->GetOwner())
+                                (*itr)->GetOwner()->CastSpell((*itr), 78777, true);
 
                             // Suicide spell
                             (*itr)->CastSpell((*itr), 92853, true);
