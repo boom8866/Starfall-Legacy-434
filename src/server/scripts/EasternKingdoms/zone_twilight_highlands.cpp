@@ -60,7 +60,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -145,7 +145,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -233,7 +233,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -321,7 +321,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -420,7 +420,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -513,7 +513,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -588,7 +588,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -1647,7 +1647,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -1727,7 +1727,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -1835,7 +1835,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -3915,7 +3915,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -3995,7 +3995,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -4202,7 +4202,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -4303,7 +4303,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -6844,7 +6844,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -6990,7 +6990,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -7767,7 +7767,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -8339,7 +8339,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -8494,7 +8494,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -8649,7 +8649,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
     };
@@ -8814,7 +8814,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -9234,7 +9234,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -12748,7 +12748,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -15187,7 +15187,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -18282,7 +18282,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -19272,13 +19272,13 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() && me->isInCombat())
+            if (!UpdateVictim())
                 return;
 
             events.Update(diff);
@@ -19486,7 +19486,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = urand(521, 784);
         }
 
@@ -20019,7 +20019,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -21439,7 +21439,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
     };

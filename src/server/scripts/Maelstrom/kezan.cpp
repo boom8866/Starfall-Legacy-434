@@ -1833,7 +1833,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 
@@ -1914,7 +1914,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+            if (attacker && attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
                 damage = 0;
         }
 

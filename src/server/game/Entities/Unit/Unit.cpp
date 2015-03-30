@@ -3310,19 +3310,8 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
     {
         case CURRENT_GENERIC_SPELL:
         {
-            // Warlock: Inferno
-            bool spellHellfire = false;
-            if (m_currentSpells[CURRENT_CHANNELED_SPELL])
-            {
-                if (m_currentSpells[CURRENT_CHANNELED_SPELL]->GetSpellInfo())
-                {
-                    if (m_currentSpells[CURRENT_CHANNELED_SPELL]->GetSpellInfo()->Id == 1949)
-                        spellHellfire = true;
-                }
-            }
-
             // generic spells always break channeled not delayed spells
-            InterruptSpell(CURRENT_CHANNELED_SPELL, false, true, spellHellfire);
+            InterruptSpell(CURRENT_CHANNELED_SPELL, false, true);
 
             // autorepeat breaking
             if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
@@ -3391,12 +3380,12 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
     pSpell->m_selfContainer = &(m_currentSpells[pSpell->GetCurrentContainer()]);
 }
 
-void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool withInstant, bool fromClient)
+void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool withInstant)
 {
-    InterruptSpellWithSource(spellType, NULL, withDelayed, withInstant, fromClient);
+    InterruptSpellWithSource(spellType, NULL, withDelayed, withInstant);
 }
 
-void Unit::InterruptSpellWithSource(CurrentSpellTypes spellType, Unit* source, bool withDelayed, bool withInstant, bool fromClient)
+void Unit::InterruptSpellWithSource(CurrentSpellTypes spellType, Unit* source, bool withDelayed, bool withInstant)
 {
     ASSERT(spellType < CURRENT_MAX_SPELL);
 
@@ -3415,19 +3404,6 @@ void Unit::InterruptSpellWithSource(CurrentSpellTypes spellType, Unit* source, b
 
         if (source)
             source->ProcDamageAndSpell(this, DONE_HIT_PROC_FLAG_MASK, TAKEN_HIT_PROC_FLAG_MASK, PROC_EX_INTERRUPT, 0, BASE_ATTACK, spell->GetSpellInfo());
-
-        // Warlock: Inferno
-        if (fromClient == false)
-        {
-            if (Unit* caster = spell->GetCaster())
-            {
-                if (const SpellInfo* spellProto = spell->GetSpellInfo())
-                {
-                    if (spellProto->Id == 1949 && caster->HasSpell(85105))
-                        return;
-                }
-            }
-        }
 
         // send autorepeat cancel message for autorepeat spells
         if (spellType == CURRENT_AUTOREPEAT_SPELL)
@@ -3485,19 +3461,19 @@ bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skip
     return false;
 }
 
-void Unit::InterruptNonMeleeSpells(bool withDelayed, uint32 spell_id, bool withInstant, bool fromClient)
+void Unit::InterruptNonMeleeSpells(bool withDelayed, uint32 spell_id, bool withInstant)
 {
     // generic spells are interrupted if they are not finished or delayed
     if (m_currentSpells[CURRENT_GENERIC_SPELL] && (!spell_id || m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Id == spell_id))
-        InterruptSpell(CURRENT_GENERIC_SPELL, withDelayed, withInstant, fromClient);
+        InterruptSpell(CURRENT_GENERIC_SPELL, withDelayed, withInstant);
 
     // autorepeat spells are interrupted if they are not finished or delayed
     if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL] && (!spell_id || m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id == spell_id))
-        InterruptSpell(CURRENT_AUTOREPEAT_SPELL, withDelayed, withInstant, fromClient);
+        InterruptSpell(CURRENT_AUTOREPEAT_SPELL, withDelayed, withInstant);
 
     // channeled spells are interrupted if they are not finished, even if they are delayed
     if (m_currentSpells[CURRENT_CHANNELED_SPELL] && (!spell_id || m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->Id == spell_id))
-        InterruptSpell(CURRENT_CHANNELED_SPELL, true, true, fromClient);
+        InterruptSpell(CURRENT_CHANNELED_SPELL, true, true);
 }
 
 Spell* Unit::FindCurrentSpellBySpellId(uint32 spell_id) const
