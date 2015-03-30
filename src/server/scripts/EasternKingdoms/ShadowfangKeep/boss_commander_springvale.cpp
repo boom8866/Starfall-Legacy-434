@@ -126,15 +126,6 @@ public:
             _DespawnAtEvade();
         }
 
-        void JustRespawned()
-        {
-            if (IsHeroic())
-            {
-                me->SummonCreature(NPC_WAILING_GUARDSMAN, GuardsmanPos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 4000);
-                me->SummonCreature(NPC_TORMENTED_OFFICER, OfficerPos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 4000);
-            }
-        }
-
         void JustSummoned(Creature* summon)
         {
             switch (summon->GetEntry())
