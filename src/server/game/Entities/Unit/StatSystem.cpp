@@ -1085,7 +1085,7 @@ bool Guardian::UpdateStats(Stats stat)
                 mod = 0.88f;
                 // Glyph of Raise Dead
                 if (Aura* glyphOfRaiseDead = owner->GetAura(58686, owner->GetGUID()))
-                    mod = 0.7f;
+                    mod = 1.1f;
                 break;
             }
             case STAT_STRENGTH:

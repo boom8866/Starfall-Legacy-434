@@ -7566,7 +7566,10 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
     target->SendPeriodicAuraLog(&pInfo);
 
     if (target && caster)
-        target->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f, GetSpellInfo());
+    {
+        if (!target->getHostileRefManager().isEmpty())
+            target->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f, GetSpellInfo());
+    }
 
     bool haveCastItem = GetBase()->GetCastItemGUID() != 0;
 

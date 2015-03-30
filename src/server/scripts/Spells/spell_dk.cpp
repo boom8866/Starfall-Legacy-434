@@ -1831,6 +1831,11 @@ public:
     {
     }
 
+    enum spellId
+    {
+        SPELL_GLYPH_OF_DEATH_COIL   = 63333
+    };
+
     class spell_dk_death_coil_damage_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_dk_death_coil_damage_SpellScript);
@@ -1844,6 +1849,11 @@ public:
 
             int32 dmg = GetHitDamage();
             dmg += caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.3f;
+
+            // Glyph of Death Coil
+            if (caster->HasAura(SPELL_GLYPH_OF_DEATH_COIL))
+                AddPct(dmg, 15);
+
             SetHitDamage(dmg);
         }
 
