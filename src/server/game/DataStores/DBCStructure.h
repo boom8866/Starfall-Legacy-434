@@ -86,6 +86,13 @@ struct AchievementCriteriaEntry
             uint64  winCount;                               // 4
         } win_bg;
 
+        // ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ARCHAEOLOGY_PROJECTS = 3
+        struct
+        {
+            uint32 unused;                                 // 3
+            uint32 count;                                  // 4
+        } archaeology;
+
         // ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL            = 5
         // ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL      = 125
         struct
@@ -1920,6 +1927,16 @@ struct ResearchSiteEntry
     uint32  QuestPOI;
     char*   Name;
     char*   Flags;
+    
+    bool IsValid() const
+    {
+        return ID != 140 && // template
+            ID != 142 &&    // template
+            ID != 161 &&    // template
+            ID != 471 &&    // vashj'ir
+            ID != 473 &&    // vashj'ir
+            ID != 475;      // vashj'ir
+    }
 };
 
 // SpellCategories.dbc

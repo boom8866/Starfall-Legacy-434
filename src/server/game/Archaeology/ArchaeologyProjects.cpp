@@ -192,6 +192,8 @@ void Archaeology::CompleteProject(uint16 projectId)
             _completedProjects[projectId].second, _player->GetGUIDLow(), projectId);
     }
 
+    _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ARCHAEOLOGY_PROJECTS, projectId, 1);
+
     delete archData;
     ActivateBranch(project->branch, true);
 }
