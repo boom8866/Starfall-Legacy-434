@@ -34,25 +34,6 @@ public:
     {
         instance_firelands_InstanceMapScript(InstanceMap* map) : InstanceScript(map)
         {
-            Initialize();
-        }
-
-        uint64 _ragnarosGUID;
-        uint64 _shannoxGUID;
-        uint64 _bethilacGUID;
-        uint64 _lordRhyolithGUID;
-        uint64 _majordomoGUID;
-        uint64 _alysrazorGUID;
-        uint64 _balerocGUID;
-        uint64 _shannoxControllerGUID;
-        uint64 _cacheOfTheFirelordGUID;
-        uint64 _cacheOfTheFirelordHeroicGUID;
-
-        uint32 _bridgeEventDone;
-        uint32 _ragnarosKilled;
-
-        void Initialize()
-        {
             SetBossNumber(MAX_ENCOUNTERS);
             LoadDoorData(doorData);
             _ragnarosGUID = 0;
@@ -67,7 +48,8 @@ public:
             _cacheOfTheFirelordHeroicGUID = 0;
 
             _bridgeEventDone = 0;
-            _ragnarosKilled = 0;
+            _ragnarosSummoned = 0;
+            _ragnarosFirstTimeSummoned = true;
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -107,18 +89,6 @@ public:
             }
         }
 
-        void OnCreatureRemove(Creature* creature)
-        {
-            switch (creature->GetEntry())
-            {
-                case BOSS_RAGNAROS:
-                    _ragnarosGUID = 0;
-                    break;
-                default:
-                    break;
-            }
-        }
-
         void OnGameObjectCreate(GameObject* go)
         {
             switch (go->GetEntry())
@@ -131,10 +101,6 @@ public:
                     _cacheOfTheFirelordHeroicGUID = go->GetGUID();
                     go->SetPhaseMask(2, true);
                     break;
-                case GO_RAGNAROS_DOOR:
-                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-                    AddDoor(go, true);
-                    break;
                 case GO_BRIDGE_DOOR:
                     if (GetData(DATA_FIRELANDS_BRIDGE))
                         go->SetGoState(GO_STATE_ACTIVE);
@@ -145,6 +111,7 @@ public:
                     break;
                 case GO_BALEROC_DOOR:
                 case GO_MAJODOMO_DOOR:
+                case GO_RAGNAROS_DOOR:
                     AddDoor(go, true);
                     break;
                 default:
@@ -174,9 +141,21 @@ public:
                     _bridgeEventDone = data;
                     SaveToDB();
                     break;
-                case DATA_RAGNAROS_KILLED:
-                    _ragnarosKilled = data;
-                    SaveToDB();
+                case DATA_FIRST_RAGNAROS_SUMMON:
+                    _ragnarosFirstTimeSummoned = data;
+                    break;
+                case DATA_RAGNAROS_SUMMONED:
+                    if (data == 1)
+                    {
+                        if (Creature* ragnaros = instance->SummonCreature(BOSS_RAGNAROS, RagnarosSummonPosition, 0))
+                            ragnaros->AI()->DoAction(1);
+                    }
+                    else if (data == 4)
+                        Events.ScheduleEvent(EVENT_SUMMON_RAGNAROS, 30000);
+
+                    _ragnarosSummoned = data;
+                    break;
+                default:
                     break;
             }
         }
@@ -187,8 +166,11 @@ public:
             {
                 case DATA_FIRELANDS_BRIDGE:
                     return (uint32)_bridgeEventDone;
-                case DATA_RAGNAROS_KILLED:
-                    return (uint32)_ragnarosKilled;
+
+                case DATA_RAGNAROS_SUMMONED:
+                    return (uint32)_ragnarosSummoned;
+                case DATA_FIRST_RAGNAROS_SUMMON:
+                    return (uint32)_ragnarosFirstTimeSummoned;
             }
             return 0;
         }
@@ -219,17 +201,19 @@ public:
             return 0;
         }
 
-        bool SetBossState(uint32 data, EncounterState state)
+        bool SetBossState(uint32 type, EncounterState state)
         {
-            if (!InstanceScript::SetBossState(data, state))
+            if (!InstanceScript::SetBossState(type, state))
                 return false;
 
-            switch (data)
+            switch (type)
             {
                 case DATA_BALEROC:
                     if (state == DONE)
                         if (Creature* majodomo = instance->GetCreature(_majordomoGUID))
                             majodomo->AI()->DoAction(1);
+                    break;
+                default:
                     break;
             }
 
@@ -241,25 +225,25 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "F L " << GetBossSaveData() << " " << _bridgeEventDone << " " <<_ragnarosKilled;
+            saveStream << "F L " << GetBossSaveData() << _bridgeEventDone;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
         }
 
-        void Load(const char* in)
+        void Load(const char* str)
         {
-            if (!in)
+            if (!str)
             {
                 OUT_LOAD_INST_DATA_FAIL;
                 return;
             }
 
-            OUT_LOAD_INST_DATA(in);
+            OUT_LOAD_INST_DATA(str);
 
             char dataHead1, dataHead2;
 
-            std::istringstream loadStream(in);
+            std::istringstream loadStream(str);
             loadStream >> dataHead1 >> dataHead2;
 
             if (dataHead1 == 'F' && dataHead2 == 'L')
@@ -270,17 +254,53 @@ public:
                     loadStream >> tmpState;
                     if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
                         tmpState = NOT_STARTED;
-
-                    loadStream >> _bridgeEventDone;
-                    loadStream >> _ragnarosKilled;
-
                     SetBossState(i, EncounterState(tmpState));
                 }
 
-            } else OUT_LOAD_INST_DATA_FAIL;
+                // Loading saved bridge event
+                uint32 temp = 0;
+                loadStream >> temp;
+                SetData(DATA_FIRELANDS_BRIDGE, temp);
+            }
+            else
+                OUT_LOAD_INST_DATA_FAIL;
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
+
+        void Update(uint32 diff)
+        {
+            Events.Update(diff);
+
+            while (uint32 eventId = Events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SUMMON_RAGNAROS:
+                        if (Creature* ragnaros = instance->SummonCreature(BOSS_RAGNAROS, RagnarosSummonPosition, 0))
+                            ragnaros->AI()->DoAction(1);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        protected:
+            EventMap Events;
+            uint64 _ragnarosGUID;
+            uint64 _shannoxGUID;
+            uint64 _bethilacGUID;
+            uint64 _lordRhyolithGUID;
+            uint64 _majordomoGUID;
+            uint64 _alysrazorGUID;
+            uint64 _balerocGUID;
+            uint64 _shannoxControllerGUID;
+            uint64 _cacheOfTheFirelordGUID;
+            uint64 _cacheOfTheFirelordHeroicGUID;
+
+            uint8 _bridgeEventDone;
+            uint8 _ragnarosSummoned;
+            bool _ragnarosFirstTimeSummoned;
     };
 
     InstanceScript* GetInstanceScript(InstanceMap* map) const
