@@ -340,8 +340,6 @@ void PetAI::UpdateAI(uint32 diff)
                     me->SendUpdateToPlayer(owner->ToPlayer());
             }
 
-            me->AddCreatureSpellCooldown(spell->m_spellInfo->Id);
-
             spell->prepare(&targets);
         }
 
