@@ -6424,10 +6424,7 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
             for (Unit::AuraEffectList::const_iterator i = modFishingSkillTemp.begin(); i != modFishingSkillTemp.end(); ++i)
             {
                 if ((*i)->GetMiscValue() == 356)
-                {
                     RemoveAura((*i)->GetId());
-                    CastWithDelay(500, this, (*i)->GetId(), true);
-                }
             }
         }
 
