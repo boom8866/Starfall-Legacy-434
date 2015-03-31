@@ -1,0 +1,1 @@
+UPDATE `quest_template` SET `Flags`=4224 WHERE `Id` IN (30110, 28905, 28907, 29185);

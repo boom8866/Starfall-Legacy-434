@@ -327,7 +327,7 @@ void WorldSession::SendLfgPlayerLockInfo()
 
             if (quest)
             {
-                weeklyLimitReached = !player->CanRewardQuest(quest, false);
+                weeklyLimitReached = !GetPlayer()->CanRewardQuest(quest, false);
                 if (weeklyLimitReached)
                     quest = sObjectMgr->GetQuestTemplate(reward->otherQuest);
                 /*switch (dungeonId)

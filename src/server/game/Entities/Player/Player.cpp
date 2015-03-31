@@ -16656,7 +16656,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
         CharacterDatabase.CommitTransaction(trans);
     }
 
-    if (quest->IsDaily() || quest->IsDFQuest() && !quest->IsRepeatable())
+    if (quest->IsDaily() || quest->IsDFQuest())
     {
         SetDailyQuestStatus(quest_id);
         if (quest->IsDaily())
@@ -17275,7 +17275,7 @@ bool Player::SatisfyQuestDay(Quest const* qInfo, bool msg)
     if (!qInfo->IsDaily() && !qInfo->IsDFQuest())
         return true;
 
-    if (qInfo->IsDFQuest() && !qInfo->IsRepeatable())
+    if (qInfo->IsDFQuest())
     {
         if (!m_DFQuests.empty())
             return false;
@@ -19994,7 +19994,7 @@ void Player::_LoadDailyQuestStatus(PreparedQueryResult result)
             Field* fields = result->Fetch();
             if (Quest const* qQuest = sObjectMgr->GetQuestTemplate(fields[0].GetUInt32()))
             {
-                if (qQuest->IsDFQuest() && !qQuest->IsRepeatable())
+                if (qQuest->IsDFQuest())
                 {
                     m_DFQuests.insert(qQuest->GetQuestId());
                     m_lastDailyQuestTime = time_t(fields[1].GetUInt32());
@@ -24980,7 +24980,7 @@ void Player::SetDailyQuestStatus(uint32 quest_id)
                 }
             }
         }
-        else if (!qQuest->IsRepeatable())
+        else
         {
             m_DFQuests.insert(quest_id);
             m_lastDailyQuestTime = time(NULL);
