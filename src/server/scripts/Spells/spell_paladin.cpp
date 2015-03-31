@@ -886,6 +886,10 @@ class spell_pal_holy_wrath : public SpellScriptLoader
             void FilterTargets(std::list<WorldObject*>& targets)
             {
                 targetCount = 0;
+
+                if (targets.empty())
+                    return;
+
                 std::list<WorldObject*> toAdd;
                 for (std::list<WorldObject*>::iterator iter = targets.begin(); iter != targets.end(); ++iter)
                 {
