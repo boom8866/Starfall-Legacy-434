@@ -94,6 +94,9 @@ bool npc_escortAI::AssistPlayerInCombat(Unit* who)
 
 void npc_escortAI::MoveInLineOfSight(Unit* who)
 {
+    if (!who)
+        return;
+
     if (!me->HasUnitState(UNIT_STATE_STUNNED) && who->isTargetableForAttack() && who->isInAccessiblePlaceFor(me))
     {
         if (HasEscortState(STATE_ESCORT_ESCORTING) && AssistPlayerInCombat(who) || HasEscortState(STATE_ESCORT_JUMPING))
@@ -109,8 +112,12 @@ void npc_escortAI::MoveInLineOfSight(Unit* who)
             {
                 if (!me->getVictim())
                 {
-                    who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
-                    AttackStart(who);
+                    if (who && who->IsInWorld())
+                    {
+                        if (who->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                            who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                        AttackStart(who);
+                    }
                 }
                 else if (me->GetMap()->IsDungeon())
                 {
