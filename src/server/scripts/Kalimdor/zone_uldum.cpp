@@ -549,8 +549,8 @@ public:
                     }
                     case EVENT_FADE_TO_BLACK:
                     {
-                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner->IsInWorld())
-                            playerOwner->CastSpell(playerOwner, SPELL_FADE_TO_BLACK, true);
+                        if (Unit* owner = me->GetCharmerOrOwner())
+                            owner->CastSpell(owner, SPELL_FADE_TO_BLACK, true);
 
                         if (Creature* ladyHumps = me->FindNearestCreature(NPC_ENTRY_LADY_HUMPS, 100.0f, true))
                             ladyHumps->AI()->DoAction(2);
@@ -611,8 +611,8 @@ public:
                     }
                     case EVENT_FADE_SECOND:
                     {
-                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
-                            playerOwner->CastSpell(playerOwner, SPELL_FADE_TO_BLACK, true);
+                        if (Unit* owner = me->GetCharmerOrOwner())
+                            owner->CastSpell(owner, SPELL_FADE_TO_BLACK, true);
                         events.CancelEvent(EVENT_FADE_SECOND);
                         break;
                     }
