@@ -6421,10 +6421,13 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
         if (skill_id == 356)
         {
             Unit::AuraEffectList const& modFishingSkillTemp = GetAuraEffectsByType(SPELL_AURA_MOD_SKILL);
-            for (Unit::AuraEffectList::const_iterator i = modFishingSkillTemp.begin(); i != modFishingSkillTemp.end(); ++i)
+            if (!modFishingSkillTemp.empty())
             {
-                if ((*i)->GetMiscValue() == 356)
-                    RemoveAura((*i)->GetId());
+                for (Unit::AuraEffectList::const_iterator i = modFishingSkillTemp.begin(); i != modFishingSkillTemp.end(); ++i)
+                {
+                    if ((*i) && (*i)->GetMiscValue() == 356)
+                        RemoveAura((*i)->GetId());
+                }
             }
         }
 
