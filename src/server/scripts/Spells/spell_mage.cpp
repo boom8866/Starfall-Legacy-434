@@ -1460,6 +1460,9 @@ class spell_mage_piercing_chill : public SpellScriptLoader
 
             void HandleTargetSelectEff0(std::list<WorldObject*>& targets)
             {
+                if (targets.empty())
+                    return;
+
                 if(Unit* caster = GetCaster())
                 {
                     targets.remove(GetExplTargetUnit());
@@ -1479,6 +1482,9 @@ class spell_mage_piercing_chill : public SpellScriptLoader
 
             void HandleTargetSelectEff2(std::list<WorldObject*>& targets)
             {
+                if (targets.empty())
+                    return;
+
                 targets.clear();
 
                 if(!additionalTargets.empty())
@@ -1899,6 +1905,9 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
+            if (targets.empty())
+                return;
+
             std::list<WorldObject*> validTarget;
             for (std::list<WorldObject*>::iterator target = targets.begin(); target != targets.end(); ++target)
             {
