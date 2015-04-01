@@ -1946,7 +1946,7 @@ public:
                                 AddPct(damage, aurEff->GetAmount());
                         }
                     }
-                    caster->DealDamage(target, damage, 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_FIRE, GetSpellInfo(), false);
+                    target->DealDamage(target, damage, 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_FIRE, GetSpellInfo(), false);
                 }
             }
         }
@@ -2087,7 +2087,7 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_snake_trap();
     new spell_hun_lock_and_load();
     new spell_hun_attack_basic();
-    new spell_hun_explosive_trap();
+    //new spell_hun_explosive_trap();
     new spell_hun_rapid_killing();
     new spell_hun_rapid_fire();
 }
