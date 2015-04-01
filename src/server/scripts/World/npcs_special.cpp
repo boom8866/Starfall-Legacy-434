@@ -9703,43 +9703,80 @@ public:
         SPELL_BANE_OF_HAVOC                 = 80240
     };
 
+    enum eventId
+    {
+        EVENT_CHECK_DUMMY   = 1
+    };
+
     struct npc_warlock_infernalAI : PetAI
     {
         npc_warlock_infernalAI(Creature* creature) : PetAI(creature)
         {
         }
 
-        uint32 checkTimer;
+        EventMap events;
 
         void InitializeAI()
         {
             me->SetPower(POWER_ENERGY, me->GetMaxPower(POWER_ENERGY));
             me->CastSpell(me, SPELL_DEMONIC_IMMOLATION_PASSIVE, true);
-            checkTimer = 0;
+            events.ScheduleEvent(EVENT_CHECK_DUMMY, 500);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            events.Reset();
+            me->DespawnOrUnsummon(5000);
         }
 
         void UpdateAI(uint32 diff)
         {
-            if (checkTimer <= diff)
+            if (!me->isAlive())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                if (Unit* owner = me->GetOwner())
+                switch (eventId)
                 {
-                    Player* player = owner->ToPlayer();
-                    if (!player)
-                        return;
-
-                    Unit* ownerVictim = isBaned(player->GetSelectedUnit()) ? player->GetSelectedUnit() : NULL;
-                    Unit* meVictim = isBaned(me->getVictim()) ? me->getVictim() : NULL;
-                    Unit* infernalTarget = ownerVictim ? ownerVictim : meVictim ? meVictim : NULL;
-
-                    if (infernalTarget)
+                    case EVENT_CHECK_DUMMY:
                     {
-                        me->Attack(infernalTarget, true);
-                        me->GetMotionMaster()->MoveChase(infernalTarget);
-                        DoMeleeAttackIfReady();
+                        if (Unit* owner = me->GetOwner())
+                        {
+                            Player* player = owner->ToPlayer();
+                            if (!player)
+                                return;
+
+                            Unit* ownerVictim = isBaned(player->GetSelectedUnit()) ? player->GetSelectedUnit() : NULL;
+                            Unit* meVictim = isBaned(me->getVictim()) ? me->getVictim() : NULL;
+                            Unit* infernalTarget = ownerVictim ? ownerVictim : meVictim ? meVictim : NULL;
+
+                            if (infernalTarget)
+                            {
+                                if (me->GetMotionMaster())
+                                {
+                                    me->Attack(infernalTarget, true);
+                                    me->GetMotionMaster()->MovementExpired(false);
+                                    me->GetMotionMaster()->MoveChase(infernalTarget);
+                                }
+                                DoMeleeAttackIfReady();
+                            }
+                            else
+                            {
+                                if (Unit* owner = me->GetOwner())
+                                {
+                                    me->SetReactState(REACT_PASSIVE);
+                                    me->GetMotionMaster()->MovementExpired(false);
+                                    me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST * 2, me->GetFollowAngle());
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_CHECK_DUMMY, 2000);
+                        break;
                     }
-                    else
-                        dummyGuard();
+                    default:
+                        break;
                 }
             }
         }
@@ -9749,16 +9786,6 @@ public:
             if (Unit* owner = me->GetOwner())
                 return victim && (victim->HasAura(SPELL_BANE_OF_DOOM, owner->GetGUID()) || victim->HasAura(SPELL_BANE_OF_AGONY, owner->GetGUID()));
             return false;
-        }
-
-        void dummyGuard()
-        {
-            if (Unit* owner = me->GetOwner())
-            {
-                me->SetReactState(REACT_PASSIVE);
-                me->GetMotionMaster()->Clear(false);
-                me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST * 2, me->GetFollowAngle());
-            }
         }
     };
 
