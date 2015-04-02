@@ -499,10 +499,7 @@ public:
                             }
 
                             if (Creature* neptulon = creature->FindNearestCreature(NPC_ENTRY_NEPTULON, 500.0f, true))
-                            {
-                                creature->AddThreat(neptulon, 10.0f);
                                 creature->AI()->AttackStart(neptulon);
-                            }
                             return true;
                         }
 

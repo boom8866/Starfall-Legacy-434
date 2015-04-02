@@ -3284,10 +3284,7 @@ public:
                 if (Unit* owner = me->ToTempSummon()->GetSummoner())
                 {
                     if (owner->getAttackerForHelper())
-                    {
                         AttackStart(owner->getAttackerForHelper());
-                        me->AddThreat(owner->getAttackerForHelper(), 1.0f);
-                    }
                 }
             }
         }
@@ -8417,7 +8414,6 @@ public:
                     {
                         if (playerInvoker && playerInvoker->IsInWorld() && playerInvoker != NULL)
                         {
-                            me->AddThreat(playerInvoker, 1.0f);
                             me->SetInCombatWith(playerInvoker);
                             me->AI()->AttackStart(playerInvoker);
                             events.ScheduleEvent(EVENT_DRAKE_BANE, urand(3000, 5000));
