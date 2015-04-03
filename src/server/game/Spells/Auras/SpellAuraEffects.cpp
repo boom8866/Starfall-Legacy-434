@@ -710,7 +710,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
                 return;
         }
 
-        if (resetPeriodicTimer && !IsPeriodic())
+        if (resetPeriodicTimer)
         {
             m_periodicTimer = 0;
             m_tickNumber = 0;
