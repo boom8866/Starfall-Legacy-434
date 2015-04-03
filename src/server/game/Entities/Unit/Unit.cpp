@@ -11322,6 +11322,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             if (isPet())
             {
                 uint32 attackPower = GetTotalAttackPowerValue(BASE_ATTACK);
+                uint32 wildHuntMod = 1;
                 switch (spellProto->Id)
                 {
                     case 16827:    // Claw
@@ -11334,8 +11335,13 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
 
                         // Wild Hunt
                         if (AuraEffect* wildHunt = GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_0))
+                        {
+                            wildHuntMod = wildHunt->GetAmount();
+                            if (GetPower(POWER_FOCUS) >= 50)
+                                AddPct(DoneTotalMod, wildHuntMod);
                             if (GetPower(POWER_FOCUS) + spellProto->CalcPowerCost(this, spellProto->GetSchoolMask()) >= 50)
-                                AddPct(DoneTotal, wildHunt->GetAmount());
+                                SetPower(POWER_FOCUS, GetPower(POWER_FOCUS) - spellProto->CalcPowerCost(this, spellProto->GetSchoolMask()));
+                        }
 
                         DoneTotal += attackPower * 0.1952f;
                         break;

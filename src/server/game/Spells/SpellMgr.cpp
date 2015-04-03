@@ -4277,8 +4277,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 62762:
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
-                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
-                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
                 break;
             case 83967: // Have Group, Will Travel
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
