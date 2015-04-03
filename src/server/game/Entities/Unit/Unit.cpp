@@ -2983,7 +2983,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
         return SPELL_MISS_IMMUNE;
 
     // For spells like Dark Command etc...
-    if (spell->AttributesEx8 | SPELL_ATTR8_CANT_MISS)
+    if (spell->AttributesEx8 & SPELL_ATTR8_CANT_MISS)
         return SPELL_MISS_NONE;
 
     // For all kind of player summons (Get hit chance from owner)
