@@ -1,0 +1,1 @@
+UPDATE `spell_proc_event` SET `procEx`=0 WHERE `entry` IN (51556, 51557, 51558);
