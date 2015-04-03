@@ -6974,18 +6974,11 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         }
         else
         {
-            if (GetBase()->IsAffectedByModDuration() == true)
-            {
-                if (m_canBeRecalculated)
-                    damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+            if (m_canBeRecalculated)
+                damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
 
-                damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
-
-                GetBase()->GetEffect(GetEffIndex())->SetBonus(caster->SpellDamageBonusDone(target, m_spellInfo, GetBase()->GetEffect(GetEffIndex())->GetAmount(), DOT, GetBase()->GetStackAmount()) - GetBase()->GetEffect(GetEffIndex())->GetAmount());
-                GetBase()->SetAffectedByModDuration(false);
-            }
-            else
-                damage += bonus;
+            damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+            damage += bonus;
         }
 
         // Calculate armor mitigation
@@ -7441,25 +7434,18 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         if (target->HasAuraType(SPELL_AURA_MOD_HEALING_RECEIVED) || target->HasAura(90785))
         {
             if (m_canBeRecalculated)
-                damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+                damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), damage, HEAL, GetBase()->GetStackAmount());
 
-            damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+            damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), damage, HEAL, GetBase()->GetStackAmount());
             damage += bonus;
         }
         else
         {
-            if (GetBase()->IsAffectedByModDuration() == true)
-            {
-                if (m_canBeRecalculated)
-                    damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+            if (m_canBeRecalculated)
+                damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), damage, HEAL, GetBase()->GetStackAmount());
 
-                damage = target->SpellHealingBonusDone(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
-
-                GetBase()->GetEffect(GetEffIndex())->SetBonus(caster->SpellHealingBonusDone(target, m_spellInfo, GetBase()->GetEffect(GetEffIndex())->GetAmount(), DOT, GetBase()->GetStackAmount()) - GetBase()->GetEffect(GetEffIndex())->GetAmount());
-                GetBase()->SetAffectedByModDuration(false);
-            }
-            else
-                damage += bonus;
+            damage = target->SpellHealingBonusDone(caster, GetSpellInfo(), damage, HEAL, GetBase()->GetStackAmount());
+            damage += bonus;
         }
     }
 
