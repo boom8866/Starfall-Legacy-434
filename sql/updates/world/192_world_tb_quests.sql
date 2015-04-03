@@ -1,0 +1,13 @@
+update quest_template set rewardmoneymaxlevel = '68000' where rewardorrequiredmoney = '68000' and zoneorsort = '4922';
+update quest_template set rewardmoneymaxlevel = '45000' where rewardorrequiredmoney = '45000' and zoneorsort = '4922';
+update quest_template set rewardmoneymaxlevel = '90000' where rewardorrequiredmoney = '90000' and zoneorsort = '4922';
+update quest_template set rewardmoneymaxlevel = '270000' where rewardorrequiredmoney = '270000' and zoneorsort = '4922';
+update quest_template set rewardmoneymaxlevel = '180000' where rewardorrequiredmoney = '180000' and zoneorsort = '4922';
+update quest_template set rewardmoneymaxlevel = '22500' where rewardorrequiredmoney = '22500' and zoneorsort = '4922';
+update quest_template set rewardmoneymaxlevel = '282000' where rewardorrequiredmoney = '282000' and zoneorsort = '4922';
+update quest_template set rewardmoneymaxlevel = '71000' where rewardorrequiredmoney = '71000' and zoneorsort = '4922';
+update quest_template set rewardmoneymaxlevel = '94000' where rewardorrequiredmoney = '94000' and zoneorsort = '4922';
+update quest_template set rewardmoneymaxlevel = '9400' where rewardorrequiredmoney = '9400' and zoneorsort = '4922';
+update quest_template set rewardmoneymaxlevel = '188000' where rewardorrequiredmoney = '188000' and zoneorsort = '4922';
+update quest_template set rewardmoneymaxlevel = '376000' where rewardorrequiredmoney = '376000' and zoneorsort = '4922';
+update quest_template set rewardmoneymaxlevel = '23500' where rewardorrequiredmoney = '23500' and zoneorsort = '4922';
