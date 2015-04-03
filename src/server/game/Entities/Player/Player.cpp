@@ -19100,15 +19100,15 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         if (getLevel() >= 55)
         {
             if (!HasSpell(68976))
-                learnSpell(68976, true);
+                learnSpell(68976, false);
             if (!HasSpell(68978))
-                learnSpell(68978, true);
+                learnSpell(68978, false);
             if (!HasSpell(87840))
-                learnSpell(87840, true);
+                learnSpell(87840, false);
             if (!HasSpell(68975))
-                learnSpell(68975, true);
+                learnSpell(68975, false);
             if (!HasSpell(68996))
-                learnSpell(68996, true);
+                learnSpell(68996, false);
         }
 
         // Set Worgen form at login.
@@ -24620,6 +24620,18 @@ void Player::SendInitialPacketsAfterAddToMap()
     }
     else if (GetRaidDifficulty() != GetStoredRaidDifficulty())
         SendRaidDifficulty(GetGroup() != NULL);
+
+    // Cleanups
+    if (HasAura(76213))
+        RemoveAurasDueToSpell(76213);
+    if (HasAura(76616))
+        RemoveAurasDueToSpell(76616);
+    if (HasAura(76206))
+        RemoveAurasDueToSpell(76206);
+    if (HasAura(76207))
+        RemoveAurasDueToSpell(76207);
+    if (HasAura(91413))
+        RemoveAurasDueToSpell(91413);
 
     switch (getClass())
     {

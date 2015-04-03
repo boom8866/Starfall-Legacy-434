@@ -357,10 +357,6 @@ m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false)
     m_procCharges = CalcMaxCharges(caster);
     m_isUsingCharges = m_procCharges != 0;
 
-    // DoT Snapshot system
-    if (GetType() == SPELL_AURA_PERIODIC_DAMAGE || GetType() == SPELL_AURA_PERIODIC_HEAL)
-        SetAffectedByModDuration(false);
-
     // m_casterLevel = cast item level/caster level, caster level should be saved to db, confirmed with sniffs
 }
 
@@ -764,20 +760,6 @@ void Aura::RefreshDuration()
 
     if (m_spellInfo->ManaPerSecond)
         m_timeCla = 1 * IN_MILLISECONDS;
-
-    /* PREVENT TO USE THAT FUNCTION FOR GENERIC SPELLS (we're excluding all PvE) */
-    // Process damage change due to refresh aura using a switch (not all auras should be affected by that function)
-    if (m_spellInfo->SpellFamilyName != SPELLFAMILY_GENERIC)
-    {
-        switch (m_spellInfo->Id)
-        {
-            case 8050:  // Flame Shock
-                break;
-            default:
-                SetAffectedByModDuration(true);
-                break;
-        }
-    }
 }
 
 void Aura::RefreshTimers()

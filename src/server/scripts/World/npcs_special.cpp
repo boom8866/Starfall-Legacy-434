@@ -10277,6 +10277,47 @@ public:
     }
 };
 
+class npc_dancing_rune_weapon : public CreatureScript
+{
+public:
+    npc_dancing_rune_weapon() : CreatureScript("npc_dancing_rune_weapon") { }
+
+    struct npc_dancing_rune_weaponAI : PetAI
+    {
+        npc_dancing_rune_weaponAI(Creature* creature) : PetAI(creature) {}
+
+        void InitializeAI()
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
+            me->SetReactState(REACT_AGGRESSIVE);
+        }
+
+        void UpdateAI(uint32 /*diff*/)
+        {
+            if(Unit* owner = me->GetOwner())
+            {
+                Unit* ownerVictim = owner->getVictim();
+                Unit* myVictim = me->getVictim();
+                if (ownerVictim != myVictim)
+                {
+                    myVictim = ownerVictim;
+                    me->GetMotionMaster()->MovementExpired(false);
+                    me->Attack(myVictim, true);
+                    me->GetMotionMaster()->MoveChase(myVictim);
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_dancing_rune_weaponAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -10382,4 +10423,5 @@ void AddSC_npcs_special()
     new npc_flameward_activated();
     new npc_cold_water_crayfish();
     new npc_cook_ghilm();
+    new npc_dancing_rune_weapon();
 }
