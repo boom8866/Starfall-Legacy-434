@@ -11318,7 +11318,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     switch (spellProto->SpellFamilyName)
     {
         case SPELLFAMILY_HUNTER:
-        {
             if (isPet())
             {
                 uint32 attackPower = GetTotalAttackPowerValue(BASE_ATTACK);
@@ -11328,7 +11327,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     case 16827:    // Claw
                     case 17253:    // Bite
                     case 49966:    // Smack
-                    {
                         // Spiked Collar
                         if (AuraEffect* spikedCollar = GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2934, EFFECT_0))
                             AddPct(DoneTotalMod, spikedCollar->GetAmount());
@@ -11345,13 +11343,12 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
 
                         DoneTotal += (attackPower * 0.40f) * 0.20f;
                         break;
-                    }
+                    default:
+                        break;
                 }
             }
             break;
-        }
         case SPELLFAMILY_MAGE:
-        {
             if (spellProto && GetTypeId() == TYPEID_PLAYER)
             {
                 // Mastery: Frostburn
@@ -11379,18 +11376,14 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 switch (spellProto->Id)
                 {
                     case 30455: // Ice Lance
-                    {
                         if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
                             DoneTotalMod *= 2.0f;
                         break;
-                    }
                     case 116:   // Frostbolt
-                    {
                         // Fingers of Frost (Reduce damage to avoid problems)
                         if (HasAura(44544))
                             DoneTotalMod -= DoneTotalMod * 0.20f;
                         break;
-                    }
                     default:
                         break;
                 }
@@ -11412,24 +11405,17 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 }
             }
             break;
-        }
         case SPELLFAMILY_PRIEST:
-        {
             switch (spellProto->Id)
             {
                 case 585:   // Smite
-                {
                     // Glyph of Smite
                     if (AuraEffect* aurEff = GetAuraEffect(55692, EFFECT_0))
-                    {
                         if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x100000, 0, 0, GetGUID()))
                             AddPct(DoneTotalMod, aurEff->GetAmount());
-                    }
                     break;
-                }
                 case 8092:  // Mind Blast
                 case 73510: // Mind Spike
-                {
                     // Shadow Orbs
                     if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_GENERIC, 4941, EFFECT_0))
                     {
@@ -11446,15 +11432,11 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                         AddPct(DoneTotalMod, bonus);
                     }
                     break;
-                }
             }
             break;
-        }
         case SPELLFAMILY_WARLOCK:
-        {
             // Fire and Brimstone
             if (spellProto->SpellFamilyFlags[1] & 0x00020040)
-            {
                 if (victim->HasAuraState(AURA_STATE_CONFLAGRATE))
                 {
                     AuraEffectList const& mDumyAuras = GetAuraEffectsByType(SPELL_AURA_DUMMY);
@@ -11467,82 +11449,56 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                         }
                     }
                 }
-            }
             // Drain Soul - increased damage for targets under 25 % HP
             if (spellProto->SpellFamilyFlags[0] & 0x00004000)
-            {
                 if (victim->HealthBelowPct(25))
                     DoneTotalMod *= 2;
-            }
             // Shadow Bite (30% increase from each dot)
             if (spellProto->SpellFamilyFlags[1] & 0x00400000 && isPet())
-            {
                 if (uint8 count = victim->GetDoTsByCaster(GetOwnerGUID()))
                     AddPct(DoneTotalMod, 30 * count);
-            }
             // Demonic Immolation
             if (spellProto->Id == 4524)
-            {
                 // TODO: Check the correct coefficient, not sure atm
                 if(Unit* owner = GetCharmerOrOwner())
                     DoneTotal += (float)owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) * 0.4f;
-            }
             break;
-        }
         case SPELLFAMILY_DEATHKNIGHT:
-        {
             // Sigil of the Vengeful Heart
             if (spellProto->SpellFamilyFlags[0] & 0x2000)
-            {
                 if (AuraEffect* aurEff = GetAuraEffect(64962, EFFECT_1))
                     DoneTotal += aurEff->GetAmount();
-            }
             break;
-        }
         case SPELLFAMILY_SHAMAN:
-        {
             switch (spellProto->SchoolMask)
             {
                 case SPELL_SCHOOL_MASK_FIRE:
                 case SPELL_SCHOOL_MASK_FROST:
                 case SPELL_SCHOOL_MASK_NATURE:
-                {
                     if (!spellProto->IsPositive())
-                    {
-                        // Mastery: Enhanced Elements (For Totems)
-                        if (isTotem())
+                        if (isTotem()) // Mastery: Enhanced Elements (For Totems)
                         {
                             if (!spellProto->IsPositive())
-                            {
-                                // Each points of Mastery increases damage by an additional 2.5%
-                                if (Unit* owner = GetCharmerOrOwner())
-                                {
+                                if (Unit* owner = GetCharmerOrOwner()) // Each points of Mastery increases damage by an additional 2.5%
                                     if (owner->GetTypeId() == TYPEID_PLAYER)
                                     {
                                         float masteryPoints = owner->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                                         if (owner->HasAura(77223, owner->GetGUID()))
                                             DoneTotalMod += DoneTotalMod * (0.025f * masteryPoints);
                                     }
-                                }
-                            }
                         }
-                        // Mastery: Enhanced Elements (For Players)
-                        else
+                        else // Mastery: Enhanced Elements (For Players)
                         {
-                            // Each points of Mastery increases damage by an additional 2.5%
-                            if (GetTypeId() == TYPEID_PLAYER && spellProto->Id != 60103)
+                            if (GetTypeId() == TYPEID_PLAYER && spellProto->Id != 60103) // Each points of Mastery increases damage by an additional 2.5%
                             {
                                 float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                                 if (HasAura(77223, GetGUID()))
                                     DoneTotalMod += DoneTotalMod * (0.025f * masteryPoints);
                             }
                         }
-                    }
                     break;
-                }
             }
             break;
-        }
     }
 
     // Done fixed damage bonus auras
