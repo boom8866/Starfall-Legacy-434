@@ -24621,18 +24621,6 @@ void Player::SendInitialPacketsAfterAddToMap()
     else if (GetRaidDifficulty() != GetStoredRaidDifficulty())
         SendRaidDifficulty(GetGroup() != NULL);
 
-    // Cleanups
-    if (HasAura(76213))
-        RemoveAurasDueToSpell(76213);
-    if (HasAura(76616))
-        RemoveAurasDueToSpell(76616);
-    if (HasAura(76206))
-        RemoveAurasDueToSpell(76206);
-    if (HasAura(76207))
-        RemoveAurasDueToSpell(76207);
-    if (HasAura(91413))
-        RemoveAurasDueToSpell(91413);
-
     switch (getClass())
     {
         case CLASS_DEATH_KNIGHT:
