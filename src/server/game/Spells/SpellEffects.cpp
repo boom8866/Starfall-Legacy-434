@@ -2683,7 +2683,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         if (AuraEffect* savageCombat = m_caster->GetAuraEffect(51682, EFFECT_0))
                             m_caster->CastSpell(unitTarget, 58684, true, NULL, savageCombat);
                         // Savage Combat r2
-                        if (AuraEffect* savageCombat = m_caster->GetAuraEffect(54813, EFFECT_0))
+                        if (AuraEffect* savageCombat = m_caster->GetAuraEffect(58413, EFFECT_0))
                             m_caster->CastSpell(unitTarget, 58683, true, NULL, savageCombat);
                         // Master Poisoner
                         if (AuraEffect* masterPoisoner = m_caster->GetAuraEffect(58410, EFFECT_0))

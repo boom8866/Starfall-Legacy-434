@@ -113,11 +113,7 @@ void npc_escortAI::MoveInLineOfSight(Unit* who)
                 if (!me->getVictim())
                 {
                     if (who && who->IsInWorld())
-                    {
-                        if (who->HasAuraType(SPELL_AURA_MOD_STEALTH))
-                            who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                         AttackStart(who);
-                    }
                 }
                 else if (me->GetMap()->IsDungeon())
                 {
