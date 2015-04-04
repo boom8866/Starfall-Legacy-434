@@ -11589,7 +11589,6 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
         switch ((*i)->GetSpellInfo()->SpellIconID)
         {
             case 2109:  // Cheat Death
-            {
                 if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL)
                 {
                     if (GetTypeId() != TYPEID_PLAYER)
@@ -11602,7 +11601,6 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
                     AddPct(TakenTotalMod, (*i)->GetAmount());
                 }
                 break;
-            }
             default:
                 break;
         }

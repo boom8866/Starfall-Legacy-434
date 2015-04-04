@@ -340,10 +340,8 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
     if (unitTarget && unitTarget->isAlive())
     {
         if (m_caster->ToTempSummon())
-        {
             if (!m_caster->canSeeOrDetect(unitTarget) && m_caster->ToTempSummon()->GetSummoner() != unitTarget)
                 return;
-        }
 
         bool apply_direct_bonus = true;
 
@@ -365,51 +363,34 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 // better way to check unknown
                 switch (m_spellInfo->Id)
                 {
-                        // Consumption
-                    case 28865:
-                    {
+                    case 28865: // Consumption
                         damage = (((InstanceMap*)m_caster->GetMap())->GetDifficulty() == REGULAR_DIFFICULTY ? 2750 : 4250);
                         break;
-                    }
-                        // Arrow Assault & Ballista Assault
-                    case 53349:
+                    case 53349: // Arrow Assault & Ballista Assault
                     case 53118:
-                    {
                         if (unitTarget)
                             if (unitTarget->GetTypeId() == TYPEID_PLAYER)
                                 damage = 0;
                             else
                                 damage = urand(99, 140);
                         break;
-                    }
-                        // percent from health with min
-                    case 25599:          // Thundercrash
-                    {
+                    case 25599: // Thundercrash
                         damage = unitTarget->GetHealth() / 2;
                         if (damage < 200)
                             damage = 200;
                         break;
-                    }
-                        // arcane charge. must only affect demons (also undead?)
-                    case 45072:
-                    {
+                    case 45072: // arcane charge. must only affect demons (also undead?)
                         if (unitTarget->GetCreatureType() != CREATURE_TYPE_DEMON && unitTarget->GetCreatureType() != CREATURE_TYPE_UNDEAD)
                             return;
                         break;
-                    }
-                        // Gargoyle Strike
-                    case 51963:
-                    {
+                    case 51963: // Gargoyle Strike
                         if (Unit* owner = m_caster->GetCharmerOrOwner())
                         {
                             int32 ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.333f;
                             damage = 120 + ap;
                         }
                         break;
-                    }
-                        // Emerald Barrage
-                    case 65063:
-                    {
+                    case 65063: // Emerald Barrage
                         // Return anyway if target is not pointing at creature
                         if (!unitTarget->ToCreature())
                             return;
@@ -418,10 +399,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         if (unitTarget->GetEntry() != 34316 && unitTarget->GetEntry() != 34282)
                             return;
                         break;
-                    }
-                        // Darkblaze
-                    case 82068:
-                    {
+                    case 82068: // Darkblaze
                         if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
                         {
                             // Caster and Keeshan are both immune
@@ -429,91 +407,59 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                 unitTarget->Kill(unitTarget, false);
                         }
                         break;
-                    }
-                        // TDDC 1: Knockback Elemental
-                    case 86563:
-                    {
+                    case 86563: // TDDC 1: Knockback Elemental
                         if (unitTarget && unitTarget->ToCreature())
                         {
                             switch (unitTarget->ToCreature()->GetEntry())
                             {
                                 case 46466: // Theldurin the Lost
                                 case 46471: // Deathwing
-                                {
                                     damage = 0;
                                     break;
-                                }
                                 default:
                                     break;
                             }
                         }
                         break;
-                    }
-                        // Amakkar's Kidney Shot & Eric's Charge
-                    case 87608:
+                    case 87608: // Amakkar's Kidney Shot & Eric's Charge
                     case 87278:
-                    {
                         if (Vehicle* vehicle = m_caster->GetVehicleKit())
                             for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
                                 if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger.Guid))
                                     player->KilledMonsterCredit(46862);
                         break;
-                    }
-                        // Fiery Blast & Baelog's Valhalla Shot
-                    case 38382:
+                    case 38382: // Fiery Blast & Baelog's Valhalla Shot
                     case 87276:
-                    {
                         if (Vehicle* vehicle = m_caster->GetVehicleKit())
                             for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
                                 if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger.Guid))
                                     player->KilledMonsterCredit(46865);
                         break;
-                    }
-                        // Tombshroom Explosion
-                    case 81318:
-                    {
+                    case 81318: // Tombshroom Explosion
                         // Set not eligible for achievement
                         if (unitTarget && unitTarget->ToPlayer())
                             unitTarget->ToPlayer()->m_damagedByShroom = 1;
                         break;
-                    }
-                        // Fire! Effect
-                    case 81507:
-                    {
+                    case 81507: // Fire! Effect
                         if (unitTarget && unitTarget->ToCreature())
-                        {
                             if (unitTarget->ToCreature()->GetEntry() == 43560)
-                            {
                                 if (m_caster->ToPlayer())
                                     m_caster->ToPlayer()->KilledMonsterCredit(43560);
-                            }
-                        }
                         break;
-                    }
-                        // Weed Whacker
-                    case 68213:
-                    {
+                    case 68213: // Weed Whacker
                         if (m_caster)
                             m_caster->SetHealth(m_caster->GetMaxHealth());
                         break;
-                    }
-                        // Rocket Barrage
-                    case 69041:
-                    {
+                    case 69041: // Rocket Barrage
                         if (m_caster)
-                        {
                             if (Player* player = m_caster->ToPlayer())
                             {
                                 uint32 ap = player->GetTotalAttackPowerValue(MAX_ATTACK) * 0.25f;
                                 uint32 sp = player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) * 0.429f;
                                 damage = 1 + ap + sp + (player->getLevel() * 2);
                             }
-                        }
                         break;
-                    }
-                        // Seismic Shard
-                    case 79021:
-                    {
+                    case 79021: // Seismic Shard
                         if (m_caster->GetTypeId() == TYPEID_PLAYER)
                             break;
 
@@ -523,34 +469,23 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             m_caster->ToCreature()->DespawnOrUnsummon(1000);
                         }
                         break;
-                    }
-                        // Storm Hammer
-                    case 87997:
-                    {
+                    case 87997: // Storm Hammer
                         if (unitTarget->GetTypeId() == TYPEID_PLAYER || unitTarget == m_caster)
                             damage = 0;
                         break;
-                    }
-                        // Static Charge impact
-                    case 88048:
-                    {
+                    case 88048: // Static Charge impact
                         // Storm Shield
                         if (unitTarget->HasAura(88027))
                             damage = 0;
 
                         if (Vehicle* vehicle = unitTarget->GetVehicle())
-                        {
                             if (vehicle->GetBase()->HasAura(88027))
                             {
                                 unitTarget->AddAura(88050, unitTarget);
                                 damage = 0;
                             }
-                        }
                         break;
-                    }
-                        // Heat Wave
-                    case 75851:
-                    {
+                    case 75851: // Heat Wave
                         Aura* superheatedN = m_caster->GetAura(75846);
                         Aura* superheatedH = m_caster->GetAura(93567);
                         if (superheatedN)
@@ -558,48 +493,33 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         if (superheatedH)
                             damage *= superheatedH->GetStackAmount();
                         break;
-                    }
-                        // Artillery Barrage
-                    case 84864:
-                    {
+                    case 84864: // Artillery Barrage
                         if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
                             damage = 0;
                         break;
-                    }
-                        // Exploding Stuff
-                    case 92734:
-                    {
+                    case 92734: // Exploding Stuff
                         if (unitTarget)
                         {
                             if (unitTarget->GetTypeId() == TYPEID_PLAYER)
                                 damage = 0;
 
                             if (unitTarget->GetTypeId() == TYPEID_UNIT)
-                            {
                                 if (unitTarget->GetEntry() != 49683)
                                     damage = 0;
-                            }
                         }
                         break;
-                    }
                     case 92601: // Detonate Mana
-                    {
                         if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
-                        {
                             // Tyrande's Favorite Doll
                             if (Aura* TFD = m_caster->GetAura(92272))
                             {
                                 uint32 manaPower = uint32(TFD->GetEffect(EFFECT_1)->GetAmount());
                                 damage = manaPower;
                             }
-                        }
                         break;
-                    }
                     case 91571: // Shredder Round
                     case 91574: // Destroyer Round
-                    {
                         if (m_caster && unitTarget)
-                        {
                             if (unitTarget->GetTypeId() == TYPEID_UNIT)
                             {
                                 if (unitTarget->ToCreature()->GetEntry() != 49060 && unitTarget->GetEntry() != 49025 && unitTarget->GetEntry() != 49124)
@@ -614,24 +534,17 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             }
                             else
                                 damage = 0;
-                        }
                         break;
-                    }
                     case 86704: // Ancient Fury
-                    {
                         if (Aura* aur = m_caster->GetAura(86700))
                             damage *= aur->GetStackAmount();
                         break;
-                    }
                     case 76370: // Warped Twilight
                     case 97300:
-                    {
                         if (unitTarget)
                             damage = damage * unitTarget->GetMaxHealth() / 100;
                         break;
-                    }
                     case 74817: // Inferno (Baron Geddon)
-                    {
                         if (Aura* aur = m_caster->GetAura(74813))
                         {
                             int32 duration = aur->GetDuration() / 1000;
@@ -639,7 +552,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             damage += damage * (maxDuration - duration);
                         }
                         break;
-                    }
                     default:
                         break;
                 }
@@ -649,40 +561,30 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             {
                 switch (m_spellInfo->Id)
                 {
-                    // Victory Rush
-                    case 34428:
-                    {
+                    case 34428: // Victory Rush
                         ApplyPct(damage, m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
                         break;
-                    }
-                    // Shockwave
-                    case 46968:
-                    {
+                    case 46968: // Shockwave
                         int32 pct = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, 2);
                         if (pct > 0)
                             damage += int32(CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), pct));
                         break;
-                    }
-                    // Heroic Throw
-                    case 57755:
-                    {
+                    case 57755: // Heroic Throw
                         // Glyph of Heroic Throw
                         if (m_caster->HasAura(58357) && m_caster->GetTypeId() == TYPEID_PLAYER)
-                        {
                             if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
                             {
                                 if (aur->GetStackAmount() < 3)
                                     aur->SetStackAmount(aur->GetStackAmount() + 1);
+
                                 aur->RefreshDuration();
                             }
                             else
                                 m_caster->CastSpell(unitTarget, 58567, true);
-                        }
 
                         // Throws your weapon at the enemy causing $m1 damage (based on attack power) {ap*75/100}
                         damage = int32(12 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f);
                         break;
-                    }
                 }
                 break;
             }
@@ -690,17 +592,13 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             {
                 switch (m_spellInfo->Id)
                 {
-                    case 879:   // Exorcism
-                    {
+                    case 879: // Exorcism
                         if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                        {
                             if (m_caster->GetTotalAttackPowerValue(BASE_ATTACK) > m_caster->ToPlayer()->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()))
                                 damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.344f;
                             else
                                 damage += m_caster->ToPlayer()->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()) * 0.344f;
-                        }
                         break;
-                    }
                     case 81297: // Consecration
                     {
                         float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
@@ -723,7 +621,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             {
                 // Incinerate Rank 1 & 2
                 if ((m_spellInfo->SpellFamilyFlags[1] & 0x000040) && m_spellInfo->SpellIconID == 2128)
-                {
                     // Shadow and Flame
                     if (m_caster->HasAura(17793) && roll_chance_i(33))
                         m_caster->AddAura(17800, unitTarget);
@@ -731,12 +628,10 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         m_caster->AddAura(17800, unitTarget);
                     else if (m_caster->HasAura(17801))
                         m_caster->AddAura(17800, unitTarget);
-                }
+
                 switch (m_spellInfo->Id)
                 {
-                    // Rain of Fire
-                    case 42223:
-                    {
+                    case 42223: // Rain of Fire
                         // Aftermath r1
                         if(m_caster->HasAura(85113) && roll_chance_i(6))
                             m_caster->CastSpell(unitTarget, 85387, true);
@@ -744,9 +639,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         else if(m_caster->HasAura(85114) && roll_chance_i(12))
                             m_caster->CastSpell(unitTarget, 85387, true);
                         break;
-                    }
-                    // Conflagrate
-                    case 17962:
+                    case 17962: // Conflagrate
                     {
                         // Aftermath r1
                         if(m_caster->HasAura(85113) && roll_chance_i(50))
@@ -756,10 +649,8 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             m_caster->CastSpell(unitTarget, 18118, true);
                         break;
                     }
-                    // Soul Fire & Imp's Firebolt
-                    case 3110:
+                    case 3110: // Soul Fire & Imp's Firebolt
                     case 6353:
-                    {
                         if (m_caster->isPet() && m_caster->GetOwner())
                         {
                             // Burning Embers (For Pet)
@@ -790,52 +681,41 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         // Imp Firebolt
                         if (m_spellInfo->Id == 3110)
-                        {
                             if (m_caster->GetCharmerOrOwner())
                             {
                                 float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
-                                damage += int32(spellpower * 0.289f);
+                                damage += int32((spellpower * 0.50f) * 0.657f);
                             }
-                        }
                         break;
-                    }
                     case 3716:  // Torment
                     case 6360:  // Whiplash
-                    {
                         if (m_caster->GetCharmerOrOwner())
                         {
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
                             damage += int32((spellpower * 0.80f) / 2);
                         }
                         break;
-                    }
                     case 7814:  // Lash of Pain
-                    {
                         if (m_caster->GetCharmerOrOwner())
                         {
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
                             damage += int32((spellpower * 0.306f));
                         }
                         break;
-                    }
                     case 54049: // Shadow Bite
-                    {
                         if (m_caster->GetCharmerOrOwner())
                         {
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
                             damage += int32((spellpower * 0.614f));
                         }
                         break;
-                    }
                     case 85692: // Doom Bolt
-                    {
                         if (m_caster->GetCharmerOrOwner())
                         {
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
                             damage += int32((spellpower * 1.2855f));
                         }
                         break;
-                    }
                 }
                 break;
             }
@@ -846,7 +726,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 {
                     Unit::AuraEffectList const& ImprMindBlast = m_caster->GetAuraEffectsByType(SPELL_AURA_ADD_FLAT_MODIFIER);
                     for (Unit::AuraEffectList::const_iterator i = ImprMindBlast.begin(); i != ImprMindBlast.end(); ++i)
-                    {
                         if ((*i)->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_PRIEST && ((*i)->GetSpellInfo()->SpellIconID == 95))
                         {
                             int chance = (*i)->GetSpellInfo()->Effects[EFFECT_1].CalcValue(m_caster);
@@ -855,31 +734,24 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                 m_caster->CastSpell(unitTarget, 48301, true, 0);
                             break;
                         }
-                    }
                 }
                 switch (m_spellInfo->Id)
                 {
                     case 73510: // Mind Spike
-                    {
                         // Chakra state
                         if (m_caster->HasAura(14751))
                             m_caster->CastSpell(m_caster, 81209, true);  // Chakra: Chastise
 
                         m_caster->RemoveAurasDueToSpell(14751);
                         break;
-                    }
                     case 87532: // Shadowy Apparitions
-                    {
                         if (unitTarget)
-                        {
                             if (m_caster->GetCharmerOrOwner())
                             {
                                 float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
                                 damage += int32(spellpower * 0.515f);
                             }
-                        }
                         break;
-                    }
                     default:
                         break;
                 }
@@ -891,7 +763,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 {
                     // Sunfire
                     case 93402:
-                    {
                         // If we are set to fill the solar side or we've just logged in with 0 power..
                         if ((!m_caster->HasAura(67483) && m_caster->HasAura(67484)))
                         {
@@ -909,17 +780,13 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         if (m_caster->HasAura(48517) && m_caster->GetPower(POWER_ECLIPSE) <= 0)
                             m_caster->RemoveAurasDueToSpell(48517);
                         break;
-                    }
                     // Moonfire
                     case 8921:
-                    {
                         // If we are set to fill the lunar side or we've just logged in with 0 power..
                         if (!m_caster->HasAura(67484) && m_caster->HasAura(67483))
-                        {
                             // Lunar Shower
                             if (m_caster->HasAura(33603) || m_caster->HasAura(33604) || m_caster->HasAura(33605))
                                 m_caster->EnergizeBySpell(m_caster, 89265, 8, POWER_ECLIPSE);
-                        }
                         // The energizing effect brought us out of the solar eclipse, remove the aura
                         if (m_caster->HasAura(48518) && m_caster->GetPower(POWER_ECLIPSE) >= 0)
                             m_caster->RemoveAurasDueToSpell(48518);
@@ -935,21 +802,14 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         if (!m_caster->HasAura(48517) && m_caster->HasAura(93401) && m_caster->GetPower(POWER_ECLIPSE) >= 100)
                             m_caster->CastSpell(m_caster, 94338, true);
                         break;
-                    }
-                    // Wild Mushroom
-                    case 78777:
-                    {
+                    case 78777: // Wild Mushroom
                         // Earth and Moon
                         if (m_caster->HasAura(48506) && unitTarget)
                             m_caster->CastSpell(unitTarget, 60433, true);
                         break;
-                    }
-                    // Starfire
-                    case 2912:
-                    {
+                    case 2912: // Starfire
                         // Glyph of Starfire
                         if (m_caster->HasAura(54845))
-                        {
                             if (AuraEffect const* aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00000002, 0, 0, m_caster->GetGUID()))
                             {
                                 Aura* aura = aurEff->GetBase();
@@ -969,8 +829,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                     aura->SetMaxDuration(countMin + 3000);
                                 }
                             }
-                        }
-                    }
+                        break;
                 }
                 break;
             }
@@ -1074,26 +933,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                     }
                                 }
                                 float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                                switch (combo)
-                                {
-                                    case 1:
-                                        damage += int32(ap * 0.091f);
-                                        break;
-                                    case 2:
-                                        damage += int32(ap * 0.182f);
-                                        break;
-                                    case 3:
-                                        damage += int32(ap * 0.273f);
-                                        break;
-                                    case 4:
-                                        damage += int32(ap * 0.364f);
-                                        break;
-                                    case 5:
-                                        damage += int32(ap * 0.455f);
-                                        break;
-                                    default:
-                                        break;
-                                }
+
+                                if (combo)
+                                    damage += int32(ap * (0.091f * combo));
 
                                 // Eviscerate and Envenom Bonus Damage (item set effect)
                                 if (m_caster->HasAura(37169))
