@@ -684,7 +684,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             if (m_caster->GetCharmerOrOwner())
                             {
                                 float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
-                                damage += int32((spellpower * 0.50f) * 0.657f);
+                                damage += int32(1.20f * ((spellpower * 0.50f) * 0.657f));
                             }
                         break;
                     case 3716:  // Torment
