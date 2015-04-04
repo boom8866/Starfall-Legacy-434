@@ -486,6 +486,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             }
                         break;
                     case 75851: // Heat Wave
+                    {
                         Aura* superheatedN = m_caster->GetAura(75846);
                         Aura* superheatedH = m_caster->GetAura(93567);
                         if (superheatedN)
@@ -493,6 +494,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         if (superheatedH)
                             damage *= superheatedH->GetStackAmount();
                         break;
+                    }
                     case 84864: // Artillery Barrage
                         if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
                             damage = 0;
@@ -565,26 +567,31 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         ApplyPct(damage, m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
                         break;
                     case 46968: // Shockwave
+                    {
                         int32 pct = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, 2);
                         if (pct > 0)
                             damage += int32(CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), pct));
                         break;
+                    }
                     case 57755: // Heroic Throw
+                    {
                         // Glyph of Heroic Throw
                         if (m_caster->HasAura(58357) && m_caster->GetTypeId() == TYPEID_PLAYER)
+                        {
                             if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
                             {
                                 if (aur->GetStackAmount() < 3)
                                     aur->SetStackAmount(aur->GetStackAmount() + 1);
-
                                 aur->RefreshDuration();
                             }
                             else
                                 m_caster->CastSpell(unitTarget, 58567, true);
+                        }
 
                         // Throws your weapon at the enemy causing $m1 damage (based on attack power) {ap*75/100}
                         damage = int32(12 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f);
                         break;
+                    }
                 }
                 break;
             }
