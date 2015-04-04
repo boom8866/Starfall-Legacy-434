@@ -936,8 +936,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
 
                                 if (combo)
                                     damage += int32(ap * (0.091f * combo));
-                                else
-                                    damage += int32(ap * 0.091f);
 
                                 // Eviscerate and Envenom Bonus Damage (item set effect)
                                 if (m_caster->HasAura(37169))
