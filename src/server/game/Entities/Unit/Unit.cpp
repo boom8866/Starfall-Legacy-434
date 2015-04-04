@@ -11343,7 +11343,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                                 SetPower(POWER_FOCUS, GetPower(POWER_FOCUS) - spellProto->CalcPowerCost(this, spellProto->GetSchoolMask()));
                         }
 
-                        DoneTotal += attackPower * 0.1952f;
+                        DoneTotal += (attackPower * 0.40f) * 0.20f;
                         break;
                     }
                 }
