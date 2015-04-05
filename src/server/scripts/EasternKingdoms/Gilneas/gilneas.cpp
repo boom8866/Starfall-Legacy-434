@@ -69,11 +69,6 @@ class npc_panicked_citizen_gate : public CreatureScript
 public:
     npc_panicked_citizen_gate() : CreatureScript("npc_panicked_citizen_gate") { }
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_panicked_citizen_gateAI (creature);
-    }
-
     struct npc_panicked_citizen_gateAI : public ScriptedAI
     {
         npc_panicked_citizen_gateAI(Creature* creature) : ScriptedAI(creature)
@@ -100,17 +95,16 @@ public:
             DoMeleeAttackIfReady();
         }
     };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_panicked_citizen_gateAI(creature);
+    }
 };
 
 class npc_gilneas_city_guard_gate : public CreatureScript
 {
 public:
     npc_gilneas_city_guard_gate() : CreatureScript("npc_gilneas_city_guard_gate") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_gilneas_city_guard_gateAI (creature);
-    }
 
     struct npc_gilneas_city_guard_gateAI : public ScriptedAI
     {
@@ -176,6 +170,10 @@ public:
             DoMeleeAttackIfReady();
         }
     };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gilneas_city_guard_gateAI(creature);
+    }
 };
 
 /*######
@@ -193,14 +191,11 @@ class npc_gilnean_crow : public CreatureScript
 public:
     npc_gilnean_crow() : CreatureScript("npc_gilnean_crow") {}
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_gilnean_crowAI (creature);
-    }
-
     struct npc_gilnean_crowAI : public ScriptedAI
     {
-        npc_gilnean_crowAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_gilnean_crowAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
 
         void Reset()
         {
@@ -245,7 +240,7 @@ public:
                 {
                     case EVENT_SPAWN:
                     {
-                        me->GetMotionMaster()->MovePoint(0, (me->GetPositionX() + irand(-15, 15)), (me->GetPositionY() + irand(-15, 15)), (me->GetPositionZ() + irand(5, 15)), false);
+                        me->GetMotionMaster()->MovePoint(0, (me->GetPositionX() + irand(-15, 15)), (me->GetPositionY() + irand(-15, 15)), (me->GetPositionZ() + irand(10, 15)), false);
                         me->DespawnOrUnsummon(3500);
                         break;
                     }
@@ -260,6 +255,10 @@ public:
         EventMap events;
         uint16 checkPlayer;
     };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gilnean_crowAI(creature);
+    }
 };
 
 /*######
@@ -271,10 +270,10 @@ class npc_prince_liam_greymane_intro : public CreatureScript
 public:
     npc_prince_liam_greymane_intro() : CreatureScript("npc_prince_liam_greymane_intro") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    enum EventIds
     {
-        return new npc_prince_liam_greymane_introAI (creature);
-    }
+        EVENT_TALK_INTRO = 1,
+    };
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
@@ -293,32 +292,53 @@ public:
 
     struct npc_prince_liam_greymane_introAI : public ScriptedAI
     {
-        npc_prince_liam_greymane_introAI(Creature *c) : ScriptedAI(c) {}
-
-        uint32 uiSayTimer;
+        npc_prince_liam_greymane_introAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
 
         void Reset()
         {
-            uiSayTimer = 1000;
+            events.ScheduleEvent(EVENT_TALK_INTRO, 1000);
         }
+
+        EventMap events;
 
         void UpdateAI(uint32 diff)
         {
-            if (uiSayTimer <= diff)
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                if (Player *tar = me->FindNearestPlayer(0.5f,true))
-                    if (!(tar->GetExtraFlags() & PLAYER_EXTRA_WATCHING_MOVIE))
+                switch (eventId)
+                {
+                    case EVENT_TALK_INTRO:
                     {
-                        Talk(0);
-                        uiSayTimer = urand(12000, 18000);
+                        std::list<Player*> players = me->GetNearestPlayersList(10.0f, true);
+                        if (!players.empty())
+                        {
+                            for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); itr++)
+                                if (!((*itr)->GetExtraFlags() & PLAYER_EXTRA_WATCHING_MOVIE))
+                                    Talk(0, (*itr)->GetGUID());
+                        }
+                        else
+                            Talk(0);
+
+                        events.ScheduleEvent(EVENT_TALK_INTRO, urand(12000, 18000));
+                        break;
                     }
-                    else
-                        uiSayTimer = urand(12000, 18000);
+                    default:
+                        break;
+                }
             }
-            else
-                uiSayTimer -= diff;
         }
     };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_prince_liam_greymane_introAI(creature);
+    }
 };
 
 class npc_gilneas_wounded_guard : public CreatureScript
@@ -328,19 +348,14 @@ public:
 
     enum eventId
     {
-        EVENT_SET_RANDOM_HEALTH     = 1
+        EVENT_SET_RANDOM_HEALTH = 1
     };
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_gilneas_wounded_guardAI (creature);
-    }
 
     struct npc_gilneas_wounded_guardAI : public ScriptedAI
     {
         EventMap events;
 
-        npc_gilneas_wounded_guardAI(Creature *c) : ScriptedAI(c)
+        npc_gilneas_wounded_guardAI(Creature* creature) : ScriptedAI(creature)
         {
             SetCombatMovement(false);
             me->SetReactState(REACT_PASSIVE);
@@ -354,11 +369,9 @@ public:
             {
                 case 774:   // Rejuvenation
                 case 2061:  // Flash Heal
-                {
                     caster->ToPlayer()->KilledMonsterCredit(44175, 0);
                     events.RescheduleEvent(EVENT_SET_RANDOM_HEALTH, urand(10000, 25000));
                     break;
-                }
                 default:
                     break;
             }
@@ -384,23 +397,24 @@ public:
             }
         }
     };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gilneas_wounded_guardAI(creature);
+    }
 };
 
 class npc_sergeant_cleese : public CreatureScript
 {
 public:
-    npc_sergeant_cleese() : CreatureScript("npc_sergeant_cleese") {}
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_sergeant_cleeseAI (creature);
-    }
+    npc_sergeant_cleese() : CreatureScript("npc_sergeant_cleese") { }
 
     struct npc_sergeant_cleeseAI : public ScriptedAI
     {
-        npc_sergeant_cleeseAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_sergeant_cleeseAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
 
-        void DamageTaken(Unit* who, uint32& damage)
+        void DamageTaken(Unit* /*who*/, uint32& damage)
         {
             damage = 0;
         }
@@ -413,17 +427,16 @@ public:
             DoMeleeAttackIfReady();
         }
     };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_sergeant_cleeseAI(creature);
+    }
 };
 
 class npc_mariam_spellwalker : public CreatureScript
 {
 public:
     npc_mariam_spellwalker() : CreatureScript("npc_mariam_spellwalker") {}
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_mariam_spellwalkerAI (creature);
-    }
 
     struct npc_mariam_spellwalkerAI : public ScriptedAI
     {
@@ -445,44 +458,49 @@ public:
                 DoMeleeAttackIfReady();
         }
     };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_mariam_spellwalkerAI(creature);
+    }
 };
 
 ///////////
 // Quest Royal Orders 14099
 ///////////
+
+enum LiamPhase1Events
+{
+    EVENT_TALK = 1,
+};
+
 class npc_prince_liam_greymane_phase_1 : public CreatureScript
 {
 public:
     npc_prince_liam_greymane_phase_1() : CreatureScript("npc_prince_liam_greymane_phase_1") { }
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_prince_liam_greymane_phase_1AI (creature);
-    }
-
     struct npc_prince_liam_greymane_phase_1AI : public ScriptedAI
     {
-        npc_prince_liam_greymane_phase_1AI(Creature *c) : ScriptedAI(c)
+        npc_prince_liam_greymane_phase_1AI(Creature* creature) : ScriptedAI(creature)
         {
-            SetCombatMovement(false);
-            me->m_CombatDistance = 10.0f;
         }
 
-        uint32 uiSayTimer;
-        uint32 uiShootTimer;
-        bool miss;
+        EventMap events;
 
         void Reset()
         {
-            uiSayTimer = urand(5000, 10000);
-            uiShootTimer = 1500;
-            miss = false;
+            events.ScheduleEvent(EVENT_TALK, urand(5000, 10000));
+            SetCombatMovement(false);
         }
 
-        void DamageTaken(Unit* attacker, uint32 &damage)
+        void EnterEvadeMode()
         {
-            if (attacker->GetTypeId() != TYPEID_PLAYER)
-                damage = 0;
+            me->GetMotionMaster()->MoveTargetedHome();
+            _EnterEvadeMode();
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32 &damage)
+        {
+            damage = 0;
         }
 
         void UpdateAI(uint32 diff)
@@ -490,47 +508,33 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (uiShootTimer <= diff)
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                uiShootTimer = 1500;
-                Unit* target = NULL;
-
-                if (target = me->FindNearestCreature(NPC_RAMPAGING_WORGEN, 40.0f))
-                    if (target != me->getVictim())
-                    {
-                        me->getThreatManager().modifyThreatPercent(me->getVictim(), -100);
-                        me->CombatStart(target);
-                        me->AddThreat(target, 1000);
-                    }
-
-                    if (!me->IsWithinMeleeRange(me->getVictim(), 0.0f))
-                    {
-                        me->Attack(me->getVictim(), false);
-                        me->CastSpell(me->getVictim(), SPELL_SHOOT, false);
-                    }
-                    else
-                        me->Attack(me->getVictim(), true);
+                switch (eventId)
+                {
+                    case EVENT_TALK:
+                        Talk(0);
+                        events.ScheduleEvent(EVENT_TALK, urand(30000, 120000));
+                        break;
+                    default:
+                        break;
+                }
             }
-            else
-                uiShootTimer -= diff;
 
-            if (uiSayTimer <= diff)
-            {
-                uiSayTimer = urand(30000, 120000);
-                Talk(0);
-            }
-            else
-                uiSayTimer -= diff;
-
-            if (me->getVictim()->GetTypeId() == TYPEID_UNIT)
-                if (me->getVictim()->GetHealthPct() < 90)
-                    miss = true;
+            if (Unit* target = me->getVictim())
+                if (target->IsWithinMeleeRange(me, me->GetFloatValue(UNIT_FIELD_COMBATREACH)))
+                    DoMeleeAttackIfReady();
                 else
-                    miss = false;
-
-            DoMeleeAttackIfReady();
+                    DoSpellAttackIfReady(SPELL_SHOOT);
         }
     };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_prince_liam_greymane_phase_1AI(creature);
+    }
 };
 
 class npc_rampaging_worgen : public CreatureScript
@@ -540,72 +544,82 @@ public:
 
     enum eventId
     {
-        EVENT_SEARCH_FOR_GUARDS     = 1
+        EVENT_SEARCH_FOR_GUARDS = 1
     };
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_rampaging_worgenAI (creature);
-    }
 
     struct npc_rampaging_worgenAI : public ScriptedAI
     {
-        npc_rampaging_worgenAI(Creature *c) : ScriptedAI(c) {}
+        npc_rampaging_worgenAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
 
-        EventMap events;
-
-        uint32 uiEnemyEntry;
+        uint32 _enemyEntry;
         bool enrage;
-        bool miss;
 
         void Reset()
         {
+            _enemyEntry = 0;
             enrage = false;
-            miss = false;
+            AttackGuard();
+        }
 
-            if (me->GetEntry() == NPC_AFFLICTED_GILNEAN)
-                me->m_CombatDistance = 3.0f;
-            else
-                me->m_CombatDistance = 10.0f;
+        void EnterEvadeMode()
+        {
+            enrage = false;
+            _enemyEntry = 0;
+            me->GetMotionMaster()->MoveTargetedHome();
+            _EnterEvadeMode();
+        }
 
-            switch(me->GetEntry())
+        void JustRespawned()
+        {
+            me->AI()->Reset();
+        }
+
+        void AttackGuard()
+        {
+            switch (me->GetEntry())
             {
                 case NPC_RAMPAGING_WORGEN:
-                    uiEnemyEntry = NPC_GILNEAS_CITY_GUARD;
+                    if (me->FindNearestCreature(NPC_PRINCE_LIAM_GREYMANE, 10.0f, true))
+                        _enemyEntry = NPC_PRINCE_LIAM_GREYMANE;
+                    else
+                        _enemyEntry = NPC_GILNEAS_CITY_GUARD;
                     break;
                 case NPC_BLOODFANG_WORGEN:
-                    uiEnemyEntry = NPC_GILNEAN_ROYAL_GUARD;
+                    _enemyEntry = NPC_GILNEAN_ROYAL_GUARD;
                     break;
                 case NPC_FRENZIED_STALKER:
-                    uiEnemyEntry = NPC_NORTHGATE_REBEL;
+                    _enemyEntry = NPC_NORTHGATE_REBEL;
                     break;
                 default:
-                    uiEnemyEntry = 0;
+                    _enemyEntry = 0;
                     break;
             }
-
-            events.ScheduleEvent(EVENT_SEARCH_FOR_GUARDS, urand(2000,5000));
+            if (_enemyEntry)
+                if (Unit* target = me->FindNearestCreature(_enemyEntry, 10.0f, true))
+                    me->AI()->AttackStart(target);
         }
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if (attacker->GetTypeId() != TYPEID_PLAYER)
+            if (!enrage && me->HealthBelowPct(30))
             {
-                if (attacker->ToCreature()->GetEntry() == NPC_GILNEAS_CITY_GUARD ||
-                    attacker->ToCreature()->GetEntry() == NPC_GILNEAN_ROYAL_GUARD)
-                {
-                    damage = 0;
-                    return;
-                }
+                DoCast(me, SPELL_ENRAGE);
+                enrage = true;
             }
 
-            Unit* victim = NULL;
-
-            if (victim = me->getVictim())
-                me->getThreatManager().modifyThreatPercent(victim, -100);
-
-            AttackStart(attacker);
-            me->AddThreat(attacker, 10005000);
+            switch (attacker->GetEntry())
+            {
+                case NPC_GILNEAS_CITY_GUARD:
+                case NPC_GILNEAN_ROYAL_GUARD:
+                case NPC_PRINCE_LIAM_GREYMANE:
+                case NPC_NORTHGATE_REBEL:
+                    damage = 0;
+                    break;
+                default:
+                    break;
+            }
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
@@ -619,10 +633,8 @@ public:
                     case 2098:  // Eviscerate
                     case 56641: // Steady Shot
                     case 5143:  // Arcane Missile
-                    {
                         caster->ToPlayer()->KilledMonsterCredit(44175, 0);
                         break;
-                    }
                     default:
                         break;
                 }
@@ -631,47 +643,17 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            events.Update(diff);
-
-            while (uint32 eventId = events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                    case EVENT_SEARCH_FOR_GUARDS:
-                    {
-                        if (!me->isInCombat())
-                        {
-                            if (Creature* guard = me->FindNearestCreature(NPC_GILNEAS_CITY_GUARD, 8.5f, true))
-                                AttackStart(guard);
-                            events.RescheduleEvent(EVENT_SEARCH_FOR_GUARDS, urand(5000, 10000));
-                        }
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            }
-
             if (!UpdateVictim())
                 return;
-
-            if (!enrage && me->HealthBelowPct(30))
-            {
-                DoCast(me, SPELL_ENRAGE);
-                enrage = true;
-            }
-
-            if (me->getVictim() && me->getVictim()->GetTypeId() == TYPEID_UNIT)
-            {
-                if (me->getVictim()->GetHealthPct() < 90)
-                    miss = true;
-                else
-                    miss = false;
-            }
 
             DoMeleeAttackIfReady();
         }
     };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_rampaging_worgenAI(creature);
+    }
 };
 
 class npc_gilneas_city_guard : public CreatureScript

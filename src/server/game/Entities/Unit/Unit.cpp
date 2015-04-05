@@ -11324,9 +11324,9 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 uint32 wildHuntMod = 1;
                 switch (spellProto->Id)
                 {
-                    case 16827:    // Claw
-                    case 17253:    // Bite
-                    case 49966:    // Smack
+                    case 16827: // Claw
+                    case 17253: // Bite
+                    case 49966: // Smack
                         // Spiked Collar
                         if (AuraEffect* spikedCollar = GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2934, EFFECT_0))
                             AddPct(DoneTotalMod, spikedCollar->GetAmount());
