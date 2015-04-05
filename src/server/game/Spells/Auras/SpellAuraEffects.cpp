@@ -6973,13 +6973,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
         }
         else
-        {
-            if (m_canBeRecalculated)
-                damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
-
-            damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
             damage += bonus;
-        }
 
         // Calculate armor mitigation
         if (Unit::IsDamageReducedByArmor(GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), GetEffIndex()))
@@ -7440,13 +7434,7 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
             damage += bonus;
         }
         else
-        {
-            if (m_canBeRecalculated)
-                damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), damage, HEAL, GetBase()->GetStackAmount());
-
-            damage = target->SpellHealingBonusDone(caster, GetSpellInfo(), damage, HEAL, GetBase()->GetStackAmount());
             damage += bonus;
-        }
     }
 
     switch (m_spellInfo->Id)
