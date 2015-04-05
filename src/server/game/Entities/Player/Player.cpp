@@ -2444,6 +2444,11 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 SendSavedInstances();
             }
 
+            // Remove all kinds of shapeshift to prevent exploits (Druids Only)
+            if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_DRUID)
+                if (HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
+                    RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
+
             // move packet sent by client always after far teleport
             // code for finish transfer to new map called in WorldSession::HandleMoveWorldportAckOpcode at client packet
             SetSemaphoreTeleportFar(true);
@@ -24543,13 +24548,6 @@ void Player::SendInitialPacketsAfterAddToMap()
     SendItemDurations();                                    // must be after add to map
 
     RestoreAllSpellMods();
-
-    // Remove all kinds of shapeshift to prevent exploits (Druids Only)
-    if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_DRUID)
-    {
-        if (HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
-            RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
-    }
 
     // raid downscaling - send difficulty to player
     if (GetMap()->IsRaid())
