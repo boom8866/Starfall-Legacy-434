@@ -316,7 +316,7 @@ public:
                 {
                     case EVENT_TALK_INTRO:
                     {
-                        std::list<Player*> players = me->GetNearestPlayersList(10.0f, true);
+                        std::list<Player*> players = me->GetNearestPlayersList(50.0f, true);
                         if (!players.empty())
                         {
                             for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); itr++)
@@ -609,17 +609,8 @@ public:
                 enrage = true;
             }
 
-            switch (attacker->GetEntry())
-            {
-                case NPC_GILNEAS_CITY_GUARD:
-                case NPC_GILNEAN_ROYAL_GUARD:
-                case NPC_PRINCE_LIAM_GREYMANE:
-                case NPC_NORTHGATE_REBEL:
-                    damage = 0;
-                    break;
-                default:
-                    break;
-            }
+            if (!attacker->isPet() && attacker->GetTypeId() != TYPEID_PLAYER)
+                damage = 0;
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
