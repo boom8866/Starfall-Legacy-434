@@ -171,7 +171,7 @@ DELETE FROM `creature` WHERE `guid` = 777397; DELETE FROM creature_addon WHERE g
 
 UPDATE `creature` SET `spawntimesecs`=60 WHERE `id`= '34884';
 UPDATE `creature_template` SET `unit_flags`=0 WHERE `entry` IN (34916, 35232);
-UPDATE `creature_template` SET `npcflag`=0, `mindmg`=2, `maxdmg`=3 WHERE `entry`=34884;
+UPDATE `creature_template` SET `npcflag`=0 WHERE `entry`=34884;
 
 DELETE FROM `creature_questrelation` WHERE `id`=34884 AND `quest`=14093;
 
