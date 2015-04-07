@@ -480,6 +480,7 @@ class npc_lct_harbringer_of_darknes : public CreatureScript
             void InitializeAI()
             {
                 me->SetReactState(REACT_PASSIVE);
+                me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)

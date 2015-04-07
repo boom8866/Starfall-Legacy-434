@@ -1190,6 +1190,11 @@ public:
         SpellCastResult CheckElevation()
         {
             Unit* caster = GetCaster();
+
+            // Can't be used while under root effects
+            if (caster->HasAuraType(SPELL_AURA_MOD_ROOT))
+                return SPELL_FAILED_ROOTED;
+
             WorldLocation const* const dest = GetExplTargetDest();
 
             if (dest->GetPositionZ() > caster->GetPositionZ() + 5.0f) // Cant jump to higher ground
