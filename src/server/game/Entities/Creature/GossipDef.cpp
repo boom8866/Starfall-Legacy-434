@@ -264,21 +264,23 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote const& eEmote, const std::string
     data << uint32(eEmote._Emote);                         // NPC emote
 
     size_t count_pos = data.wpos();
-    data << uint8 (_questMenu.GetMenuItemCount());
+    data << uint8(0);
     uint32 count = 0;
 
     // Store this instead of checking the Singleton every loop iteration
-    bool const questLevelInTitle = sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS);
-    bool const questIdsInTitle    = sWorld->getBoolConfig(CONFIG_UI_QUESTIDS_IN_DIALOGS);
+    bool questLevelInTitle = sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS);
+    bool questIdsInTitle   = sWorld->getBoolConfig(CONFIG_UI_QUESTIDS_IN_DIALOGS);
 
-    for (; count < _questMenu.GetMenuItemCount(); ++count)
+
+    for (uint32 i = 0; i < _questMenu.GetMenuItemCount(); ++i)
     {
-        QuestMenuItem const& qmi = _questMenu.GetItem(count);
+        QuestMenuItem const& qmi = _questMenu.GetItem(i);
 
         uint32 questID = qmi.QuestId;
 
         if (Quest const* quest = sObjectMgr->GetQuestTemplate(questID))
         {
+            ++count;
             std::string title = quest->GetTitle();
 
             int32 locale = _session->GetSessionDbLocaleIndex();
@@ -296,7 +298,7 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote const& eEmote, const std::string
             data << uint32(qmi.QuestIcon);
             data << int32(quest->GetQuestLevel());
             data << uint32(quest->GetFlags());             // 3.3.3 quest flags
-            data << uint8(0);                               // 3.3.3 changes icon: blue question or yellow exclamation
+            data << uint8(0);                              // 3.3.3 changes icon: blue question or yellow exclamation
             data << title;
         }
     }
