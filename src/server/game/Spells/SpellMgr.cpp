@@ -5125,6 +5125,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             // RAIDS
             // Firelands
             // * Ragnaros
+            case 100171: // World in Flames
+            case 100190:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_OTHER_CASTS;
+                break;
             case 99510: // Raise Lava Damage
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
                 break;

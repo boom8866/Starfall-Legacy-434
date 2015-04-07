@@ -116,14 +116,7 @@ public:
 
         void JustSummoned(Creature* summon)
         {
-            switch (summon->GetEntry())
-            {
-                case 0:
-                    break;
-                default:
-                    summons.Summon(summon);
-                    break;
-            }
+            summons.Summon(summon);
         }
 
         void UpdateAI(uint32 diff)
