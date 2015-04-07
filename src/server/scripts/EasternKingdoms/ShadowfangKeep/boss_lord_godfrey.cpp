@@ -108,6 +108,7 @@ public:
             _EnterEvadeMode();
             summons.DespawnAll();
             events.Reset();
+            me->SetReactState(REACT_AGGRESSIVE);
             me->GetMotionMaster()->MoveTargetedHome();
             instance->SetBossState(DATA_LORD_GODFREY, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
