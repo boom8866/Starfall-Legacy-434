@@ -471,18 +471,18 @@ public:
                         }
                         channelTarget = zealot;
 
-                        std::list<WorldObject*> targets;
-                        Trinity::AllWorldObjectsInRange u_check(me, 100.0f);
-                        Trinity::WorldObjectListSearcher<Trinity::AllWorldObjectsInRange> searcher(me, targets, u_check);
+                        std::list<Player*> targets;
+                        Trinity::AnyPlayerInObjectRangeCheck u_check(me, 100.0f);
+                        Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, targets, u_check);
                         me->VisitNearbyObject(100.0f, searcher);
-                        for (std::list<WorldObject*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        for (std::list<Player*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
                             if ((*itr)->GetTypeId() != TYPEID_PLAYER)
                                 continue;
 
                             if (zealot && (*itr) && (*itr)->IsInBetween(me, zealot, 1.0f))
                             {
-                                channelTarget = (*itr)->ToUnit();
+                                channelTarget = (*itr);
                                 if (channelTarget && channelTarget->IsInWorld() && channelTarget != NULL && !channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
                                     DoCast(channelTarget, SPELL_EVOLUTION_VISUAL, true);
                             }
@@ -579,10 +579,43 @@ public:
     };
 };
 
+class spell_brc_twilight_evolution : public SpellScriptLoader
+{
+public:
+    spell_brc_twilight_evolution() : SpellScriptLoader("spell_brc_twilight_evolution")
+    {
+    }
+
+    class spell_brc_twilight_evolution_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_brc_twilight_evolution_AuraScript);
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* owner = GetUnitOwner())
+            {
+                // Only in Blackrock Caverns
+                if (owner->GetTypeId() == TYPEID_UNIT && owner->GetMapId() == 645)
+                    owner->ToCreature()->AI()->DoAction(1);
+            }
+        }
+
+        void Register()
+        {
+            AfterEffectApply += AuraEffectApplyFn(spell_brc_twilight_evolution_AuraScript::OnApply, EFFECT_0, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_brc_twilight_evolution_AuraScript();
+    }
+};
+
 class EvolutionTargetSelector : public std::unary_function<Unit *, bool>
 {
 public:
-    EvolutionTargetSelector(Unit* me, const WorldObject* victim) : _me(me)
+    EvolutionTargetSelector(Unit* me) : _me(me)
     {
     }
 
@@ -660,18 +693,15 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            if (!targets.empty())
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    targets.remove_if(EvolutionTargetSelector(caster, caster->getVictim()));
-                    if (WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets))
-                    {
-                        targets.clear();
-                        targets.push_back(target);
-                    }
-                }
-            }
+            if (targets.empty())
+                return;
+
+            targets.remove_if(EvolutionTargetSelector(GetCaster()));
+
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
         }
 
         void Register()
@@ -683,39 +713,6 @@ public:
     SpellScript* GetSpellScript() const
     {
         return new spell_brc_evolution_SpellScript();
-    }
-};
-
-class spell_brc_twilight_evolution : public SpellScriptLoader
-{
-public:
-    spell_brc_twilight_evolution() : SpellScriptLoader("spell_brc_twilight_evolution")
-    {
-    }
-
-    class spell_brc_twilight_evolution_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_brc_twilight_evolution_AuraScript);
-
-        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            if (Unit* owner = GetUnitOwner())
-            {
-                // Only in Blackrock Caverns
-                if (owner->GetTypeId() == TYPEID_UNIT && owner->GetMapId() == 645)
-                    owner->ToCreature()->AI()->DoAction(1);
-            }
-        }
-
-        void Register()
-        {
-            AfterEffectApply += AuraEffectApplyFn(spell_brc_twilight_evolution_AuraScript::OnApply, EFFECT_0, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_brc_twilight_evolution_AuraScript();
     }
 };
 
@@ -737,7 +734,7 @@ void AddSC_boss_corla_herald_of_twilight()
     new boss_corla_herald_of_twilight();
     new npc_twilight_zealot();
     new npc_corla_netheressence_trigger();
-    new spell_brc_evolution();
     new spell_brc_twilight_evolution();
+    new spell_brc_evolution();
     new achievement_brc_arrested_developement();
 }
