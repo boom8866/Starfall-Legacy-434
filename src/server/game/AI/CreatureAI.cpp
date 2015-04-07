@@ -84,7 +84,7 @@ void CreatureAI::TalkWithDelay(uint32 const& delay, uint32 const& groupId, uint6
         uint64 const whisperGuid;
     };
 
-    if (me && whisperGuid != 0)
+    if (me)
         me->m_Events.AddEvent(new TalkDelayEvent(me, groupId, whisperGuid), me->m_Events.CalculateTime(delay));
 }
 

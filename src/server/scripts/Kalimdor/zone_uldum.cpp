@@ -14439,6 +14439,7 @@ public:
             EVENT_TELEPORT_CAMERA,
             EVENT_CHECK_DUMMY,
             EVENT_FOCUS_HARRISON,
+            EVENT_SUMMON_HARRISON,
             EVENT_QUEST_COMPLETE
         };
 
@@ -14518,10 +14519,15 @@ public:
                             }
                         }
 
-                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
-                            playerOwner->CastWithDelay(11000, playerOwner, SPELL_SUMMON_HARRISON, true);
-
+                        events.ScheduleEvent(EVENT_SUMMON_HARRISON, 11000);
                         events.ScheduleEvent(EVENT_FOCUS_HARRISON, 11500);
+                        break;
+                    }
+                    case EVENT_SUMMON_HARRISON:
+                    {
+                        events.CancelEvent(EVENT_SUMMON_HARRISON);
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
+                            playerOwner->CastSpell(playerOwner, SPELL_SUMMON_HARRISON, true);
                         break;
                     }
                     case EVENT_FOCUS_HARRISON:

@@ -1104,7 +1104,7 @@ void VehicleJoinEvent::Abort(uint64)
         /// When this code is triggered it means that something went wrong in @Vehicle::AddPassenger, and we should remove
         /// the aura manually.
         if (Passenger && Passenger->IsInWorld())
-            Target->GetBase()->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE, Passenger->GetGUID());
+            Target->GetBase()->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE);
     }
 
     if (Passenger->IsInWorld() && Passenger->HasUnitTypeMask(UNIT_MASK_ACCESSORY))

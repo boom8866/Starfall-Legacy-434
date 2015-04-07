@@ -1707,34 +1707,48 @@ bool Creature::canStartAttack(Unit const* who, bool force) const
 
 float Creature::GetAttackDistance(Unit const* player) const
 {
-    float maxRadius = (45.0f * sWorld->getRate(RATE_CREATURE_AGGRO));
-    float minRadius = (5.0f * sWorld->getRate(RATE_CREATURE_AGGRO));
-    float aggroRate = sWorld->getRate(RATE_CREATURE_AGGRO);
-    int32 levelDifference = getLevel() - player->getLevel();
+    float aggroRate = 1; //sWorld->getRate(RATE_CREATURE_AGGRO);
+    if (aggroRate == 0)
+        return 0.0f;
 
-    // The aggro radius for creatures with equal level as the player is 20 yards
-    float baseAggroDistance = 20.0f - GetFloatValue(UNIT_FIELD_COMBATREACH);
+    uint32 playerlevel   = player->getLevelForTarget(this);
+    uint32 creaturelevel = getLevelForTarget(player);
 
-    // + - 1 yard for each level difference between player and creature
-    float aggroRadius = baseAggroDistance + float(levelDifference);
+    int32 leveldif       = int32(playerlevel) - int32(creaturelevel);
 
-    if (aggroRadius > maxRadius)
-        aggroRadius = maxRadius;
-    else if (aggroRadius < minRadius)
-        aggroRadius = minRadius;
+    // "The maximum Aggro Radius has a cap of 25 levels under. Example: A level 30 char has the same Aggro Radius of a level 5 char on a level 60 mob."
+    if (leveldif < - 25)
+        leveldif = -25;
+
+    // "The aggro radius of a mob having the same level as the player is roughly 15 yards"
+    float RetDistance = 15;
+
+    // "Aggro Radius varies with level difference at a rate of roughly 1 yard/level"
+    // radius grow if playlevel < creaturelevel
+    RetDistance -= (float)leveldif;
+
+    if (creaturelevel+5 <= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+    {
+        // detect range auras
+        RetDistance += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
+
+        // detected range auras
+        RetDistance += player->GetTotalAuraModifier(SPELL_AURA_MOD_DETECTED_RANGE);
+    }
+
+    // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)"
+    if (RetDistance < 5)
+    {
+        if (player->isCamouflaged() || isCamouflaged())
+            RetDistance = 1;
+        else
+            RetDistance = 5;
+    }
 
     if (player->isCamouflaged() || isCamouflaged())
-        aggroRadius = 1.0f;
+        RetDistance = 1;
 
-    // detect range auras
-    if (float(getLevel() + 5) <= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
-        aggroRadius += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
-
-    // The aggro range of dungeon bosses should not scale
-    if (getLevel() > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
-        aggroRadius = 20.0f;
-
-    return (aggroRadius * aggroRate);
+    return (RetDistance*aggroRate);
 }
 
 void Creature::setDeathState(DeathState s)

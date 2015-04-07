@@ -242,7 +242,8 @@ public:
                         if (Creature* dummy = me->FindNearestCreature(NPC_BAD_INTENTIONS_TARGET, 200.0f))
                         {
                             me->RemoveAurasDueToSpell(SPELL_RIDE_VEHICLE_HARDCODED);
-                            player->CastSpell(dummy, SPELL_RIDE_VEHICLE_HARDCODED);
+                            if (player)
+                                player->CastSpell(dummy, SPELL_RIDE_VEHICLE_HARDCODED);
                             DoCastAOE(SPELL_THROW_PILLAR);
                             me->SetReactState(REACT_AGGRESSIVE);
                             if (me->getVictim())
@@ -250,7 +251,8 @@ public:
                         }
                         break;
                     case EVENT_DAMAGE_PLAYER:
-                        DoCast(player, SPELL_HARD_IMPACT);
+                        if (player)
+                            DoCast(player, SPELL_HARD_IMPACT);
                         break;
                     case EVENT_DETONATE_TRAPS:
                         DoCastAOE(SPELL_DETONATE_TRAPS);

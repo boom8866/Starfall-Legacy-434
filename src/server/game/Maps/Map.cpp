@@ -154,7 +154,7 @@ void Map::LoadMap(int gx, int gy, bool reload)
 
         // load grid map for base map
         if (!m_parentMap->GridMaps[gx][gy])
-            m_parentMap->EnsureGridCreated_i(GridCoord(63-gx, 63-gy));
+            m_parentMap->EnsureGridCreated(GridCoord((MAX_NUMBER_OF_GRIDS - 1) - gx, (MAX_NUMBER_OF_GRIDS - 1) - gy));
 
         ((MapInstanced*)(m_parentMap))->AddGridMapReference(GridCoord(gx, gy));
         GridMaps[gx][gy] = m_parentMap->GridMaps[gx][gy];
@@ -1098,7 +1098,7 @@ GridMap::~GridMap()
     unloadData();
 }
 
-bool GridMap::loadData(char* filename)
+bool GridMap::loadData(const char* filename)
 {
     // Unload old data if exist
     unloadData();
@@ -1268,8 +1268,8 @@ uint16 GridMap::getArea(float x, float y) const
     if (!_areaMap)
         return _gridArea;
 
-    x = 16 * (32 - x/SIZE_OF_GRIDS);
-    y = 16 * (32 - y/SIZE_OF_GRIDS);
+    x = 16 * (CENTER_GRID_ID - x/SIZE_OF_GRIDS);
+    y = 16 * (CENTER_GRID_ID - y/SIZE_OF_GRIDS);
     int lx = (int)x & 15;
     int ly = (int)y & 15;
     return _areaMap[lx*16 + ly];
@@ -1285,8 +1285,8 @@ float GridMap::getHeightFromFloat(float x, float y) const
     if (!m_V8 || !m_V9)
         return _gridHeight;
 
-    x = MAP_RESOLUTION * (32 - x/SIZE_OF_GRIDS);
-    y = MAP_RESOLUTION * (32 - y/SIZE_OF_GRIDS);
+    x = MAP_RESOLUTION * (CENTER_GRID_ID - x/SIZE_OF_GRIDS);
+    y = MAP_RESOLUTION * (CENTER_GRID_ID - y/SIZE_OF_GRIDS);
 
     int x_int = (int)x;
     int y_int = (int)y;
@@ -1367,8 +1367,8 @@ float GridMap::getHeightFromUint8(float x, float y) const
     if (!m_uint8_V8 || !m_uint8_V9)
         return _gridHeight;
 
-    x = MAP_RESOLUTION * (32 - x/SIZE_OF_GRIDS);
-    y = MAP_RESOLUTION * (32 - y/SIZE_OF_GRIDS);
+    x = MAP_RESOLUTION * (CENTER_GRID_ID - x/SIZE_OF_GRIDS);
+    y = MAP_RESOLUTION * (CENTER_GRID_ID - y/SIZE_OF_GRIDS);
 
     int x_int = (int)x;
     int y_int = (int)y;
@@ -1434,8 +1434,8 @@ float GridMap::getHeightFromUint16(float x, float y) const
     if (!m_uint16_V8 || !m_uint16_V9)
         return _gridHeight;
 
-    x = MAP_RESOLUTION * (32 - x/SIZE_OF_GRIDS);
-    y = MAP_RESOLUTION * (32 - y/SIZE_OF_GRIDS);
+    x = MAP_RESOLUTION * (CENTER_GRID_ID - x/SIZE_OF_GRIDS);
+    y = MAP_RESOLUTION * (CENTER_GRID_ID - y/SIZE_OF_GRIDS);
 
     int x_int = (int)x;
     int y_int = (int)y;
@@ -1501,8 +1501,8 @@ float GridMap::getLiquidLevel(float x, float y) const
     if (!_liquidMap)
         return _liquidLevel;
 
-    x = MAP_RESOLUTION * (32 - x/SIZE_OF_GRIDS);
-    y = MAP_RESOLUTION * (32 - y/SIZE_OF_GRIDS);
+    x = MAP_RESOLUTION * (CENTER_GRID_ID - x/SIZE_OF_GRIDS);
+    y = MAP_RESOLUTION * (CENTER_GRID_ID - y/SIZE_OF_GRIDS);
 
     int cx_int = ((int)x & (MAP_RESOLUTION-1)) - _liquidOffY;
     int cy_int = ((int)y & (MAP_RESOLUTION-1)) - _liquidOffX;
@@ -1521,8 +1521,8 @@ uint8 GridMap::getTerrainType(float x, float y) const
     if (!_liquidFlags)
         return 0;
 
-    x = 16 * (32 - x/SIZE_OF_GRIDS);
-    y = 16 * (32 - y/SIZE_OF_GRIDS);
+    x = 16 * (CENTER_GRID_ID - x/SIZE_OF_GRIDS);
+    y = 16 * (CENTER_GRID_ID - y/SIZE_OF_GRIDS);
     int lx = (int)x & 15;
     int ly = (int)y & 15;
     return _liquidFlags[lx*16 + ly];
@@ -1536,8 +1536,8 @@ inline ZLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 R
         return LIQUID_MAP_NO_WATER;
 
     // Get cell
-    float cx = MAP_RESOLUTION * (32 - x/SIZE_OF_GRIDS);
-    float cy = MAP_RESOLUTION * (32 - y/SIZE_OF_GRIDS);
+    float cx = MAP_RESOLUTION * (CENTER_GRID_ID - x/SIZE_OF_GRIDS);
+    float cy = MAP_RESOLUTION * (CENTER_GRID_ID - y/SIZE_OF_GRIDS);
 
     int x_int = (int)cx & (MAP_RESOLUTION-1);
     int y_int = (int)cy & (MAP_RESOLUTION-1);
@@ -1627,8 +1627,8 @@ inline ZLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 R
 inline GridMap* Map::GetGrid(float x, float y)
 {
     // half opt method
-    int gx=(int)(32-x/SIZE_OF_GRIDS);                       //grid x
-    int gy=(int)(32-y/SIZE_OF_GRIDS);                       //grid y
+    int gx=(int)(CENTER_GRID_ID - x/SIZE_OF_GRIDS);                       //grid x
+    int gy=(int)(CENTER_GRID_ID - y/SIZE_OF_GRIDS);                       //grid y
 
     // ensure GridMap is loaded
     EnsureGridCreated(GridCoord(63-gx, 63-gy));
