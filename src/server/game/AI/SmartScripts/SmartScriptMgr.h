@@ -1303,7 +1303,7 @@ public:
             if (WorldObject* obj = ObjectAccessor::GetWorldObject(*m_baseObject, *itr))
                 m_objectList->push_back(obj);
             else
-                TC_LOG_DEBUG("scripts.ai", "SmartScript::mTargetStorage stores a guid to an invalid object: " UI64FMTD, *itr);
+                sLog->outDebug(LOG_FILTER_DATABASE_AI, "SmartScript::mTargetStorage stores a guid to an invalid object: " UI64FMTD, *itr);
         }
 
         return m_objectList;
