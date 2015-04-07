@@ -1845,13 +1845,12 @@ void Creature::Respawn(bool force)
         m_respawnTime = 0;
         lootForPickPocketed = false;
         lootForBody         = false;
-        loot.clear();
 
         if (m_originalEntry != GetEntry())
             UpdateEntry(m_originalEntry);
 
-        if (CreatureTemplate const* cinfo = GetCreatureTemplate())
-            SelectLevel(cinfo);
+        CreatureTemplate const* cinfo = GetCreatureTemplate();
+        SelectLevel(cinfo);
 
         setDeathState(JUST_RESPAWNED);
 
@@ -1869,7 +1868,6 @@ void Creature::Respawn(bool force)
         //Call AI respawn virtual function
         if (IsAIEnabled)
         {
-            //reset the AI to be sure no dirty or uninitialized values will be used till next tick
             AI()->Reset();
             TriggerJustRespawned = true;//delay event to next tick so all creatures are created on the map before processing
         }
@@ -1878,10 +1876,20 @@ void Creature::Respawn(bool force)
         if (poolid)
             sPoolMgr->UpdatePool<Creature>(poolid, GetDBTableGUIDLow());
 
+        // Reset original flags
+        if (CreatureTemplate const* cinfo = GetCreatureTemplate())
+        {
+            SetFlag(UNIT_NPC_FLAGS, cinfo->npcflag);
+            SetFlag(UNIT_FIELD_FLAGS, cinfo->unit_flags);
+            LoadCreaturesAddon();
+        }
+
         //Re-initialize reactstate that could be altered by movementgenerators
         InitializeReactState();
-        NearTeleportTo(GetHomePosition(), false);
     }
+
+    if (IsInWorld() && isAlive() && !IsInEvadeMode())
+        GetMotionMaster()->MoveTargetedHome();
 
     UpdateObjectVisibility();
 }
