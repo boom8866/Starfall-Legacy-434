@@ -109,6 +109,7 @@ public:
             summons.DespawnAll();
             events.Reset();
             me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             me->GetMotionMaster()->MoveTargetedHome();
             instance->SetBossState(DATA_LORD_GODFREY, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
