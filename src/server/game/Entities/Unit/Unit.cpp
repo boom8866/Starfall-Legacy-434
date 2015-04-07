@@ -396,10 +396,6 @@ void Unit::Update(uint32 p_time)
         // Check UNIT_STATE_MELEE_ATTACKING or UNIT_STATE_CHASE (without UNIT_STATE_FOLLOW in this case) so pets can reach far away
         // targets without stopping half way there and running off.
         // These flags are reset after target dies or another command is given.
-
-        // Use this check to prevent permanent combat while questing in world zone just
-        // walking through two npc's that are fighting eachother
-        // Use normal check
         if (m_HostileRefManager.isEmpty())
         {
             // m_CombatTimer set at aura start and it will be freeze until aura removing
@@ -407,20 +403,6 @@ void Unit::Update(uint32 p_time)
                 ClearInCombat();
             else
                 m_CombatTimer -= p_time;
-        }
-        else
-        {
-            if (!GetInstanceId())
-            {
-                if (m_CombatTimer <= p_time)
-                {
-                    if (!GetDamageTakenInPastSecs(5) && !GetDamageDoneInPastSecs(5))
-                        ClearInCombat();
-                    m_CombatTimer = 5100;
-                }
-                else
-                    m_CombatTimer -= p_time;
-            }
         }
     }
 
@@ -9168,7 +9150,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             {
                 if (Aura* lightningShield = GetAura(324))
                 {
-                    if (lightningShield->GetStackAmount() <= 3)
+                    if (lightningShield->GetCharges() <= 3)
                     {
                         if (GetTypeId() == TYPEID_PLAYER && !ToPlayer()->HasSpellCooldown(26364))
                         {
@@ -9340,6 +9322,15 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             // Cannot proc on self heal
             if (victim == this || (procSpell && procSpell->IsPeriodicDamage()))
+                return false;
+            break;
+        }
+        // Song of Sorrow
+        case 90998:
+        case 91003:
+        {
+            // Procs only if victim is under 35% of health
+            if (victim && victim->GetHealth() >= victim->GetMaxHealth() * 0.35f)
                 return false;
             break;
         }
@@ -12810,7 +12801,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                         AuraEffectList const& mModDamagePercentDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
                         if (!mModDamagePercentDone.empty())
                             for (AuraEffectList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
-                                AddPct(DoneTotalMod, (*i)->GetAmount());
+                                AddPct(DoneTotalMod, ((*i)->GetAmount() / 2));
                         break;
                     }
                 }

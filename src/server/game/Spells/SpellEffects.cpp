@@ -1087,10 +1087,8 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
 
                         // Ebon Plaguebringer
                         if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
-                        {
-                            int32 bp0 = aurEff->GetAmount();
-                            m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                        }
+                            m_caster->CastSpell(unitTarget, 65142, true);
+
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.20f);
                         break;
                     }
@@ -1101,10 +1099,8 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
 
                         // Ebon Plaguebringer
                         if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
-                        {
-                            int32 bp0 = aurEff->GetAmount();
-                            m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                        }
+                            m_caster->CastSpell(unitTarget, 65142, true);
+
                         // Glyph of Chains of Ice
                         if (m_spellInfo->Id == 45524 && m_caster->HasAura(58620))
                             m_caster->CastSpell(unitTarget, 58621, true);
@@ -5360,10 +5356,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
 
                 // Ebon Plaguebringer
                 if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
-                {
-                    int32 bp0 = aurEff->GetAmount();
-                    m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                }
+                    m_caster->CastSpell(unitTarget, 65142, true);
             }
             break;
         }
@@ -6653,10 +6646,7 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                             }
                             // Ebon Plague
                             if (AuraEffect* ebonPlague = m_targets.GetUnitTarget()->GetAuraEffect(65142, EFFECT_0, m_caster->GetGUID()))
-                            {
-                                bp0 += bp0 * ebonPlague->GetAmount() / 100;
-                                m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true);
-                            }
+                                m_caster->CastSpell(unitTarget, 65142, true);
 
                             // Spread visual effect!
                             m_caster->CastSpell(unitTarget, 91939, true);
