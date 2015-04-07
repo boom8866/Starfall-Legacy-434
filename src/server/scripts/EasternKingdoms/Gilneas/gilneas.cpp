@@ -524,10 +524,11 @@ public:
             }
 
             if (Unit* target = me->getVictim())
-                if (target->IsWithinMeleeRange(me, me->GetFloatValue(UNIT_FIELD_COMBATREACH)))
-                    DoMeleeAttackIfReady();
-                else
-                    DoSpellAttackIfReady(SPELL_SHOOT);
+                if (target->getVictim() == me)
+                    if (target->IsWithinMeleeRange(me, me->GetFloatValue(UNIT_FIELD_COMBATREACH)))
+                        DoMeleeAttackIfReady();
+                    else
+                        DoSpellAttackIfReady(SPELL_SHOOT);
         }
     };
 
@@ -652,79 +653,20 @@ class npc_gilneas_city_guard : public CreatureScript
 public:
     npc_gilneas_city_guard() : CreatureScript("npc_gilneas_city_guard") { }
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_gilneas_city_guardAI (creature);
-    }
-
     struct npc_gilneas_city_guardAI : public ScriptedAI
     {
-        npc_gilneas_city_guardAI(Creature *c) : ScriptedAI(c)
+        npc_gilneas_city_guardAI(Creature* creature) : ScriptedAI(creature)
         {
-            SetCombatMovement(false);
-            uiEmoteState = me->GetUInt32Value(UNIT_NPC_EMOTESTATE);
-        }
-
-        uint32 uiYellTimer;
-        uint32 uiEnemyEntry;
-        uint32 uiShootTimer;
-        uint32 uiEmoteState;
-        bool miss;
-        bool CanSay;
-
-        void DamageTaken(Unit* attacker, uint32 &damage)
-        {
-            if (attacker->GetTypeId() != TYPEID_PLAYER)
-                damage = 0;
         }
 
         void Reset()
         {
-            uiYellTimer = urand(25000, 75000);
-            uiShootTimer = 1000;
-            miss = false;
-            CanSay = false;
-            me->SetUInt32Value(UNIT_NPC_EMOTESTATE, uiEmoteState);
+            SetCombatMovement(false);
+        }
 
-            switch(me->GetEntry())
-            {
-            case NPC_GILNEAS_CITY_GUARD:
-                uiEnemyEntry = NPC_RAMPAGING_WORGEN;
-                break;
-            case NPC_GILNEAN_ROYAL_GUARD:
-                uiEnemyEntry = NPC_BLOODFANG_WORGEN;
-                break;
-            case NPC_GILNEAS_CITY_GUARD_PHASE_4:
-                CanSay = true;
-                uiEnemyEntry = NPC_AFFLICTED_GILNEAN;
-                break;
-            case NPC_NORTHGATE_REBEL_PHASE_5:
-                uiEnemyEntry = NPC_BLOODFANG_STALKER_PHASE_5;
-                break;
-            case NPC_NORTHGATE_REBEL:
-                uiEnemyEntry = NPC_FRENZIED_STALKER;
-                break;
-            default:
-                uiEnemyEntry = 0;
-                break;
-            }
-
-            if (me->GetEntry() == NPC_GILNEAS_CITY_GUARD_PHASE_4)
-            {
-                me->m_CombatDistance = 3.0f;
-                SetCombatMovement(false);
-            }
-            else
-                me->m_CombatDistance = 10.0f;
-
-            if (me->GetDistance2d(-1770.2f, 1343.78f) < 25.0f)
-            {
-                me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            }
-
-            if (Unit* target = me->FindNearestCreature(uiEnemyEntry, 40.0f))
-                AttackStart(target);
+        void DamageTaken(Unit* attacker, uint32 &damage)
+        {
+            damage = 0;
         }
 
         void UpdateAI(uint32 diff)
@@ -732,60 +674,13 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (CanSay)
-                if (uiYellTimer <= diff)
-                {
-                    uiYellTimer = urand(50000, 100000);
-                    Talk(0);
-                }
-                else
-                    uiYellTimer -= diff;
-
-            if (me->getVictim()->GetTypeId() == TYPEID_UNIT)
-                if (me->getVictim()->GetHealthPct() < 90)
-                    miss = true;
-                else
-                    miss = false;
-
-            if (uiShootTimer <= diff)
-            {
-                uiShootTimer = 2500;
-                Unit* target = NULL;
-
-                if (!me->IsWithinMeleeRange(me->getVictim(), 0.0f))
-                    if (uiEnemyEntry)
-                        if (target = me->FindNearestCreature(uiEnemyEntry, 40.0f))
-                            if (target != me->getVictim())
-                            {
-                                me->getThreatManager().modifyThreatPercent(me->getVictim(), -100);
-                                me->CombatStart(target);
-                                me->AddThreat(target, 1000);
-                            }
-
-                            if (!me->IsWithinMeleeRange(me->getVictim(), 0.0f))
-                            {
-                                if (me->HasUnitState(UNIT_STATE_MELEE_ATTACKING))
-                                {
-                                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-                                    me->ClearUnitState(UNIT_STATE_MELEE_ATTACKING);
-                                    me->SendMeleeAttackStop(me->getVictim());
-                                }
-
-                                me->CastSpell(me->getVictim(), SPELL_SHOOT, false);
-                            }
-                            else
-                                if (!me->HasUnitState(UNIT_STATE_MELEE_ATTACKING))
-                                {
-                                    me->AddUnitState(UNIT_STATE_MELEE_ATTACKING);
-                                    me->SendMeleeAttackStart(me->getVictim());
-                                }
-            }
-            else
-                uiShootTimer -= diff;
-
             DoMeleeAttackIfReady();
         }
     };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gilneas_city_guardAI(creature);
+    }
 };
 
 ///////////
