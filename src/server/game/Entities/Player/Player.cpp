@@ -7473,6 +7473,14 @@ int32 Player::CalculateReputationGain(ReputationSource source, uint32 creatureOr
 //Calculates how many reputation points player gains in victim's enemy factions
 void Player::RewardOnKill(Unit* victim, float rate)
 {
+    enum rewardId
+    {
+        BOSS_GUILD_REPUTATION_REWARD_NORMAL     = 47775,
+        BOSS_REPUTATION_REWARD_NORMAL           = 47776,
+        BOSS_GUILD_REPUTATION_REWARD_HEROIC     = 49667,
+        BOSS_REPUTATION_REWARD_HEROIC           = 49668
+    };
+
     if (!victim || victim->GetTypeId() == TYPEID_PLAYER)
         return;
 
@@ -7480,6 +7488,36 @@ void Player::RewardOnKill(Unit* victim, float rate)
         return;
 
     RewardOnKillEntry const* Rew = sObjectMgr->GetRewardOnKillEntry(victim->ToCreature()->GetCreatureTemplate()->Entry);
+
+    // Automatic reputation rewarder (For Boss only)
+    if (victim->ToCreature())
+    {
+        if (Map* map = victim->GetMap())
+        {
+            if (map->IsDungeon())
+            {
+                if (victim->ToCreature()->IsDungeonBoss())
+                {
+                    // Check if is a guild group and apply correct guild reputation
+                    if (GetGroup() && GetGuild() && GetGuildId() != 0 && GetGroup()->IsGuildGroup(GetGuildId(), true, true))
+                        Rew = sObjectMgr->GetRewardOnKillEntry(map->IsHeroic() ? BOSS_GUILD_REPUTATION_REWARD_HEROIC : BOSS_GUILD_REPUTATION_REWARD_NORMAL);
+                    else
+                    {
+                        // If player is not part of guild, use nerfed reward if have championing tabards active or guild tabards
+                        uint32 ChampioningFaction = 0;
+                        if (GetChampioningFaction() || (GetGuild() && (HasAura(97340) || HasAura(97341))))
+                        {
+                            if (map->IsNonRaidDungeon())
+                                if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
+                                    if (dungeon->reclevel == 85)
+                                        ChampioningFaction = GetChampioningFaction();
+                            Rew = sObjectMgr->GetRewardOnKillEntry(map->IsHeroic() ? BOSS_REPUTATION_REWARD_HEROIC : BOSS_REPUTATION_REWARD_NORMAL);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     if (!Rew)
         return;
@@ -7510,6 +7548,15 @@ void Player::RewardOnKill(Unit* victim, float rate)
         int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rew->RepValue1, ChampioningFaction ? ChampioningFaction : Rew->RepFaction1);
         donerep1 = int32(donerep1 * rate);
 
+        // Guild Tabards
+        if (GetGuild() && Rew->RepFaction1 == 1168)
+        {
+            if (HasAura(97340))
+                AddPct(donerep1, 25);
+            if (HasAura(97341))
+                AddPct(donerep1, 50);
+        }
+
         FactionEntry const* factionEntry1 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rew->RepFaction1);
         uint32 current_reputation_rank1 = GetReputationMgr().GetRank(factionEntry1);
         if (factionEntry1 && current_reputation_rank1 <= Rew->ReputationMaxCap1)
@@ -7520,6 +7567,15 @@ void Player::RewardOnKill(Unit* victim, float rate)
     {
         int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rew->RepValue2, ChampioningFaction ? ChampioningFaction : Rew->RepFaction2);
         donerep2 = int32(donerep2 * rate);
+
+        // Guild Tabards (Decreased multipliers)
+        if (GetGuild() && Rew->RepFaction2 == 1168)
+        {
+            if (HasAura(97340))
+                AddPct(donerep2, 25);
+            else if (HasAura(97341))
+                AddPct(donerep2, 50);
+        }
 
         FactionEntry const* factionEntry2 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rew->RepFaction2);
         uint32 current_reputation_rank2 = GetReputationMgr().GetRank(factionEntry2);
