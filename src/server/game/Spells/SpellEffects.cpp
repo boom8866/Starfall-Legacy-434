@@ -7167,7 +7167,15 @@ void Spell::EffectInebriate (SpellEffIndex /*effIndex*/)
     else
         currentDrunk += drunkMod;
 
-    player->SetDrunkValue(currentDrunk, m_CastItem ? m_CastItem->GetEntry() : 0);
+    switch (m_spellInfo->Id)
+    {
+        case 87648: // Starfire Espresso
+            player->SetDrunkValue(0);
+            break;
+        default:
+            player->SetDrunkValue(currentDrunk, m_CastItem ? m_CastItem->GetEntry() : 0);
+            break;
+    }
 }
 
 void Spell::EffectFeedPet (SpellEffIndex effIndex)

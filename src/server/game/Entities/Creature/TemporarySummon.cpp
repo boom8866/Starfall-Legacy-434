@@ -239,13 +239,10 @@ void TempSummon::UnSummon(uint32 msTime)
 
     switch(GetEntry())
     {
-        // Force of Nature
-        case 36070:
-        {
+        case 36070: // Force of Nature
             if (IsAIEnabled && isAlive())
                 AI()->JustDied(this);
             break;
-        }
         default:
             break;
     }
