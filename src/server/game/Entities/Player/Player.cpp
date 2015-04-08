@@ -7457,27 +7457,32 @@ void Player::RewardOnKill(Unit* victim, float rate)
         return;
 
     uint32 ChampioningFaction = 0;
+    bool allowRewardReputation = true;
 
+    // Championing
     if (GetChampioningFaction())
-    {
-        // support for: Championing - http://www.wowwiki.com/Championing
-        Map const* map = GetMap();
-        if (map && map->IsNonRaidDungeon())
-            if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
-                if (dungeon->reclevel == 85)
-                    ChampioningFaction = GetChampioningFaction();
-    }
+        if (Map const* map = GetMap())
+            if (map->IsNonRaidDungeon())
+                if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
+                    if (dungeon->expansion == EXPANSION_CATACLYSM)
+                        ChampioningFaction = GetChampioningFaction();
 
     uint32 team = GetTeam();
 
-    // Skip Guild rep from championing if we are in a guild group
-    if (Rew->RepFaction1 == 1168 || Rew->RepFaction2 == 1168)
-    {
-        if (GetGroup() && GetGroup()->IsGuildGroup(GetGuildId()))
-            ChampioningFaction = 0;
-    }
+    // Do not grant guild reputation from trash creatures
+    if (Rew->RepFaction1 == 1168 && !victim->ToCreature()->IsDungeonBoss() && !GetChampioningFaction())
+        allowRewardReputation = false;
 
-    if (Rew->RepFaction1 && (!Rew->TeamDependent || team == ALLIANCE))
+    if (Rew->RepFaction2 == 1168 && !victim->ToCreature()->IsDungeonBoss() && !GetChampioningFaction())
+        allowRewardReputation = false;
+
+    // Grant guild reputation only if the rewarded player is in a guild group
+    if (Group* group = GetGroup())
+        if (Guild* guild = GetGuild())
+            if (!group->IsGuildGroup(guild->GetId(), true, true))
+                allowRewardReputation = false;
+
+    if (allowRewardReputation && Rew->RepFaction1 && (!Rew->TeamDependent || team == ALLIANCE))
     {
         int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rew->RepValue1, ChampioningFaction ? ChampioningFaction : Rew->RepFaction1);
         donerep1 = int32(donerep1 * rate);
@@ -7488,7 +7493,7 @@ void Player::RewardOnKill(Unit* victim, float rate)
             GetReputationMgr().ModifyReputation(factionEntry1, donerep1);
     }
 
-    if (Rew->RepFaction2 && (!Rew->TeamDependent || team == HORDE))
+    if (allowRewardReputation && Rew->RepFaction2 && (!Rew->TeamDependent || team == HORDE))
     {
         int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rew->RepValue2, ChampioningFaction ? ChampioningFaction : Rew->RepFaction2);
         donerep2 = int32(donerep2 * rate);
