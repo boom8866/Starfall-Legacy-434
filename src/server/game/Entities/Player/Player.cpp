@@ -537,8 +537,10 @@ inline void KillRewarder::_RewardHonor(Player* player)
                 player->CompletedAchievement(bBerserker);
         }
 
+        /*
         if (player->IsHonorRewardAllowed(_victim))
             player->RewardGuildReputation(std::max<uint32>(1, _count / 20));
+            */
     }
 }
 
@@ -619,10 +621,12 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
             _RewardOnKill(player, isDungeon ? 1.0f : rate);
             _RewardKillCredit(player);
 
+            /*
             // Reward Guild reputation
             if (player->GetGuildId() && _victim->GetTypeId() == TYPEID_UNIT && _victim->ToCreature()->IsDungeonBoss()
                 && player->GetGroup() && player->GetGroup()->IsGuildGroup(player->GetGuildId()))
                     player->RewardGuildReputation(std::max<uint32>(1, _xp / 450));
+            */
         }
     }
 }
@@ -7458,6 +7462,8 @@ void Player::RewardOnKill(Unit* victim, float rate)
 
     uint32 ChampioningFaction = 0;
     bool allowRewardReputation = true;
+    uint8 guildBonus1 = 0;
+    uint8 guildBonus2 = 0;
 
     // Championing
     if (GetChampioningFaction())
@@ -7465,26 +7471,36 @@ void Player::RewardOnKill(Unit* victim, float rate)
             if (map->IsNonRaidDungeon())
                 if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
                     if (dungeon->expansion == EXPANSION_CATACLYSM)
+                    {
                         ChampioningFaction = GetChampioningFaction();
+
+                        // Guild Reputation have an additional bonus
+                        if (map->IsHeroic() && !ChampioningFaction)
+                            if (Rew->RepFaction1 == GUILD_FACTION_ID)
+                                guildBonus1 = sWorld->getIntConfig(CONFIG_GUILD_REP_HEROIC_DUNGEON_BONUS);
+                            else if (Rew->RepFaction2 == GUILD_FACTION_ID)
+                                guildBonus2 = sWorld->getIntConfig(CONFIG_GUILD_REP_NORMAL_DUNGEON_BONUS);
+                    }
 
     uint32 team = GetTeam();
 
     // Do not grant guild reputation from trash creatures
-    if (Rew->RepFaction1 == 1168 && !victim->ToCreature()->IsDungeonBoss() && !GetChampioningFaction())
+    if (Rew->RepFaction1 == GUILD_FACTION_ID && !victim->ToCreature()->IsDungeonBoss() && !GetChampioningFaction())
         allowRewardReputation = false;
 
-    if (Rew->RepFaction2 == 1168 && !victim->ToCreature()->IsDungeonBoss() && !GetChampioningFaction())
+    if (Rew->RepFaction2 == GUILD_FACTION_ID && !victim->ToCreature()->IsDungeonBoss() && !GetChampioningFaction())
         allowRewardReputation = false;
 
     // Grant guild reputation only if the rewarded player is in a guild group
-    if (Group* group = GetGroup())
-        if (Guild* guild = GetGuild())
-            if (!group->IsGuildGroup(guild->GetId(), true, true))
-                allowRewardReputation = false;
+    if (victim->ToCreature()->IsDungeonBoss())
+        if (Group* group = GetGroup())
+            if (Guild* guild = GetGuild())
+                if (!group->IsGuildGroup(guild->GetId(), true, true) && !GetChampioningFaction())
+                    allowRewardReputation = false;
 
     if (allowRewardReputation && Rew->RepFaction1 && (!Rew->TeamDependent || team == ALLIANCE))
     {
-        int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rew->RepValue1, ChampioningFaction ? ChampioningFaction : Rew->RepFaction1);
+        int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rew->RepValue1 + guildBonus1, ChampioningFaction ? ChampioningFaction : Rew->RepFaction1);
         donerep1 = int32(donerep1 * rate);
 
         FactionEntry const* factionEntry1 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rew->RepFaction1);
@@ -7495,7 +7511,7 @@ void Player::RewardOnKill(Unit* victim, float rate)
 
     if (allowRewardReputation && Rew->RepFaction2 && (!Rew->TeamDependent || team == HORDE))
     {
-        int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rew->RepValue2, ChampioningFaction ? ChampioningFaction : Rew->RepFaction2);
+        int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rew->RepValue2 + guildBonus2, ChampioningFaction ? ChampioningFaction : Rew->RepFaction2);
         donerep2 = int32(donerep2 * rate);
 
         FactionEntry const* factionEntry2 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rew->RepFaction2);
