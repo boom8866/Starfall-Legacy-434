@@ -1,0 +1,1 @@
+UPDATE `prospecting_loot_template` SET `groupid`=2 WHERE `item`=52181;
