@@ -9334,6 +9334,18 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        // Hurricane
+        case 89086:
+        {
+            // Players only!
+            if (GetTypeId() != TYPEID_PLAYER || !victim)
+                return false;
+
+            // Avoid crash from explosive trap
+            if (procSpell && procSpell->Id == 13812)
+                return false;
+            break;
+        }
         // Battle Trance
         case 12322:
         case 85741:

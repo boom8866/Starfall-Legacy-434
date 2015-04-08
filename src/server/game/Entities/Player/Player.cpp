@@ -7479,34 +7479,7 @@ void Player::RewardOnKill(Unit* victim, float rate)
     if (victim->ToCreature()->IsReputationGainDisabled())
         return;
 
-   RewardOnKillEntry const* Rew = sObjectMgr->GetRewardOnKillEntry(victim->ToCreature()->GetCreatureTemplate()->Entry);
-   RewardOnKillEntry const* addRew = NULL;
-
-   if (!Rew) // Automatic Reputation addition for NPC's without reward entry
-        if (Map* map = victim->GetMap())
-            if (victim->GetTypeId() != TYPEID_PLAYER)
-                if (map->IsDungeon())
-                    // Killing a Trash unit that is not a tempoary summon
-                    if (victim->ToCreature()->GetCreatureTemplate()->expansion == 3 && !victim->ToCreature()->IsDungeonBoss() && !victim->isSummon() && !victim->ToTempSummon() && !(victim->ToCreature()->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL))
-                    {
-                        if (!map->IsHeroic())
-                            Rew = sObjectMgr->GetRewardOnKillEntry(42696);
-                        else
-                            Rew = sObjectMgr->GetRewardOnKillEntry(49667);
-                    }
-                    // Killing a Boss
-                    else if (victim->ToCreature()->isWorldBoss() && victim->ToCreature()->GetCreatureTemplate()->expansion == 3)
-                    {
-                        if (!map->IsHeroic())
-                            Rew = sObjectMgr->GetRewardOnKillEntry(43296);
-                        else
-                            Rew = sObjectMgr->GetRewardOnKillEntry(47775);
-
-                        if (!map->IsHeroic())
-                            addRew = sObjectMgr->GetRewardOnKillEntry(43438);
-                        else
-                            addRew = sObjectMgr->GetRewardOnKillEntry(49642);
-                    }
+    RewardOnKillEntry const* Rew = sObjectMgr->GetRewardOnKillEntry(victim->ToCreature()->GetCreatureTemplate()->Entry);
 
     if (!Rew)
         return;
@@ -7525,10 +7498,12 @@ void Player::RewardOnKill(Unit* victim, float rate)
 
     uint32 team = GetTeam();
 
-    // Disable guild reputation from championing (Guild Group)
-    if (Rew->RepFaction1 && (Rew->RepFaction1 == 1168) || Rew->RepFaction2 && (Rew->RepFaction2 == 1168))
+    // Skip Guild rep from championing if we are in a guild group
+    if (Rew->RepFaction1 == 1168 || Rew->RepFaction2 == 1168)
+    {
         if (GetGroup() && GetGroup()->IsGuildGroup(GetGuildId()))
             ChampioningFaction = 0;
+    }
 
     if (Rew->RepFaction1 && (!Rew->TeamDependent || team == ALLIANCE))
     {
