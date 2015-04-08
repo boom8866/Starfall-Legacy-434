@@ -7477,10 +7477,11 @@ void Player::RewardOnKill(Unit* victim, float rate)
         allowRewardReputation = false;
 
     // Grant guild reputation only if the rewarded player is in a guild group
-    if (Group* group = GetGroup())
-        if (Guild* guild = GetGuild())
-            if (!group->IsGuildGroup(guild->GetId(), true, true))
-                allowRewardReputation = false;
+    if (victim->ToCreature()->IsDungeonBoss())
+        if (Group* group = GetGroup())
+            if (Guild* guild = GetGuild())
+                if (!group->IsGuildGroup(guild->GetId(), true, true) && !GetChampioningFaction())
+                    allowRewardReputation = false;
 
     if (allowRewardReputation && Rew->RepFaction1 && (!Rew->TeamDependent || team == ALLIANCE))
     {
