@@ -281,13 +281,15 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             Talk(SAY_DEATH);
-            _JustDied();
             RemoveEncounterFrame();
             if (GameObject* console = me->FindNearestGameObject(GO_CONTROL_SYSTEM, 150.0f))
                 console->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
             if (Creature* ulthok = me->FindNearestCreature(BOSS_COMMANDER_ULTHOK, 500.0f, true))
                 ulthok->SetVisible(true);
             DespawnMinions();
+            _JustDied();
+            if (GameObject* ladyDoor = me->FindNearestGameObject(GO_LADY_NAZJAR_DOOR, 500.0f))
+                ladyDoor->SetGoState(GO_STATE_READY);
         }
 
         void DespawnMinions()
