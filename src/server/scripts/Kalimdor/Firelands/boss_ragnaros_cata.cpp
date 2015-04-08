@@ -602,7 +602,14 @@ public:
 
         void JustSummoned(Creature* summon)
         {
-            summons.Summon(summon);
+            switch (summon->GetEntry())
+            {
+                case NPC_LAVA_SCION: // We handle the despawn of the Lava Scions in a special case due to the encounter frame thing
+                    break;
+                default:
+                    summons.Summon(summon);
+                    break;
+            }
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)

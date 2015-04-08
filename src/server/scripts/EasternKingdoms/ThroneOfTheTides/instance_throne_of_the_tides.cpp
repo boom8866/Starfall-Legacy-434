@@ -174,63 +174,47 @@ public:
                 case GO_LADY_NAZJAR_DOOR:
                 case GO_MINDEBENDER_GHURSA_DOOR:
                 case GO_OZUMAT_DOOR:
-                {
                     AddDoor(go, true);
                     break;
-                }
                 case GO_CONTROL_SYSTEM:
-                {
                     uiControlSystem = go->GetGUID();
                     go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
-                }
                 case GO_TENTACLE_RIGHT:
-                {
                     uiTentacleRight = go->GetGUID();
                     if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
                         go->RemoveFromWorld();
                     break;
-                }
                 case GO_TENTACLE_LEFT:
-                {
                     uiTentacleLeft = go->GetGUID();
                     if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
                         go->RemoveFromWorld();
                     break;
-                }
                 case GO_INVISIBLE_DOOR_R:
-                {
                     uiInvisibleDoorRight = go->GetGUID();
                     if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
                         go->RemoveFromWorld();
                     break;
-                }
                 case GO_INVISIBLE_DOOR_L:
-                {
                     uiInvisibleDoorLeft = go->GetGUID();
                     if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
                         go->RemoveFromWorld();
                     break;
-                }
                 case GO_CORALES:
-                {
                     uiCorales = go->GetGUID();
                     if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
                         go->RemoveFromWorld();
                     break;
-                }
                 case GO_NEPTULONS_CACHE_NH:
                 case GO_NEPTULONS_CACHE_HC:
-                {
                     go->SetPhaseMask(32768, true);
                     uiNeptulonsCache = go->GetGUID();
                     break;
-                }
                 case GO_COMMANDER_ULTHOK_DOOR:
-                {
                     uiCommanderUlthokDoor = go->GetGUID();
                     break;
-                }
+                default:
+                    break;
             }
         }
 
@@ -344,16 +328,26 @@ public:
         {
             switch(identifier)
             {
-                case BOSS_LADY_NAZJAR:          return uiLadyNazjar;
-                case BOSS_COMMANDER_ULTHOK:     return uiCommanderUlthok;
-                case NPC_ERUNAK_STONESPEAKER:   return uiErunakStonespeaker;
-                case BOSS_MINDBENDER_GHURSHA:   return uiMindbenderGhursha;
-                case BOSS_OZUMAT:               return uiOzumat;
-                case NPC_NEPTULON:              return uiNeptulon;
-                case NPC_NAZJAR_EVENT_DOUBLE:   return uiNazjarEventDouble;
-                case GO_COMMANDER_ULTHOK_DOOR:  return uiCommanderUlthokDoor;
-                case GO_CORALES:                return uiCorales;
-                default:                        return 0;
+                case BOSS_LADY_NAZJAR:
+                    return uiLadyNazjar;
+                case BOSS_COMMANDER_ULTHOK:
+                    return uiCommanderUlthok;
+                case NPC_ERUNAK_STONESPEAKER:
+                    return uiErunakStonespeaker;
+                case BOSS_MINDBENDER_GHURSHA:
+                    return uiMindbenderGhursha;
+                case BOSS_OZUMAT:
+                    return uiOzumat;
+                case NPC_NEPTULON:
+                    return uiNeptulon;
+                case NPC_NAZJAR_EVENT_DOUBLE:
+                    return uiNazjarEventDouble;
+                case GO_COMMANDER_ULTHOK_DOOR:
+                    return uiCommanderUlthokDoor;
+                case GO_CORALES:
+                    return uiCorales;
+                default:
+                    return 0;
             }
         }
 
