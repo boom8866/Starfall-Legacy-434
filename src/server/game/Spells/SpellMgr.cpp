@@ -97,17 +97,14 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Shattered Barrier
             else if (spellproto->SpellVisual[0] == 12297)
                 return DIMINISHING_ROOT;
-            // Deep Freeze
-            else if (spellproto->SpellIconID == 2939 && spellproto->SpellVisual[0] == 9963)
-                return DIMINISHING_CONTROLLED_STUN;
             // Frost Nova / Freeze (Water Elemental)
             else if (spellproto->SpellIconID == 193)
                 return DIMINISHING_CONTROLLED_ROOT;
             // Dragon's Breath
             else if (spellproto->SpellFamilyFlags[0] & 0x800000)
                 return DIMINISHING_DRAGONS_BREATH;
-            // Ring of Frost and Deep Freeze
-            else if (spellproto->Id == 82691 || spellproto->Id == 44572)
+            // Ring of Frost, Deep Freeze and Polymorph
+            else if (spellproto->Id == 82691 || spellproto->Id == 44572 || spellproto->Id == 118)
                 return DIMINISHING_CONTROLLED_STUN;
             // Dragon's Breath
             else if (spellproto->Id == 31661)
