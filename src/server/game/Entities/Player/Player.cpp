@@ -7464,6 +7464,7 @@ void Player::RewardOnKill(Unit* victim, float rate)
     bool allowRewardReputation = true;
     uint8 guildBonus1 = 0;
     uint8 guildBonus2 = 0;
+    uint8 specialBonus = 0;
 
     // Championing
     if (Map const* map = GetMap())
@@ -7502,20 +7503,30 @@ void Player::RewardOnKill(Unit* victim, float rate)
                             case false:
                                 guildBonus1 = bonusN;
                                 break;
-                            }
+                            default:
+                                break;
                         }
+                    }
                     if (Rew->RepFaction2 == GUILD_FACTION_ID)
                     {
                         switch (GetMap()->IsHeroic())
                         {
-                            case true:
-                               guildBonus2 = bonusH;
-                                break;
-                            case false:
-                                guildBonus2 = bonusN;
+                        case true:
+                            guildBonus2 = bonusH;
+                            break;
+                        case false:
+                            guildBonus2 = bonusN;
+                            break;
+                        default:
                             break;
                         }
                     }
+                    else if (group->IsGuildGroup(guild->GetId(), true, true) && GetChampioningFaction())
+                        if (GetMap()->IsHeroic())
+                            specialBonus = bonusH;
+                        else
+                            specialBonus = bonusN;
+
                 }
 
     if (allowRewardReputation && Rew->RepFaction1 && (!Rew->TeamDependent || team == ALLIANCE))
@@ -7527,6 +7538,15 @@ void Player::RewardOnKill(Unit* victim, float rate)
         uint32 current_reputation_rank1 = GetReputationMgr().GetRank(factionEntry1);
         if (factionEntry1 && current_reputation_rank1 <= Rew->ReputationMaxCap1)
             GetReputationMgr().ModifyReputation(factionEntry1, donerep1);
+
+        if (specialBonus && current_reputation_rank1 <= Rew->ReputationMaxCap1)
+        {
+            FactionEntry const* factionEntry = sFactionStore.LookupEntry(GUILD_FACTION_ID);
+            int32 guildRep = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), specialBonus, GUILD_FACTION_ID);
+            guildRep = int32(guildRep * rate);
+            if (factionEntry)
+                GetReputationMgr().ModifyReputation(factionEntry, guildRep);
+        }
     }
 
     if (allowRewardReputation && Rew->RepFaction2 && (!Rew->TeamDependent || team == HORDE))
