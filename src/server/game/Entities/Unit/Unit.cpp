@@ -4223,6 +4223,18 @@ void Unit::RemoveAurasWithAttribute(uint32 flags)
     }
 }
 
+void Unit::RemoveFoodBuffAurasWithExclusion(uint32 excludeSpellId)
+{
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    {
+        SpellInfo const* spell = iter->second->GetBase()->GetSpellInfo();
+        if (spell->Id != excludeSpellId && spell->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)
+            RemoveAura(iter);
+        else
+            ++iter;
+    }
+}
+
 void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase)
 {
     // single target auras from other casters
