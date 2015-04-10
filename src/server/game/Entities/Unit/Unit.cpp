@@ -1446,7 +1446,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
                     }
                 }
                 // Only in Balance spec
-                if (HasSpell(78674) && !HasAura(48518) && solarEnabled == false)
+                if (HasSpell(78674) && !HasAura(48517) && solarEnabled == false)
                 {
                     EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
                     // Marker
@@ -1478,7 +1478,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
                     }
                 }
                 // Only in Balance spec
-                if (HasSpell(78674) && !HasAura(48517) && lunarEnabled == false)
+                if (HasSpell(78674) && !HasAura(48518) && lunarEnabled == false)
                 {
                     EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
                     // Marker
@@ -14848,21 +14848,6 @@ int32 Unit::ModSpellDuration(SpellInfo const* spellProto, Unit const* target, in
         }
     }
 
-    // Glyphs which increase duration of selfcasted buffs
-    if (target == this)
-    {
-        switch (spellProto->SpellFamilyName)
-        {
-            case SPELLFAMILY_DRUID:
-                if (spellProto->SpellFamilyFlags[0] & 0x100)
-                {
-                    // Glyph of Thorns
-                    if (AuraEffect* aurEff = GetAuraEffect(57862, 0))
-                        duration += aurEff->GetAmount() * MINUTE * IN_MILLISECONDS;
-                }
-                break;
-        }
-    }
     return std::max(duration, 0);
 }
 
