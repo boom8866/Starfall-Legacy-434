@@ -7379,7 +7379,10 @@ int32 Player::CalculateReputationGain(ReputationSource source, uint32 creatureOr
 
     // faction specific auras only seem to apply to kills
     if (source == REPUTATION_SOURCE_KILL)
+    {
         repMod += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_FACTION_REPUTATION_GAIN, faction);
+        repMod += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_GUILD_REPUTATION_GAIN_PCT, faction);
+    }
 
     percent += rep > 0 ? repMod : -repMod;
 

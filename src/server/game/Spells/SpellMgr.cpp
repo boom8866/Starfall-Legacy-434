@@ -3805,6 +3805,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 72072: // Place Territorial Fetish
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(9);
                 break;
+            case 97340: // Guild Champion
+            case 97341:
+                spellInfo->Effects[EFFECT_0].MiscValue = 1168;
+                break;
             case 66600: // Rolling with my Homies: Summon Izzy
             case 66597: // Rolling with my Homies: Summon Ace
             case 66599: // Rolling with my Homies: Summon Gobber

@@ -17890,8 +17890,9 @@ public:
                     case EVENT_JOCK_SALUTE:
                     {
                         events.CancelEvent(EVENT_JOCK_SALUTE);
-                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
-                            passenger->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
+                        if (Vehicle* vehicle = me->GetVehicleKit())
+                            if (Unit* passenger = vehicle->GetPassenger(0))
+                                passenger->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
                         break;
                     }
                     case EVENT_MOVE_FORWARD:
