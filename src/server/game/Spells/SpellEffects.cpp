@@ -1147,6 +1147,19 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 }
                 break;
             }
+            case SPELLFAMILY_SHAMAN:
+            {
+                // Searing Bolt (Totem)
+                if (m_spellInfo->Id == 3606)
+                {
+                    if (m_caster->GetCharmerOrOwner())
+                    {
+                        float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
+                        damage += int32((spellpower * 0.167f));
+                    }
+                }
+                break;
+            }
             case SPELLFAMILY_MAGE:
             {
                 switch (m_spellInfo->Id)
