@@ -300,6 +300,7 @@ public:
 
             uint8 _bridgeEventDone;
             uint8 _ragnarosSummoned;
+            uint8 _ragnarosKilled;
             bool _ragnarosFirstTimeSummoned;
     };
 

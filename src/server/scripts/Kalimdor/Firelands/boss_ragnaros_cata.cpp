@@ -243,8 +243,8 @@ enum Events
     EVENT_DETONATE_SONS_OF_FLAME,
     EVENT_ENGULFING_FLAMES,
     EVENT_MOLTEN_SEED,
-
     EVENT_LIVING_METEOR,
+
     EVENT_ATTACK_HEROIC,
 
     // Magma Trap
@@ -357,21 +357,19 @@ enum RagnarosQuest
     QUEST_HEART_OF_FIRE = 29307,
 };
 
-Position const SplittingTriggerNorth  = {1023.55f,  -57.158f,   55.4215f,   3.12414f    };
-Position const SplittingTriggerEast   = {1035.45f,  -25.3646f,  55.4924f,   2.49582f    };
-Position const SplittingTriggerWest   = {1036.27f,  -89.2396f,  55.5098f,   3.83972f    };
+Position const SplittingTriggerNorth  = { 1023.55f,  -57.158f,   55.4215f,   3.12414f    };
+Position const SplittingTriggerEast   = { 1035.45f,  -25.3646f,  55.4924f,   2.49582f    };
+Position const SplittingTriggerWest   = { 1036.27f,  -89.2396f,  55.5098f,   3.83972f    };
 
-Position const CenariusSummonPosition = {795.504f,  -60.138f,   83.652f,    0.02050f    };
-Position const HamuulSummonPosition   = {790.017f,  -50.393f,   97.115f,    6.22572f    };
-Position const MalfurionSummonPosition = {781.208f, -69.534f,   98.061f,    3.89547f    };
+Position const CacheOfTheFirelordPos  = { 1012.49f,  -57.2882f,  55.3302f,   4.41094f    };
 
-Position const MalfurionPoint         = {984.996f,  -73.638f,   55.348f  };
-Position const CenariusPoint          = {984.1371f, -57.65625f, 55.36652f};
-Position const HamuulPoint            = {982.9132f, -43.22049f, 55.35419f};
+Position const CenariusSummonPosition = { 795.504f,  -60.138f,   83.652f,    0.02050f    };
+Position const HamuulSummonPosition   = { 790.017f,  -50.393f,   97.115f,    6.22572f    };
+Position const MalfurionSummonPosition = {781.208f,  -69.534f,   98.061f,    3.89547f    };
 
-/*
-    Positions for Sons of Flame
-*/
+Position const MalfurionPoint         = { 984.996f,  -73.638f,   55.348f   };
+Position const CenariusPoint          = { 984.1371f, -57.65625f, 55.36652f };
+Position const HamuulPoint            = { 982.9132f, -43.22049f, 55.35419f };
 
 const Position SonsOfFlameWest[] =
 {
@@ -413,7 +411,7 @@ const Position SonsOfFlameEast[] =
     Positions for engulfing flames
 */
 
-const Position EngulfingFlamesMelee[] =
+Position const EngulfingFlamesMelee[] =
 {
     {1086.55f, -18.0885f, 55.4228f},
     {1091.83f, -21.9254f, 55.4241f},
@@ -433,7 +431,7 @@ const Position EngulfingFlamesMelee[] =
     {1086.42f, -96.7812f, 55.4226f},
 };
 
-const Position EngulfingFlamesRange[] =
+Position const EngulfingFlamesRange[] =
 {
     {1052.58f, -120.561f, 55.4561f},
     {1049.73f, -118.396f, 55.5661f},
@@ -472,7 +470,7 @@ const Position EngulfingFlamesRange[] =
     {1035.17f, -125.646f, 55.4471f},
 };
 
-const Position EngulfingFlamesCenter[] =
+Position const EngulfingFlamesCenter[] =
 {
     {1069.66f, -4.5399f,  55.4308f},
     {1062.93f, -4.3420f,  55.5681f},
@@ -493,7 +491,7 @@ const Position EngulfingFlamesCenter[] =
     {1069.91f, -109.651f, 55.4277f},
 };
 
-const Position LavaScionPos[] =
+Position const LavaScionPos[] =
 {
     {1027.306f, -121.7465f, 55.4471f, 1.361f},
     {1026.861f, 5.895833f, 55.44697f, 4.904f},
@@ -573,6 +571,10 @@ public:
             if (Creature* sulfuras = me->FindNearestCreature(NPC_SULFURAS_HAND_OF_RAGNAROS, 100.0f, true))
                 sulfuras->DespawnOrUnsummon(1);
 
+            if (Creature* lava = me->FindNearestCreature(NPC_MAGMA_POOL_TRIGGER, 100.0f, true))
+                if (!lava->HasAura(SPELL_MAGMA_PERIODIC))
+                    lava->CastSpell(lava, SPELL_MAGMA_PERIODIC, true);
+
             me->DespawnOrUnsummon(1);
         }
 
@@ -580,11 +582,21 @@ public:
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             _JustDied();
+            summons.DespawnAll();
 
             if (!IsHeroic())
             {
                 if (Creature* sulfuras = me->FindNearestCreature(NPC_SULFURAS_HAND_OF_RAGNAROS, 100.0f, true))
                     sulfuras->DespawnOrUnsummon(1);
+
+                if (Creature* magma = me->FindNearestCreature(NPC_MAGMA_POOL_TRIGGER, 50.0f, true))
+                    if (GameObject* cache = magma->SummonGameObject(Is25ManRaid() ? GO_CACHE_OF_THE_FIRELORD_HC : GO_CACHE_OF_THE_FIRELORD, CacheOfTheFirelordPos.m_positionX,
+                        CacheOfTheFirelordPos.m_positionY, CacheOfTheFirelordPos.m_positionZ, CacheOfTheFirelordPos.m_orientation, 0, 0, 0, 0, 3000))
+                    {
+                        cache->SetGoState(GO_STATE_READY);
+                        cache->SetPhaseMask(1, true);
+                        cache->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    }
 
                 me->SetHealth(1);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
@@ -592,6 +604,12 @@ public:
                 me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
                 me->DespawnOrUnsummon(6000);
             }
+
+            std::list<Creature*> units;
+            GetCreatureListWithEntryInGrid(units, me, NPC_LAVA_SCION, 500.0f);
+
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->AI()->EnterEvadeMode();
         }
 
         void KilledUnit(Unit* killed)
@@ -612,7 +630,7 @@ public:
             }
         }
 
-        void DamageTaken(Unit* attacker, uint32& damage)
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
             if (me->HealthBelowPct(70) && _submergeCounter == 0)
             {
@@ -633,7 +651,6 @@ public:
                 _submergeCounter++;
                 if (!IsHeroic() && !_encounterDone)
                 {
-                    summons.DespawnAll();
                     me->Kill(me);
                     _encounterDone = true;
                 }
@@ -655,6 +672,11 @@ public:
                         events.ScheduleEvent(EVENT_INTRO, 6750, 0);
                         instance->SetData(DATA_FIRST_RAGNAROS_SUMMON, 0);
                     }
+
+                    if (Creature* lava = me->FindNearestCreature(NPC_MAGMA_POOL_TRIGGER, 100.0f, true))
+                        if (!lava->HasAura(SPELL_MAGMA_PERIODIC))
+                            lava->CastSpell(lava, SPELL_MAGMA_PERIODIC, true);
+
                     me->setActive(true);
                     me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
@@ -750,6 +772,9 @@ public:
                     case EVENT_TALK_TRANSITION:
                         me->RemoveAurasDueToSpell(SPELL_BASE_VISUAL);
                         Talk(SAY_PHASE_TRANSITION);
+                        if (events.IsInPhase(PHASE_SUBMERGE_2))
+                            for (uint8 i = 0; i < 2; i++)
+                                me->SummonCreature(NPC_LAVA_SCION, LavaScionPos[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
                         break;
                     case EVENT_ANNOUNCE_EMERGE:
                         Talk(SAY_ANNOUNCE_EMERGE);
@@ -786,6 +811,7 @@ public:
                             events.SetPhase(PHASE_3);
                             events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 30000);
                             events.ScheduleEvent(EVENT_SULFURAS_SMASH, 16000);
+                            events.ScheduleEvent(EVENT_LIVING_METEOR, 45000);
                         }
                         break;
                     case EVENT_MOLTEN_SEED:
@@ -818,6 +844,7 @@ public:
             me->SetReactState(REACT_PASSIVE);
             me->AttackStop();
             DoCast(me, SPELL_SUBMERGE, true);
+            _killedSons = 0;
 
             switch (side)
             {
@@ -1247,17 +1274,25 @@ class npc_fl_lava_scion : public CreatureScript
             void EnterCombat(Unit* /*victim*/)
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                events.ScheduleEvent(EVENT_BLAZING_HEAT, 12000);
+                events.ScheduleEvent(EVENT_BLAZING_HEAT, urand (10000, 12000));
             }
 
             void JustDied(Unit* /*killer*/)
             {
-                me->DespawnOrUnsummon(5000);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            }
+
+            void EnterEvadeMode()
+            {
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                me->DespawnOrUnsummon(1);
             }
 
             void UpdateAI(uint32 diff)
             {
+                if (!UpdateVictim())
+                    return;
+
                 events.Update(diff);
 
                 while (uint32 eventId = events.ExecuteEvent())
@@ -1296,9 +1331,8 @@ class npc_fl_blazing_heat : public CreatureScript
 
             void IsSummonedBy(Unit* summoner)
             {
-                me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
-                DoCastAOE(SPELL_BLAZING_HEAT_DAMAGE_AURA);
+                if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 150.0f, true))
+                    ragnaros->AI()->JustSummoned(me);
             }
 
             void UpdateAI(uint32 diff)
