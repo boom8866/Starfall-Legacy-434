@@ -7472,44 +7472,44 @@ void Player::RewardOnKill(Unit* victim, float rate)
     if (Map const* map = GetMap())
         if (map->IsNonRaidDungeon())
             if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
-                    if (dungeon->expansion == EXPANSION_CATACLYSM && dungeon->minlevel >= 84)
+                if (dungeon->expansion == EXPANSION_CATACLYSM && dungeon->minlevel >= 84)
+                {
+                    ChampioningFaction = GetChampioningFaction();
+
+                    // Guild Reputation Handling
+                    if (Rew->RepFaction1 == GUILD_FACTION_ID)
                     {
-                        ChampioningFaction = GetChampioningFaction();
+                        if (!victim->ToCreature()->IsDungeonBoss() && !ChampioningFaction)
+                            allowRewardReputation = false;
 
-                        // Guild Reputation Handling
-                        if (Rew->RepFaction1 == GUILD_FACTION_ID)
+                        if (victim->ToCreature()->IsDungeonBoss())
                         {
-                            if (!victim->ToCreature()->IsDungeonBoss() && !ChampioningFaction)
-                                allowRewardReputation = false;
-
-                            if (victim->ToCreature()->IsDungeonBoss())
-                            {
-                                uint32 bonusN = sWorld->getIntConfig(CONFIG_GUILD_REP_NORMAL_DUNGEON_BONUS);
-                                uint32 bonusH = sWorld->getIntConfig(CONFIG_GUILD_REP_HEROIC_DUNGEON_BONUS);
-                                if (Group* group = GetGroup())
-                                    if (Guild* guild = GetGuild())
-                                        if (!group->IsGuildGroup(guild->GetId(), true, true) && !ChampioningFaction)
-                                            allowRewardReputation = false;
-                                        else if (group->IsGuildGroup(guild->GetId(), true, true) && !ChampioningFaction)
-                                        {
-                                            allowRewardReputation = false;
-                                            if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
-                                                RewardGuildReputation(bonusH);
-                                            else
-                                                RewardGuildReputation(bonusN);
-                                        }
-                                        else if (group->IsGuildGroup(guild->GetId(), true, true) && ChampioningFaction)
-                                        {
-                                            if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
-                                                RewardGuildReputation(bonusH);
-                                            else
-                                                RewardGuildReputation(bonusN);
-                                        }
+                            uint32 bonusN = sWorld->getIntConfig(CONFIG_GUILD_REP_NORMAL_DUNGEON_BONUS);
+                            uint32 bonusH = sWorld->getIntConfig(CONFIG_GUILD_REP_HEROIC_DUNGEON_BONUS);
+                            if (Group* group = GetGroup())
+                                if (Guild* guild = GetGuild())
+                                    if (!group->IsGuildGroup(guild->GetId(), true, true) && !ChampioningFaction)
+                                        allowRewardReputation = false;
+                                    else if (group->IsGuildGroup(guild->GetId(), true, true) && !ChampioningFaction)
+                                    {
+                                        allowRewardReputation = false;
+                                        if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
+                                            RewardGuildReputation(bonusH);
                                         else
-                                            allowRewardReputation = false;
-                            }
+                                            RewardGuildReputation(bonusN);
+                                    }
+                                    else if (group->IsGuildGroup(guild->GetId(), true, true) && ChampioningFaction)
+                                    {
+                                        if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
+                                            RewardGuildReputation(bonusH);
+                                        else
+                                            RewardGuildReputation(bonusN);
+                                    }
+                                    else
+                                        allowRewardReputation = false;
                         }
                     }
+                }
 
     if (allowRewardReputation && Rew->RepFaction1 && (!Rew->TeamDependent || team == ALLIANCE))
     {
