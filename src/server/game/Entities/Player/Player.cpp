@@ -7503,22 +7503,18 @@ void Player::RewardOnKill(Unit* victim, float rate)
                             case false:
                                 guildBonus1 = bonusN;
                                 break;
-                            default:
-                                break;
                         }
                     }
                     if (Rew->RepFaction2 == GUILD_FACTION_ID)
                     {
                         switch (GetMap()->IsHeroic())
                         {
-                        case true:
-                            guildBonus2 = bonusH;
-                            break;
-                        case false:
-                            guildBonus2 = bonusN;
-                            break;
-                        default:
-                            break;
+                            case true:
+                                guildBonus2 = bonusH;
+                                break;
+                            case false:
+                                guildBonus2 = bonusN;
+                                break;
                         }
                     }
                     else if (group->IsGuildGroup(guild->GetId(), true, true) && GetChampioningFaction())
