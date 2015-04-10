@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `DamageModifier`=4 WHERE `entry`=25577;

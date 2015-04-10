@@ -1488,6 +1488,13 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
             }
             case 78674: // Starsurge
             {
+                // Solar Energy if eclipse is 0
+                if (!HasAura(67483) && !HasAura(67484) && GetPower(POWER_ECLIPSE) == 0)
+                {
+                    EnergizeBySpell(this, spellProto->Id, 15, POWER_ECLIPSE);
+                    CastSpell(this, 67483, true);
+                }
+
                 if (HasAura(67483))
                     EnergizeBySpell(this, spellProto->Id, 15, POWER_ECLIPSE);
                 if (HasAura(67484))
@@ -9691,6 +9698,24 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         fulmination->RefreshDuration();
                     else
                         CastSpell(this, 95774, true);
+                }
+            }
+            break;
+        }
+        // Strength of Soul
+        case 89490:
+        {
+            if (procSpell->Id == 2050 || procSpell->Id == 2060 || procSpell->Id == 2061)
+            {
+                if (victim && victim->HasAura(6788))
+                {
+                    uint32 newCooldownDelay = victim->GetAura(6788)->GetDuration();
+                    if (newCooldownDelay <= uint32((triggeredByAura->GetSpellInfo()->Effects[0].BasePoints) * 1000))
+                         newCooldownDelay = 0;
+                    else
+                        newCooldownDelay -= ((triggeredByAura->GetSpellInfo()->Effects[0].BasePoints) * 1000);
+
+                    victim->GetAura(6788)->SetDuration(newCooldownDelay, true);
                 }
             }
             break;
