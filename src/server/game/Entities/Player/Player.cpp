@@ -7505,8 +7505,6 @@ void Player::RewardOnKill(Unit* victim, float rate)
                                         else
                                             RewardGuildReputation(bonusN);
                                     }
-                                    else
-                                        allowRewardReputation = false;
                         }
                     }
                 }
