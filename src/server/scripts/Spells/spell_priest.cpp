@@ -1709,49 +1709,6 @@ public:
     }
 };
 
-// 89490 Strength of Soul
-class spell_pri_strength_of_soul : public SpellScriptLoader
-{
-    public:
-        spell_pri_strength_of_soul() : SpellScriptLoader("spell_pri_strength_of_soul") { }
-
-        class spell_pri_strength_of_soul_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pri_strength_of_soul_SpellScript);
-
-            void HandleEffectScriptEffect(SpellEffIndex /*effIndex*/)
-            {
-                if (Unit* caster = GetOriginalCaster())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (Aura* aura = target->GetAura(SPELL_PRIEST_WEAKENED_SOUl, caster->GetGUID()))
-                        {
-                            if (AuraEffect const* auraEffect = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_PRIEST, PRIEST_ICON_ID_STRENGTH_OF_SOUL, EFFECT_0))
-                            {
-                                int32 const reduce = auraEffect->GetAmount() * 1000;
-                                if (aura->GetDuration() < reduce)
-                                    aura->Remove();
-                                else
-                                    aura->SetDuration(aura->GetDuration() - reduce);
-                            }
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_pri_strength_of_soul_SpellScript::HandleEffectScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_pri_strength_of_soul_SpellScript;
-        }
-};
-
 // 586 - Fade
 class spell_pri_fade : public SpellScriptLoader
 {
@@ -2049,7 +2006,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_spirit_of_redemption_kill();
     new spell_pri_atonement();
     new spell_pri_atonement_heal();
-    new spell_pri_strength_of_soul();
     new spell_pri_fade();
     new spell_pri_holy_fire();
     new spell_pri_mass_dispel();

@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `faction`=1862 WHERE `entry` IN (23067, 23066, 23068, 21651, 21787, 21763);

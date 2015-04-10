@@ -561,8 +561,10 @@ inline void KillRewarder::_RewardHonor(Player* player)
                 player->CompletedAchievement(bBerserker);
         }
 
+        /*
         if (player->IsHonorRewardAllowed(_victim))
             player->RewardGuildReputation(std::max<uint32>(1, _count / 20));
+            */
     }
 }
 
@@ -643,10 +645,12 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
             _RewardOnKill(player, isDungeon ? 1.0f : rate);
             _RewardKillCredit(player);
 
+            /*
             // Reward Guild reputation
             if (player->GetGuildId() && _victim->GetTypeId() == TYPEID_UNIT && _victim->ToCreature()->IsDungeonBoss()
                 && player->GetGroup() && player->GetGroup()->IsGuildGroup(player->GetGuildId()))
                     player->RewardGuildReputation(std::max<uint32>(1, _xp / 450));
+            */
         }
     }
 }
@@ -7403,7 +7407,10 @@ int32 Player::CalculateReputationGain(ReputationSource source, uint32 creatureOr
 
     // faction specific auras only seem to apply to kills
     if (source == REPUTATION_SOURCE_KILL)
+    {
         repMod += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_FACTION_REPUTATION_GAIN, faction);
+        repMod += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_GUILD_REPUTATION_GAIN_PCT, faction);
+    }
 
     percent += rep > 0 ? repMod : -repMod;
 
@@ -7484,28 +7491,53 @@ void Player::RewardOnKill(Unit* victim, float rate)
     if (!Rew)
         return;
 
-    uint32 ChampioningFaction = 0;
-
-    if (GetChampioningFaction())
-    {
-        // support for: Championing - http://www.wowwiki.com/Championing
-        Map const* map = GetMap();
-        if (map && map->IsNonRaidDungeon())
-            if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
-                if (dungeon->reclevel == 85)
-                    ChampioningFaction = GetChampioningFaction();
-    }
-
     uint32 team = GetTeam();
 
-    // Skip Guild rep from championing if we are in a guild group
-    if (Rew->RepFaction1 == 1168 || Rew->RepFaction2 == 1168)
-    {
-        if (GetGroup() && GetGroup()->IsGuildGroup(GetGuildId()))
-            ChampioningFaction = 0;
-    }
+    uint32 ChampioningFaction = 0;
+    bool allowRewardReputation = true;
 
-    if (Rew->RepFaction1 && (!Rew->TeamDependent || team == ALLIANCE))
+    // Championing
+    if (Map const* map = GetMap())
+        if (map->IsNonRaidDungeon())
+            if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
+                if (dungeon->expansion == EXPANSION_CATACLYSM && dungeon->minlevel >= 84)
+                {
+                    ChampioningFaction = GetChampioningFaction();
+
+                    // Guild Reputation Handling
+                    if (Rew->RepFaction1 == GUILD_FACTION_ID)
+                    {
+                        if (!victim->ToCreature()->IsDungeonBoss() && !ChampioningFaction)
+                            allowRewardReputation = false;
+
+                        if (victim->ToCreature()->IsDungeonBoss())
+                        {
+                            uint32 bonusN = sWorld->getIntConfig(CONFIG_GUILD_REP_NORMAL_DUNGEON_BONUS);
+                            uint32 bonusH = sWorld->getIntConfig(CONFIG_GUILD_REP_HEROIC_DUNGEON_BONUS);
+                            if (Group* group = GetGroup())
+                                if (Guild* guild = GetGuild())
+                                    if (!group->IsGuildGroup(guild->GetId(), true, true) && !ChampioningFaction)
+                                        allowRewardReputation = false;
+                                    else if (group->IsGuildGroup(guild->GetId(), true, true) && !ChampioningFaction)
+                                    {
+                                        allowRewardReputation = false;
+                                        if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
+                                            RewardGuildReputation(bonusH);
+                                        else
+                                            RewardGuildReputation(bonusN);
+                                    }
+                                    else if (group->IsGuildGroup(guild->GetId(), true, true) && ChampioningFaction)
+                                    {
+                                        if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
+                                            RewardGuildReputation(bonusH);
+                                        else
+                                            RewardGuildReputation(bonusN);
+                                    }
+                        }
+                    }
+                }
+
+    if (allowRewardReputation && Rew->RepFaction1 && (!Rew->TeamDependent || team == ALLIANCE))
     {
         int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rew->RepValue1, ChampioningFaction ? ChampioningFaction : Rew->RepFaction1);
         donerep1 = int32(donerep1 * rate);
@@ -7516,7 +7548,7 @@ void Player::RewardOnKill(Unit* victim, float rate)
             GetReputationMgr().ModifyReputation(factionEntry1, donerep1);
     }
 
-    if (Rew->RepFaction2 && (!Rew->TeamDependent || team == HORDE))
+    if (allowRewardReputation && Rew->RepFaction2 && (!Rew->TeamDependent || team == HORDE))
     {
         int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rew->RepValue2, ChampioningFaction ? ChampioningFaction : Rew->RepFaction2);
         donerep2 = int32(donerep2 * rate);

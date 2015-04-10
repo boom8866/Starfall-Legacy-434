@@ -1286,6 +1286,10 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_ANTICHEAT_GMLEVEL] = ConfigMgr::GetIntDefault("Anticheat.GmLevel", SEC_VIP);
     m_int_configs[CONFIG_ANTICHEAT_DELETE_LOGS] = ConfigMgr::GetIntDefault("Anticheat.DeleteOldLogsInDays", 7);
 
+    // Guild Reputation Bonus
+    m_int_configs[CONFIG_GUILD_REP_NORMAL_DUNGEON_BONUS] = ConfigMgr::GetIntDefault("AdditionalGuildReputationNormal", 50);
+    m_int_configs[CONFIG_GUILD_REP_HEROIC_DUNGEON_BONUS] = ConfigMgr::GetIntDefault("AdditionalGuildReputationHeroic", 80);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

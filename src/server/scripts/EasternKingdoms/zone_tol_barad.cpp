@@ -950,7 +950,7 @@ public:
         }
         if (player->GetQuestStatus(QUEST_WALK_A_MILE_IN_THEIR_SHOES_A) == QUEST_STATUS_INCOMPLETE)
         {
-            player->CastSpell(creature, 90358);
+            player->CastSpell(creature, 92141);
             creature->DespawnOrUnsummon(1);
             return true;
         }

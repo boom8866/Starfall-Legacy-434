@@ -950,6 +950,22 @@ Guild.BankEventLogRecordsCount = 25
 Guild.NewsLogRecordsCount = 250
 
 #
+#    AdditionalGuildReputationNormal
+#        Description: Amount of additional guild reputation gained on killing a dungeon boss while
+#                     while in a guild group and no championing for normal mode Cataclysm dungeons
+#        Default:     50
+
+AdditionalGuildReputationNormal = 50
+
+#
+#    AdditionalGuildReputationHeroic
+#        Description: Amount of additional guild reputation gained on killing a dungeon boss while
+#                     while in a guild group and no championing for heroic mode Cataclysm dungeons
+#        Default:     50
+
+AdditionalGuildReputationHeroic = 80
+
+#
 #    MaxPrimaryTradeSkill
 #        Description: Maximum number of primary professions a character can learn.
 #        Range:       0-10

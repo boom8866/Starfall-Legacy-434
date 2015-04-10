@@ -1,0 +1,1 @@
+DELETE FROM `spell_script_names` WHERE `spell_id`=89490 AND `ScriptName`='spell_pri_strength_of_soul';

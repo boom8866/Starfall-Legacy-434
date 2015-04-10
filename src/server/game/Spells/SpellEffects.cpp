@@ -1147,6 +1147,19 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 }
                 break;
             }
+            case SPELLFAMILY_SHAMAN:
+            {
+                // Searing Bolt (Totem)
+                if (m_spellInfo->Id == 3606)
+                {
+                    if (m_caster->GetCharmerOrOwner())
+                    {
+                        float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
+                        damage += int32((spellpower * 0.167f));
+                    }
+                }
+                break;
+            }
             case SPELLFAMILY_MAGE:
             {
                 switch (m_spellInfo->Id)
@@ -2297,6 +2310,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
         return;
 
     ASSERT(unitTarget == m_spellAura->GetOwner());
+
     m_spellAura->_ApplyEffectForTargets(effIndex);
 
     switch (m_spellInfo->GetEffectMechanic(effIndex))
@@ -2328,6 +2342,10 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
     {
         case SPELLFAMILY_GENERIC:
         {
+            // Food buffs cannot stack!
+            if (m_spellInfo->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)
+                m_caster->RemoveFoodBuffAurasWithExclusion(m_spellInfo->Id);
+
             switch (m_spellAura->GetId())
             {
                 case 77487: // Shadow Orb

@@ -97,17 +97,14 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Shattered Barrier
             else if (spellproto->SpellVisual[0] == 12297)
                 return DIMINISHING_ROOT;
-            // Deep Freeze
-            else if (spellproto->SpellIconID == 2939 && spellproto->SpellVisual[0] == 9963)
-                return DIMINISHING_CONTROLLED_STUN;
             // Frost Nova / Freeze (Water Elemental)
             else if (spellproto->SpellIconID == 193)
                 return DIMINISHING_CONTROLLED_ROOT;
             // Dragon's Breath
             else if (spellproto->SpellFamilyFlags[0] & 0x800000)
                 return DIMINISHING_DRAGONS_BREATH;
-            // Ring of Frost and Deep Freeze
-            else if (spellproto->Id == 82691 || spellproto->Id == 44572)
+            // Ring of Frost, Deep Freeze and Polymorph
+            else if (spellproto->Id == 82691 || spellproto->Id == 44572 || spellproto->Id == 118)
                 return DIMINISHING_CONTROLLED_STUN;
             // Dragon's Breath
             else if (spellproto->Id == 31661)
@@ -4001,6 +3998,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 72072: // Place Territorial Fetish
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(9);
                 break;
+            case 97340: // Guild Champion
+            case 97341:
+                spellInfo->Effects[EFFECT_0].MiscValue = 1168;
+                break;
             case 66600: // Rolling with my Homies: Summon Izzy
             case 66597: // Rolling with my Homies: Summon Ace
             case 66599: // Rolling with my Homies: Summon Gobber
@@ -4197,7 +4198,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(29);
                 break;
             case 81781: // Power Word: Barrier
-                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
                 break;
             case 89485: // Inner Focus
                 spellInfo->ProcCharges = 1;

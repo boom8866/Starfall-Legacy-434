@@ -2521,11 +2521,18 @@ public:
                 case CLASS_HUNTER:
                     possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_AGI);
                     break;
-                case CLASS_DRUID:
                 case CLASS_PALADIN:
                     possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_INT);
                     possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_STR);
                     break;
+                case CLASS_DRUID:
+                {
+                    if (caster->HasSpell(84735))
+                        possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_AGI);
+                    else
+                        possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_INT);
+                    break;
+                }
                 case CLASS_SHAMAN:
                     possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_INT);
                     possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_AGI);
