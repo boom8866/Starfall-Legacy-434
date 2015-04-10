@@ -1432,6 +1432,9 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
         {
             case 2912:  // Starfire
             {
+                if (HasAura(67484))
+                    break;
+
                 int32 energizeAmount = 20;
                 // Euphoria
                 if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, EFFECT_0))
@@ -1444,11 +1447,26 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
                 }
                 // Only in Balance spec
                 if (HasSpell(78674) && !HasAura(48517) && solarEnabled == false)
+                {
                     EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
+                    // Marker
+                    if (!HasAura(67483))
+                        CastSpell(this, 67483, true);
+                }
+
+                if (GetPower(POWER_ECLIPSE) >= 100)
+                {
+                    RemoveAurasDueToSpell(67483);
+                    CastSpell(this, 67484, true);
+                    CastSpell(this, 48517, true);
+                }
                 break;
             }
             case 5176:  // Wrath
             {
+                if (HasAura(67483))
+                    break;
+
                 int32 energizeAmount = -13;
                 // Euphoria
                 if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, EFFECT_0))
@@ -1461,7 +1479,12 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
                 }
                 // Only in Balance spec
                 if (HasSpell(78674) && !HasAura(48518) && lunarEnabled == false)
+                {
                     EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
+                    // Marker
+                    if (!HasAura(67484))
+                        CastSpell(this, 67484, true);
+                }
 
                 if (GetPower(POWER_ECLIPSE) <= -100)
                 {
@@ -1488,6 +1511,10 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
             }
             case 78674: // Starsurge
             {
+                // Point to Solar if power is 0
+                if (GetPower(POWER_ECLIPSE) == 0)
+                    CastSpell(this, 67483, true);
+
                 if (HasAura(67483))
                     EnergizeBySpell(this, spellProto->Id, 15, POWER_ECLIPSE);
                 if (HasAura(67484))
@@ -4190,6 +4217,18 @@ void Unit::RemoveAurasWithAttribute(uint32 flags)
     {
         SpellInfo const* spell = iter->second->GetBase()->GetSpellInfo();
         if (spell->Attributes & flags)
+            RemoveAura(iter);
+        else
+            ++iter;
+    }
+}
+
+void Unit::RemoveFoodBuffAurasWithExclusion(uint32 excludeSpellId)
+{
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    {
+        SpellInfo const* spell = iter->second->GetBase()->GetSpellInfo();
+        if (spell->Id != excludeSpellId && spell->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)
             RemoveAura(iter);
         else
             ++iter;
@@ -9346,6 +9385,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        // Wide Swipe
+        case 6750:
+        {
+            if (GetTypeId() == TYPEID_PLAYER)
+                return false;
+            break;
+        }
         // Battle Trance
         case 12322:
         case 85741:
@@ -9691,6 +9737,24 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         fulmination->RefreshDuration();
                     else
                         CastSpell(this, 95774, true);
+                }
+            }
+            break;
+        }
+        // Strength of Soul
+        case 89490:
+        {
+            if (procSpell->Id == 2050 || procSpell->Id == 2060 || procSpell->Id == 2061)
+            {
+                if (victim && victim->HasAura(6788))
+                {
+                    uint32 newCooldownDelay = victim->GetAura(6788)->GetDuration();
+                    if (newCooldownDelay <= uint32((triggeredByAura->GetSpellInfo()->Effects[0].BasePoints) * 1000))
+                         newCooldownDelay = 0;
+                    else
+                        newCooldownDelay -= ((triggeredByAura->GetSpellInfo()->Effects[0].BasePoints) * 1000);
+
+                    victim->GetAura(6788)->SetDuration(newCooldownDelay, true);
                 }
             }
             break;
@@ -14796,21 +14860,6 @@ int32 Unit::ModSpellDuration(SpellInfo const* spellProto, Unit const* target, in
         }
     }
 
-    // Glyphs which increase duration of selfcasted buffs
-    if (target == this)
-    {
-        switch (spellProto->SpellFamilyName)
-        {
-            case SPELLFAMILY_DRUID:
-                if (spellProto->SpellFamilyFlags[0] & 0x100)
-                {
-                    // Glyph of Thorns
-                    if (AuraEffect* aurEff = GetAuraEffect(57862, 0))
-                        duration += aurEff->GetAmount() * MINUTE * IN_MILLISECONDS;
-                }
-                break;
-        }
-    }
     return std::max(duration, 0);
 }
 

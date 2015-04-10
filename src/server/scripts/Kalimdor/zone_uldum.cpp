@@ -621,7 +621,6 @@ public:
                         events.CancelEvent(EVENT_TELEPORT_CAMERA);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
-                            playerOwner->AddAura(49416, playerOwner);
                             playerOwner->SummonCreature(NPC_ENTRY_AMBUSHERS, -11004.76f, -1273.58f, 13.81f, 5.07f, TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                             playerOwner->SummonCreature(NPC_ENTRY_AMBUSHERS, -11009.67f, -1275.45f, 13.90f, 5.07f, TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                         }
