@@ -7469,7 +7469,6 @@ void Player::RewardOnKill(Unit* victim, float rate)
     if (Map const* map = GetMap())
         if (map->IsNonRaidDungeon())
             if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
-                if (GetChampioningFaction())
                     if (dungeon->expansion == EXPANSION_CATACLYSM && dungeon->minlevel >= 84)
                     {
                         ChampioningFaction = GetChampioningFaction();
@@ -7486,9 +7485,9 @@ void Player::RewardOnKill(Unit* victim, float rate)
                                 uint32 bonusH = sWorld->getIntConfig(CONFIG_GUILD_REP_HEROIC_DUNGEON_BONUS);
                                 if (Group* group = GetGroup())
                                     if (Guild* guild = GetGuild())
-                                        if (!group->IsGuildGroup(guild->GetId(), true, true) && !GetChampioningFaction())
+                                        if (!group->IsGuildGroup(guild->GetId(), true, true) && !ChampioningFaction)
                                             allowRewardReputation = false;
-                                        else if (group->IsGuildGroup(guild->GetId(), true, true) && !GetChampioningFaction())
+                                        else if (group->IsGuildGroup(guild->GetId(), true, true) && !ChampioningFaction)
                                         {
                                             allowRewardReputation = false;
                                             if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
@@ -7496,7 +7495,7 @@ void Player::RewardOnKill(Unit* victim, float rate)
                                             else
                                                 RewardGuildReputation(bonusN);
                                         }
-                                        else if (group->IsGuildGroup(guild->GetId(), true, true) && GetChampioningFaction())
+                                        else if (group->IsGuildGroup(guild->GetId(), true, true) && ChampioningFaction)
                                         {
                                             if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
                                                 RewardGuildReputation(bonusH);
