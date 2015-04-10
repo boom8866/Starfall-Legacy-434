@@ -1432,6 +1432,9 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
         {
             case 2912:  // Starfire
             {
+                if (HasAura(67484))
+                    break;
+
                 int32 energizeAmount = 20;
                 // Euphoria
                 if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, EFFECT_0))
@@ -1443,12 +1446,27 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
                     }
                 }
                 // Only in Balance spec
-                if (HasSpell(78674) && !HasAura(48517) && solarEnabled == false)
+                if (HasSpell(78674) && !HasAura(48518) && solarEnabled == false)
+                {
                     EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
+                    // Marker
+                    if (!HasAura(67483))
+                        CastSpell(this, 67483, true);
+                }
+
+                if (GetPower(POWER_ECLIPSE) >= 100)
+                {
+                    RemoveAurasDueToSpell(67483);
+                    CastSpell(this, 67484, true);
+                    CastSpell(this, 48517, true);
+                }
                 break;
             }
             case 5176:  // Wrath
             {
+                if (HasAura(67483))
+                    break;
+
                 int32 energizeAmount = -13;
                 // Euphoria
                 if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, EFFECT_0))
@@ -1460,8 +1478,13 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
                     }
                 }
                 // Only in Balance spec
-                if (HasSpell(78674) && !HasAura(48518) && lunarEnabled == false)
+                if (HasSpell(78674) && !HasAura(48517) && lunarEnabled == false)
+                {
                     EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
+                    // Marker
+                    if (!HasAura(67484))
+                        CastSpell(this, 67484, true);
+                }
 
                 if (GetPower(POWER_ECLIPSE) <= -100)
                 {
@@ -1488,12 +1511,9 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
             }
             case 78674: // Starsurge
             {
-                // Solar Energy if eclipse is 0
-                if (!HasAura(67483) && !HasAura(67484) && GetPower(POWER_ECLIPSE) == 0)
-                {
-                    EnergizeBySpell(this, spellProto->Id, 15, POWER_ECLIPSE);
+                // Point to Solar if power is 0
+                if (GetPower(POWER_ECLIPSE) == 0)
                     CastSpell(this, 67483, true);
-                }
 
                 if (HasAura(67483))
                     EnergizeBySpell(this, spellProto->Id, 15, POWER_ECLIPSE);
@@ -9350,6 +9370,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 
             // Avoid crash from explosive trap
             if (procSpell && procSpell->Id == 13812)
+                return false;
+            break;
+        }
+        // Wide Swipe
+        case 6750:
+        {
+            if (GetTypeId() == TYPEID_PLAYER)
                 return false;
             break;
         }
