@@ -7475,7 +7475,7 @@ void Player::RewardOnKill(Unit* victim, float rate)
                         ChampioningFaction = GetChampioningFaction();
 
                         // Guild Reputation have an additional bonus
-                        if (map->IsHeroic() && !ChampioningFaction)
+                        if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC && !ChampioningFaction)
                             if (Rew->RepFaction1 == GUILD_FACTION_ID)
                                 guildBonus1 = sWorld->getIntConfig(CONFIG_GUILD_REP_HEROIC_DUNGEON_BONUS);
                             else if (Rew->RepFaction2 == GUILD_FACTION_ID)
