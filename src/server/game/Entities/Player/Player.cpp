@@ -7470,7 +7470,7 @@ void Player::RewardOnKill(Unit* victim, float rate)
         if (map->IsNonRaidDungeon())
             if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
                 if (GetChampioningFaction())
-                    if (dungeon->expansion == EXPANSION_CATACLYSM)
+                    if (dungeon->expansion == EXPANSION_CATACLYSM && dungeon->minlevel >= 84)
                     {
                         ChampioningFaction = GetChampioningFaction();
 
@@ -7479,7 +7479,8 @@ void Player::RewardOnKill(Unit* victim, float rate)
                         {
                             if (!victim->ToCreature()->IsDungeonBoss() && !ChampioningFaction)
                                 allowRewardReputation = false;
-                            else if (victim->ToCreature()->IsDungeonBoss())
+
+                            if (victim->ToCreature()->IsDungeonBoss())
                             {
                                 uint32 bonusN = sWorld->getIntConfig(CONFIG_GUILD_REP_NORMAL_DUNGEON_BONUS);
                                 uint32 bonusH = sWorld->getIntConfig(CONFIG_GUILD_REP_HEROIC_DUNGEON_BONUS);
@@ -7501,7 +7502,9 @@ void Player::RewardOnKill(Unit* victim, float rate)
                                                 RewardGuildReputation(bonusH);
                                             else
                                                 RewardGuildReputation(bonusN);
-                                        }       
+                                        }
+                                        else
+                                            allowRewardReputation = false;
                             }
                         }
                     }
