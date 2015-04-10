@@ -7466,21 +7466,12 @@ void Player::RewardOnKill(Unit* victim, float rate)
     uint8 guildBonus2 = 0;
 
     // Championing
-    if (GetChampioningFaction())
-        if (Map const* map = GetMap())
-            if (map->IsNonRaidDungeon())
-                if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
+    if (Map const* map = GetMap())
+        if (map->IsNonRaidDungeon())
+            if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
+                if (GetChampioningFaction())
                     if (dungeon->expansion == EXPANSION_CATACLYSM)
-                    {
                         ChampioningFaction = GetChampioningFaction();
-
-                        // Guild Reputation have an additional bonus
-                        if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC && !ChampioningFaction)
-                            if (Rew->RepFaction1 == GUILD_FACTION_ID)
-                                guildBonus1 = sWorld->getIntConfig(CONFIG_GUILD_REP_HEROIC_DUNGEON_BONUS);
-                            else if (Rew->RepFaction2 == GUILD_FACTION_ID)
-                                guildBonus2 = sWorld->getIntConfig(CONFIG_GUILD_REP_NORMAL_DUNGEON_BONUS);
-                    }
 
     uint32 team = GetTeam();
 
@@ -7497,6 +7488,35 @@ void Player::RewardOnKill(Unit* victim, float rate)
             if (Guild* guild = GetGuild())
                 if (!group->IsGuildGroup(guild->GetId(), true, true) && !GetChampioningFaction())
                     allowRewardReputation = false;
+                else if (group->IsGuildGroup(guild->GetId(), true, true) && !GetChampioningFaction())
+                {
+                    uint32 bonusN = sWorld->getIntConfig(CONFIG_GUILD_REP_NORMAL_DUNGEON_BONUS);
+                    uint32 bonusH = sWorld->getIntConfig(CONFIG_GUILD_REP_HEROIC_DUNGEON_BONUS);
+                    if (Rew->RepFaction1 == GUILD_FACTION_ID)
+                    {
+                        switch (GetMap()->IsHeroic())
+                        {
+                            case true:
+                                guildBonus1 = bonusH;
+                                break;
+                            case false:
+                                guildBonus1 = bonusN;
+                                break;
+                            }
+                        }
+                    if (Rew->RepFaction2 == GUILD_FACTION_ID)
+                    {
+                        switch (GetMap()->IsHeroic())
+                        {
+                            case true:
+                               guildBonus2 = bonusH;
+                                break;
+                            case false:
+                                guildBonus2 = bonusN;
+                            break;
+                        }
+                    }
+                }
 
     if (allowRewardReputation && Rew->RepFaction1 && (!Rew->TeamDependent || team == ALLIANCE))
     {
