@@ -821,6 +821,15 @@ class spell_mage_ignite : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
+                if (Unit* procTarget = eventInfo.GetProcTarget())
+                {
+                    if (Aura* ignite = procTarget->GetAura(SPELL_MAGE_IGNITE, eventInfo.GetDamageInfo()->GetAttacker()->GetGUID()))
+                    {
+                        if (ignite->GetDuration() > (ignite->GetMaxDuration() / 2))
+                            storedAmount += int32(ignite->GetEffect(EFFECT_0)->GetAmount());
+                        durationUpdated = true;
+                    }
+                }
                 return eventInfo.GetProcTarget();
             }
 
@@ -854,11 +863,29 @@ class spell_mage_ignite : public SpellScriptLoader
                 if (SpellInfo const* igniteDot = sSpellMgr->GetSpellInfo(SPELL_MAGE_IGNITE))
                 {
                     int32 amount = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), pct) / igniteDot->GetMaxTicks());
+                    if (storedAmount != 0)
+                        amount += storedAmount;
+
                     if (Unit* procTarget = eventInfo.GetProcTarget())
                     {
                         if (Unit* target = GetTarget())
+                        {
                             target->CastCustomSpell(SPELL_MAGE_IGNITE, SPELLVALUE_BASE_POINT0, amount, eventInfo.GetProcTarget(), true, NULL, aurEff);
+                            // Check for existant aura and update the duration to 6 seconds
+                            if (Aura* igniteAura = eventInfo.GetProcTarget()->GetAura(SPELL_MAGE_IGNITE, GetCaster()->GetGUID()))
+                            {
+                                if (durationUpdated)
+                                {
+                                    igniteAura->SetMaxDuration(6 * IN_MILLISECONDS);
+                                    igniteAura->SetDuration(6 * IN_MILLISECONDS);
+                                }
+                            }
+                        }
                     }
+
+                    // Cleanup
+                    storedAmount = 0;
+                    durationUpdated = false;
                 }
             }
 
@@ -867,6 +894,10 @@ class spell_mage_ignite : public SpellScriptLoader
                 DoCheckProc += AuraCheckProcFn(spell_mage_ignite_AuraScript::CheckProc);
                 OnEffectProc += AuraEffectProcFn(spell_mage_ignite_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
             }
+
+        protected:
+            int32 storedAmount;
+            bool durationUpdated;
         };
 
         AuraScript* GetAuraScript() const

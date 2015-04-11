@@ -4032,9 +4032,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 79684: // Arcane Missiles Proc
                 spellInfo->ProcChance = 40.0f;
                 break;
-            case 12654: // Ignite
-                spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
-                break;
             case 5143: // Arcane Missiles
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                 break;
