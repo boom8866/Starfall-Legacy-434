@@ -706,7 +706,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
         if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
         {
             // Exclude first tick or deadly poison triggering (Exclude PvE things to prevent problems with bosses)
-            if (m_tickNumber > 0 || m_spellInfo->Id == 2818 || m_spellInfo->Id == 12654 || m_spellInfo->SpellFamilyName == SPELLFAMILY_GENERIC)
+            if (m_tickNumber > 0 || m_spellInfo->Id == 2818 || m_spellInfo->SpellFamilyName == SPELLFAMILY_GENERIC)
                 return;
         }
 
@@ -6986,7 +6986,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         if (caster->GetTypeId() == TYPEID_PLAYER)
         {
             // Mastery: Flashburn
-            if (caster->HasAura(76595) && GetSpellInfo()->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
+            if (caster->HasAura(76595) && GetSpellInfo()->SchoolMask == SPELL_SCHOOL_MASK_FIRE && GetSpellInfo()->Id != 83853)
             {
                 float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                 damage += damage * (0.220f + (0.0280f * masteryPoints));

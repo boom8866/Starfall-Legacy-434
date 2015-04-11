@@ -1263,10 +1263,8 @@ public:
 
                             (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             (*itr)->SetWalk(true);
-                            (*itr)->ToCreature()->AddThreat(target, 100000.0f);
                             (*itr)->ToCreature()->Attack(target, false);
-                            (*itr)->AddThreat(target, 10000.0f);
-                            (*itr)->GetMotionMaster()->Clear();
+                            (*itr)->GetMotionMaster()->MovementExpired(false);
                             (*itr)->GetMotionMaster()->MoveChase(target, 1.0f, 0.0f);
                         }
                     }
