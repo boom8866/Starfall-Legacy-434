@@ -821,13 +821,18 @@ class spell_mage_ignite : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
+                storedAmount = 0;
+                durationUpdated = false;
+
                 if (Unit* procTarget = eventInfo.GetProcTarget())
                 {
                     if (Aura* ignite = procTarget->GetAura(SPELL_MAGE_IGNITE, eventInfo.GetDamageInfo()->GetAttacker()->GetGUID()))
                     {
                         if (ignite->GetDuration() > (ignite->GetMaxDuration() / 2))
-                            storedAmount += int32(ignite->GetEffect(EFFECT_0)->GetAmount());
-                        durationUpdated = true;
+                            storedAmount += uint32(ignite->GetEffect(EFFECT_0)->GetAmount());
+
+                        if (ignite->GetEffect(EFFECT_0)->GetTickNumber() > 0)
+                            durationUpdated = true;
                     }
                 }
                 return eventInfo.GetProcTarget();
@@ -836,7 +841,7 @@ class spell_mage_ignite : public SpellScriptLoader
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
-                int32 pct = 13;
+                uint32 pct = 13;
 
                 // Spells exclusions
                 if (eventInfo.GetDamageInfo() && eventInfo.GetDamageInfo()->GetSpellInfo())
@@ -862,8 +867,8 @@ class spell_mage_ignite : public SpellScriptLoader
 
                 if (SpellInfo const* igniteDot = sSpellMgr->GetSpellInfo(SPELL_MAGE_IGNITE))
                 {
-                    int32 amount = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), pct) / igniteDot->GetMaxTicks());
-                    if (storedAmount != 0)
+                    uint32 amount = uint32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), pct) / (durationUpdated ? 3 : 2));
+                    if (storedAmount > 0)
                         amount += storedAmount;
 
                     if (Unit* procTarget = eventInfo.GetProcTarget())
@@ -896,7 +901,7 @@ class spell_mage_ignite : public SpellScriptLoader
             }
 
         protected:
-            int32 storedAmount;
+            uint32 storedAmount;
             bool durationUpdated;
         };
 

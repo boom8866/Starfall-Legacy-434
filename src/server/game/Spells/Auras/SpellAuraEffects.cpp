@@ -6986,7 +6986,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         if (caster->GetTypeId() == TYPEID_PLAYER)
         {
             // Mastery: Flashburn
-            if (caster->HasAura(76595) && GetSpellInfo()->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
+            if (caster->HasAura(76595) && GetSpellInfo()->SchoolMask == SPELL_SCHOOL_MASK_FIRE && GetSpellInfo()->Id != 83853)
             {
                 float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                 damage += damage * (0.220f + (0.0280f * masteryPoints));
