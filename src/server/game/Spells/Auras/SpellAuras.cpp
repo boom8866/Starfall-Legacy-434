@@ -1940,7 +1940,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             }
                         }
 
-                        if (player->m_pyromaniacCount > 2)
+                        if (apply && player->m_pyromaniacCount > 2)
                         {
                             if (AuraEffect const* aurEff = player->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, 2128, EFFECT_0))
                             {
@@ -1948,10 +1948,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 player->CastCustomSpell(player, 83582, &bp, NULL, NULL, true);
                             }
                             if (Aura* pyromaniac = player->GetAura(83582, player->GetGUID()))
-                                pyromaniac->SetDuration(15*IN_MILLISECONDS);
+                                pyromaniac->SetDuration(15 * IN_MILLISECONDS);
                         }
 
-                        if (player->m_pyromaniacCount <= 2)
+                        if (!apply && player->m_pyromaniacCount <= 2)
                             player->RemoveAurasDueToSpell(83582);
                     }
                 }
