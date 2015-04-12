@@ -1385,9 +1385,29 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
                 }
             }
         }
+
+        // Mastery Feral rehandling
+        if (GetMiscValue() == FORM_CAT || GetMiscValue() == FORM_BEAR)
+        {
+            if (target->HasAura(86470))
+            {
+                target->RemoveAurasDueToSpell(86470);
+                target->CastSpell(target, 86470, true);
+            }
+        }
     }
     else
     {
+        // Mastery Feral rehandling
+        if (GetMiscValue() == FORM_CAT || GetMiscValue() == FORM_BEAR)
+        {
+            if (target->HasAura(86470))
+            {
+                target->RemoveAurasDueToSpell(86470);
+                target->CastSpell(target, 86470, true);
+            }
+        }
+
         if (spellId)
             target->RemoveOwnedAura(spellId, target->GetGUID());
         if (spellId2)

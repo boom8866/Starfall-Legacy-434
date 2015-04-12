@@ -505,9 +505,6 @@ void Player::UpdateBlockPercentage()
         // Increase from rating
         value += GetRatingBonusValue(CR_BLOCK);
         value = value < 0.0f ? 0.0f : value;
-        // Mastery: Divine Bulwark
-        if (AuraEffect* aurEff = GetAuraEffect(76671, EFFECT_1))
-            AddPct(value, aurEff->GetAmount());
     }
     SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, value);
 }
