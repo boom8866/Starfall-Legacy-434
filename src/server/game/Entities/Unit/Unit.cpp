@@ -7007,34 +7007,37 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 // Ancient Healer
                 case 86674:
                 {
-                    int32 bp0 = damage;
-                    int32 bp1 = bp0 * 0.10f;
+                    int32 bp0 = damage * 0.8568;
+                    int32 bp1 = CalculatePct(bp0, 10);
 
-                    if (!bp0 || !bp1)
+                    if (!bp0 || !bp1 || !victim)
                         return false;
 
                     if (GetTypeId() == TYPEID_PLAYER)
                     {
                         std::list<Unit*> targets;
-                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(this, this, 80.0f);
+                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(this, this, 45.0f);
                         Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, targets, u_check);
-                        VisitNearbyObject(80.0f, searcher);
+                        VisitNearbyObject(45.0f, searcher);
                         for (std::list<Unit*>::const_iterator guardian = targets.begin(); guardian != targets.end(); ++guardian)
                         {
                             if ((*guardian) && (*guardian)->GetTypeId() == TYPEID_UNIT && (*guardian)->GetEntry() == 46499 &&
                                 (*guardian)->ToTempSummon() && (*guardian)->ToTempSummon()->GetSummoner() == this)
                             {
-                                if (victim && victim->IsFriendlyTo((*guardian)))
-                                    (*guardian)->CastCustomSpell(victim, 86678, &bp0, &bp1, 0, true, NULL, triggeredByAura, 0);
-                                else
-                                    (*guardian)->CastCustomSpell((*guardian), 86678, &bp0, &bp1, 0, true, NULL, triggeredByAura, 0);
+                                if (victim)
+                                {
+                                    if (victim && victim->IsFriendlyTo((*guardian)))
+                                        (*guardian)->CastCustomSpell(victim, 86678, &bp0, &bp1, 0, true, NULL, triggeredByAura, GetGUID());
+                                    else
+                                        (*guardian)->CastCustomSpell((*guardian), 86678, &bp0, &bp1, 0, true, NULL, triggeredByAura, GetGUID());
+                                }
 
                                 // After 5 direct heals the guardian should disappear
                                 (*guardian)->ToCreature()->AI()->DoAction(1);
                             }
                         }
                     }
-                    return true;
+                    break;
                 }
                 // Item - Icecrown 25 Normal Dagger Proc
                 case 71880:

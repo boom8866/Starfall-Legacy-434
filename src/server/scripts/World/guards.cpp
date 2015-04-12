@@ -429,7 +429,10 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
             if (owner && !isRetribution)
+            {
                 UnableToAttack();
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL, true);
+            }
             if (me->GetEntry() == GUARDIAN_RETRIBUTION)
             {
                 if (Unit* owner = me->GetCharmerOrOwner())
