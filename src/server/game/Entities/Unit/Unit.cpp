@@ -12883,6 +12883,24 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                 }
                 break;
             }
+            case SPELLFAMILY_DEATHKNIGHT:
+            {
+                switch (spellProto->Id)
+                {
+                    case 49143: // Frost Strike
+                    {
+                        if (GetTypeId() == TYPEID_PLAYER)
+                        {
+                            // Mastery: Frozen Heart
+                            float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                            if (HasAura(77514))
+                                DoneTotalMod += DoneTotalMod * (0.160f + (0.020f * masteryPoints));
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
         }
     }
 
