@@ -437,38 +437,60 @@ class spell_warr_execute : public SpellScriptLoader
 
             void HandleEffect(SpellEffIndex /*effIndex*/)
             {
-                Unit* caster = GetCaster();
-                if (GetHitUnit())
+                if (Unit* caster = GetCaster())
                 {
-                    SpellInfo const* spellInfo = GetSpellInfo();
-                    int32 rageUsed = std::min<int32>(300, caster->GetPower(POWER_RAGE));
-                    int32 newRage = std::max<int32>(0, caster->GetPower(POWER_RAGE) - rageUsed);
-
-                    // Sudden Death rage save
-                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_GENERIC, WARRIOR_ICON_ID_SUDDEN_DEATH, EFFECT_0))
+                    if (GetHitUnit())
                     {
-                        int32 ragesave = aurEff->GetSpellInfo()->Effects[EFFECT_0].CalcValue() * 10;
-                        newRage = std::max(newRage, ragesave);
+                        SpellInfo const* spellInfo = GetSpellInfo();
+                        if (!spellInfo)
+                            return;
+
+                        int32 rageUsed = std::min<int32>(300, caster->GetPower(POWER_RAGE));
+                        int32 newRage = std::max<int32>(0, caster->GetPower(POWER_RAGE) - rageUsed);
+
+                        // Sudden Death rage save
+                        if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_GENERIC, WARRIOR_ICON_ID_SUDDEN_DEATH, EFFECT_0))
+                        {
+                            int32 ragesave = aurEff->GetSpellInfo()->Effects[EFFECT_0].CalcValue() * 10;
+                            newRage = std::max(newRage, ragesave);
+                        }
+
+                        caster->SetPower(POWER_RAGE, uint32(newRage));
+
+                        /// Formula taken from the DBC: "${10+$AP*0.437*$m1/100}"
+                        int32 baseDamage = int32(10 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.437f * GetEffectValue() / 100.0f);
+                        /// Formula taken from the DBC: "${$ap*0.874*$m1/100-1} = 20 rage"
+                        int32 moreDamage = int32(rageUsed * (caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.874f * GetEffectValue() / 100.0f - 1) / 200);
+                        SetHitDamage(baseDamage + moreDamage);
+
+                        // Berserker Stance
+                        if (caster->HasAura(SPELL_BERSERKER_STANCE_PASSIVE))
+                            SetHitDamage(GetHitDamage() + (GetHitDamage() * 0.10f));
+
+                        uint32 finalDamage = GetHitDamage();
+
+                        // Calculate also damage reductions
+                        Unit::AuraEffectList const& mDamageTakenPct = GetHitUnit()->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
+                        if (!mDamageTakenPct.empty())
+                            for (Unit::AuraEffectList::const_iterator i = mDamageTakenPct.begin(); i != mDamageTakenPct.end(); ++i)
+                                if ((*i)->GetMiscValue() == 127)
+                                    AddPct(finalDamage, (*i)->GetAmount());
+
+                        // Calculate also damage absorb
+                        Unit::AuraEffectList const& mDamageAbsorbPct = GetHitUnit()->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
+                        if (!mDamageAbsorbPct.empty())
+                            for (Unit::AuraEffectList::const_iterator i = mDamageAbsorbPct.begin(); i != mDamageAbsorbPct.end(); ++i)
+                                if ((*i)->GetMiscValue() == 127)
+                                    AddPct(finalDamage, -(*i)->GetAmount());
+
+                        SetHitDamage(finalDamage);
                     }
-
-                    caster->SetPower(POWER_RAGE, uint32(newRage));
-
-                    /// Formula taken from the DBC: "${10+$AP*0.437*$m1/100}"
-                    int32 baseDamage = int32(10 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.437f * GetEffectValue() / 100.0f);
-                    /// Formula taken from the DBC: "${$ap*0.874*$m1/100-1} = 20 rage"
-                    int32 moreDamage = int32(rageUsed * (caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.874f * GetEffectValue() / 100.0f - 1) / 200);
-                    SetHitDamage(baseDamage + moreDamage);
-
-                    // Berserker Stance
-                    if (caster->HasAura(SPELL_BERSERKER_STANCE_PASSIVE))
-                        SetHitDamage(GetHitDamage() + (GetHitDamage() * 0.10f));
                 }
             }
 
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warr_execute_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-
             }
         };
 
