@@ -2956,6 +2956,13 @@ void SpellMgr::LoadSpellCustomAttr()
                 // Roar
                 if (spellInfo->SpellFamilyFlags[0] & 0x8)
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
+
+                switch (spellInfo->Id)
+                {
+                    case 1822:  // Rake
+                        spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+                        break;
+                }
                 break;
             }
             case SPELLFAMILY_WARLOCK:
