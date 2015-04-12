@@ -3163,7 +3163,6 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 1929, 1))
                 {
                     int32 bp0 = aurEff->GetAmount();
-                    bp0 += bp0 * 0.10f;
                     m_caster->CastCustomSpell(m_caster, 100977, &bp0, NULL, NULL, true, NULL, NULL, caster->GetGUID());
                 }
                 break;

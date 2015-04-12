@@ -476,12 +476,9 @@ class spell_warr_execute : public SpellScriptLoader
                                 if ((*i)->GetMiscValue() == 127)
                                     AddPct(finalDamage, (*i)->GetAmount());
 
-                        // Calculate also damage absorb
-                        Unit::AuraEffectList const& mDamageAbsorbPct = GetHitUnit()->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
-                        if (!mDamageAbsorbPct.empty())
-                            for (Unit::AuraEffectList::const_iterator i = mDamageAbsorbPct.begin(); i != mDamageAbsorbPct.end(); ++i)
-                                if ((*i)->GetMiscValue() == 127)
-                                    AddPct(finalDamage, -(*i)->GetAmount());
+                        // Cheating Death
+                        if (GetHitUnit()->HasAura(45182))
+                            AddPct(finalDamage, -80);
 
                         SetHitDamage(finalDamage);
                     }

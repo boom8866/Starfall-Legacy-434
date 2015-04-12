@@ -9744,7 +9744,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         // Strength of Soul
         case 89490:
         {
-            if (procSpell->Id == 2050 || procSpell->Id == 2060 || procSpell->Id == 2061)
+            if (procSpell->Id == 2050 || procSpell->Id == 2060 || procSpell->Id == 2061 || procSpell->Id == 101062)
             {
                 if (victim && victim->HasAura(6788))
                 {
