@@ -762,13 +762,13 @@ class spell_mage_ice_barrier : public SpellScriptLoader
 
            void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
            {
-               if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_ENEMY_SPELL)
-                   return;
-
-               if (GetTarget()->HasAura(SPELL_MAGE_SHATTERED_BARRIER_R1))
-                   GetTarget()->CastSpell(GetTarget(), SPELL_MAGE_SHATTERED_BARRIER_FREEZE_R1, true);
-               else if (GetTarget()->HasAura(SPELL_MAGE_SHATTERED_BARRIER_R2))
-                   GetTarget()->CastSpell(GetTarget(), SPELL_MAGE_SHATTERED_BARRIER_FREEZE_R2, true);
+               if ((GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL) && (GetSpellInfo()->SpellFamilyFlags[EFFECT_1] & 0x00000001) && (GetEffect(EFFECT_0)->GetAmount() <= 0))
+               {
+                   if (GetTarget()->HasAura(SPELL_MAGE_SHATTERED_BARRIER_R1))
+                       GetTarget()->CastSpell(GetTarget(), SPELL_MAGE_SHATTERED_BARRIER_FREEZE_R1, true);
+                   else if (GetTarget()->HasAura(SPELL_MAGE_SHATTERED_BARRIER_R2))
+                       GetTarget()->CastSpell(GetTarget(), SPELL_MAGE_SHATTERED_BARRIER_FREEZE_R2, true);
+               }
            }
 
            void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)

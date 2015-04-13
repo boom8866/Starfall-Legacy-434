@@ -101,6 +101,26 @@ static bool isAlwaysTriggeredAura[TOTAL_AURAS];
 // Prepare lists
 static bool procPrepared = InitTriggerAuraData();
 
+class DropChargeEvent : public BasicEvent
+{
+    public:
+        DropChargeEvent(Unit* target, uint32 spellId, uint64 caster = 0) : _target(target), _spellId(spellId), _caster(caster)
+        {
+        }
+
+        bool Execute(uint64 /*time*/, uint32 /*diff*/)
+        {
+            if (Aura* aura = _target->GetAura(_spellId, _caster))
+                aura->DropCharge();
+            return true;
+        }
+
+    private:
+        Unit* _target;
+        uint32 _spellId;
+        uint64 _caster;
+};
+
 DamageInfo::DamageInfo(Unit* _attacker, Unit* _victim, uint32 _damage, SpellInfo const* _spellInfo, SpellSchoolMask _schoolMask, DamageEffectType _damageType)
 : m_attacker(_attacker), m_victim(_victim), m_damage(_damage), m_spellInfo(_spellInfo), m_schoolMask(_schoolMask),
 m_damageType(_damageType), m_attackType(BASE_ATTACK)
@@ -6081,8 +6101,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (!counter)
                         return true;
 
-                    if (procSpell->Id == 92315)
-                        return true;
+                    // Only from Fire Blast, Scorch, Fireball, Frostfire Bolt, Pyroblast and Pyroblast!
+                    if (procSpell && !(procSpell->Id == 133 || procSpell->Id == 2136 || procSpell->Id == 2948 || procSpell->Id == 44614 || procSpell->Id == 11366 || procSpell->Id == 92315))
+                        return false;
 
                     if (procEx & PROC_EX_CRITICAL_HIT)
                     {
@@ -16437,7 +16458,23 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
 
         // Remove charge (aura can be removed by triggers)
         if (prepare && useCharges && takeCharges)
-            i->aura->DropCharge();
+        {
+            // Set charge drop delay (only for missiles)
+            if ((procExtra & PROC_EX_REFLECT) && procSpell && procSpell->Speed > 0.0f)
+            {
+                // Set up missile speed based delay (from Spell.cpp: Spell::AddUnitTarget()::L2237)
+                int32 delay = target ? int32(floor(std::max<float>(target->GetDistance(this), 5.0f) / procSpell->Speed * 1000.0f)) : (1 * IN_MILLISECONDS) / 2;
+
+                // Do not allow aura to be removed too soon (do not update clientside timer)
+                i->aura->SetDuration(std::max<int32>(i->aura->GetDuration(), delay), false, false);
+
+                // Schedule charge drop
+                DropChargeEvent* dropEvent = new DropChargeEvent(this, i->aura->GetId(), i->aura->GetCasterGUID());
+                m_Events.AddEvent(dropEvent, m_Events.CalculateTime(delay));
+            }
+            else
+                i->aura->DropCharge();
+        }
 
         i->aura->CallScriptAfterProcHandlers(aurApp, eventInfo);
 
