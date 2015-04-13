@@ -4301,6 +4301,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 82691: // Ring of Frost
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(8);   // 5 yd
+                spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
                 break;
             case 57416: // Immune to Daze
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
