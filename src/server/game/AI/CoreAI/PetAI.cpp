@@ -247,6 +247,12 @@ void PetAI::UpdateAI(uint32 diff)
 
             if (spellInfo->IsPositive())
             {
+                // Prevent autocast spamming for AoE raid buffs
+                if (spellInfo->AttributesEx8 & SPELL_ATTR8_AFFECT_PARTY_AND_RAID)
+                    if (Unit* owner = me->GetCharmerOrOwner())
+                        if (owner->HasAura(spellInfo->Id, me->GetGUID()))
+                            continue;
+
                 if (spellInfo->CanBeUsedInCombat())
                 {
                     // check spell cooldown
