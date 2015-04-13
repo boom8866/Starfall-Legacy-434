@@ -105,9 +105,9 @@ enum PriestSpells
 
     SPELL_PRIEST_PRAYER_OF_HEALING                  = 596,
 
-    SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R1		= 14748,
-    SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R2		= 14768,
-    
+    SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R1      = 14748,
+    SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R2      = 14768,
+
     SPELL_PRIEST_FADE                               = 586,
     SPELL_PRIEST_PHANTASM_R1                        = 47569,
     SPELL_PRIEST_PHANTASM_R2                        = 47570,
@@ -626,8 +626,8 @@ class spell_pri_power_word_shield : public SpellScriptLoader
                 canBeRecalculated = false;
                 if (Unit* caster = GetCaster())
                 {
-                    // +80.68% from SP bonus
-                    float bonus = 0.8068f;
+                    // +87.00% from SP bonus
+                    float bonus = 0.870f;
                     bonus *= caster->SpellBaseHealingBonusDone(GetSpellInfo()->GetSchoolMask());
                     bonus = caster->ApplyEffectModifiers(GetSpellInfo(), aurEff->GetEffIndex(), bonus);
                     bonus *= caster->CalculateLevelPenalty(GetSpellInfo());
@@ -1973,6 +1973,45 @@ class spell_pri_inner_focus : public SpellScriptLoader
         }
 };
 
+class spell_pri_dispel_magic : public SpellScriptLoader
+{
+public:
+    spell_pri_dispel_magic() : SpellScriptLoader("spell_pri_dispel_magic")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_TALENT_ABSOLUTION     = 33167
+    };
+
+    class spell_pri_dispel_magic_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pri_dispel_magic_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetExplTargetUnit())
+                    if (!caster->HasAura(SPELL_TALENT_ABSOLUTION) && (target != caster && target->IsFriendlyTo(caster)))
+                        return SPELL_FAILED_BAD_TARGETS;
+            }
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_pri_dispel_magic_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pri_dispel_magic_SpellScript;
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_divine_aegis();
@@ -2011,4 +2050,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_vampiric_embrace();
     new spell_pri_inner_fire();
     new spell_pri_inner_focus();
+    new spell_pri_dispel_magic();
 }

@@ -2956,6 +2956,13 @@ void SpellMgr::LoadSpellCustomAttr()
                 // Roar
                 if (spellInfo->SpellFamilyFlags[0] & 0x8)
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
+
+                switch (spellInfo->Id)
+                {
+                    case 1822:  // Rake
+                        spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+                        break;
+                }
                 break;
             }
             case SPELLFAMILY_WARLOCK:
@@ -4561,6 +4568,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 86499: // Water of Life
             case 99511: // Simulate Alliance Presence
             case 99508: // Throw Frog
+            case 62981: // Unbathed Concotion
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 83836: // Summon Twilight Striker
