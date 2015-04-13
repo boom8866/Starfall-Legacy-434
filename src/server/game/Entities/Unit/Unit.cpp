@@ -6101,8 +6101,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (!counter)
                         return true;
 
-                    if (procSpell->Id == 92315)
-                        return true;
+                    // Only from Fire Blast, Scorch, Fireball, Frostfire Bolt, Pyroblast and Pyroblast!
+                    if (procSpell && !(procSpell->Id == 133 || procSpell->Id == 2136 || procSpell->Id == 2948 || procSpell->Id == 44614 || procSpell->Id == 11366 || procSpell->Id == 92315))
+                        return false;
 
                     if (procEx & PROC_EX_CRITICAL_HIT)
                     {
