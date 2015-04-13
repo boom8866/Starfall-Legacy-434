@@ -442,7 +442,7 @@ public:
     {
         npc_mariam_spellwalkerAI(Creature* creature) : ScriptedAI(creature) {}
 
-        void DamageTaken(Unit* who, uint32& damage)
+        void DamageTaken(Unit* /*who*/, uint32& damage)
         {
             damage = 0;
         }
@@ -610,7 +610,7 @@ public:
                 enrage = true;
             }
 
-            if (!attacker->isPet() && attacker->GetTypeId() != TYPEID_PLAYER)
+            if (attacker && !attacker->isPet() && attacker->GetTypeId() != TYPEID_PLAYER)
                 damage = 0;
         }
 
@@ -664,7 +664,7 @@ public:
             SetCombatMovement(false);
         }
 
-        void DamageTaken(Unit* attacker, uint32 &damage)
+        void DamageTaken(Unit* /*attacker*/, uint32 &damage)
         {
             damage = 0;
         }
@@ -1027,10 +1027,7 @@ public:
 
             if (me->isSummon())
                 if (Unit* summoner = me->ToTempSummon()->GetSummoner())
-                {
                     me->CombatStart(summoner);
-                    me->AddThreat(summoner, 100500);
-                }
         }
 
         void WaypointReached(uint32 point)
@@ -1572,7 +1569,6 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             me->SetInCombatWith(who);
             who->SetInCombatWith(me);
-            me->AddThreat(who, 100500);
         }
 
         void DamageTaken(Unit* attacker, uint32 &damage)
@@ -1637,7 +1633,6 @@ public:
                 target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 target->SetReactState(REACT_AGGRESSIVE);
                 target->AI()->AttackStart(caster);
-                target->AddThreat(caster, 10005000);
             }
         }
 
@@ -2284,7 +2279,7 @@ public:
             }
         }
 
-        void DamageTaken(Unit* attacker, uint32& damage)
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
             damage = 0;
         }
@@ -2492,10 +2487,8 @@ public:
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
-            if (attacker->GetTypeId() != TYPEID_PLAYER)
+            if (attacker && attacker->GetTypeId() != TYPEID_PLAYER)
                 damage = 0;
-            else
-                me->AddThreat(attacker, 1000);
         }
     };
 };
@@ -3057,7 +3050,7 @@ public:
 
         void DamageTaken(Unit* who, uint32& damage)
         {
-            if (who->ToCreature() && (who->GetEntry() == NPC_ENTRY_INVADER || who->GetEntry() == NPC_ENTRY_FOOTSOLDIER))
+            if (who && who->ToCreature() && (who->GetEntry() == NPC_ENTRY_INVADER || who->GetEntry() == NPC_ENTRY_FOOTSOLDIER))
                 damage = 0;
         }
 
@@ -3135,7 +3128,7 @@ public:
 
         void DamageTaken(Unit* who, uint32& damage)
         {
-            if (who->ToCreature() && who->GetEntry() == NPC_ENTRY_WATCHMAN)
+            if (who && who->ToCreature() && who->GetEntry() == NPC_ENTRY_WATCHMAN)
                 damage = 0;
         }
 

@@ -1,0 +1,1 @@
+DELETE FROM `spell_proc_event` WHERE `entry` IN (44448, 44446, 44445);

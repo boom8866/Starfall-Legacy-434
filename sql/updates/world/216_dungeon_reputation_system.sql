@@ -1,0 +1,7 @@
+CREATE TABLE championing_values (difficulty  tinyint(1) unsigned, classification tinyint(3) unsigned, reputation tinyint(4) unsigned);
+INSERT INTO championing_values VALUES (0,0,10),(0,1,30),(0,2,150),(1,0,15),(1,1,45),(1,2,250);
+CREATE TABLE instance_creatures AS SELECT DISTINCT entry, difficulty_entry_1, name, flags_extra, map IN (670,755,644) AS map85,HealthModifier FROM creature_template ct INNER JOIN creature c ON (ct.entry=c.id) WHERE map IN (645,643,725,657,670,755,644,33,36) AND difficulty_entry_1>0 AND rank>0 AND HealthModifier>=4;
+
+INSERT INTO creature_onkill_reward (creature_id,RewOnKillRepFaction1,MaxStanding1,RewOnKillRepValue1) SELECT IF(difficulty=0,entry,difficulty_entry_1), 1168, 7, reputation FROM instance_creatures ct CROSS JOIN championing_values cv WHERE difficulty|map85 AND ((flags_extra&1=0 AND HealthModifier<12 AND classification=0) OR (flags_extra&1=0 AND HealthModifier>=12 AND classification=1) OR (flags_extra&1=1 AND classification=2)) ON DUPLICATE KEY UPDATE creature_id=VALUES(creature_id), RewOnKillRepFaction1=VALUES(RewOnKillRepFaction1),MaxStanding1=VALUES(MaxStanding1),RewOnKillRepValue1=VALUES(RewOnKillRepValue1);
+DROP TABLE IF EXISTS championing_values;
+DROP TABLE IF EXISTS instance_creatures;

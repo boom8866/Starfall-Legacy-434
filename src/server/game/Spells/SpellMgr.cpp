@@ -2956,6 +2956,13 @@ void SpellMgr::LoadSpellCustomAttr()
                 // Roar
                 if (spellInfo->SpellFamilyFlags[0] & 0x8)
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
+
+                switch (spellInfo->Id)
+                {
+                    case 1822:  // Rake
+                        spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+                        break;
+                }
                 break;
             }
             case SPELLFAMILY_WARLOCK:
@@ -4032,9 +4039,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 79684: // Arcane Missiles Proc
                 spellInfo->ProcChance = 40.0f;
                 break;
-            case 12654: // Ignite
-                spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
-                break;
             case 5143: // Arcane Missiles
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                 break;
@@ -4297,6 +4301,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 82691: // Ring of Frost
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(8);   // 5 yd
+                spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
                 break;
             case 57416: // Immune to Daze
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
@@ -4371,6 +4376,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 86499: // Water of Life
             case 99511: // Simulate Alliance Presence
             case 99508: // Throw Frog
+            case 62981: // Unbathed Concotion
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 83836: // Summon Twilight Striker
