@@ -361,8 +361,6 @@ Position const SplittingTriggerNorth  = { 1023.55f,  -57.158f,   55.4215f,   3.1
 Position const SplittingTriggerEast   = { 1035.45f,  -25.3646f,  55.4924f,   2.49582f    };
 Position const SplittingTriggerWest   = { 1036.27f,  -89.2396f,  55.5098f,   3.83972f    };
 
-Position const CacheOfTheFirelordPos  = { 1012.49f,  -57.2882f,  55.3302f,   4.41094f    };
-
 Position const CenariusSummonPosition = { 795.504f,  -60.138f,   83.652f,    0.02050f    };
 Position const HamuulSummonPosition   = { 790.017f,  -50.393f,   97.115f,    6.22572f    };
 Position const MalfurionSummonPosition = {781.208f,  -69.534f,   98.061f,    3.89547f    };
@@ -589,15 +587,6 @@ public:
                 if (Creature* sulfuras = me->FindNearestCreature(NPC_SULFURAS_HAND_OF_RAGNAROS, 100.0f, true))
                     sulfuras->DespawnOrUnsummon(1);
 
-                if (Creature* magma = me->FindNearestCreature(NPC_MAGMA_POOL_TRIGGER, 50.0f, true))
-                    if (GameObject* cache = magma->SummonGameObject(Is25ManRaid() ? GO_CACHE_OF_THE_FIRELORD_HC : GO_CACHE_OF_THE_FIRELORD, CacheOfTheFirelordPos.m_positionX,
-                        CacheOfTheFirelordPos.m_positionY, CacheOfTheFirelordPos.m_positionZ, CacheOfTheFirelordPos.m_orientation, 0, 0, 0, 0, 3000))
-                    {
-                        cache->SetGoState(GO_STATE_READY);
-                        cache->SetPhaseMask(1, true);
-                        cache->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-                    }
-
                 me->SetHealth(1);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                 me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
@@ -666,10 +655,10 @@ public:
                 case ACTION_SUMMONED:
                     me->SetReactState(REACT_PASSIVE);
                     events.SetPhase(PHASE_INTRO);
-                    events.ScheduleEvent(EVENT_BASE_VISUAL, 2000, 0);
+                    events.ScheduleEvent(EVENT_BASE_VISUAL, 1000, 0);
                     if (instance->GetData(DATA_FIRST_RAGNAROS_SUMMON) == 1)
                     {
-                        events.ScheduleEvent(EVENT_INTRO, 6750, 0);
+                        events.ScheduleEvent(EVENT_INTRO, 5700, 0);
                         instance->SetData(DATA_FIRST_RAGNAROS_SUMMON, 0);
                     }
 
@@ -686,7 +675,7 @@ public:
                 case ACTION_CAST_SULFURAS_SMASH:
                     Talk(SAY_ANNOUNCE_SULFURAS_SMASH);
                     DoCast(me, SPELL_SULFURAS_SMASH);
-                    events.ScheduleEvent(EVENT_ATTACK, 5000);
+                    events.ScheduleEvent(EVENT_ATTACK, 6000);
                     break;
                 case ACTION_SUBMERGE:
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
@@ -836,7 +825,11 @@ public:
                         break;
                 }
             }
-            DoMeleeAttackIfReady();
+            if (Unit* victim = me->getVictim())
+                if (me->IsWithinCombatRange(victim, me->GetFloatValue(UNIT_FIELD_COMBATREACH)))
+                    DoMeleeAttackIfReady();
+                else
+                    DoSpellAttackIfReady(SPELL_MAGMA_STRIKE);
         }
 
         void CastSplittingBlow(uint8 side)
@@ -2418,9 +2411,9 @@ void AddSC_boss_ragnaros_cata()
     new npc_fl_lava_wave();
     new npc_fl_son_of_flame();
     new npc_fl_molten_elemental();
-
     new npc_fl_lava_scion();
     new npc_fl_blazing_heat();
+
     new npc_fl_living_meteor();
     new npc_fl_archdruids();
     new npc_fl_dreadflame();
@@ -2436,8 +2429,8 @@ void AddSC_boss_ragnaros_cata()
     new spell_fl_molten_seed_aoe();
     new spell_fl_world_in_flames();
     new spell_fl_engulfing_flames();
-
     new spell_fl_blazing_heat();
+
     new spell_fl_empower_sulfuras();
     new spell_fl_breadth_of_frost();
     new spell_fl_breadth_of_frost_freeze();
