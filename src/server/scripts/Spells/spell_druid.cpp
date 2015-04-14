@@ -722,6 +722,9 @@ class spell_dru_starfall_aoe : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
+                if (targets.empty())
+                    return;
+
                 targets.remove(GetExplTargetUnit());
             }
 
@@ -749,6 +752,9 @@ class spell_dru_starfall_dummy : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
+                if (targets.empty())
+                    return;
+
                 Trinity::Containers::RandomResizeList(targets, 2);
             }
 
@@ -957,6 +963,9 @@ class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
+                if (targets.empty())
+                    return;
+
                 if (!GetCaster()->ToPlayer()->GetGroup())
                 {
                     targets.clear();

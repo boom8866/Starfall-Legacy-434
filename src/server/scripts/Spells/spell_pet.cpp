@@ -2014,6 +2014,9 @@ class spell_pet_raid_buffs_block : public SpellScriptLoader
 
             void CheckAreaTargets(std::list<WorldObject*>& targets)
             {
+                if (targets.empty())
+                    return;
+
                 targets.remove_if(TargetIsPetCheck());
             }
 

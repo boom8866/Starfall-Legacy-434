@@ -150,6 +150,9 @@ class spell_sha_bloodlust : public SpellScriptLoader
 
             void RemoveInvalidTargets(std::list<WorldObject*>& targets)
             {
+                if (targets.empty())
+                    return;
+
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_SHAMAN_SATED));
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_HUNTER_INSANITY));
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_MAGE_TEMPORAL_DISPLACEMENT));
@@ -318,6 +321,9 @@ class spell_sha_earthen_power : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& unitList)
             {
+                if (unitList.empty())
+                    return;
+
                 unitList.remove_if(EarthenPowerTargetSelector());
             }
 
@@ -515,6 +521,9 @@ class spell_sha_heroism : public SpellScriptLoader
 
             void RemoveInvalidTargets(std::list<WorldObject*>& targets)
             {
+                if (targets.empty())
+                    return;
+
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_SHAMAN_EXHAUSTION));
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_HUNTER_INSANITY));
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_MAGE_TEMPORAL_DISPLACEMENT));
@@ -755,6 +764,9 @@ public:
 
         void CalculatePercentage(std::list<WorldObject*>& targets)
         {
+            if (targets.empty())
+                return;
+
             for (std::list<WorldObject*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
             {
                 if (Player* player = (*itr)->ToPlayer())

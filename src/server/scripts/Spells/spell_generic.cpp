@@ -3205,6 +3205,9 @@ public:
 
         void RemoveInvalidTargets(std::list<WorldObject*>& targets)
         {
+            if (targets.empty())
+                return;
+
             targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_DEBUFF_SATED));
             targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_DEBUFF_EXHAUSTION));
             targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_DEBUFF_TEMPORAL_DISPLACEMENT));
