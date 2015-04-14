@@ -445,7 +445,7 @@ class spell_warr_execute : public SpellScriptLoader
                         if (!spellInfo)
                             return;
 
-                        int32 rageUsed = std::min<int32>(300, caster->GetPower(POWER_RAGE));
+                        int32 rageUsed = std::min<int32>(200, caster->GetPower(POWER_RAGE));
                         int32 newRage = std::max<int32>(0, caster->GetPower(POWER_RAGE) - rageUsed);
 
                         // Sudden Death rage save
