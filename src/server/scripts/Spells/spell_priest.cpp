@@ -1673,6 +1673,9 @@ public:
 
         void SelectTarget(std::list<WorldObject*>& targets)
         {
+            if (targets.empty())
+                return;
+
             // Prefer a target that has low health
             std::priority_queue<Player*, std::vector<Player*>, ComparePlayersHealth> lowestHpTargets;
             for (auto const i : targets)
@@ -1873,6 +1876,9 @@ class spell_pri_vampiric_embrace : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& unitList)
             {
+                if (unitList.empty())
+                    return;
+
                 if (GetCaster())
                     unitList.remove(GetCaster());
             }

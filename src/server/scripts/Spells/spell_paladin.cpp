@@ -385,6 +385,9 @@ class spell_pal_divine_storm_dummy : public SpellScriptLoader
 
             void CountTargets(std::list<WorldObject*>& targetList)
             {
+                if (targetList.empty())
+                    return;
+
                 _targetCount = targetList.size();
             }
 
@@ -1187,6 +1190,9 @@ class spell_pal_light_of_dawn : public SpellScriptLoader
 
                 void SelectTargets(std::list <WorldObject *> &targets)
                 {
+                    if (targets.empty())
+                        return;
+
                     if (targets.size() <= uint32(glyphed ? 4 : 6))
                     {
                         count = targets.size();
