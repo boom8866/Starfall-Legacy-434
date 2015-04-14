@@ -937,12 +937,19 @@ void Battleground::EndBattleground(uint32 winner)
                     uint32 rating = player->GetArenaPersonalRating(winnerArenaTeam->GetSlot());
                     player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, rating ? rating : 1);
                 }
-                player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_ARENA, sWorld->getIntConfig(CONFIG_CURRENCY_CONQUEST_POINTS_ARENA_REWARD));
+
+                // Custom: This is needed for custom mini arena season
+                if (GetArenaType() == ARENA_TYPE_3v3)
+                    player->ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, 40 * CURRENCY_PRECISION);
 
                 winnerArenaTeam->MemberWon(player, winnerMatchmakerRating, loserMatchmakerRating, winnerMatchmakerChange);
             }
             else
             {
+                // Custom: This is needed for custom mini arena season
+                if (GetArenaType() == ARENA_TYPE_3v3)
+                    player->ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, 5 * CURRENCY_PRECISION);
+
                 loserArenaTeam->MemberLost(player, loserMatchmakerRating, winnerMatchmakerRating, loserMatchmakerChange);
 
                 // Arena lost => reset the win_rated_arena having the "no_lose" condition
