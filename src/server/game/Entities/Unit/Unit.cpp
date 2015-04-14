@@ -9416,6 +9416,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        // Focus Magic
+        case 54646:
+        {
+            // Handled via spellscripts
+            return false;
+            break;
+        }
         // Battle Trance
         case 12322:
         case 85741:
