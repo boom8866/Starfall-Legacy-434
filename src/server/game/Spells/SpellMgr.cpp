@@ -205,6 +205,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Bash (Feral Spirit Ability)
             if (spellproto->Id == 58861)
                 return DIMINISHING_NONE;
+            // Hex
+            else if (spellproto->Id == 51514)
+                return DIMINISHING_CONTROLLED_STUN;
             break;
         }
         default:
