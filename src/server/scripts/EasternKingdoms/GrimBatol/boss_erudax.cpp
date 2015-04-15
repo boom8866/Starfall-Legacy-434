@@ -355,6 +355,7 @@ public:
                     case EVENT_ATTACK_PLAYERS:
                         events.CancelEvent(EVENT_ATTACK_PLAYERS);
                         me->SetReactState(REACT_AGGRESSIVE);
+                        me->SetWalk(false);
                         if (IsHeroic())
                             events.ScheduleEvent(EVENT_SIPHON_ESSENCE, 2000);
                         me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);
