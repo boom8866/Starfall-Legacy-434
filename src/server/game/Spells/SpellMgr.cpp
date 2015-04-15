@@ -5111,7 +5111,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->StartRecoveryTime = 1000;
                 break;
             // * Forgemaster Throngus
-            case 90764:
+            case 90764: // Burning Flames
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 break;
             // * Drahga Shadowburner
