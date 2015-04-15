@@ -651,10 +651,10 @@ public:
         {
             if (GetAura())
             {
-                uint8 charges = GetAura()->GetCharges();
-                if (charges > 1)
+                uint8 stack = GetAura()->GetStackAmount();
+                if (stack > 1)
                 {
-                    GetAura()->SetCharges(charges - 1);
+                    GetAura()->SetStackAmount(stack - 1);
                     return false;
                 }
                 else
@@ -675,6 +675,29 @@ public:
     AuraScript* GetAuraScript() const
     {
         return new spell_gb_disorienting_roar_AuraScript();
+    }
+
+    class spell_gb_disorienting_roar_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gb_disorienting_roar_SpellScript);
+
+        void HandleHeroicDifficulty()
+        {
+            if (Unit* target = GetHitUnit())
+                if (target->GetMap()->IsHeroic())
+                    if (Aura* disorientingRoar = target->GetAura(GetSpellInfo()->Id))
+                        disorientingRoar->SetStackAmount(3);
+        }
+
+        void Register()
+        {
+            AfterHit += SpellHitFn(spell_gb_disorienting_roar_SpellScript::HandleHeroicDifficulty);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gb_disorienting_roar_SpellScript();
     }
 };
 
