@@ -576,7 +576,9 @@ public:
 
         void HandleScriptEffect(SpellEffIndex /*effIndex*/)
         {
-            GetHitUnit()->CastSpell(GetCaster(), SPELL_RIDE_VEHICLE_HARDCODED);
+            if (Unit* caster = GetCaster())
+                if (Unit* target = GetHitUnit())
+                    target->CastSpell(caster, SPELL_RIDE_VEHICLE_HARDCODED);
         }
 
         void Register()

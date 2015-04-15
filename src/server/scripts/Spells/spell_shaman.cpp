@@ -484,7 +484,8 @@ class spell_sha_healing_stream_totem : public SpellScriptLoader
                                 damage += damage * 0.25f;
                         }
 
-                        caster->CastCustomSpell(target, SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL, &damage, 0, 0, true, 0, 0, GetOriginalCaster()->GetGUID());
+                        if (GetOriginalCaster())
+                            caster->CastCustomSpell(target, SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL, &damage, 0, 0, true, 0, 0, GetOriginalCaster()->GetGUID());
                     }
                 }
             }

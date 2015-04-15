@@ -61,6 +61,8 @@ enum Events
     EVENT_TWILIGHT_CORRUPTION,
     EVENT_UMBRAL_MENDING,
     EVENT_APPLY_IMMUNITY,
+    EVENT_ATTACK_PLAYERS,
+    EVENT_SIPHON_ESSENCE
 };
 
 enum Points
@@ -281,22 +283,18 @@ public:
 
         void InitializeAI()
         {
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, false);
-            me->SetWalk(true);
-            me->SetSpeed(MOVE_WALK, (me->GetSpeed(MOVE_WALK) * 2));
-        }
-
-        void IsSummonedBy(Unit* summoner)
-        {
             DoZoneInCombat();
             me->AttackStop();
             me->SetReactState(REACT_PASSIVE);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, false);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, false);
+            me->SetWalk(true);
             if (me->GetEntry() == NPC_FACELESS_CORRUPTOR_1)
                 me->GetMotionMaster()->MovePoint(POINT_MOVE_1, FacelessPositions1[0]);
             else
                 me->GetMotionMaster()->MovePoint(POINT_MOVE_1, FacelessPositions2[0]);
-            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -352,6 +350,18 @@ public:
                         DoCast(SPELL_TWILIGHT_CORRUPTION);
                         if (Creature* erudax = me->FindNearestCreature(BOSS_ERUDAX, 500.0f, true))
                             erudax->AI()->DoAction(ACTION_CORRUPTED);
+                        events.ScheduleEvent(EVENT_ATTACK_PLAYERS, 5100);
+                        break;
+                    case EVENT_ATTACK_PLAYERS:
+                        events.CancelEvent(EVENT_ATTACK_PLAYERS);
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        me->SetWalk(false);
+                        if (IsHeroic())
+                            events.ScheduleEvent(EVENT_SIPHON_ESSENCE, 2000);
+                        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);
+                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, true);
+                        if (Player* player = me->FindNearestPlayer(100.0f))
+                            AttackStart(player);
                         break;
                     case EVENT_UMBRAL_MENDING:
                         DoCast(SPELL_UMBRAL_MENDING);
@@ -365,10 +375,19 @@ public:
                         me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                         break;
+                    case EVENT_SIPHON_ESSENCE:
+                        if (Unit* victim = me->getVictim())
+                        {
+                            me->StopMoving();
+                            DoCast(victim, SPELL_SIPHON_ESSENCE);
+                        }
+                        events.ScheduleEvent(EVENT_SIPHON_ESSENCE, urand(15000, 20000)); // Need correct timers
+                        break;
                     default:
                         break;
                 }
             }
+            DoMeleeAttackIfReady();
         }
 
         void DoAction(int32 action)
@@ -571,6 +590,9 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& unitList)
         {
+            if (unitList.empty())
+                return;
+
             std::list<WorldObject*>::iterator it = unitList.begin();
 
             while(it != unitList.end())
@@ -614,6 +636,9 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& unitList)
         {
+            if (unitList.empty())
+                return;
+
             std::list<WorldObject*>::iterator it = unitList.begin();
 
             while(it != unitList.end())

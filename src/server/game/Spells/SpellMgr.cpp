@@ -205,6 +205,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Bash (Feral Spirit Ability)
             if (spellproto->Id == 58861)
                 return DIMINISHING_NONE;
+            // Hex
+            else if (spellproto->Id == 51514)
+                return DIMINISHING_CONTROLLED_STUN;
             break;
         }
         default:
@@ -5301,8 +5304,13 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->StartRecoveryTime = 1000;
                 break;
             // * Forgemaster Throngus
-            case 90764:
+            case 90764: // Burning Flames
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
+                break;
+            case 74909: // Glancing Blows
+            case 76480:
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+                spellInfo->Effects[EFFECT_0].MiscValue = 127;
                 break;
             // * Drahga Shadowburner
             case 82850: // Flaming Fixate
