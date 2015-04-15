@@ -314,6 +314,7 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
             void InitializeAI()
             {
                 me->SetReactState(REACT_PASSIVE);
+                me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
