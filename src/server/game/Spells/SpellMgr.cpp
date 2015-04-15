@@ -5114,6 +5114,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 90764: // Burning Flames
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 break;
+            case 74909: // Glancing Blows
+            case 76480:
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+                spellInfo->Effects[EFFECT_0].MiscValue = 127;
+                break;
             // * Drahga Shadowburner
             case 82850: // Flaming Fixate
                 spellInfo->AttributesEx4 |= SPELL_ATTR4_TRIGGERED;
