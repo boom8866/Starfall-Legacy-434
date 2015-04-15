@@ -1867,10 +1867,7 @@ void Creature::Respawn(bool force)
 
         //Call AI respawn virtual function
         if (IsAIEnabled)
-        {
-            AI()->Reset();
             TriggerJustRespawned = true;//delay event to next tick so all creatures are created on the map before processing
-        }
 
         uint32 poolid = GetDBTableGUIDLow() ? sPoolMgr->IsPartOfAPool<Creature>(GetDBTableGUIDLow()) : 0;
         if (poolid)
