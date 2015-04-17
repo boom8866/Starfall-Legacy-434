@@ -1280,6 +1280,11 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                     maxSize = m_caster->HasAura(62970) ? 6 : 5; // Glyph of Wild Growth
                     power = POWER_HEALTH;
                 }
+                else if (m_spellInfo->Id == 44203)  // Tranquillity
+                {
+                    maxSize = 5;
+                    power = POWER_HEALTH;
+                }
                 else
                     break;
 
@@ -6618,7 +6623,7 @@ SpellCastResult Spell::CheckRange(bool strict)
         if (min_range && m_caster->IsWithinDist3d(m_targets.GetDstPos(), min_range))
             return SPELL_FAILED_TOO_CLOSE;
 
-        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->isTotem() || m_caster->isPet())
         {
             if (m_spellInfo && (m_spellInfo->SpellFamilyName != SPELLFAMILY_GENERIC && m_spellInfo->SpellFamilyName != SPELLFAMILY_UNK1) &&
                 !m_caster->IsWithinLOS(m_targets.GetDst()->_position.GetPositionX(), m_targets.GetDst()->_position.GetPositionY(), m_targets.GetDst()->_position.GetPositionZ()))
