@@ -48,7 +48,7 @@ UPDATE `creature_template` SET `scriptname`= 'boss_madness_of_deathwing' WHERE `
 UPDATE `creature_template` SET `scriptname`= 'boss_tentacle' WHERE `entry` IN (56167, 56168, 56846);
 UPDATE `creature_template` SET `scriptname`= 'npc_ds_mutated_corruption', `InhabitType`= 4, `exp`= 3, `Minlevel`= 88, `Maxlevel`= 88 WHERE `entry`= 56471;
 UPDATE `gossip_menu_option` SET `option_id`= 1, `npc_option_npcflag`= 1 WHERE `menu_id`= 13295; -- Thrall gossip
-UPDATE `creature_template` SET `InhabitType`= 4, `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, `faction_H`= 16, `exp`= 3 WHERE `entry`= 56262;
+UPDATE `creature_template` SET `InhabitType`= 4, `minlevel`= 87, `maxlevel`= 87, `faction`= 16, `exp`= 3 WHERE `entry`= 56262;
 
 REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (56173, 0, 0, 'You have done NOTHING. I will tear your world APART.', 14, 0, 100, 0, 0, 26527, 'Deathwing'),
