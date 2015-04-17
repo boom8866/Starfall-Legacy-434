@@ -67,19 +67,61 @@ void TotemAI::UpdateAI(uint32 /*diff*/)
 
     // SPELLMOD_RANGE not applied in this place just because not existence range mods for attacking totems
 
-    // pointer to appropriate target if found any
-    Unit* victim = i_victimGuid ? ObjectAccessor::GetUnit(*me, i_victimGuid) : NULL;
-
-    // Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
-    if (!victim || !victim->isTargetableForAttack() || !me->IsWithinDistInMap(victim, max_range) || me->IsFriendlyTo(victim) || !me->canSeeOrDetect(victim))
+    // Searing Totem targeting
+    if (me->GetEntry() == 2523)
     {
-        victim = NULL;
-        Trinity::NearestAttackableUnitInObjectRangeCheck u_check(me, me, max_range);
-        Trinity::UnitLastSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> checker(me, victim, u_check);
-        me->VisitNearbyObject(max_range, checker);
+        std::list<Unit*> targets;
+        Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, max_range);
+        Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+        me->VisitNearbyObject(max_range, searcher);
+        for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
+        {
+            if ((*iter) && (*iter)->isTargetableForAttack() && me->IsWithinDistInMap((*iter), max_range) && !me->IsFriendlyTo((*iter)) && me->canSeeOrDetect((*iter)) && ((*iter)->HasAura(8050) || (*iter)->HasAura(17364)))
+            {
+                i_victimGuid = (*iter)->GetGUID();
+                break;
+            }
+            else if (!(*iter)->HasAura(8050) && !(*iter)->HasAura(17364))
+            {
+                Unit* victim = i_victimGuid ? ObjectAccessor::GetUnit(*me, i_victimGuid) : NULL;
+                Trinity::NearestAttackableUnitInObjectRangeCheck u_check(me, me, max_range);
+                Trinity::UnitLastSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> checker(me, victim, u_check);
+                me->VisitNearbyObject(max_range, checker);
+                if (victim)
+                    i_victimGuid = victim->GetGUID();
+            }
+        }
+
+        Unit* memtarget = i_victimGuid ? ObjectAccessor::GetUnit(*me, i_victimGuid) : NULL;
+        if (memtarget)
+            me->CastSpell(memtarget, me->ToTotem()->GetSpell(), false);
     }
     else
-        i_victimGuid = 0;
+    {
+        // pointer to appropriate target if found any
+        Unit* victim = i_victimGuid ? ObjectAccessor::GetUnit(*me, i_victimGuid) : NULL;
+        // Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
+        if (!victim || !victim->isTargetableForAttack() || !me->IsWithinDistInMap(victim, max_range) || me->IsFriendlyTo(victim) || !me->canSeeOrDetect(victim))
+        {
+            victim = NULL;
+            Trinity::NearestAttackableUnitInObjectRangeCheck u_check(me, me, max_range);
+            Trinity::UnitLastSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> checker(me, victim, u_check);
+            me->VisitNearbyObject(max_range, checker);
+        }
+
+        // If have target
+        if (victim)
+        {
+            // remember
+            i_victimGuid = victim->GetGUID();
+
+            // attack
+            me->SetInFront(victim);                         // client change orientation by self
+            me->CastSpell(victim, me->ToTotem()->GetSpell(), false);
+        }
+        else
+            i_victimGuid = 0;
+    }
 }
 
 void TotemAI::AttackStart(Unit* /*victim*/)
