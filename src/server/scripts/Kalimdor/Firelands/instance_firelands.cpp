@@ -19,7 +19,6 @@
 
 DoorData const doorData[] =
 {
-    {GO_RAGNAROS_DOOR,                  DATA_RAGNAROS,                  DOOR_TYPE_ROOM,         BOUNDARY_N      },
     {GO_BALEROC_DOOR,                   DATA_BALEROC,                   DOOR_TYPE_ROOM,         BOUNDARY_N      },
     {GO_MAJODOMO_DOOR,                  DATA_MAJORDOMO_STANGHELM,       DOOR_TYPE_PASSAGE,      BOUNDARY_N      },
     {0,                                 0,                              DOOR_TYPE_ROOM,         BOUNDARY_NONE   }, // END
@@ -46,6 +45,7 @@ public:
             _shannoxControllerGUID = 0;
             _cacheOfTheFirelordGUID = 0;
             _cacheOfTheFirelordHeroicGUID = 0;
+            _ragnarosDoorGUID = 0;
 
             _bridgeEventDone = 0;
             _ragnarosSummoned = 0;
@@ -95,11 +95,9 @@ public:
             {
                 case GO_CACHE_OF_THE_FIRELORD:
                     _cacheOfTheFirelordGUID = go->GetGUID();
-                    go->SetPhaseMask(2, true);
                     break;
                 case GO_CACHE_OF_THE_FIRELORD_HC:
                     _cacheOfTheFirelordHeroicGUID = go->GetGUID();
-                    go->SetPhaseMask(2, true);
                     break;
                 case GO_BRIDGE_DOOR:
                     if (GetData(DATA_FIRELANDS_BRIDGE))
@@ -111,8 +109,10 @@ public:
                     break;
                 case GO_BALEROC_DOOR:
                 case GO_MAJODOMO_DOOR:
-                case GO_RAGNAROS_DOOR:
                     AddDoor(go, true);
+                    break;
+                case GO_RAGNAROS_DOOR:
+                    _ragnarosDoorGUID = go->GetGUID();
                     break;
                 default:
                     break;
@@ -195,6 +195,8 @@ public:
                     return _balerocGUID;
                 case DATA_ALYSRAZOR:
                     return _alysrazorGUID;
+                case DATA_RAGNAROS_DOOR:
+                    return _ragnarosDoorGUID;
                 default:
                     break;
             }
@@ -297,6 +299,7 @@ public:
             uint64 _shannoxControllerGUID;
             uint64 _cacheOfTheFirelordGUID;
             uint64 _cacheOfTheFirelordHeroicGUID;
+            uint64 _ragnarosDoorGUID;
 
             uint8 _bridgeEventDone;
             uint8 _ragnarosSummoned;

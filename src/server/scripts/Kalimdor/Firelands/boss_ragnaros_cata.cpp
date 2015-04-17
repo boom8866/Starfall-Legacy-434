@@ -27,6 +27,8 @@ enum Texts
     SAY_ANNOUNCE_EMERGE             = 10,
     SAY_ANNOUNCE_ENGULFING_FLAMES   = 11,
     SAY_ANNOUNCE_WORLD_IN_FLAMES    = 12,
+    SAY_DEATH_NORMAL                = 13,
+
 
     /*
     SAY_DEATH_NORMAL            = 2,
@@ -364,6 +366,7 @@ enum RagnarosQuest
 Position const SplittingTriggerNorth  = { 1023.55f,  -57.158f,   55.4215f,   3.12414f    };
 Position const SplittingTriggerEast   = { 1035.45f,  -25.3646f,  55.4924f,   2.49582f    };
 Position const SplittingTriggerWest   = { 1036.27f,  -89.2396f,  55.5098f,   3.83972f    };
+Position const CacheOfTheFirelordPos =  { 1012.49f,  -57.2882f,  55.3302f,   3.14637f    };
 
 Position const CenariusSummonPosition = { 795.504f,  -60.138f,   83.652f,    0.02050f    };
 Position const HamuulSummonPosition   = { 790.017f,  -50.393f,   97.115f,    6.22572f    };
@@ -561,10 +564,12 @@ public:
             events.ScheduleEvent(EVENT_SULFURAS_SMASH, 31000);
             events.ScheduleEvent(EVENT_HAND_OF_RAGNAROS, 25000);
             events.ScheduleEvent(EVENT_MAGMA_TRAP, 16000);
+            HandleDoor(true);
         }
 
         void EnterEvadeMode()
         {
+            _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SetData(DATA_RAGNAROS_SUMMONED, SPECIAL);
             instance->SetBossState(DATA_RAGNAROS, FAIL);
@@ -577,19 +582,27 @@ public:
                 if (!lava->HasAura(SPELL_MAGMA_PERIODIC))
                     lava->CastSpell(lava, SPELL_MAGMA_PERIODIC, true);
 
+            HandleDoor(false);
             me->DespawnOrUnsummon(1);
         }
 
         void JustDied(Unit* /*killer*/)
         {
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             _JustDied();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             summons.DespawnAll();
 
             if (!IsHeroic())
             {
+                Talk(SAY_DEATH_NORMAL);
                 if (Creature* sulfuras = me->FindNearestCreature(NPC_SULFURAS_HAND_OF_RAGNAROS, 100.0f, true))
                     sulfuras->DespawnOrUnsummon(1);
+
+                if (magma = me->FindNearestCreature(NPC_MAGMA_POOL_TRIGGER, 20.0f, true))
+                    if (!Is25ManRaid())
+                        if (GameObject* chest = magma->SummonGameObject(GO_CACHE_OF_THE_FIRELORD, CacheOfTheFirelordPos.m_positionX, CacheOfTheFirelordPos.m_positionY,
+                            CacheOfTheFirelordPos.m_positionZ, CacheOfTheFirelordPos.m_orientation, 0.0f, 0.0f, 0.0f, 0.0f, 1000))
+                            chest->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED | GO_FLAG_NOT_SELECTABLE | GO_FLAG_INTERACT_COND);
 
                 me->SetHealth(1);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
@@ -603,6 +616,8 @@ public:
 
             for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                 (*itr)->AI()->EnterEvadeMode();
+
+            HandleDoor(false);
         }
 
         void KilledUnit(Unit* killed)
@@ -911,6 +926,16 @@ public:
                 DoCast(me, SPELL_ENGULFING_FLAMES_RANGE);
                 _lastPlatformFlamed = 2;
             }
+        }
+
+        // For some reason Blizzard is using the opposite states for this door.
+        void HandleDoor(bool close)
+        {
+            if (GameObject* door = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_RAGNAROS_DOOR)))
+                if (close)
+                    door->SetGoState(GO_STATE_READY);
+                else
+                    door->SetGoState(GO_STATE_ACTIVE);
         }
     };
 
