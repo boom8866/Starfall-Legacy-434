@@ -1046,8 +1046,8 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                     ap += effectVengeance->GetAmount();
 
                 // Set limit
-                if (ap > int32(victim->CountPctFromMaxHealth(10)))
-                    ap = int32(victim->CountPctFromMaxHealth(10));
+                if (ap > int32(victim->GetStat(STAT_STAMINA) + CalculatePct(victim->GetCreateHealth(), 10)))
+                    ap = int32(victim->GetStat(STAT_STAMINA) + CalculatePct(victim->GetCreateHealth(), 10));
 
                 // Cast effect & correct duration
                 if (victim->GetTypeId() == TYPEID_PLAYER)
@@ -1076,8 +1076,8 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                         ap += effectVengeance->GetAmount();
 
                     // Set limit
-                    if (ap > int32(victim->CountPctFromMaxHealth(10)))
-                        ap = int32(victim->CountPctFromMaxHealth(10));
+                    if (ap > int32(victim->GetStat(STAT_STAMINA) + CalculatePct(victim->GetCreateHealth(), 10)))
+                        ap = int32(victim->GetStat(STAT_STAMINA) + CalculatePct(victim->GetCreateHealth(), 10));
 
                     // Cast effect & correct duration
                     if (victim->GetTypeId() == TYPEID_PLAYER)
@@ -8248,6 +8248,17 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     CastCustomSpell(this, 67545, &bp0, NULL, NULL, true, NULL, triggeredByAura->GetEffect(EFFECT_0), GetGUID());
                     return true;
                 }
+                // Dragon's breath
+                case 31661:
+                {
+                    // Living bomb explosion doesn't break dragon's breath
+                    if (procSpell && procSpell->Id == 44461)
+                    {
+                        *handled = true;
+                        return false;
+                    }
+                    break;
+                }
             }
             return false;
         }
@@ -11587,28 +11598,33 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 case SPELL_SCHOOL_MASK_FIRE:
                 case SPELL_SCHOOL_MASK_FROST:
                 case SPELL_SCHOOL_MASK_NATURE:
+                {
                     if (!spellProto->IsPositive())
+                    {
                         if (isTotem()) // Mastery: Enhanced Elements (For Totems)
                         {
-                            if (!spellProto->IsPositive())
-                                if (Unit* owner = GetCharmerOrOwner()) // Each points of Mastery increases damage by an additional 2.5%
-                                    if (owner->GetTypeId() == TYPEID_PLAYER)
-                                    {
-                                        float masteryPoints = owner->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                                        if (owner->HasAura(77223, owner->GetGUID()))
-                                            DoneTotalMod += DoneTotalMod * (0.025f * masteryPoints);
-                                    }
+                            if (Unit* owner = GetCharmerOrOwner()) // Each points of Mastery increases damage by an additional 2.5%
+                            {
+                                if (owner->GetTypeId() == TYPEID_PLAYER)
+                                {
+                                    float masteryPoints = owner->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                                    if (owner->HasAura(77223))
+                                        DoneTotalMod += DoneTotalMod * (0.20f + (0.025f * masteryPoints));
+                                }
+                            }
                         }
                         else // Mastery: Enhanced Elements (For Players)
                         {
                             if (GetTypeId() == TYPEID_PLAYER && spellProto->Id != 60103) // Each points of Mastery increases damage by an additional 2.5%
                             {
                                 float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                                if (HasAura(77223, GetGUID()))
+                                if (HasAura(77223))
                                     DoneTotalMod += DoneTotalMod * (0.025f * masteryPoints);
                             }
                         }
+                    }
                     break;
+                }
             }
             break;
     }

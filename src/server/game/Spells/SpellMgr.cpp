@@ -3144,7 +3144,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->MaxAffectedTargets = 3;
                 break;
             case 44461: // Living Bomb (Damage)
-                spellInfo->AttributesEx4 |= SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS;
                 spellInfo->MaxAffectedTargets = 3;
                 break;
             case 38310: // Multi-Shot
