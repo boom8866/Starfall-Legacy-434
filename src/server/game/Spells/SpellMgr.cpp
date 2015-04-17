@@ -91,14 +91,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             return DIMINISHING_NONE;
         case SPELLFAMILY_MAGE:
         {
-        case 28271:
-        case 28272:
-        case 59634:
-        case 61025:
-        case 61305:
-        case 61721:
-        case 61780:
-        case 71379:
             // Frostbite
             if (spellproto->SpellFamilyFlags[1] & 0x80000000)
                 return DIMINISHING_ROOT;
