@@ -34,6 +34,7 @@ enum Spells
     SPELL_ENCUMBERED                    = 75007,
     SPELL_ENCUMBERED_HC                 = 90729,
     SPELL_FIRE_PATCH                    = 90752,
+    SPELL_FIRE_PATCH_TRIGGERED          = 90754,
 
     SPELL_IMPALING_SLAM                 = 75056,
     SPELL_IMPALING_SLAM_PROTECTION      = 82864,
@@ -58,6 +59,9 @@ enum Events
     // Mace Phase
     EVENT_IMPALING_SLAM,
     EVENT_RESET_MACE,
+
+    // Vehicle protection
+    EVENT_REMOVE_VEHICLE_PROTECTION
 };
 
 enum Action
@@ -299,9 +303,15 @@ public:
                                 DoCast(target, SPELL_IMPALING_SLAM);
                                 Talk(SAY_IMPALE, target->GetGUID());
                                 target->CastSpell(me, SPELL_IMPALING_SLAM_VEHICLE, true);
+                                me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_FIRE_PATCH_TRIGGERED, true);
+                                events.ScheduleEvent(EVENT_REMOVE_VEHICLE_PROTECTION, 5100);
                             }
                             events.ScheduleEvent(EVENT_IMPALING_SLAM, 15500);
                         }
+                        break;
+                    case EVENT_REMOVE_VEHICLE_PROTECTION:
+                        me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_FIRE_PATCH_TRIGGERED, false);
+                        events.CancelEvent(EVENT_REMOVE_VEHICLE_PROTECTION);
                         break;
                     case EVENT_RESET_MACE:
                         events.CancelEvent(EVENT_IMPALING_SLAM);
@@ -651,10 +661,10 @@ public:
         {
             if (GetAura())
             {
-                uint8 charges = GetAura()->GetCharges();
-                if (charges > 1)
+                uint8 stack = GetAura()->GetStackAmount();
+                if (stack > 1)
                 {
-                    GetAura()->SetCharges(charges - 1);
+                    GetAura()->SetStackAmount(stack - 1);
                     return false;
                 }
                 else
@@ -675,6 +685,29 @@ public:
     AuraScript* GetAuraScript() const
     {
         return new spell_gb_disorienting_roar_AuraScript();
+    }
+
+    class spell_gb_disorienting_roar_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gb_disorienting_roar_SpellScript);
+
+        void HandleHeroicDifficulty()
+        {
+            if (Unit* target = GetHitUnit())
+                if (target->GetMap()->IsHeroic())
+                    if (Aura* disorientingRoar = target->GetAura(GetSpellInfo()->Id))
+                        disorientingRoar->SetStackAmount(3);
+        }
+
+        void Register()
+        {
+            AfterHit += SpellHitFn(spell_gb_disorienting_roar_SpellScript::HandleHeroicDifficulty);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gb_disorienting_roar_SpellScript();
     }
 };
 

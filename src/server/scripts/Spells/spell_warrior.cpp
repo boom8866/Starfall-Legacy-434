@@ -445,7 +445,7 @@ class spell_warr_execute : public SpellScriptLoader
                         if (!spellInfo)
                             return;
 
-                        int32 rageUsed = std::min<int32>(300, caster->GetPower(POWER_RAGE));
+                        int32 rageUsed = std::min<int32>(200, caster->GetPower(POWER_RAGE));
                         int32 newRage = std::max<int32>(0, caster->GetPower(POWER_RAGE) - rageUsed);
 
                         // Sudden Death rage save
@@ -593,6 +593,9 @@ class spell_warr_improved_spell_reflection : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& unitList)
             {
+                if (unitList.empty())
+                    return;
+
                 if (GetCaster())
                     unitList.remove(GetCaster());
             }
@@ -621,6 +624,9 @@ class spell_warr_intimidating_shout : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& unitList)
             {
+                if (unitList.empty())
+                    return;
+
                 unitList.remove(GetExplTargetWorldObject());
             }
 
@@ -1006,6 +1012,9 @@ class spell_warr_thunder_clap: SpellScriptLoader
 
                 void FindTargets(std::list<WorldObject*>& targets)
                 {
+                    if (targets.empty())
+                        return;
+
                     for(auto element : targets)
                     {
                         if(element && element->ToUnit() && element->ToUnit()->HasAura(94009))
@@ -1604,6 +1613,9 @@ public:
 
         void CheckTargets(std::list<WorldObject*>& targets)
         {
+            if (targets.empty())
+                return;
+
             reduction = targets.size() >= 4 ? true : false;
         }
 

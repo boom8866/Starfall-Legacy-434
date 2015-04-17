@@ -123,7 +123,9 @@ enum PriestSpells
     SPELL_PRIEST_GLYPH_OF_SHADOWFORM                = 107906,
 
     SPELL_PRIEST_T11_HEALER_BONUS_4P                = 89911,
-    SPELL_PRIEST_T11_HEALER_BONUS_4P_TRIGGER        = 89913
+    SPELL_PRIEST_T11_HEALER_BONUS_4P_TRIGGER        = 89913,
+
+    SPELL_PRIEST_TWIN_DISCIPLINES                   = 47586
 };
 
 enum PriestSpellIcons
@@ -176,6 +178,23 @@ public:
                 // Blizzlike (Twice application on crit)
                 if (eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_PRIEST_PRAYER_OF_HEALING && (eventInfo.GetHitMask() & PROC_EX_CRITICAL_HIT))
                     absorb += CalculatePct(int32(eventInfo.GetHealInfo()->GetHeal() / 2), aurEff->GetAmount());
+
+                // Mastery: Shield Discipline
+                if (GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->ToPlayer()->HasAuraType(SPELL_AURA_MASTERY))
+                {
+                    if (Player* pCaster = GetCaster()->ToPlayer())
+                    {
+                        float masteryRate = pCaster->GetRatingBonusValue(CR_MASTERY);
+                        if (pCaster->getClass() == CLASS_PRIEST)
+                        {
+                            if (pCaster->GetPrimaryTalentTree(pCaster->GetActiveSpec()) == PRIEST_SPEC_DISCIPLINE)
+                            {
+                                int32 bonusTotal = int32(absorb * (0.20f + (0.025f * masteryRate)));
+                                absorb += bonusTotal;
+                            }
+                        }
+                    }
+                }
 
                 // Multiple effects stack, so let's try to find this aura.
                 if (AuraEffect const* aegis = eventInfo.GetActionTarget()->GetAuraEffect(SPELL_PRIEST_DIVINE_AEGIS, EFFECT_0))
@@ -635,12 +654,16 @@ class spell_pri_power_word_shield : public SpellScriptLoader
                     amount += int32(bonus);
 
                     // Improved Power Word: Shield r 1
-                    if (AuraEffect const* improved = GetCaster()->GetAuraEffect(SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R1, EFFECT_0))
+                    if (AuraEffect const* improved = caster->GetAuraEffect(SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R1, EFFECT_0))
                         AddPct(amount, improved->GetAmount());
 
                     // Improved Power Word: Shield r2
-                    if (AuraEffect const* improved = GetCaster()->GetAuraEffect(SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R2, EFFECT_0))
+                    if (AuraEffect const* improved = caster->GetAuraEffect(SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R2, EFFECT_0))
                         AddPct(amount, improved->GetAmount());
+
+                    // Twin Disciplines
+                    if (AuraEffect const* twinDisciplines = caster->GetAuraEffectOfRankedSpell(SPELL_PRIEST_TWIN_DISCIPLINES, EFFECT_0))
+                        AddPct(amount, twinDisciplines->GetAmount());
 
                     // Mastery: Shield Discipline
                     if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->HasAuraType(SPELL_AURA_MASTERY))
@@ -1673,6 +1696,9 @@ public:
 
         void SelectTarget(std::list<WorldObject*>& targets)
         {
+            if (targets.empty())
+                return;
+
             // Prefer a target that has low health
             std::priority_queue<Player*, std::vector<Player*>, ComparePlayersHealth> lowestHpTargets;
             for (auto const i : targets)
@@ -1873,6 +1899,9 @@ class spell_pri_vampiric_embrace : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& unitList)
             {
+                if (unitList.empty())
+                    return;
+
                 if (GetCaster())
                     unitList.remove(GetCaster());
             }

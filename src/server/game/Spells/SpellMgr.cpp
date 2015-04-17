@@ -104,11 +104,17 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             else if (spellproto->SpellFamilyFlags[0] & 0x800000)
                 return DIMINISHING_DRAGONS_BREATH;
             // Ring of Frost, Deep Freeze and Polymorph
-            else if (spellproto->Id == 82691 || spellproto->Id == 44572 || spellproto->Id == 118)
+            else if (spellproto->Id == 82691 || spellproto->Id == 44572 || spellproto->Id == 118 ||
+                spellproto->Id == 28271 || spellproto->Id == 28272 || spellproto->Id == 59634 ||
+                spellproto->Id == 61025 || spellproto->Id == 61305 || spellproto->Id == 61721 ||
+                spellproto->Id == 61780 || spellproto->Id == 71379)
                 return DIMINISHING_CONTROLLED_STUN;
             // Dragon's Breath
             else if (spellproto->Id == 31661)
                 return DIMINISHING_LIMITONLY;
+            // Improved Polymorph
+            else if(spellproto->Id == 83046 || spellproto->Id == 83047)
+                return DIMINISHING_NONE;
             break;
         }
         case SPELLFAMILY_WARRIOR:
@@ -205,6 +211,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Bash (Feral Spirit Ability)
             if (spellproto->Id == 58861)
                 return DIMINISHING_NONE;
+            // Hex
+            else if (spellproto->Id == 51514)
+                return DIMINISHING_CONTROLLED_STUN;
             break;
         }
         default:
@@ -5108,8 +5117,13 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->StartRecoveryTime = 1000;
                 break;
             // * Forgemaster Throngus
-            case 90764:
+            case 90764: // Burning Flames
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
+                break;
+            case 74909: // Glancing Blows
+            case 76480:
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+                spellInfo->Effects[EFFECT_0].MiscValue = 127;
                 break;
             // * Drahga Shadowburner
             case 82850: // Flaming Fixate

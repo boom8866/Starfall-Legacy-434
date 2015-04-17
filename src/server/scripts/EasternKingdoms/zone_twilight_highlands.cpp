@@ -3455,6 +3455,17 @@ public:
                             me->Relocate(-5095.94f, -4661.88f, 356.40f, 3.66f);
                             player->ExitVehicle();
                             player->NearTeleportTo(-5095.94f, -4661.88f, 356.40f, 3.66f);
+
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                            me->VisitNearbyObject(100.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr) != me)
+                                    (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                            }
+
                             player->SummonCreature(NPC_EYE, -5100.89f, -4664.92f, 356.40f, 0.39f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
                             player->SummonCreature(me->GetEntry(), -5095.94f, -4661.88f, 356.40f, 3.66f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                             player->SummonCreature(me->GetEntry(), -5084.03f, -4677.52f, 364.45f, 2.09f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));

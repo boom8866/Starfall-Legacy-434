@@ -5083,6 +5083,9 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             // Hemorrhage
             if (m_spellInfo->SpellFamilyFlags[0] & 0x2000000)
             {
+                if (!m_caster || !unitTarget)
+                    return;
+
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     m_caster->ToPlayer()->AddComboPoints(unitTarget, 1, this);
 
@@ -5102,13 +5105,17 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
         {
             // Skyshatter Harness item set bonus
             // Stormstrike
-            if (AuraEffect* aurEff = m_caster->IsScriptOverriden(m_spellInfo, 5634))
-                m_caster->CastSpell(m_caster, 38430, true, NULL, aurEff);
+            if (m_caster)
+                if (AuraEffect* aurEff = m_caster->IsScriptOverriden(m_spellInfo, 5634))
+                    m_caster->CastSpell(m_caster, 38430, true, NULL, aurEff);
 
             switch (m_spellInfo->Id)
             {
                 case 60103: // Lava Lash
                 {
+                    if (!m_caster)
+                        return;
+
                     // Damage is increased by 40% if your off-hand weapon is enchanted with Flametongue.
                     if (m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
                         totalDamagePercentMod += totalDamagePercentMod * 0.40f;
@@ -5153,11 +5160,12 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             // Mangle (Cat): CP
             if (m_spellInfo->SpellFamilyFlags[1] & 0x400)
             {
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    m_caster->ToPlayer()->AddComboPoints(unitTarget, 1, this);
+                if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
+                    if (unitTarget)
+                        m_caster->ToPlayer()->AddComboPoints(unitTarget, 1, this);
             }
             // Shred, Maul - Rend and Tear
-            else if (m_spellInfo->SpellFamilyFlags[0] & 0x00008800 && unitTarget->HasAuraState(AURA_STATE_BLEEDING))
+            else if (unitTarget && m_spellInfo->SpellFamilyFlags[0] & 0x00008800 && unitTarget->HasAuraState(AURA_STATE_BLEEDING))
             {
                 if (AuraEffect const* rendAndTear = m_caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2859, 0))
                     AddPct(totalDamagePercentMod, rendAndTear->GetAmount());
@@ -5169,6 +5177,9 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             //Templar's Verdict
             if (m_spellInfo->Id == 85256)
             {
+                if (!m_caster)
+                    return;
+
                 // Divine Purpose
                 if (m_caster->HasAura(90174))
                 {

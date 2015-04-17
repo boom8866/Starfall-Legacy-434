@@ -1232,6 +1232,9 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
+            if (targets.empty())
+                return;
+
             targets.clear();
             targets.push_back(GetCaster());
             if (Unit* owner = GetCaster()->GetOwner())

@@ -566,8 +566,9 @@ class spell_mage_focus_magic : public SpellScriptLoader
                 PreventDefaultAction();
                 if (Unit* target = GetTarget())
                 {
-                    if (_procTarget && _procTarget->isAlive() && _procTarget->HasSpell(SPELL_FOCUS_MAGIC_TALENT))
-                        target->CastSpell(_procTarget, SPELL_MAGE_FOCUS_MAGIC_PROC, true, NULL, aurEff);
+                    if (Aura* focusMagic = target->GetAura(SPELL_FOCUS_MAGIC_TALENT))
+                        if (Unit* fmOwner = focusMagic->GetCaster())
+                            fmOwner->CastSpell(fmOwner, SPELL_MAGE_FOCUS_MAGIC_PROC, true, NULL, aurEff);
                 }
             }
 

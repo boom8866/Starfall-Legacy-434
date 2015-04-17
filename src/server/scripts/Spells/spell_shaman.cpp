@@ -150,6 +150,9 @@ class spell_sha_bloodlust : public SpellScriptLoader
 
             void RemoveInvalidTargets(std::list<WorldObject*>& targets)
             {
+                if (targets.empty())
+                    return;
+
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_SHAMAN_SATED));
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_HUNTER_INSANITY));
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_MAGE_TEMPORAL_DISPLACEMENT));
@@ -318,6 +321,9 @@ class spell_sha_earthen_power : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& unitList)
             {
+                if (unitList.empty())
+                    return;
+
                 unitList.remove_if(EarthenPowerTargetSelector());
             }
 
@@ -478,7 +484,8 @@ class spell_sha_healing_stream_totem : public SpellScriptLoader
                                 damage += damage * 0.25f;
                         }
 
-                        caster->CastCustomSpell(target, SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL, &damage, 0, 0, true, 0, 0, GetOriginalCaster()->GetGUID());
+                        if (GetOriginalCaster())
+                            caster->CastCustomSpell(target, SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL, &damage, 0, 0, true, 0, 0, GetOriginalCaster()->GetGUID());
                     }
                 }
             }
@@ -515,6 +522,9 @@ class spell_sha_heroism : public SpellScriptLoader
 
             void RemoveInvalidTargets(std::list<WorldObject*>& targets)
             {
+                if (targets.empty())
+                    return;
+
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_SHAMAN_EXHAUSTION));
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_HUNTER_INSANITY));
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_MAGE_TEMPORAL_DISPLACEMENT));
@@ -755,6 +765,9 @@ public:
 
         void CalculatePercentage(std::list<WorldObject*>& targets)
         {
+            if (targets.empty())
+                return;
+
             for (std::list<WorldObject*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
             {
                 if (Player* player = (*itr)->ToPlayer())
@@ -1252,11 +1265,15 @@ class spell_sha_improved_lava_lash : public SpellScriptLoader
                             Unit* target = (*singleTarget);
                             if (target)
                             {
+                                if (!caster->IsValidAttackTarget(target))
+                                    continue;
+
                                 if (Aura* procShock = procTarget->GetAura(SPELL_SHAMAN_FLAME_SHOCK, caster->GetGUID()))
                                 {
                                     if (!target->HasAura(SPELL_SHAMAN_FLAME_SHOCK, caster->GetGUID()))
                                     {
-                                        caster->AddAura(SPELL_SHAMAN_FLAME_SHOCK, target);
+                                        if (target && target->IsInWorld())
+                                            caster->AddAura(SPELL_SHAMAN_FLAME_SHOCK, target);
                                         if (Aura* targetShock = target->GetAura(SPELL_SHAMAN_FLAME_SHOCK, caster->GetGUID()))
                                             targetShock->SetDuration(procShock->GetDuration());
                                     }

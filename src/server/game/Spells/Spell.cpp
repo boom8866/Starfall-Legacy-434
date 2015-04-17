@@ -1246,7 +1246,12 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                     maxSize = m_caster->HasAura(55675) ? 6 : 5; // Glyph of Circle of Healing
                     power = POWER_HEALTH;
                 }
-                else if (m_spellInfo->Id == 64844 || m_spellInfo->Id == 81269) // Divine Hymn - Efflorescence
+                else if (m_spellInfo->Id == 64844)  // Divine Hymn
+                {
+                    maxSize = 5;
+                    power = POWER_HEALTH;
+                }
+                else if (m_spellInfo->Id == 81269)  // Efflorescence
                 {
                     maxSize = 3;
                     power = POWER_HEALTH;

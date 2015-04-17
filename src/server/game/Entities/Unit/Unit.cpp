@@ -8201,23 +8201,37 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
             {
                 // Polymorph
                 case 118:
+                case 28271:
+                case 28272:
+                case 59634:
+                case 61025:
+                case 61305:
+                case 61721:
+                case 61780:
+                case 71379:
                 {
-                    RemoveAurasDueToSpell(dummySpell->Id);
+                    *handled = true;
 
-                    // Improved polymorph
-                    if (triggeredByAura->GetCaster()->HasAura(87515))
-                        return false;
-                    if (triggeredByAura->GetCaster()->HasAura(11210))
+                    RemoveAurasDueToSpell(dummySpell->Id);
+                    if (Unit* caster = triggeredByAura->GetCaster())
                     {
-                        CastSpell(this,83046,true);
-                        triggeredByAura->GetCaster()->CastSpell(triggeredByAura->GetCaster(),87515,true);
+                        // Improved Polymorph
+                        if (caster->HasAura(87515))
+                            return false;
+
+                        if (caster->HasAura(11210))
+                        {
+                            AddAura(83046, this);
+                            caster->CastSpell(caster, 87515, true);
+                        }
+
+                        if (caster->HasAura(12592))
+                        {
+                            AddAura(83047, this);
+                            caster->CastSpell(caster, 87515, true);
+                        }
                     }
-                    else if (triggeredByAura->GetCaster()->HasAura(12592))
-                    {
-                        CastSpell(this,83047,true);
-                        triggeredByAura->GetCaster()->CastSpell(triggeredByAura->GetCaster(),87515,true);
-                    }
-                    return true;
+                    return false;
                 }
                 // Empowered Fire
                 case 31656:
@@ -9414,6 +9428,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             if (GetTypeId() == TYPEID_PLAYER)
                 return false;
+            break;
+        }
+        // Focus Magic
+        case 54646:
+        {
+            // Handled via spellscripts
+            return false;
             break;
         }
         // Battle Trance
