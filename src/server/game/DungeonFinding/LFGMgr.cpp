@@ -1301,6 +1301,13 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
         if (player->GetMapId() == uint32(dungeon->map))
             player->TeleportToBGEntryPoint();
 
+        // in the case were we are the last in lfgg roup then we must disband when porting out of the instance
+        if (group && group->GetMembersCount() == 1)
+        {
+            group->Disband();
+            sLog->outDebug(LOG_FILTER_LFG, "Player %s is last in lfggroup so we disband the group.", player->GetName().c_str());
+        }
+
         return;
     }
 
