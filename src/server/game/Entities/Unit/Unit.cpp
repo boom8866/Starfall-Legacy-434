@@ -1417,6 +1417,9 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
                 if (!isPet())
                     break;
 
+                if (!ToCreature())
+                    break;
+
                 // Mana Feed
                 if (Unit* owner = GetOwner())
                 {
@@ -1426,6 +1429,11 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
                     int32 totalMana = owner->GetMaxPower(POWER_MANA);
                     int32 amountR1 = totalMana * 2 / 100;
                     int32 amountR2 = totalMana * 4 / 100;
+
+                    // Patch 4.1.0 (2011-04-26): Now restores more mana (four times as much) when the warlock is using a Felguard or Felhunter.
+                    // http://wow.gamepedia.com/Mana_Feed
+                    amountR1 *= (GetEntry() == 417 || GetEntry() == 17252) ? 4 : 1;
+                    amountR2 *= (GetEntry() == 417 || GetEntry() == 17252) ? 4 : 1;
 
                     // Handle spell ranks
                     if (owner->HasAura(30326))
