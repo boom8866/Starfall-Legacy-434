@@ -1725,7 +1725,7 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
             return SPELL_FAILED_BAD_TARGETS;
     }
 
-    if (caster->GetTypeId() == TYPEID_PLAYER)
+    if (caster->GetTypeId() == TYPEID_PLAYER || caster->isTotem() || caster->isPet())
     {
         // Check to see if the source could see the target, as some totem spells and whirlwind
         if ((Effects[0].TargetA.GetTarget() == TARGET_SRC_CASTER) & (Effects[0].TargetB.GetTarget() == TARGET_UNIT_SRC_AREA_ENEMY))
