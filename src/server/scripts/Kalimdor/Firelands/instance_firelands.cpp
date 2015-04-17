@@ -44,7 +44,6 @@ public:
             _balerocGUID = 0;
             _shannoxControllerGUID = 0;
             _cacheOfTheFirelordGUID = 0;
-            _cacheOfTheFirelordHeroicGUID = 0;
             _ragnarosDoorGUID = 0;
 
             _bridgeEventDone = 0;
@@ -93,12 +92,6 @@ public:
         {
             switch (go->GetEntry())
             {
-                case GO_CACHE_OF_THE_FIRELORD:
-                    _cacheOfTheFirelordGUID = go->GetGUID();
-                    break;
-                case GO_CACHE_OF_THE_FIRELORD_HC:
-                    _cacheOfTheFirelordHeroicGUID = go->GetGUID();
-                    break;
                 case GO_BRIDGE_DOOR:
                     if (GetData(DATA_FIRELANDS_BRIDGE))
                         go->SetGoState(GO_STATE_ACTIVE);
@@ -113,6 +106,10 @@ public:
                     break;
                 case GO_RAGNAROS_DOOR:
                     _ragnarosDoorGUID = go->GetGUID();
+                    break;
+                case GO_CACHE_OF_THE_FIRELORD:
+                case GO_CACHE_OF_THE_FIRELORD_HC:
+                    _cacheOfTheFirelordGUID = go->GetGUID();
                     break;
                 default:
                     break;
@@ -197,6 +194,8 @@ public:
                     return _alysrazorGUID;
                 case DATA_RAGNAROS_DOOR:
                     return _ragnarosDoorGUID;
+                case DATA_CACHE_OF_THE_FIRE_LORD:
+                    return _cacheOfTheFirelordGUID;
                 default:
                     break;
             }
@@ -298,7 +297,6 @@ public:
             uint64 _balerocGUID;
             uint64 _shannoxControllerGUID;
             uint64 _cacheOfTheFirelordGUID;
-            uint64 _cacheOfTheFirelordHeroicGUID;
             uint64 _ragnarosDoorGUID;
 
             uint8 _bridgeEventDone;

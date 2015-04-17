@@ -366,7 +366,6 @@ enum RagnarosQuest
 Position const SplittingTriggerNorth  = { 1023.55f,  -57.158f,   55.4215f,   3.12414f    };
 Position const SplittingTriggerEast   = { 1035.45f,  -25.3646f,  55.4924f,   2.49582f    };
 Position const SplittingTriggerWest   = { 1036.27f,  -89.2396f,  55.5098f,   3.83972f    };
-Position const CacheOfTheFirelordPos =  { 1012.49f,  -57.2882f,  55.3302f,   3.14637f    };
 
 Position const CenariusSummonPosition = { 795.504f,  -60.138f,   83.652f,    0.02050f    };
 Position const HamuulSummonPosition   = { 790.017f,  -50.393f,   97.115f,    6.22572f    };
@@ -586,7 +585,7 @@ public:
             me->DespawnOrUnsummon(1);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* killer)
         {
             _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -598,11 +597,11 @@ public:
                 if (Creature* sulfuras = me->FindNearestCreature(NPC_SULFURAS_HAND_OF_RAGNAROS, 100.0f, true))
                     sulfuras->DespawnOrUnsummon(1);
 
-                if (magma = me->FindNearestCreature(NPC_MAGMA_POOL_TRIGGER, 20.0f, true))
-                    if (!Is25ManRaid())
-                        if (GameObject* chest = magma->SummonGameObject(GO_CACHE_OF_THE_FIRELORD, CacheOfTheFirelordPos.m_positionX, CacheOfTheFirelordPos.m_positionY,
-                            CacheOfTheFirelordPos.m_positionZ, CacheOfTheFirelordPos.m_orientation, 0.0f, 0.0f, 0.0f, 0.0f, 1000))
-                            chest->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED | GO_FLAG_NOT_SELECTABLE | GO_FLAG_INTERACT_COND);
+                if (GameObject* cache = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_CACHE_OF_THE_FIRE_LORD)))
+                {
+                    cache->SetPhaseMask(1, true);
+                    cache->SetLootState(GO_READY);
+                }
 
                 me->SetHealth(1);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
