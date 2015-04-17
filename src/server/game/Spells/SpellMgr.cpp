@@ -104,11 +104,17 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             else if (spellproto->SpellFamilyFlags[0] & 0x800000)
                 return DIMINISHING_DRAGONS_BREATH;
             // Ring of Frost, Deep Freeze and Polymorph
-            else if (spellproto->Id == 82691 || spellproto->Id == 44572 || spellproto->Id == 118)
+            else if (spellproto->Id == 82691 || spellproto->Id == 44572 || spellproto->Id == 118 ||
+                spellproto->Id == 28271 || spellproto->Id == 28272 || spellproto->Id == 59634 ||
+                spellproto->Id == 61025 || spellproto->Id == 61305 || spellproto->Id == 61721 ||
+                spellproto->Id == 61780 || spellproto->Id == 71379)
                 return DIMINISHING_CONTROLLED_STUN;
             // Dragon's Breath
             else if (spellproto->Id == 31661)
                 return DIMINISHING_LIMITONLY;
+            // Improved Polymorph
+            else if(spellproto->Id == 83046 || spellproto->Id == 83047)
+                return DIMINISHING_NONE;
             break;
         }
         case SPELLFAMILY_WARRIOR:
@@ -129,6 +135,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Seduction
             else if (spellproto->SpellFamilyFlags[1] & 0x10000000)
                 return DIMINISHING_FEAR;
+            // Unstable Affliction (dispel)
+            else if (spellproto->Id == 31117)
+                return DIMINISHING_NONE;
             break;
         }
         case SPELLFAMILY_DRUID:
@@ -3138,7 +3147,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->MaxAffectedTargets = 3;
                 break;
             case 44461: // Living Bomb (Damage)
-                spellInfo->AttributesEx4 |= SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS;
                 spellInfo->MaxAffectedTargets = 3;
                 break;
             case 38310: // Multi-Shot

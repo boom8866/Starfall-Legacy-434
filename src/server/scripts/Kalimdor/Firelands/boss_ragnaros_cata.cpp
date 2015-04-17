@@ -86,6 +86,8 @@ enum Spells
     SPELL_ENGULFING_FLAMES_VISUAL_CENTER    = 99217,
     SPELL_ENGULFING_FLAMES_VISUAL_RANGE     = 99218,
     SPELL_WOLRD_IN_FLAMES                   = 100171,
+    SPELL_LIVING_METEOR                     = 99268,
+
 
     // Molten Seed
     SPELL_MOLTEN_SEED                       = 98333,
@@ -115,15 +117,18 @@ enum Spells
     SPELL_BLAZING_HEAT_DAMAGE_AURA          = 99128,
 
     // Living Meteor
-    SPELL_LIVING_METEOR_MISSILE             = 99268,
+    SPELL_LIVING_METEOR_PERIODIC            = 99269,
+    SPELL_COMBUSTIBLE                       = 99296,
+    SPELL_FIXATE                            = 99849,
+    SPELL_COMBUSTITION                      = 99303,
+    SPELL_METEOR_IMPACT                     = 99287,
+    SPELL_LIVING_METEOR_DUMMY               = 99279,
+
     SPELL_LIVING_METEOR_DAMAGE_REDUCTION    = 100904,
-    SPELL_LIVING_METEOR_COMBUSTIBLE         = 99296,
-    SPELL_LIVING_METEOR_COMBUSTITION        = 99303, // Knockback Spell (only castable if the meteor has the aura)
     SPELL_LIVING_METEOR_EXPLOSION_TRIGGER   = 99269,
-    SPELL_LIVING_METEOR_INCREASE_SPEED      = 100278,
-    SPELL_LIVING_METEOR_FIXATE              = 99849,
     SPELL_LIVING_METEOR_UNK                 = 99267,
     SPELL_LIVING_METEOR_EXPLOSION           = 99287,
+    SPELL_LIVING_METEOR_INCREASE_SPEED      = 100278,
 
     // Heroic Encounter
 
@@ -262,8 +267,7 @@ enum Events
 
     // Living Meteor
     EVENT_STALK_PLAYER,
-    EVENT_KILL_PLAYER,
-    EVENT_ENABLE_KNOCKBACK,
+    EVENT_MAKE_COMBUSTIBLE,
 
     // Archdruids
     EVENT_SAY_PULL,
@@ -821,12 +825,17 @@ public:
                         }
                         events.ScheduleEvent(EVENT_ENGULFING_FLAMES, events.IsInPhase(PHASE_2) ? 60000 : 30000);
                         break;
+                    case EVENT_LIVING_METEOR:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_LIVING_METEOR);
+                        events.ScheduleEvent(EVENT_LIVING_METEOR, 45000);
+                        break;
                     default:
                         break;
                 }
             }
             if (Unit* victim = me->getVictim())
-                if (me->IsWithinCombatRange(victim, me->GetFloatValue(UNIT_FIELD_COMBATREACH)))
+                if (victim->IsWithinMeleeRange(me))
                     DoMeleeAttackIfReady();
                 else
                     DoSpellAttackIfReady(SPELL_MAGMA_STRIKE);
@@ -930,6 +939,8 @@ class npc_fl_magma_trap : public CreatureScript
                 events.ScheduleEvent(EVENT_PREPARE_TRAP, 1000);
                 me->AddAura(SPELL_MAGMA_TRAP_VISUAL, me);
                 me->SetReactState(REACT_PASSIVE);
+                if (me->GetPositionZ() >= 56.0f)
+                    me->GetMotionMaster()->MoveFall();
             }
 
             void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
@@ -1258,7 +1269,7 @@ class npc_fl_lava_scion : public CreatureScript
             InstanceScript* instance;
             EventMap events;
 
-            void IsSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* /*summoner*/)
             {
                 if (Unit* player = me->FindNearestPlayer(200.0f, true))
                     me->AI()->AttackStart(player);
@@ -1267,7 +1278,7 @@ class npc_fl_lava_scion : public CreatureScript
             void EnterCombat(Unit* /*victim*/)
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                events.ScheduleEvent(EVENT_BLAZING_HEAT, urand (10000, 12000));
+                events.ScheduleEvent(EVENT_BLAZING_HEAT, 12000);
             }
 
             void JustDied(Unit* /*killer*/)
@@ -1322,7 +1333,7 @@ class npc_fl_blazing_heat : public CreatureScript
             {
             }
 
-            void IsSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* /*summoner*/)
             {
                 if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 150.0f, true))
                     ragnaros->AI()->JustSummoned(me);
@@ -1353,34 +1364,70 @@ class npc_fl_living_meteor : public CreatureScript
             Unit* target;
             EventMap events;
 
-            void IsSummonedBy(Unit* summoner)
+            void InitializeAI()
             {
                 me->SetReactState(REACT_PASSIVE);
-                me->SetInCombatWithZone();
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-
-                if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                    me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE, false);
-
-                me->AddAura(SPELL_LIVING_METEOR_DAMAGE_REDUCTION, me);
-                events.ScheduleEvent(EVENT_STALK_PLAYER, 3000);
-                
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
+            void JustKilled(Unit* killed)
             {
-                if (me->HasAura(SPELL_LIVING_METEOR_COMBUSTIBLE))
-                {
-                    events.Reset();
-                    me->RemoveAllAuras();
-                    me->GetMotionMaster()->Clear();
-                    DoCast(me, SPELL_LIVING_METEOR_COMBUSTITION);
+                if (Unit* target = me->getVictim())
+                    if (target == killed)
+                    {
+                        me->StopMoving();
+                        if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        {
+                            DoCast(target, SPELL_FIXATE);
+                            events.ScheduleEvent(EVENT_STALK_PLAYER, 1);
+                        }
+                    }
+            }
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
+                me->SetInCombatWithZone();
+                if (IsHeroic())
                     me->AddAura(SPELL_LIVING_METEOR_DAMAGE_REDUCTION, me);
+
+                if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                    me->CastSpell(target, SPELL_FIXATE, false);
+
+                events.ScheduleEvent(EVENT_STALK_PLAYER, 2500);    
+            }
+
+            void SpellHitTarget(Unit* target, SpellInfo const* spell)
+            {
+                if (spell->Id == SPELL_LIVING_METEOR_DUMMY)
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        DoCast(me, SPELL_METEOR_IMPACT, true);
+                        me->RemoveAllAuras();
+                        me->StopMoving();
+
+                        if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        {
+                            DoCast(target, SPELL_FIXATE);
+                            events.ScheduleEvent(EVENT_STALK_PLAYER, 2500);
+                        }
+                    }
+            }
+
+            void DamageTaken(Unit* attacker, uint32& /*damage*/)
+            {
+                if (me->HasAura(SPELL_COMBUSTIBLE))
+                {
+                    me->RemoveAllAuras();
+                    me->StopMoving();
+                    DoCast(attacker, SPELL_COMBUSTITION);
+
                     if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                     {
-                        events.ScheduleEvent(EVENT_STALK_PLAYER, 3000);
-                        me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE, false);
+                        DoCast(target, SPELL_FIXATE);
+                        events.ScheduleEvent(EVENT_STALK_PLAYER, 2500);
                     }
+
+                    if (IsHeroic())
+                        me->AddAura(SPELL_LIVING_METEOR_DAMAGE_REDUCTION, me);
                 }
             }
 
@@ -1395,28 +1442,11 @@ class npc_fl_living_meteor : public CreatureScript
                         case EVENT_STALK_PLAYER:
                             me->ClearUnitState(UNIT_STATE_CASTING);
                             me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
-                            events.ScheduleEvent(EVENT_KILL_PLAYER, 500);
-                            events.ScheduleEvent(EVENT_ENABLE_KNOCKBACK, 2000);
+                            events.ScheduleEvent(EVENT_MAKE_COMBUSTIBLE, 2500);
                             break;
-                        case EVENT_KILL_PLAYER:
-                            if (Unit* player = me->FindNearestPlayer(5.0f, true))
-                            {
-                                events.Reset();
-                                me->RemoveAllAuras();
-                                me->GetMotionMaster()->Clear();
-                                me->AddAura(SPELL_LIVING_METEOR_DAMAGE_REDUCTION, me);
-                                DoCast(me, SPELL_LIVING_METEOR_EXPLOSION);
-                                if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                                {
-                                    events.ScheduleEvent(EVENT_STALK_PLAYER, 3000);
-                                    me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE, false);
-                                }
-                            }
-                            else
-                                events.ScheduleEvent(EVENT_KILL_PLAYER, 500);
-                            break;
-                        case EVENT_ENABLE_KNOCKBACK:
-                            me->AddAura(SPELL_LIVING_METEOR_COMBUSTIBLE, me);
+                        case EVENT_MAKE_COMBUSTIBLE:
+                            DoCast(me, SPELL_LIVING_METEOR_PERIODIC, true);
+                            DoCast(me, SPELL_COMBUSTIBLE, true);
                             break;
                         default:
                             break;
@@ -2191,6 +2221,33 @@ public:
     }
 };
 
+class spell_fl_lavalogged : public SpellScriptLoader
+{
+public:
+    spell_fl_lavalogged() : SpellScriptLoader("spell_fl_lavalogged") { }
+
+    class spell_fl_lavalogged_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_fl_lavalogged_AuraScript);
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget()->ToUnit())
+                target->AddAura(SPELL_LIVING_METEOR_INCREASE_SPEED, target);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_fl_lavalogged_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_fl_lavalogged_AuraScript();
+    }
+};
+
 class spell_fl_empower_sulfuras : public SpellScriptLoader
 {
     public:
@@ -2375,32 +2432,6 @@ public:
     }
 };
 
-class spell_fl_lavalogged : public SpellScriptLoader
-{
-public:
-    spell_fl_lavalogged() : SpellScriptLoader("spell_fl_lavalogged") { }
-
-    class spell_fl_lavalogged_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_fl_lavalogged_AuraScript);
-
-        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            GetCaster()->AddAura(SPELL_LIVING_METEOR_INCREASE_SPEED, GetCaster());
-        }
-
-        void Register()
-        {
-            OnEffectApply += AuraEffectApplyFn(spell_fl_lavalogged_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_fl_lavalogged_AuraScript();
-    }
-};
-
 void AddSC_boss_ragnaros_cata()
 {
     new at_sulfuron_keep();
@@ -2413,8 +2444,9 @@ void AddSC_boss_ragnaros_cata()
     new npc_fl_molten_elemental();
     new npc_fl_lava_scion();
     new npc_fl_blazing_heat();
-
     new npc_fl_living_meteor();
+
+    /* Rewrites required */
     new npc_fl_archdruids();
     new npc_fl_dreadflame();
     new npc_fl_cloudburst();
@@ -2430,12 +2462,13 @@ void AddSC_boss_ragnaros_cata()
     new spell_fl_world_in_flames();
     new spell_fl_engulfing_flames();
     new spell_fl_blazing_heat();
+    new spell_fl_lavalogged();
 
+    /* Rewrites required */
     new spell_fl_empower_sulfuras();
     new spell_fl_breadth_of_frost();
     new spell_fl_breadth_of_frost_freeze();
     new spell_fl_entrapping_roots();
     new spell_fl_molten_inferno();
     new spell_fl_deluge();
-    new spell_fl_lavalogged();
 }
