@@ -27,6 +27,8 @@ enum Texts
     SAY_ANNOUNCE_EMERGE             = 10,
     SAY_ANNOUNCE_ENGULFING_FLAMES   = 11,
     SAY_ANNOUNCE_WORLD_IN_FLAMES    = 12,
+    SAY_DEATH_NORMAL                = 13,
+
 
     /*
     SAY_DEATH_NORMAL            = 2,
@@ -561,10 +563,12 @@ public:
             events.ScheduleEvent(EVENT_SULFURAS_SMASH, 31000);
             events.ScheduleEvent(EVENT_HAND_OF_RAGNAROS, 25000);
             events.ScheduleEvent(EVENT_MAGMA_TRAP, 16000);
+            HandleDoor(true);
         }
 
         void EnterEvadeMode()
         {
+            _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SetData(DATA_RAGNAROS_SUMMONED, SPECIAL);
             instance->SetBossState(DATA_RAGNAROS, FAIL);
@@ -577,19 +581,27 @@ public:
                 if (!lava->HasAura(SPELL_MAGMA_PERIODIC))
                     lava->CastSpell(lava, SPELL_MAGMA_PERIODIC, true);
 
+            HandleDoor(false);
             me->DespawnOrUnsummon(1);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* killer)
         {
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             _JustDied();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             summons.DespawnAll();
 
             if (!IsHeroic())
             {
+                Talk(SAY_DEATH_NORMAL);
                 if (Creature* sulfuras = me->FindNearestCreature(NPC_SULFURAS_HAND_OF_RAGNAROS, 100.0f, true))
                     sulfuras->DespawnOrUnsummon(1);
+
+                if (GameObject* cache = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_CACHE_OF_THE_FIRE_LORD)))
+                {
+                    cache->SetPhaseMask(1, true);
+                    cache->SetLootState(GO_READY);
+                }
 
                 me->SetHealth(1);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
@@ -603,6 +615,8 @@ public:
 
             for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                 (*itr)->AI()->EnterEvadeMode();
+
+            HandleDoor(false);
         }
 
         void KilledUnit(Unit* killed)
@@ -911,6 +925,16 @@ public:
                 DoCast(me, SPELL_ENGULFING_FLAMES_RANGE);
                 _lastPlatformFlamed = 2;
             }
+        }
+
+        // For some reason Blizzard is using the opposite states for this door.
+        void HandleDoor(bool close)
+        {
+            if (GameObject* door = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_RAGNAROS_DOOR)))
+                if (close)
+                    door->SetGoState(GO_STATE_READY);
+                else
+                    door->SetGoState(GO_STATE_ACTIVE);
         }
     };
 
