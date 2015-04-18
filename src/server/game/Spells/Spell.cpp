@@ -4811,6 +4811,13 @@ void Spell::TakePower()
                     return;
                 break;
             }
+            case 47541: // Death Coil (DK)
+            {
+                // Sudden Doom (Proc)
+                if (m_caster->HasAura(81340))
+                    return;
+                break;
+            }
             case 85696: // Zealotry
                 return;
             default:
