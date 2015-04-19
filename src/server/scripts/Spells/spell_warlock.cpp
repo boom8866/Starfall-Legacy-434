@@ -73,7 +73,8 @@ enum WarlockSpells
     SPELL_WARLOCK_CREMATION_EFFECT                  = 89603,
     SPELL_WARLOCK_HAND_OF_GUL_DAN_EFFECT            = 85526,
     SPELL_WARLOCK_SUMMON_HAND_OF_GUL_DAN            = 86041,
-    SPELL_WARLOCK_SOUL_LINK_BUFF                    = 25228
+    SPELL_WARLOCK_SOUL_LINK_BUFF                    = 25228,
+    SPELL_WARLOCK_SHADOW_MASTERY                    = 87339
 };
 
 enum WarlockSpellIcons
@@ -1066,6 +1067,11 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
                     if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
                     {
                         int32 damage = aurEff->GetAmount() * 9;
+
+                        // Shadow Mastery
+                        if (AuraEffect* shadowMastery = caster->GetAuraEffect(SPELL_WARLOCK_SHADOW_MASTERY, EFFECT_0, caster->GetGUID()))
+                            AddPct(damage, shadowMastery->GetAmount());
+
                         // backfire damage and silence
                         caster->CastCustomSpell(dispelInfo->GetDispeller(), SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL, &damage, NULL, NULL, true, NULL, aurEff);
                     }
