@@ -51,6 +51,7 @@ enum Events
     EVENT_PERSONAL_PHALANX,
     EVENT_CLEAR_FACING,
     EVENT_CLEAR_PHALANX,
+    EVENT_FLAMING_SHIELD,
 
     // Dual Blades Phase
     EVENT_BURNING_FLAMES,
@@ -112,20 +113,20 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            _EnterCombat();
             Talk(SAY_AGGRO);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_MIGHTY_STOMP, 6500);
             events.ScheduleEvent(EVENT_PICK_WEAPON, 10000);
             flamesTimer = me->GetBaseAttackTime(BASE_ATTACK);
+            _EnterCombat();
         }
 
         void JustDied(Unit* /*killer*/)
         {
-            _JustDied();
             summons.DespawnAll();
             Talk(SAY_DEATH);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            _JustDied();
         }
 
         void KilledUnit(Unit* killed)
@@ -136,24 +137,13 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
-            instance->SetBossState(DATA_FORGEMASTER_THRONGUS, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->SetReactState(REACT_AGGRESSIVE);
-            summons.DespawnAll();
-            events.Reset();
             _mace = false;
             _shield = false;
             _blades = false;
-            _DespawnAtEvade();
-        }
-
-        void Reset()
-        {
             _Reset();
-            _mace = false;
-            _shield = false;
-            _blades = false;
+            _DespawnAtEvade();
         }
 
         void JustSummoned(Creature* summon)
@@ -172,7 +162,7 @@ public:
 
         void DamageDealt(Unit* /*victim*/, uint32& damage, DamageEffectType damageType)
         {
-            if(!IsHeroic() && !me->HasAura(SPELL_DUAL_BLADES_BUFF_HC))
+            if (!IsHeroic() && !me->HasAura(SPELL_DUAL_BLADES_BUFF_HC))
                 return;
 
             if (damage > 0 && damageType == DIRECT_DAMAGE && flamesTimer <= 0)
@@ -189,14 +179,14 @@ public:
                 case ACTION_CHOOSE_SHIELD:
                     if (!_shield)
                     {
-                        me->StopMoving();
-                        DoCast(SPELL_SHIELD_VISUAL);
                         me->AttackStop();
                         me->SetReactState(REACT_PASSIVE);
+                        UpdateMovementRotation();
+                        DoCast(SPELL_SHIELD_VISUAL);
                         me->AddAura(SPELL_PERSONAL_PHALANX, me);
                         me->AddAura(SPELL_FLAME_ARROWS_TRIGGER, me);
                         if (IsHeroic())
-                            me->CastWithDelay(1200, me, SPELL_FLAMING_SHIELD);
+                            events.ScheduleEvent(EVENT_FLAMING_SHIELD, 1200);
                         events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 1200);
                         events.ScheduleEvent(EVENT_CLEAR_PHALANX, 30100);
                         Talk(SAY_SHIELD);
@@ -244,6 +234,12 @@ public:
             }
         }
 
+        void UpdateMovementRotation()
+        {
+            me->StopMoving();
+            me->SendMovementFlagUpdate(false);
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
@@ -266,13 +262,19 @@ public:
                         DoCastAOE(SPELL_PICK_WEAPON);
                         events.ScheduleEvent(EVENT_PICK_WEAPON, 35000);
                         break;
-                    case EVENT_PERSONAL_PHALANX:
-                        DoCast(me, SPELL_PERSONAL_PHALANX_FIXATE_AOE);
+                    case EVENT_PERSONAL_PHALANX:;
+                        DoCast(me, SPELL_PERSONAL_PHALANX_FIXATE_AOE, true);
                         events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 8550);
                         events.ScheduleEvent(EVENT_CLEAR_FACING, 8400);
+                        UpdateMovementRotation();
+                        break;
+                    case EVENT_FLAMING_SHIELD:
+                        events.CancelEvent(EVENT_FLAMING_SHIELD);
+                        DoCast(me, SPELL_FLAMING_SHIELD);
                         break;
                     case EVENT_CLEAR_FACING:
                         me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                        UpdateMovementRotation();
                         break;
                     case EVENT_CLEAR_PHALANX:
                         me->CastStop();
@@ -281,6 +283,7 @@ public:
                         me->RemoveAurasDueToSpell(SPELL_PERSONAL_PHALANX);
                         me->RemoveAurasDueToSpell(SPELL_DUMMY_04);
                         me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                        UpdateMovementRotation();
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
                         me->GetMotionMaster()->MovementExpired(true);
@@ -410,6 +413,7 @@ class npc_gb_fixate_trigger : public CreatureScript
                     {
                         throngus->AI()->DoCast(SPELL_FIXATE_EFFECT);
                         throngus->SetFacingToObject(me);
+                        throngus->SetOrientation(me->GetOrientation() + M_PI);
                         throngus->AddUnitState(UNIT_STATE_CANNOT_TURN);
                         throngus->SetReactState(REACT_PASSIVE);
                         throngus->AttackStop();
