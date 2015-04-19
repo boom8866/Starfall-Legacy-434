@@ -68,6 +68,21 @@ public:
             events.ScheduleEvent(EVENT_FLAMEBREAK, urand(10000, 21000), 0, 0);
             events.ScheduleEvent(EVENT_MAGMA_SPIT, urand(9000, 13000), 0, 0);
             events.ScheduleEvent(EVENT_TERRIFYING_ROAR, 30000, 0, 0);
+
+            if (me->GetMap()->IsHeroic())
+            {
+                // Find all adds
+                std::list<Unit*> targets;
+                Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(me, me, 80.0f);
+                Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                me->VisitNearbyObject(80.0f, searcher);
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if ((*itr))
+                        if ((*itr)->ToCreature() && (*itr)->ToCreature()->GetScriptName() == "npc_beauty_whelp")
+                            (*itr)->ToCreature()->SetInCombatWithZone();
+                }
+            }
         }
 
         void DoAction(int32 action)
