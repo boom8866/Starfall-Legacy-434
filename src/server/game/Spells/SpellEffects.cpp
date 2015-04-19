@@ -656,43 +656,30 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             m_caster->CastSpell(unitTarget, 18118, true);
                         break;
                     }
-                    case 3110: // Soul Fire & Imp's Firebolt
-                    case 6353:
-                        if (m_caster->isPet() && m_caster->GetOwner())
+                    case 3110: // Imp's Firebolt
+                        if (m_caster->isPet())
                         {
-                            // Burning Embers (For Pet)
-                            if (AuraEffect* aurEff = m_caster->GetOwner()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 5116, 0))
+                            if (m_caster->GetOwner())
                             {
-                                int32 bp0 = damage * aurEff->GetAmount() / 100;
-                                m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                            }
-                            // Empowered Imp (Only for Imp's Firebolt)
-                            if (m_spellInfo->Id == 3110)
-                            {
+                                if (m_caster->GetCharmerOrOwner())
+                                {
+                                    float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
+                                    damage += int32(1.20f * ((spellpower * 0.50f) * 0.657f));
+                                }
                                 if (AuraEffect* aurEff2 = m_caster->GetOwner()->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARLOCK, 3171, 0))
                                 {
                                     float chance = aurEff2->GetAmount();
                                     if (roll_chance_f(chance))
                                         m_caster->GetOwner()->AddAura(47283, m_caster->GetOwner());
                                 }
+                                // Burning Embers (For Pet)
+                                if (AuraEffect* aurEff = m_caster->GetOwner()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 5116, EFFECT_0))
+                                {
+                                    int32 bp0 = m_caster->GetDamageDoneInPastSecs(7) * aurEff->GetAmount() / 100;
+                                    m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                }
                             }
                         }
-                        else
-                        {
-                            // Burning Embers (For Player)
-                            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 5116, 0))
-                            {
-                                int32 bp0 = damage * aurEff->GetAmount() / 100;
-                                m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                            }
-                        }
-                        // Imp Firebolt
-                        if (m_spellInfo->Id == 3110)
-                            if (m_caster->GetCharmerOrOwner())
-                            {
-                                float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
-                                damage += int32(1.20f * ((spellpower * 0.50f) * 0.657f));
-                            }
                         break;
                     case 3716:  // Torment
                     case 6360:  // Whiplash
