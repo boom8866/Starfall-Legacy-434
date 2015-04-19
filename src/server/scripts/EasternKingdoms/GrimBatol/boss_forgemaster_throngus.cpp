@@ -262,7 +262,7 @@ public:
                         DoCastAOE(SPELL_PICK_WEAPON);
                         events.ScheduleEvent(EVENT_PICK_WEAPON, 35000);
                         break;
-                    case EVENT_PERSONAL_PHALANX:;
+                    case EVENT_PERSONAL_PHALANX:
                         DoCast(me, SPELL_PERSONAL_PHALANX_FIXATE_AOE, true);
                         events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 8550);
                         events.ScheduleEvent(EVENT_CLEAR_FACING, 8400);
