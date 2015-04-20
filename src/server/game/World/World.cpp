@@ -2347,6 +2347,8 @@ void World::SendGMText(int32 string_id, ...)
         if (!player || !player->IsInWorld())
             continue;
 
+        player->PlayDirectSound(5274, player);
+
         wt_do(player);
     }
 
