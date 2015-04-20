@@ -1992,7 +1992,7 @@ bool Aura::CanBeAppliedOn(Unit* target)
     // This will only prevent the aura application if the Z is major/minor of 2 yards between dynobj and target
     // The damage/heal of some spells may need some other rules like DK Death and Decay (see Spell::EffectSchoolDMG)
     if (GetType() == DYNOBJ_AURA_TYPE)
-        if (m_spellInfo && (m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION) && GetDynobjOwner())
+        if (target && m_spellInfo && (m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION) && GetDynobjOwner())
             if (target->GetPositionZ() > (GetDynobjOwner()->GetPositionZ() + 2) || target->GetPositionZ() < (GetDynobjOwner()->GetPositionZ() - 2))
                 return false;
 
