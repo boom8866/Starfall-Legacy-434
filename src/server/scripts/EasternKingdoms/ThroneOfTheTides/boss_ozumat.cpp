@@ -26,6 +26,7 @@ enum Spells
     SPELL_JUMP_WATER_VISUAL         = 74048,
     SPELL_TIDAL_SURGE               = 76133,
     SPELL_PURE_WATER                = 84037,
+    SPELL_TIDAL_SURGE_REMOVER       = 83909,
 
     // Faceless Sappers
     SPELL_WATER_EXPLOSION           = 83479,
@@ -210,7 +211,7 @@ public:
 
                     Talk(SAY_PHASE_1);
                     DoCast(SPELL_PURIFY);
-                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TIDAL_SURGE);
+                    instance->DoCastSpellOnPlayers(SPELL_TIDAL_SURGE_REMOVER);
                     break;
                 }
                 case INST_ACTION_NEPTULON_DO_INTRO:
@@ -362,7 +363,7 @@ public:
         {
             if (summon->GetEntry() == NPC_FACELESS_SAPPER)
             {
-                if(facelessSappersLeft && --facelessSappersLeft <= 0)
+                if (facelessSappersLeft && --facelessSappersLeft <= 0)
                 {
                     me->DespawnCreaturesInArea(NPC_BLIGHT_OF_OZUMAT, 250.f);
 
@@ -377,7 +378,8 @@ public:
 
                     events.ScheduleEvent(EVENT_PURE_WATER, 17000, EVENTGROUP_PHASE_3);
 
-                    instance->DoCastSpellOnPlayers(SPELL_TIDAL_SURGE);
+                    if (Creature* neptulon = me->FindNearestCreature(NPC_NEPTULON, 250.f))
+                        neptulon->AI()->DoCastAOE(SPELL_TIDAL_SURGE);
 
                     if (Creature* ozumat = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_OZUMAT)))
                         ozumat->AI()->DoAction(INST_ACTION_OZUMAT_START_PHASE);
@@ -390,6 +392,7 @@ public:
             Ozumat::DespawnMinions(me);
             me->m_Events.KillAllEvents(false);
             instance->SetBossState(DATA_OZUMAT, NOT_STARTED);
+            instance->DoCastSpellOnPlayers(SPELL_TIDAL_SURGE_REMOVER);
             RemoveEncounterFrame();
             me->Respawn(true);
 
