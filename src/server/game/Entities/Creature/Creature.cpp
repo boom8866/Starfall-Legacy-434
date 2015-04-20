@@ -1733,7 +1733,7 @@ void Creature::setDeathState(DeathState s)
         if (m_formation && m_formation->getLeader() == this)
             m_formation->FormationReset(true);
 
-        if ((CanFly() || IsFlying()) && GetEntry() != 41570)
+        if ((CanFly() || IsFlying()))
         {
             SetDisableGravity(false);
             i_motionMaster.MoveFall();
@@ -1748,21 +1748,16 @@ void Creature::setDeathState(DeathState s)
         SetFullHealth();
         SetLootRecipient(NULL);
         ResetPlayerDamageReq();
-
         CreatureTemplate const* cinfo = GetCreatureTemplate();
-
         SetWalk(true);
         HandleInhabitType(cinfo->InhabitType);
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
         ClearUnitState(uint32(UNIT_STATE_ALL_STATE));
         SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
         LoadCreaturesAddon(true);
-
         Motion_Initialize();
-
         if (GetCreatureData() && GetPhaseMask() != GetCreatureData()->phaseMask)
             SetPhaseMask(GetCreatureData()->phaseMask, false);
-
         Unit::setDeathState(ALIVE);
     }
 }
@@ -1790,14 +1785,13 @@ void Creature::Respawn(bool force)
             GetName().c_str(), GetGUIDLow(), GetGUID(), GetEntry());
         m_respawnTime = 0;
         lootForPickPocketed = false;
-        lootForBody         = false;
-        loot.clear();
+        lootForBody = false;
 
         if (m_originalEntry != GetEntry())
             UpdateEntry(m_originalEntry);
 
-        if (CreatureTemplate const* cinfo = GetCreatureTemplate())
-            SelectLevel(cinfo);
+        CreatureTemplate const* cinfo = GetCreatureTemplate();
+        SelectLevel(cinfo);
 
         setDeathState(JUST_RESPAWNED);
 
@@ -1814,11 +1808,7 @@ void Creature::Respawn(bool force)
 
         //Call AI respawn virtual function
         if (IsAIEnabled)
-        {
-            //reset the AI to be sure no dirty or uninitialized values will be used till next tick
-            AI()->Reset();
             TriggerJustRespawned = true;//delay event to next tick so all creatures are created on the map before processing
-        }
 
         uint32 poolid = GetDBTableGUIDLow() ? sPoolMgr->IsPartOfAPool<Creature>(GetDBTableGUIDLow()) : 0;
         if (poolid)
@@ -1826,8 +1816,15 @@ void Creature::Respawn(bool force)
 
         //Re-initialize reactstate that could be altered by movementgenerators
         InitializeReactState();
-        NearTeleportTo(GetHomePosition(), false);
     }
+
+    if (GetAI() && GetAIName() == "SmartAI")
+        AI()->EnterEvadeMode();
+    else
+        GetMotionMaster()->MoveTargetedHome();
+
+    if (CreatureTemplate const* cinfo = GetCreatureTemplate())
+        HandleInhabitType(cinfo->InhabitType);
 
     UpdateObjectVisibility();
 }

@@ -17,7 +17,7 @@ enum Texts
     SAY_AGGRO_HORDE                 = 1,
     SAY_SLAY                        = 2,
     SAY_ANNOUNCE_PISTOL_BARRAGE     = 3,
-    SAY_DEATH                       = 4,
+    SAY_DEATH                       = 4
 };
 
 enum Events
@@ -31,7 +31,7 @@ enum Events
     EVENT_APPLY_IMMUNITY,
 
     // Bloodthirsty Ghoul
-    EVENT_ATTACK,
+    EVENT_ATTACK
 };
 
 enum Spells
@@ -46,7 +46,7 @@ enum Spells
     SPELL_PISTOL_BARRAGE_CAST                       = 93520,
 
     SPELL_PISTOL_BARRAGE_TRIGGER_1                  = 93566,
-    SPELL_PISTOL_BARRAGE_TRIGGER_2                  = 93558,
+    SPELL_PISTOL_BARRAGE_TRIGGER_2                  = 93558
 };
 
 class boss_lord_godfrey : public CreatureScript
@@ -56,8 +56,13 @@ public:
 
     struct boss_lord_godfreyAI : public BossAI
     {
-        boss_lord_godfreyAI(Creature* creature) : BossAI(creature, DATA_LORD_GODFREY)
+        boss_lord_godfreyAI(Creature* creature) : BossAI(creature, DATA_LORD_GODFREY) { }
+
+        void Reset()
         {
+            _Reset();
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -98,12 +103,14 @@ public:
 
         void EnterEvadeMode()
         {
+            _EnterEvadeMode();
+            summons.DespawnAll();
+            events.Reset();
             me->SetReactState(REACT_AGGRESSIVE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            me->GetMotionMaster()->MoveTargetedHome();
+            instance->SetBossState(DATA_LORD_GODFREY, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
-            _Reset();
             _DespawnAtEvade();
         }
 
@@ -125,7 +132,7 @@ public:
             if (me->HasAura(SPELL_PISTOL_BARRAGE_TRIGGER_2))
                 return;
 
-            while(uint32 eventId = events.ExecuteEvent())
+            while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
@@ -147,7 +154,7 @@ public:
                         break;
                     case EVENT_PISTOL_BARRAGE:
                         me->AttackStop();
-                        me->ToCreature()->SetReactState(REACT_PASSIVE);
+                        me->SetReactState(REACT_PASSIVE);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         DoCastAOE(SPELL_PISTOL_BARRAGE_FORCE_CAST);
                         events.ScheduleEvent(EVENT_PISTOL_BARRAGE_CAST, 500);
@@ -173,16 +180,17 @@ public:
                 DoMeleeAttackIfReady();
         }
     };
+
     CreatureAI* GetAI(Creature *creature) const
     {
-        return new boss_lord_godfreyAI (creature);
+        return new boss_lord_godfreyAI(creature);
     }
 };
 
 class npc_sfk_bloodthirsty_ghoul : public CreatureScript
 {
 public:
-    npc_sfk_bloodthirsty_ghoul() :  CreatureScript("npc_sfk_bloodthirsty_ghoul") { }
+    npc_sfk_bloodthirsty_ghoul() : CreatureScript("npc_sfk_bloodthirsty_ghoul") { }
 
     struct npc_sfk_bloodthirsty_ghoulAI : public ScriptedAI
     {
