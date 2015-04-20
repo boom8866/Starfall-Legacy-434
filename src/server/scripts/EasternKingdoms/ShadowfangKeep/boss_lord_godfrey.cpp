@@ -60,13 +60,6 @@ public:
         {
         }
 
-        void Reset()
-        {
-            _Reset();
-            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
-        }
-
         void EnterCombat(Unit* /*who*/)
         {
             if (Player* player = me->FindNearestPlayer(200.0f, true))
@@ -76,7 +69,6 @@ public:
                 else
                     Talk(SAY_AGGRO_HORDE);
             }
-            _EnterCombat();
             me->ApplySpellImmune(0, IMMUNITY_ID, 93564, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 93784, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
@@ -87,14 +79,15 @@ public:
             events.ScheduleEvent(EVENT_SUMMON_BLOODTHIRSTY_GHOULS, 6000);
             if (IsHeroic())
                 events.ScheduleEvent(EVENT_PISTOL_BARRAGE, 12500);
+            _EnterCombat();
         }
 
         void JustDied(Unit* /*killer*/)
         {
             Talk(SAY_DEATH);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             _JustDied();
             _FinishDungeon();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
         void KilledUnit(Unit* target)
@@ -105,14 +98,12 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
-            summons.DespawnAll();
-            events.Reset();
             me->SetReactState(REACT_AGGRESSIVE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-            me->GetMotionMaster()->MoveTargetedHome();
-            instance->SetBossState(DATA_LORD_GODFREY, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            _Reset();
             _DespawnAtEvade();
         }
 

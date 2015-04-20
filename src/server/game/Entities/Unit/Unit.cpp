@@ -641,12 +641,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     if (IsAIEnabled)
         GetAI()->DamageDealt(victim, damage, damagetype);
 
-    if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
-    {
-        m_damage_done[0] += damage;
-        victim->m_damage_taken[0] += damage;
-    }
-
     if (victim->GetTypeId() == TYPEID_PLAYER && this != victim)
     {
         // Signal to pets that their owner was attacked
@@ -1370,6 +1364,12 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
         damage = 0;
 
     damageInfo->damage = damage;
+
+    if (damage > 0)
+    {
+        m_damage_done[0] += damage;
+        victim->m_damage_taken[0] += damage;
+    }
 }
 
 void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
@@ -21787,18 +21787,18 @@ uint32 Unit::GetHealingDoneInPastSecs(uint32 secs)
 
 uint32 Unit::GetDamageDoneInPastSecs(uint32 secs)
 {
-    uint32 damage = 0;
+    uint32 ddamage = 0;
 
     if (secs > 120)
         secs = 120;
 
     for (uint32 i = 0; i < secs; i++)
-        damage += m_damage_done[i];
+        ddamage += m_damage_done[i];
 
-    if (damage < 0)
+    if (ddamage < 0)
         return 0;
 
-    return damage;
+    return ddamage;
 }
 
 uint32 Unit::GetDamageTakenInPastSecs(uint32 secs)

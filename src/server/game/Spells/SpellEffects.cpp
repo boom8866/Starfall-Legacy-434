@@ -682,8 +682,16 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                 // Burning Embers (For Pet)
                                 if (AuraEffect* aurEff = m_caster->GetOwner()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 5116, EFFECT_0))
                                 {
-                                    int32 bp0 = m_caster->GetDamageDoneInPastSecs(7) * aurEff->GetAmount() / 100;
-                                    m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                    float threshold = aurEff->GetId() == 85112 ? 1.4f : 0.7f;
+                                    int32 damageInPastSecs = m_caster->GetDamageDoneInPastSecs(7);
+                                    int32 basePoints = int32(ApplyPct(damageInPastSecs, aurEff->GetAmount()) / 7);
+                                    if (Unit* owner = m_caster->GetCharmerOrOwner())
+                                    {
+                                        int32 dmgThreshold = int32(owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) * threshold);
+                                        int32 bp0 = basePoints > dmgThreshold ? dmgThreshold : basePoints;
+
+                                        m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                    }
                                 }
                             }
                         }

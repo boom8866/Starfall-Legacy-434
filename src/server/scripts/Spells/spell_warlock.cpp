@@ -1179,13 +1179,13 @@ class spell_warl_soulfire : public SpellScriptLoader
                         // Burning Embers
                         if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 5116, EFFECT_0))
                         {
-                            uint32 damageDoneSeconds = caster->GetDamageDoneInPastSecs(7);
-                            if (damageDoneSeconds <= 0)
-                                return;
+                            float threshold = aurEff->GetId() == 85112 ? 1.4f : 0.7f;
+                            int32 damageInPastSecs = caster->GetDamageDoneInPastSecs(7);
+                            int32 basePoints = int32(ApplyPct(damageInPastSecs, aurEff->GetAmount()) / 7);
+                            int32 dmgThreshold = int32(caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) * threshold);
 
-                            int32 bp0 = caster->GetDamageDoneInPastSecs(7) * aurEff->GetAmount() / 100;
+                            int32 bp0 = basePoints > dmgThreshold ? dmgThreshold : basePoints;
                             caster->CastCustomSpell(target, SPELL_WARLOCK_BURNING_EMBERS_TRIGGERED, &bp0, NULL, NULL, true, NULL, NULL, caster->GetGUID());
-                            damageDoneSeconds = 0;
                             return;
                         }
                     }
