@@ -4811,6 +4811,13 @@ void Spell::TakePower()
                     return;
                 break;
             }
+            case 47541: // Death Coil (DK)
+            {
+                // Sudden Doom (Proc)
+                if (m_caster->HasAura(81340))
+                    return;
+                break;
+            }
             case 85696: // Zealotry
                 return;
             default:
@@ -5431,13 +5438,8 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 if (target != m_caster)
                 {
-                    if (m_caster->IsFriendlyTo(target) && target->ToPlayer()->IsInDuel())
-                    {
-                        if (m_spellInfo->IsPositive())
-                            target = m_caster;
-                        else
-                            return SPELL_FAILED_TARGET_DUELING;
-                    }
+                    if (target->ToPlayer()->IsInDuel())
+                        return SPELL_FAILED_TARGET_DUELING;
                 }
             }
         }
@@ -7319,7 +7321,7 @@ bool Spell::CheckEffectTarget(Unit const* target, uint32 eff) const
     }
 
     // Line of Sight check for AoE ground-pointing spells (Only for PvP for now to prevent problems in PvE)
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->isPet())
     {
         if (m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION && !(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS))
         {

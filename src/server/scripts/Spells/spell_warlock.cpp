@@ -73,7 +73,9 @@ enum WarlockSpells
     SPELL_WARLOCK_CREMATION_EFFECT                  = 89603,
     SPELL_WARLOCK_HAND_OF_GUL_DAN_EFFECT            = 85526,
     SPELL_WARLOCK_SUMMON_HAND_OF_GUL_DAN            = 86041,
-    SPELL_WARLOCK_SOUL_LINK_BUFF                    = 25228
+    SPELL_WARLOCK_SOUL_LINK_BUFF                    = 25228,
+    SPELL_WARLOCK_SHADOW_MASTERY                    = 87339,
+    SPELL_WARLOCK_BURNING_EMBERS_TRIGGERED          = 85421
 };
 
 enum WarlockSpellIcons
@@ -1066,6 +1068,11 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
                     if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
                     {
                         int32 damage = aurEff->GetAmount() * 9;
+
+                        // Shadow Mastery
+                        if (AuraEffect* shadowMastery = caster->GetAuraEffect(SPELL_WARLOCK_SHADOW_MASTERY, EFFECT_0, caster->GetGUID()))
+                            AddPct(damage, shadowMastery->GetAmount());
+
                         // backfire damage and silence
                         caster->CastCustomSpell(dispelInfo->GetDispeller(), SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL, &damage, NULL, NULL, true, NULL, aurEff);
                     }
@@ -1159,11 +1166,30 @@ class spell_warl_soulfire : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* caster = GetCaster())
+                {
+                    // Improved Soulfire
                     if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, WARLOCK_ICON_SOULFIRE, EFFECT_0))
                     {
                         int32 basepoints = aurEff->GetAmount();
                         caster->CastCustomSpell(caster, SPELL_WARLOCK_IMPROVED_SOULFIRE, &basepoints, NULL, NULL, true);
                     }
+
+                    if (Unit* target = GetHitUnit())
+                    {
+                        // Burning Embers
+                        if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 5116, EFFECT_0))
+                        {
+                            uint32 damageDoneSeconds = caster->GetDamageDoneInPastSecs(7);
+                            if (damageDoneSeconds <= 0)
+                                return;
+
+                            int32 bp0 = caster->GetDamageDoneInPastSecs(7) * aurEff->GetAmount() / 100;
+                            caster->CastCustomSpell(target, SPELL_WARLOCK_BURNING_EMBERS_TRIGGERED, &bp0, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                            damageDoneSeconds = 0;
+                            return;
+                        }
+                    }
+                }
             }
 
             void Register()
