@@ -2750,7 +2750,7 @@ void Player::Regenerate(Powers power)
         }
         case POWER_ENERGY:
         {
-            addvalue += sWorld->getRate(RATE_POWER_ENERGY) * 0.01f * m_regenTimer / GetHasteMod(CTYPE_BASE);
+            addvalue += ((0.01f * m_regenTimer) + (CalculatePct(0.01f, GetRatingBonusValue(CR_HASTE_MELEE)) * m_regenTimer)) * sWorld->getRate(RATE_POWER_ENERGY);
             break;
         }
         case POWER_RUNIC_POWER:

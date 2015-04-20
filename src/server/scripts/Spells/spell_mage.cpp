@@ -832,7 +832,7 @@ class spell_mage_ignite : public SpellScriptLoader
                         if (ignite->GetDuration() > (ignite->GetMaxDuration() / 2))
                             storedAmount += uint32(ignite->GetEffect(EFFECT_0)->GetAmount());
 
-                        if (ignite->GetEffect(EFFECT_0)->GetTickNumber() > 0)
+                        if (ignite->GetDuration() <= (ignite->GetMaxDuration() - 1 * IN_MILLISECONDS))
                             durationUpdated = true;
                     }
                 }

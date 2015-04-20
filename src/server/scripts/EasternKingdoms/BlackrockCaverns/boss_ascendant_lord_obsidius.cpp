@@ -579,11 +579,51 @@ public:
     }
 };
 
+class spell_brc_twitchy : public SpellScriptLoader
+{
+public:
+    spell_brc_twitchy() : SpellScriptLoader("spell_brc_twitchy")
+    {
+    }
+
+    class spell_brc_twitchy_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_brc_twitchy_AuraScript);
+
+        void HandleTwitchy(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() != TYPEID_UNIT)
+                    return;
+
+                if (Unit* attacker = eventInfo.GetActor())
+                {
+                    caster->DeleteThreatList();
+                    caster->AttackStop();
+                    caster->ToCreature()->AI()->AttackStart(attacker);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(spell_brc_twitchy_AuraScript::HandleTwitchy, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_brc_twitchy_AuraScript();
+    }
+};
+
 void AddSC_boss_ascendant_lord_obsidius()
 {
     new boss_ascendant_lord_obsidius();
     new npc_shadow_of_obsidius();
     new spell_transformation();
     new spell_transformation_dummy();
+    new spell_brc_twitchy();
     new achievement_brc_ascendant_descending();
 }

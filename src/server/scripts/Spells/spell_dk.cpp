@@ -916,6 +916,10 @@ class spell_dk_runic_empowerment : public SpellScriptLoader
                                 uint8 runescount = 0;
                                 for (uint32 i = 0; i < MAX_RUNES; ++i)
                                 {
+                                    // Exclude Blood/Death Runes if caster has Blood of the North talent
+                                    if (owner->HasAura(54637) && (owner->ToPlayer()->GetBaseRune(i) == RUNE_BLOOD || owner->ToPlayer()->GetBaseRune(i) == RUNE_DEATH))
+                                        continue;
+
                                     if (owner->GetRuneCooldown(i))
                                     {
                                         cooldownrunes[runescount] = i;
