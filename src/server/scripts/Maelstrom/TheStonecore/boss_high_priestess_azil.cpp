@@ -537,7 +537,7 @@ public:
             instance = creature->GetInstanceScript();
             me->SetDisableGravity(true);
             me->SetReactState(REACT_PASSIVE);
-            DoCast(SPELL_SEISMIC_SHARD_VISUAL);
+            me->AddAura(SPELL_SEISMIC_SHARD_VISUAL, me);
             Position pos;
             me->GetPosition(&pos);
             Movement::MoveSplineInit init(me);
@@ -744,6 +744,12 @@ public:
     {
     }
 
+    enum npcId
+    {
+        NPC_HIGH_PRIESTESS_AZIL_N   = 42333,
+        NPC_HIGH_PRIESTESS_AZIL_H   = 49624
+    };
+
     class spell_gravity_well_damage_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_gravity_well_damage_SpellScript);
@@ -760,6 +766,9 @@ public:
                 SetHitDamage(int32(200000 - (1000 * distance))); //need more research on this formula, damage values from sniffs: 189264, 190318, 190478, 196134, 197672, 199735
             else
                 SetHitDamage(int32(4000 - (200 * distance)));
+
+            if (target->GetEntry() == NPC_HIGH_PRIESTESS_AZIL_N || target->GetEntry() == NPC_HIGH_PRIESTESS_AZIL_H)
+                SetHitDamage(0);
         }
 
         void Register()
