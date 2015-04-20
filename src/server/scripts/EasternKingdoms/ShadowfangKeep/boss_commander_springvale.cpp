@@ -223,8 +223,10 @@ public:
         InstanceScript* instance;
         EventMap events;
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* who)
         {
+            if (Creature* tormentedOfficer = me->FindNearestCreature(NPC_TORMENTED_OFFICER, 20.0f))
+                tormentedOfficer->AI()->AttackStart(who);
             events.ScheduleEvent(EVENT_MORTAL_STRIKE, 11000);
             events.ScheduleEvent(EVENT_SCREAMS_OF_THE_PAST, 14000);
             events.ScheduleEvent(EVENT_UNHOLY_EMPOWERMENT, urand(28000, 30000));
@@ -279,8 +281,10 @@ public:
         EventMap events;
         bool _shielded;
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* who)
         {
+            if (Creature* wailingGuardsman = me->FindNearestCreature(NPC_WAILING_GUARDSMAN, 20.0f))
+                wailingGuardsman->AI()->AttackStart(who);
             _shielded = false; // Just in case
             events.ScheduleEvent(EVENT_UNHOLY_EMPOWERMENT, urand(28000, 30000));
             events.ScheduleEvent(EVENT_FORSAKEN_ABILITY, 17000);
