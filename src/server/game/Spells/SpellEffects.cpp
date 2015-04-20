@@ -343,6 +343,13 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             if (!m_caster->canSeeOrDetect(unitTarget) && m_caster->ToTempSummon()->GetSummoner() != unitTarget)
                 return;
 
+        // AoE LoS rule for dynamic objects to prevent application out of Line of Sight
+        // This will only prevent the aura application if the Z is major/minor of 2 yards between dynobj and target
+        if (m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->GetTypeId() == TYPEID_DYNAMICOBJECT)
+            if (m_spellInfo && m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION && m_spellInfo->SpellFamilyName != SPELLFAMILY_GENERIC && m_targets.GetDst())
+                if (unitTarget->GetPositionZ() > (m_targets.GetDstPos()->GetPositionZ() + 2) || unitTarget->GetPositionZ() < (m_targets.GetDstPos()->GetPositionZ() - 2))
+                    return;
+
         bool apply_direct_bonus = true;
 
         switch (m_spellInfo->SpellFamilyName)
@@ -3559,6 +3566,7 @@ void Spell::EffectPersistentAA (SpellEffIndex effIndex)
     }
 
     ASSERT(m_spellAura->GetDynobjOwner());
+
     m_spellAura->_ApplyEffectForTargets(effIndex);
 }
 

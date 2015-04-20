@@ -7321,7 +7321,7 @@ bool Spell::CheckEffectTarget(Unit const* target, uint32 eff) const
     }
 
     // Line of Sight check for AoE ground-pointing spells (Only for PvP for now to prevent problems in PvE)
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->isPet())
     {
         if (m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION && !(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS))
         {
