@@ -421,8 +421,6 @@ public:
                         events.ScheduleEvent(EVENT_SHREDDING_SWIPE, 25000);
                         break;
                     case EVENT_DEVOURING_FLAMES:
-                        me->StopMoving();
-                        me->SendMovementFlagUpdate(false);
                         if (IsHeroic())
                         {
                             DoCast(me, SPELL_DEVOURING_FLAMES_AOE);
