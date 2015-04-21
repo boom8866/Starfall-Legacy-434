@@ -1241,7 +1241,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     {
                         // Improved Cone of Cold
                         if (m_caster->HasAura(11190))
-                            unitTarget->CastSpell(unitTarget, 83302, true, 0, 0, m_caster->GetGUID());
+                            unitTarget->CastSpell(unitTarget, 83301, true, 0, 0, m_caster->GetGUID());
                         else if (m_caster->HasAura(12489))
                             unitTarget->CastSpell(unitTarget, 83302, true, 0, 0, m_caster->GetGUID());
                         break;
