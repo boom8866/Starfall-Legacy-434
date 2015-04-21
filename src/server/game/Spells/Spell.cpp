@@ -5438,7 +5438,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 if (target != m_caster)
                 {
-                    if (target->ToPlayer()->IsInDuel())
+                    if (m_caster->IsFriendlyTo(target) && target->ToPlayer()->IsInDuel())
                         return SPELL_FAILED_TARGET_DUELING;
                 }
             }

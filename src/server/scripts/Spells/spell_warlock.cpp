@@ -1306,11 +1306,11 @@ public:
             return GetCaster()->GetTypeId() == TYPEID_PLAYER;
         }
 
-        void HandleHit(SpellEffIndex /*effIndex*/)
+        void HandleHit()
         {
             if (Unit* plr = GetCaster())
             {
-                if (Unit* unitTarget = GetHitUnit())
+                if (Unit* unitTarget = GetExplTargetUnit())
                 {
                     Aura* glyAur = plr->GetAura(SPELL_WARLOCK_GYLPH_OF_SOUL_SWAP);
 
@@ -1333,7 +1333,7 @@ public:
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_warl_soul_swap_exhale_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            AfterCast += SpellCastFn(spell_warl_soul_swap_exhale_SpellScript::HandleHit);
         }
     };
 
