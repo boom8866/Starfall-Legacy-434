@@ -421,6 +421,8 @@ public:
                         events.ScheduleEvent(EVENT_SHREDDING_SWIPE, 25000);
                         break;
                     case EVENT_DEVOURING_FLAMES:
+                        me->StopMoving();
+                        me->SendMovementFlagUpdate(false);
                         if (IsHeroic())
                         {
                             DoCast(me, SPELL_DEVOURING_FLAMES_AOE);
@@ -437,7 +439,10 @@ public:
                         {
                             Talk(SAY_ANNOUNCE_DEVOURING_FLAMES);
                             me->SetFacingToObject(dummy);
+                            me->SetOrientation(dummy->GetOrientation() + M_PI);
                             me->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                            me->StopMoving();
+                            me->SendMovementFlagUpdate(false);
                             me->SetReactState(REACT_PASSIVE);
                             me->AttackStop();
                             DoCast(SPELL_DEVOURING_FLAMES);
