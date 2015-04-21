@@ -599,9 +599,10 @@ public:
 
                 if (Unit* attacker = eventInfo.GetActor())
                 {
-                    caster->DeleteThreatList();
                     caster->AttackStop();
+                    caster->DeleteThreatList();
                     caster->ToCreature()->AI()->AttackStart(attacker);
+                    attacker->AddThreat(caster, 1.0f);
                 }
             }
         }

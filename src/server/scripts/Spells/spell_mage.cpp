@@ -1161,62 +1161,64 @@ class spell_mage_replenish_mana : public SpellScriptLoader
 /// Updated 4.3.4
 class spell_mage_water_elemental_freeze : public SpellScriptLoader
 {
-   public:
-       spell_mage_water_elemental_freeze() : SpellScriptLoader("spell_mage_water_elemental_freeze") { }
+public:
+    spell_mage_water_elemental_freeze() : SpellScriptLoader("spell_mage_water_elemental_freeze")
+    {
+    }
 
-       class spell_mage_water_elemental_freeze_SpellScript : public SpellScript
-       {
-           PrepareSpellScript(spell_mage_water_elemental_freeze_SpellScript);
+    class spell_mage_water_elemental_freeze_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_water_elemental_freeze_SpellScript);
 
-           bool Validate(SpellInfo const* /*spellInfo*/)
-           {
-               if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_FINGERS_OF_FROST))
-                   return false;
-               return true;
-           }
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_FINGERS_OF_FROST))
+                return false;
+            return true;
+        }
 
-           void CountTargets(std::list<WorldObject*>& targetList)
-           {
-               _didHit = !targetList.empty();
-           }
+        void CountTargets(std::list<WorldObject*>& targetList)
+        {
+            _didHit = !targetList.empty();
+        }
 
-           void HandleImprovedFreeze()
-           {
-               if (!_didHit)
-                   return;
+        void HandleImprovedFreeze()
+        {
+            if (!_didHit)
+                return;
 
-               Unit* owner = GetCaster()->GetOwner();
-               if (!owner)
-                   return;
+            Unit* owner = GetCaster()->GetOwner();
+            if (!owner)
+                return;
 
-               if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, ICON_MAGE_IMPROVED_FREEZE, EFFECT_0))
-               {
-                   if (roll_chance_i(aurEff->GetAmount()))
-                       owner->CastCustomSpell(SPELL_MAGE_FINGERS_OF_FROST, SPELLVALUE_AURA_STACK, 2, owner, true);
-               }
+            if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, ICON_MAGE_IMPROVED_FREEZE, EFFECT_0))
+            {
+                if (roll_chance_i(aurEff->GetAmount()))
+                    owner->CastCustomSpell(SPELL_MAGE_FINGERS_OF_FROST, SPELLVALUE_AURA_STACK, 2, owner, true);
+            }
 
-               // Invisibility
-               if(Unit* caster = GetCaster())
-               {
-                   if(caster->HasAura(SPELL_MAGE_INVISIBILITY_INVISIBLE))
-                       caster->RemoveAura(SPELL_MAGE_INVISIBILITY_INVISIBLE);
-               }
-           }
+            // Invisibility
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_MAGE_INVISIBILITY_INVISIBLE))
+                    caster->RemoveAura(SPELL_MAGE_INVISIBILITY_INVISIBLE);
+            }
+        }
 
-           void Register()
-           {
-               OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_water_elemental_freeze_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
-               AfterCast += SpellCastFn(spell_mage_water_elemental_freeze_SpellScript::HandleImprovedFreeze);
-           }
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_water_elemental_freeze_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            AfterCast += SpellCastFn(spell_mage_water_elemental_freeze_SpellScript::HandleImprovedFreeze);
+        }
 
-       private:
-           bool _didHit;
-       };
+    private:
+        bool _didHit;
+    };
 
-       SpellScript* GetSpellScript() const
-       {
-           return new spell_mage_water_elemental_freeze_SpellScript();
-       }
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_water_elemental_freeze_SpellScript();
+    }
 };
 
 // 30451 Arcane Blast
