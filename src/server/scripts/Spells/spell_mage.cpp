@@ -824,16 +824,17 @@ class spell_mage_ignite : public SpellScriptLoader
             {
                 storedAmount = 0;
                 durationUpdated = false;
-
+                igniteExists = false;
                 if (Unit* procTarget = eventInfo.GetProcTarget())
                 {
                     if (Aura* ignite = procTarget->GetAura(SPELL_MAGE_IGNITE, eventInfo.GetDamageInfo()->GetAttacker()->GetGUID()))
                     {
-                        if (ignite->GetDuration() > (ignite->GetMaxDuration() / 2))
+                        if (ignite->GetDuration() <= (ignite->GetMaxDuration() - 100) && !igniteExists)
+                        {
                             storedAmount += uint32(ignite->GetEffect(EFFECT_0)->GetAmount());
-
-                        if (ignite->GetDuration() <= (ignite->GetMaxDuration() - 1 * IN_MILLISECONDS))
                             durationUpdated = true;
+                            igniteExists = true;
+                        }
                     }
                 }
                 return eventInfo.GetProcTarget();
@@ -868,7 +869,7 @@ class spell_mage_ignite : public SpellScriptLoader
 
                 if (SpellInfo const* igniteDot = sSpellMgr->GetSpellInfo(SPELL_MAGE_IGNITE))
                 {
-                    uint32 amount = uint32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), pct) / (durationUpdated ? 3 : 2));
+                    uint32 amount = uint32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), pct));
                     if (storedAmount > 0)
                         amount += storedAmount;
 
@@ -876,6 +877,17 @@ class spell_mage_ignite : public SpellScriptLoader
                     {
                         if (Unit* target = GetTarget())
                         {
+                            amount /= igniteExists ? 3 : 2;
+                            if (Unit* caster = GetCaster())
+                            {
+                                // Mastery: Flashburn
+                                if (caster->HasAura(76595))
+                                {
+                                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                                    amount += amount * (0.220f + (0.0280f * masteryPoints));
+                                }
+                            }
+
                             target->CastCustomSpell(SPELL_MAGE_IGNITE, SPELLVALUE_BASE_POINT0, amount, eventInfo.GetProcTarget(), true, NULL, aurEff);
                             // Check for existant aura and update the duration to 6 seconds
                             if (Aura* igniteAura = eventInfo.GetProcTarget()->GetAura(SPELL_MAGE_IGNITE, GetCaster()->GetGUID()))
@@ -892,6 +904,7 @@ class spell_mage_ignite : public SpellScriptLoader
                     // Cleanup
                     storedAmount = 0;
                     durationUpdated = false;
+                    igniteExists = false;
                 }
             }
 
@@ -904,6 +917,8 @@ class spell_mage_ignite : public SpellScriptLoader
         protected:
             uint32 storedAmount;
             bool durationUpdated;
+            bool igniteExists;
+            float threshold;
         };
 
         AuraScript* GetAuraScript() const
