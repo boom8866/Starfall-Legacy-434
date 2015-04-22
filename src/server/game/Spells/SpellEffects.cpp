@@ -4963,6 +4963,11 @@ void Spell::EffectTaunt (SpellEffIndex /*effIndex*/)
     if (!unitTarget)
         return;
 
+    // Army of the Dead Taunt (Not useable in dungeons/raid)
+    if (m_spellInfo->Id == 29060)
+        if (unitTarget->GetMap() && unitTarget->GetMap()->Instanceable())
+            return;
+
     // this effect use before aura Taunt apply for prevent taunt already attacking target
     // for spell as marked "non effective at already attacking target"
     if (!unitTarget || !unitTarget->CanHaveThreatList() || unitTarget->getVictim() == m_caster)
