@@ -2893,7 +2893,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
             parryChance = 0;
 
         tmp += parryChance;
-        if (roll < tmp)
+        if (roll < tmp && !victim->HasInArc(M_PI, this))
             return SPELL_MISS_PARRY;
     }
 
@@ -4451,6 +4451,7 @@ void Unit::RemoveArenaAuras()
         Aura const* aura = aurApp->GetBase();
         if (!(aura->GetSpellInfo()->AttributesEx4 & SPELL_ATTR4_UNK21) // don't remove stances, shadowform, pally/hunter auras
             && !aura->IsPassive()                               // don't remove passive auras
+            && !(aura->GetSpellInfo()->Attributes & SPELL_ATTR0_PASSIVE)
             && (aurApp->IsPositive() || !(aura->GetSpellInfo()->AttributesEx3 & SPELL_ATTR3_DEATH_PERSISTENT))) // not negative death persistent auras
             RemoveAura(iter);
         else
@@ -9891,8 +9892,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 CastSpell(this, 71072, true, castItem, triggeredByAura); // Slam GCD Reduced
                 CastSpell(this, 71069, true, castItem, triggeredByAura); // Execute GCD Reduced
             }
+
             // Remove cd from Colossus Smash
-            ToPlayer()->RemoveSpellCooldown(86346, true);
+            if (auraSpellInfo->Id == 52437)
+                ToPlayer()->RemoveSpellCooldown(86346, true);
 
             break;
         }
