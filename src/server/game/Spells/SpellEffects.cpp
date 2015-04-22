@@ -647,22 +647,20 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 {
                     case 42223: // Rain of Fire
                         // Aftermath r1
-                        if(m_caster->HasAura(85113) && roll_chance_i(6))
+                        if (m_caster->HasAura(85113) && roll_chance_i(6))
                             m_caster->CastSpell(unitTarget, 85387, true);
                         // Aftermath r2
-                        else if(m_caster->HasAura(85114) && roll_chance_i(12))
+                        else if (m_caster->HasAura(85114) && roll_chance_i(12))
                             m_caster->CastSpell(unitTarget, 85387, true);
                         break;
                     case 17962: // Conflagrate
-                    {
                         // Aftermath r1
-                        if(m_caster->HasAura(85113) && roll_chance_i(50))
+                        if (m_caster->HasAura(85113) && roll_chance_i(50))
                             m_caster->CastSpell(unitTarget, 18118, true);
                         // Aftermath r2
-                        else if(m_caster->HasAura(85114))
+                        else if (m_caster->HasAura(85114))
                             m_caster->CastSpell(unitTarget, 18118, true);
                         break;
-                    }
                     case 3110: // Imp's Firebolt
                         if (m_caster->isPet())
                         {
