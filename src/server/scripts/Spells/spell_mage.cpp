@@ -918,7 +918,6 @@ class spell_mage_ignite : public SpellScriptLoader
             uint32 storedAmount;
             bool durationUpdated;
             bool igniteExists;
-            float threshold;
         };
 
         AuraScript* GetAuraScript() const
