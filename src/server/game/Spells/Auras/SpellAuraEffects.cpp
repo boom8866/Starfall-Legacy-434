@@ -3322,6 +3322,11 @@ void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const* aurApp, uint8
         }
     }
 
+    // The Quick and the Dead (Not in Battleground)
+    if (m_spellInfo->Id == 83950 || m_spellInfo->Id == 84559)
+        if (target->GetMap()->IsBattlegroundOrArena())
+            return;
+
     target->UpdateSpeed(MOVE_RUN, true);
 }
 
