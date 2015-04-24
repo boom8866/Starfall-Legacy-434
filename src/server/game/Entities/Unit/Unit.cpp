@@ -702,8 +702,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                         CastSpell(victim, 20170, true);
                     else if (HasAura(20165) && roll_chance_i(75))   // Seal of Insight
                         CastSpell(victim, 20167, true);
-                    else if (HasAura(31801))                        // Seal of Truth
-                        CastSpell(victim, 31803, true);
                 }
             }
 
