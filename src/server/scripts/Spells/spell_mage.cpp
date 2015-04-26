@@ -325,6 +325,7 @@ public:
             {
                 absorbAmount = dmgInfo.GetDamage();
                 caster->CastCustomSpell(caster,SPELL_MAGE_CAUTERIZE_DAMAGE,NULL,&cauterizeHeal,NULL, true, NULL, aurEff);
+                caster->SetHealth(cauterizeHeal);
                 caster->ToPlayer()->AddSpellCooldown(SPELL_MAGE_CAUTERIZE_DAMAGE, 0, time(NULL) + 60);
             }
         }
@@ -918,7 +919,6 @@ class spell_mage_ignite : public SpellScriptLoader
             uint32 storedAmount;
             bool durationUpdated;
             bool igniteExists;
-            float threshold;
         };
 
         AuraScript* GetAuraScript() const

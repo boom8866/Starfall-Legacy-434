@@ -652,6 +652,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     int32 bonus_dmg = (int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC)* 0.071429f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + bonus_dmg));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + bonus_dmg));
+
+                    // Apply Avoidance
+                    if (!HasAura(65220))
+                        AddAura(65220, this);
                     break;
                 }
              }

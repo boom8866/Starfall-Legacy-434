@@ -379,6 +379,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);
             events.ScheduleEvent(EVENT_CHECK_SHADOW, 2000);
             if (IsHeroic())

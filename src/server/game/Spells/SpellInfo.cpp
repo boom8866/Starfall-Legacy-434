@@ -2767,6 +2767,13 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                 return true;
             break;
         }
+        case SPELLFAMILY_PALADIN:
+        {
+            // Hand of Salvation
+            if (Id == 1038)
+                return true;
+            break;
+        }
         default:
             break;
     }

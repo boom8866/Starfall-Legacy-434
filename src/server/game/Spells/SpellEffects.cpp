@@ -647,22 +647,20 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 {
                     case 42223: // Rain of Fire
                         // Aftermath r1
-                        if(m_caster->HasAura(85113) && roll_chance_i(6))
+                        if (m_caster->HasAura(85113) && roll_chance_i(6))
                             m_caster->CastSpell(unitTarget, 85387, true);
                         // Aftermath r2
-                        else if(m_caster->HasAura(85114) && roll_chance_i(12))
+                        else if (m_caster->HasAura(85114) && roll_chance_i(12))
                             m_caster->CastSpell(unitTarget, 85387, true);
                         break;
                     case 17962: // Conflagrate
-                    {
                         // Aftermath r1
-                        if(m_caster->HasAura(85113) && roll_chance_i(50))
+                        if (m_caster->HasAura(85113) && roll_chance_i(50))
                             m_caster->CastSpell(unitTarget, 18118, true);
                         // Aftermath r2
-                        else if(m_caster->HasAura(85114))
+                        else if (m_caster->HasAura(85114))
                             m_caster->CastSpell(unitTarget, 18118, true);
                         break;
-                    }
                     case 3110: // Imp's Firebolt
                         if (m_caster->isPet())
                         {
@@ -2670,9 +2668,9 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     if (unitTarget)
                     {
                         if (m_caster->HasAura(50040)) // Chilblains r1
-                            m_caster->AddAura(96293, unitTarget);
+                            m_caster->CastSpell(unitTarget, 96293, true);
                         else if (m_caster->HasAura(50041)) // Chilblains r2
-                            m_caster->AddAura(96294, unitTarget);
+                            m_caster->CastSpell(unitTarget, 96294, true);
                     }
                     break;
                 }
@@ -4964,6 +4962,11 @@ void Spell::EffectTaunt (SpellEffIndex /*effIndex*/)
 
     if (!unitTarget)
         return;
+
+    // Army of the Dead Taunt (Not useable in dungeons/raid)
+    if (m_spellInfo->Id == 29060)
+        if (unitTarget->GetMap() && unitTarget->GetMap()->Instanceable())
+            return;
 
     // this effect use before aura Taunt apply for prevent taunt already attacking target
     // for spell as marked "non effective at already attacking target"
