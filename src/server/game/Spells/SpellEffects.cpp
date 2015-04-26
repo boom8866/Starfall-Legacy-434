@@ -2668,9 +2668,9 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     if (unitTarget)
                     {
                         if (m_caster->HasAura(50040)) // Chilblains r1
-                            m_caster->AddAura(96293, unitTarget);
+                            m_caster->CastSpell(unitTarget, 96293, true);
                         else if (m_caster->HasAura(50041)) // Chilblains r2
-                            m_caster->AddAura(96294, unitTarget);
+                            m_caster->CastSpell(unitTarget, 96294, true);
                     }
                     break;
                 }
