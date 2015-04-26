@@ -5429,7 +5429,8 @@ SpellCastResult Spell::CheckCast(bool strict)
 
             if (!IsTriggered())
             {
-                if (m_caster->IsVisionObscured(target))
+                // Exclude Pounce and Cheap Shot
+                if (m_caster->IsVisionObscured(target) && !(m_spellInfo->Id == 9005 || m_spellInfo->Id == 1833))
                     return SPELL_FAILED_VISION_OBSCURED; // smoke bomb, camouflage...
             }
 
