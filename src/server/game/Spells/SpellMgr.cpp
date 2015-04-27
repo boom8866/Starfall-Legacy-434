@@ -108,7 +108,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
                 || spellproto->Id == 59634 || spellproto->Id == 61025 || spellproto->Id == 61305
                 || spellproto->Id == 61721 || spellproto->Id == 61780 || spellproto->Id == 71379
                 || spellproto->Id == 82691)
-                return DIMINISHING_DISORIENT;
+                return DIMINISHING_CONTROLLED_STUN;
             // Dragon's Breath
             else if (spellproto->Id == 31661)
                 return DIMINISHING_LIMITONLY;
@@ -219,7 +219,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
                 return DIMINISHING_NONE;
             // Hex
             else if (spellproto->Id == 51514)
-                return DIMINISHING_DISORIENT;
+                return DIMINISHING_CONTROLLED_STUN;
             break;
         }
         default:
