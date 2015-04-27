@@ -103,18 +103,21 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Dragon's Breath
             else if (spellproto->SpellFamilyFlags[0] & 0x800000)
                 return DIMINISHING_DRAGONS_BREATH;
-            // Ring of Frost, Deep Freeze and Polymorph
-            else if (spellproto->Id == 82691 || spellproto->Id == 44572 || spellproto->Id == 118 ||
-                spellproto->Id == 28271 || spellproto->Id == 28272 || spellproto->Id == 59634 ||
-                spellproto->Id == 61025 || spellproto->Id == 61305 || spellproto->Id == 61721 ||
-                spellproto->Id == 61780 || spellproto->Id == 71379)
-                return DIMINISHING_CONTROLLED_STUN;
+            // Polymorph
+            else if (spellproto->Id == 118 || spellproto->Id == 28271 || spellproto->Id == 28272
+                || spellproto->Id == 59634 || spellproto->Id == 61025 || spellproto->Id == 61305
+                || spellproto->Id == 61721 || spellproto->Id == 61780 || spellproto->Id == 71379
+                || spellproto->Id == 82691)
+                return DIMINISHING_DISORIENT;
             // Dragon's Breath
             else if (spellproto->Id == 31661)
                 return DIMINISHING_LIMITONLY;
             // Improved Polymorph
-            else if(spellproto->Id == 83046 || spellproto->Id == 83047)
+            else if (spellproto->Id == 83046 || spellproto->Id == 83047)
                 return DIMINISHING_NONE;
+            // Deep Freeze and Ring of Frost
+            else if (spellproto->Id == 44572 || spellproto->Id == 82691)
+                return DIMINISHING_SPECIAL;
             break;
         }
         case SPELLFAMILY_WARRIOR:
@@ -216,7 +219,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
                 return DIMINISHING_NONE;
             // Hex
             else if (spellproto->Id == 51514)
-                return DIMINISHING_CONTROLLED_STUN;
+                return DIMINISHING_DISORIENT;
             break;
         }
         default:
