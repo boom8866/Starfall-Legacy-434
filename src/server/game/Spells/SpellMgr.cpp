@@ -3789,7 +3789,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].ItemType = 54493;
                 break;
             case 75305:
-                spellInfo->Effects[EFFECT_0].ItemType = 54497;
+                spellInfo->Effects[EFFECT_0].ItemType = 54495;
                 break;
             case 75306:
                 spellInfo->Effects[EFFECT_0].ItemType = 54496;
