@@ -1061,6 +1061,7 @@ void Creature::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, 
 #define ENTRY_RUNIC_WEAPON      27893
 #define ENTRY_SPIRIT_WOLF       29264
 #define ENTRY_GARGOYLE          27829
+#define ENTRY_SHADOWFIEND       19668
 
 bool Guardian::UpdateStats(Stats stat)
 {
@@ -1359,11 +1360,15 @@ void Guardian::UpdateMaxHealth()
                 value = (9.1 * getLevel() / 80) * GetOwner()->GetStat(STAT_STAMINA) + GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
                 break;
             case ENTRY_WATER_ELEMENTAL:
-            case ENTRY_GARGOYLE:
                 value = (7.0 * getLevel() / 80) * GetOwner()->GetStat(STAT_STAMINA) + GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
                 break;
             case ENTRY_SPIRIT_WOLF:
+            case ENTRY_GARGOYLE:
+            case ENTRY_SHADOWFIEND:
                 value = (4.2 * getLevel() / 80) * GetOwner()->GetStat(STAT_STAMINA) + GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
+                break;
+            case ENTRY_TREANT:
+                value = (1.9 * getLevel() / 80) * GetOwner()->GetStat(STAT_STAMINA) + GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
                 break;
             default:
                 break;
