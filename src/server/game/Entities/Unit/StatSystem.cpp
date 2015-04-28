@@ -1334,9 +1334,11 @@ void Guardian::UpdateMaxHealth()
     float multiplicator;
     switch (GetEntry())
     {
-        case ENTRY_BLOODWORM:       multiplicator = 1.0f;   break;
-        case ENTRY_WATER_ELEMENTAL: multiplicator = 7.5;    break;
-        default:                    multiplicator = 14.0f;  break;
+        case ENTRY_BLOODWORM:
+            multiplicator = 1.0f;
+            break;
+        default:multiplicator = 14.0f;
+            break;
     }
 
     float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
