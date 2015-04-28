@@ -103,18 +103,21 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Dragon's Breath
             else if (spellproto->SpellFamilyFlags[0] & 0x800000)
                 return DIMINISHING_DRAGONS_BREATH;
-            // Ring of Frost, Deep Freeze and Polymorph
-            else if (spellproto->Id == 82691 || spellproto->Id == 44572 || spellproto->Id == 118 ||
-                spellproto->Id == 28271 || spellproto->Id == 28272 || spellproto->Id == 59634 ||
-                spellproto->Id == 61025 || spellproto->Id == 61305 || spellproto->Id == 61721 ||
-                spellproto->Id == 61780 || spellproto->Id == 71379)
+            // Polymorph
+            else if (spellproto->Id == 118 || spellproto->Id == 28271 || spellproto->Id == 28272
+                || spellproto->Id == 59634 || spellproto->Id == 61025 || spellproto->Id == 61305
+                || spellproto->Id == 61721 || spellproto->Id == 61780 || spellproto->Id == 71379
+                || spellproto->Id == 82691)
                 return DIMINISHING_CONTROLLED_STUN;
             // Dragon's Breath
             else if (spellproto->Id == 31661)
                 return DIMINISHING_LIMITONLY;
             // Improved Polymorph
-            else if(spellproto->Id == 83046 || spellproto->Id == 83047)
+            else if (spellproto->Id == 83046 || spellproto->Id == 83047)
                 return DIMINISHING_NONE;
+            // Deep Freeze and Ring of Frost
+            else if (spellproto->Id == 44572 || spellproto->Id == 82691)
+                return DIMINISHING_SPECIAL;
             break;
         }
         case SPELLFAMILY_WARRIOR:
@@ -4278,6 +4281,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 77223: // Enhanced Elements
                 spellInfo->Effects[EFFECT_1].BasePoints = 0;
                 spellInfo->SpellFamilyName = SPELLFAMILY_SHAMAN;
+                break;
+            case 8042:  // Earth Shock
+            case 8050:  // Flame Shock
+            case 8056:  // Frost Shock
+                spellInfo->StartRecoveryTime = 4500;
                 break;
             // Warlock
             case 54424: // Fel Intelligence

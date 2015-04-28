@@ -5249,6 +5249,10 @@ SpellCastResult Spell::CheckCast(bool strict)
         return SPELL_FAILED_CUSTOM_ERROR;
     }
 
+    // Check global cooldown
+    if (strict && !(_triggeredCastFlags & TRIGGERED_IGNORE_GCD) && HasGlobalCooldown())
+        return SPELL_FAILED_NOT_READY;
+
     // only triggered spells can be processed an ended battleground
     if (!IsTriggered() && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -5429,8 +5433,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
             if (!IsTriggered())
             {
-                // Exclude Pounce and Cheap Shot
-                if (m_caster->IsVisionObscured(target) && !(m_spellInfo->Id == 9005 || m_spellInfo->Id == 1833))
+                if (m_caster->IsVisionObscured(target))
                     return SPELL_FAILED_VISION_OBSCURED; // smoke bomb, camouflage...
             }
 
@@ -6170,10 +6173,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_NO_COMBO_POINTS;
         }
     }
-
-    // Check global cooldown
-    if (strict && !(_triggeredCastFlags & TRIGGERED_IGNORE_GCD) && HasGlobalCooldown())
-        return SPELL_FAILED_NOT_READY;
 
     // Check for cooldown too
     if (m_caster->GetTypeId() == TYPEID_PLAYER)

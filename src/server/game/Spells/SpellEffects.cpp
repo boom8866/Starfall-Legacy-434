@@ -4927,6 +4927,12 @@ void Spell::EffectSummonPet (SpellEffIndex effIndex)
             pet->SetPower(POWER_ENERGY, 100);
         }
     }
+
+    // Camouflage
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (m_caster->getClass() == CLASS_HUNTER)
+            if (m_caster->HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE))
+                m_caster->RemoveAurasByType(SPELL_AURA_MOD_CAMOUFLAGE);
 }
 
 void Spell::EffectLearnPetSpell (SpellEffIndex effIndex)
@@ -7265,6 +7271,12 @@ void Spell::EffectDismissPet (SpellEffIndex effIndex)
 
     ExecuteLogEffectUnsummonObject(effIndex, pet);
     pet->GetOwner()->RemoveCurrentPet();
+
+    // Camouflage
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (m_caster->getClass() == CLASS_HUNTER)
+            if (m_caster->HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE))
+                m_caster->RemoveAurasByType(SPELL_AURA_MOD_CAMOUFLAGE);
 }
 
 void Spell::EffectSummonObject (SpellEffIndex effIndex)
