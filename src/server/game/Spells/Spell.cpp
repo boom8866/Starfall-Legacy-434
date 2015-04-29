@@ -5243,6 +5243,17 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_CastItem)
+    {
+        if (ItemTemplate const* proto = m_CastItem->GetTemplate())
+        {
+            for (int i = 0; i < MAX_ITEM_SPELLS; ++i)            {
+                if (m_caster->ToPlayer()->HasSpellCooldown(proto->Spells[i].SpellId))
+                    m_caster->ToPlayer()->AddSpellCooldown(proto->Spells[i].SpellId, m_CastItem->GetEntry(), time(NULL) + (proto->Spells[i].SpellCooldown / 1000));
+            }
+        }
+    }
+
     if (m_spellInfo->AttributesEx7 & SPELL_ATTR7_IS_CHEAT_SPELL && !m_caster->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS))
     {
         m_customError = SPELL_CUSTOM_ERROR_GM_ONLY;
@@ -6730,6 +6741,12 @@ SpellCastResult Spell::CheckItems()
         ItemTemplate const* proto = m_CastItem->GetTemplate();
         if (!proto)
             return SPELL_FAILED_ITEM_NOT_READY;
+
+        for (int i = 0; i < MAX_ITEM_SPELLS; ++i)
+        {
+            if (p_caster->HasSpellCooldown(proto->Spells[i].SpellId))
+                return SPELL_FAILED_ITEM_NOT_READY;
+        }
 
         for (int i = 0; i < MAX_ITEM_SPELLS; ++i)
             if (proto->Spells[i].SpellCharges)

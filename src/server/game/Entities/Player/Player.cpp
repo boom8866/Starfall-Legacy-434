@@ -23653,7 +23653,7 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
             }
         }
 
-         // replace negative cooldowns by 0
+        // replace negative cooldowns by 0
         if (rec < 0)
             rec = 0;
 
