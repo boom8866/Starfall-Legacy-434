@@ -702,8 +702,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                         CastSpell(victim, 20170, true);
                     else if (HasAura(20165) && roll_chance_i(75))   // Seal of Insight
                         CastSpell(victim, 20167, true);
-                    else if (HasAura(31801))                        // Seal of Truth
-                        CastSpell(victim, 31803, true);
                 }
             }
 
@@ -1364,6 +1362,18 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
         damage = 0;
 
     damageInfo->damage = damage;
+
+    if (damageInfo->absorb > 0)
+    {
+        if (spellInfo)
+        {
+            if (victim->HasAura(20066)) // Repentance
+                victim->RemoveAurasDueToSpell(20066);
+            if (spellInfo->Id != 1776)
+                if (victim->HasAura(1776))  // Gouge
+                    victim->RemoveAurasDueToSpell(1776);
+        }
+    }
 
     if (damage > 0)
     {
@@ -2893,7 +2903,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
             parryChance = 0;
 
         tmp += parryChance;
-        if (roll < tmp)
+        if (roll < tmp && !victim->HasInArc(M_PI, this))
             return SPELL_MISS_PARRY;
     }
 
@@ -4451,6 +4461,7 @@ void Unit::RemoveArenaAuras()
         Aura const* aura = aurApp->GetBase();
         if (!(aura->GetSpellInfo()->AttributesEx4 & SPELL_ATTR4_UNK21) // don't remove stances, shadowform, pally/hunter auras
             && !aura->IsPassive()                               // don't remove passive auras
+            && !(aura->GetSpellInfo()->Attributes & SPELL_ATTR0_PASSIVE)
             && (aurApp->IsPositive() || !(aura->GetSpellInfo()->AttributesEx3 & SPELL_ATTR3_DEATH_PERSISTENT))) // not negative death persistent auras
             RemoveAura(iter);
         else
@@ -6875,7 +6886,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (effIndex != 0)
                     return false;
 
-                if (procSpell && (procSpell->Id == 20187 || procSpell->Id == 24275))
+                if (procSpell && (procSpell->Id == 20187 || procSpell->Id == 24275 || procSpell->Id == 85126))
                     return false;
 
                 if (HasAura(85126))
@@ -6884,9 +6895,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 25742;
 
                 float ap = GetTotalAttackPowerValue(BASE_ATTACK);
-                int32 holy = SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) +
-                    victim->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
-                basepoints0 = (int32)GetBaseAttackTime(BASE_ATTACK) * int32(ap * 0.011f + 0.022f * holy) / 1000;
+                int32 holy = SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) + victim->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
+                basepoints0 = (int32)GetBaseAttackTime(BASE_ATTACK) * int32(ap * 0.022f + 0.044f * holy) / 1000;
                 break;
             }
             switch (dummySpell->Id)
@@ -9891,8 +9901,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 CastSpell(this, 71072, true, castItem, triggeredByAura); // Slam GCD Reduced
                 CastSpell(this, 71069, true, castItem, triggeredByAura); // Execute GCD Reduced
             }
+
             // Remove cd from Colossus Smash
-            ToPlayer()->RemoveSpellCooldown(86346, true);
+            if (auraSpellInfo->Id == 52437)
+                ToPlayer()->RemoveSpellCooldown(86346, true);
 
             break;
         }

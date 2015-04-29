@@ -1413,7 +1413,7 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/)
         {
-            return sSpellMgr->GetSpellInfo(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT);;
+            return sSpellMgr->GetSpellInfo(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT);
         }
 
         void HandleProc(ProcEventInfo& info)

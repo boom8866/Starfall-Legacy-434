@@ -1345,6 +1345,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             caster->CastSpell(caster, 80879, true);
                         else if (AuraEffect* aurEff = caster->GetAuraEffect(80317, 1, caster->GetGUID()))
                             caster->CastSpell(caster, 80886, true);
+
+                        // Primal Madness - Energize Effect
+                        if (caster->GetShapeshiftForm() == FORM_BEAR)
+                        {
+                            if (caster->HasSpell(80316))
+                                caster->EnergizeBySpell(caster, 80879, 60, POWER_RAGE);
+                            else if (caster->HasSpell(80317))
+                                caster->EnergizeBySpell(caster, 80886, 120, POWER_RAGE);
+                        }
                         break;
                     }
                     // Enrage - Bear
@@ -1358,14 +1367,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         {
                             int32 bp0 = aurEff->GetAmount();
                             caster->CastCustomSpell(caster, 51185, &bp0, 0, 0, true);
-                        }
-                        // Primal Madness - Energize Effect
-                        if (caster->GetShapeshiftForm() == FORM_BEAR)
-                        {
-                            if (caster->HasSpell(80316))
-                                caster->EnergizeBySpell(caster, 80879, 60, POWER_RAGE);
-                            else if (caster->HasSpell(80317))
-                                caster->EnergizeBySpell(caster, 80886, 120, POWER_RAGE);
                         }
                         break;
                     }

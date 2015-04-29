@@ -1406,7 +1406,7 @@ public:
     {
         PrepareSpellScript(spell_pal_judgement_SpellScript)
 
-        enum
+        enum spellId
         {
             SPELL_JUDGEMENT_DAMAGE  = 54158,
             TALENT_COMMUNION        = 31876,
@@ -1968,6 +1968,59 @@ public:
     }
 };
 
+class spell_pal_judgement_damage : public SpellScriptLoader
+{
+public:
+    spell_pal_judgement_damage() : SpellScriptLoader("spell_pal_judgement_damage")
+    {
+    }
+
+    class spell_pal_judgement_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pal_judgement_damage_SpellScript)
+
+        enum spellId
+        {
+            SPELL_CENSURE           = 31803,
+            SPELL_SEAL_OF_TRUTH     = 31801
+        };
+
+        void CalculateDamage(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            if (!caster || !target)
+                return;
+
+            uint32 damageOriginal = GetHitDamage();
+            uint32 censureMultiplier = 0;
+            uint32 damageFinal = 0;
+
+            // Check for Censure debuff on target
+            if (Aura* censureStack = target->GetAura(SPELL_CENSURE, caster->GetGUID()))
+                censureMultiplier = censureStack->GetStackAmount();
+
+            damageFinal = AddPct(damageOriginal, (20 * censureMultiplier));
+
+            SetHitDamage(uint32(damageFinal));
+
+            // Apply seal of truth only if the damage is not absorbed
+            if (caster->HasAura(SPELL_SEAL_OF_TRUTH))
+                caster->CastSpell(target, SPELL_CENSURE, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pal_judgement_damage_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pal_judgement_damage_SpellScript();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_ardent_defender();
@@ -1997,4 +2050,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_shield_of_the_righteous();
     new spell_pal_sanctuary();
     new spell_pal_lights_beacon();
+    new spell_pal_judgement_damage();
 }

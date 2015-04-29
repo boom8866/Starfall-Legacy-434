@@ -325,6 +325,7 @@ public:
             {
                 absorbAmount = dmgInfo.GetDamage();
                 caster->CastCustomSpell(caster,SPELL_MAGE_CAUTERIZE_DAMAGE,NULL,&cauterizeHeal,NULL, true, NULL, aurEff);
+                caster->SetHealth(cauterizeHeal);
                 caster->ToPlayer()->AddSpellCooldown(SPELL_MAGE_CAUTERIZE_DAMAGE, 0, time(NULL) + 60);
             }
         }
@@ -824,16 +825,17 @@ class spell_mage_ignite : public SpellScriptLoader
             {
                 storedAmount = 0;
                 durationUpdated = false;
-
+                igniteExists = false;
                 if (Unit* procTarget = eventInfo.GetProcTarget())
                 {
                     if (Aura* ignite = procTarget->GetAura(SPELL_MAGE_IGNITE, eventInfo.GetDamageInfo()->GetAttacker()->GetGUID()))
                     {
-                        if (ignite->GetDuration() > (ignite->GetMaxDuration() / 2))
+                        if (ignite->GetDuration() <= (ignite->GetMaxDuration() - 100) && !igniteExists)
+                        {
                             storedAmount += uint32(ignite->GetEffect(EFFECT_0)->GetAmount());
-
-                        if (ignite->GetDuration() <= (ignite->GetMaxDuration() - 1 * IN_MILLISECONDS))
                             durationUpdated = true;
+                            igniteExists = true;
+                        }
                     }
                 }
                 return eventInfo.GetProcTarget();
@@ -868,7 +870,7 @@ class spell_mage_ignite : public SpellScriptLoader
 
                 if (SpellInfo const* igniteDot = sSpellMgr->GetSpellInfo(SPELL_MAGE_IGNITE))
                 {
-                    uint32 amount = uint32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), pct) / (durationUpdated ? 3 : 2));
+                    uint32 amount = uint32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), pct));
                     if (storedAmount > 0)
                         amount += storedAmount;
 
@@ -876,6 +878,17 @@ class spell_mage_ignite : public SpellScriptLoader
                     {
                         if (Unit* target = GetTarget())
                         {
+                            amount /= igniteExists ? 3 : 2;
+                            if (Unit* caster = GetCaster())
+                            {
+                                // Mastery: Flashburn
+                                if (caster->HasAura(76595))
+                                {
+                                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                                    amount += amount * (0.220f + (0.0280f * masteryPoints));
+                                }
+                            }
+
                             target->CastCustomSpell(SPELL_MAGE_IGNITE, SPELLVALUE_BASE_POINT0, amount, eventInfo.GetProcTarget(), true, NULL, aurEff);
                             // Check for existant aura and update the duration to 6 seconds
                             if (Aura* igniteAura = eventInfo.GetProcTarget()->GetAura(SPELL_MAGE_IGNITE, GetCaster()->GetGUID()))
@@ -892,6 +905,7 @@ class spell_mage_ignite : public SpellScriptLoader
                     // Cleanup
                     storedAmount = 0;
                     durationUpdated = false;
+                    igniteExists = false;
                 }
             }
 
@@ -904,6 +918,7 @@ class spell_mage_ignite : public SpellScriptLoader
         protected:
             uint32 storedAmount;
             bool durationUpdated;
+            bool igniteExists;
         };
 
         AuraScript* GetAuraScript() const
@@ -1146,62 +1161,64 @@ class spell_mage_replenish_mana : public SpellScriptLoader
 /// Updated 4.3.4
 class spell_mage_water_elemental_freeze : public SpellScriptLoader
 {
-   public:
-       spell_mage_water_elemental_freeze() : SpellScriptLoader("spell_mage_water_elemental_freeze") { }
+public:
+    spell_mage_water_elemental_freeze() : SpellScriptLoader("spell_mage_water_elemental_freeze")
+    {
+    }
 
-       class spell_mage_water_elemental_freeze_SpellScript : public SpellScript
-       {
-           PrepareSpellScript(spell_mage_water_elemental_freeze_SpellScript);
+    class spell_mage_water_elemental_freeze_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_water_elemental_freeze_SpellScript);
 
-           bool Validate(SpellInfo const* /*spellInfo*/)
-           {
-               if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_FINGERS_OF_FROST))
-                   return false;
-               return true;
-           }
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_FINGERS_OF_FROST))
+                return false;
+            return true;
+        }
 
-           void CountTargets(std::list<WorldObject*>& targetList)
-           {
-               _didHit = !targetList.empty();
-           }
+        void CountTargets(std::list<WorldObject*>& targetList)
+        {
+            _didHit = !targetList.empty();
+        }
 
-           void HandleImprovedFreeze()
-           {
-               if (!_didHit)
-                   return;
+        void HandleImprovedFreeze()
+        {
+            if (!_didHit)
+                return;
 
-               Unit* owner = GetCaster()->GetOwner();
-               if (!owner)
-                   return;
+            Unit* owner = GetCaster()->GetOwner();
+            if (!owner)
+                return;
 
-               if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, ICON_MAGE_IMPROVED_FREEZE, EFFECT_0))
-               {
-                   if (roll_chance_i(aurEff->GetAmount()))
-                       owner->CastCustomSpell(SPELL_MAGE_FINGERS_OF_FROST, SPELLVALUE_AURA_STACK, 2, owner, true);
-               }
+            if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, ICON_MAGE_IMPROVED_FREEZE, EFFECT_0))
+            {
+                if (roll_chance_i(aurEff->GetAmount()))
+                    owner->CastCustomSpell(SPELL_MAGE_FINGERS_OF_FROST, SPELLVALUE_AURA_STACK, 2, owner, true);
+            }
 
-               // Invisibility
-               if(Unit* caster = GetCaster())
-               {
-                   if(caster->HasAura(SPELL_MAGE_INVISIBILITY_INVISIBLE))
-                       caster->RemoveAura(SPELL_MAGE_INVISIBILITY_INVISIBLE);
-               }
-           }
+            // Invisibility
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_MAGE_INVISIBILITY_INVISIBLE))
+                    caster->RemoveAura(SPELL_MAGE_INVISIBILITY_INVISIBLE);
+            }
+        }
 
-           void Register()
-           {
-               OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_water_elemental_freeze_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
-               AfterCast += SpellCastFn(spell_mage_water_elemental_freeze_SpellScript::HandleImprovedFreeze);
-           }
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_water_elemental_freeze_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            AfterCast += SpellCastFn(spell_mage_water_elemental_freeze_SpellScript::HandleImprovedFreeze);
+        }
 
-       private:
-           bool _didHit;
-       };
+    private:
+        bool _didHit;
+    };
 
-       SpellScript* GetSpellScript() const
-       {
-           return new spell_mage_water_elemental_freeze_SpellScript();
-       }
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_water_elemental_freeze_SpellScript();
+    }
 };
 
 // 30451 Arcane Blast

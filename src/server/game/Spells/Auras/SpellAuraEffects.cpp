@@ -1613,6 +1613,9 @@ void AuraEffect::HandleModInvisibility(AuraApplication const* aurApp, uint8 mode
         }
 
         target->m_invisibility.AddValue(type, -GetAmount());
+
+        // Send update to nearest objects to avoid visibility problems
+        target->SendMovementFlagUpdate(false);
     }
 
     // call functions which may have additional effects after chainging state of unit
@@ -1681,6 +1684,9 @@ void AuraEffect::HandleModStealth(AuraApplication const* aurApp, uint8 mode, boo
         // Overkill
         if (Aura* overkill = target->GetAura(58427, target->GetGUID()))
             overkill->SetDuration(20000); // 20 seconds
+
+        // Send update to nearest objects to avoid visibility problems
+        target->SendMovementFlagUpdate(false);
     }
 
     // call functions which may have additional effects after chainging state of unit
@@ -3321,6 +3327,11 @@ void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const* aurApp, uint8
             }
         }
     }
+
+    // The Quick and the Dead (Not in Battleground)
+    if (m_spellInfo->Id == 83950 || m_spellInfo->Id == 84559)
+        if (target->GetMap()->IsBattlegroundOrArena())
+            return;
 
     target->UpdateSpeed(MOVE_RUN, true);
 }

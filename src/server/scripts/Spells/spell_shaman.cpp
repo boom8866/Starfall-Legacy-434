@@ -967,11 +967,25 @@ class spell_sha_thunderstorm : public SpellScriptLoader
         {
             PrepareSpellScript(spell_sha_thunderstorm_SpellScript);
 
+            enum spellId
+            {
+                SPELL_THUNDERSTORM_SLOW     = 100955
+            };
+
             void HandleKnockBack(SpellEffIndex effIndex)
             {
-                // Glyph of Thunderstorm
-                if (GetCaster()->HasAura(SPELL_SHAMAN_GLYPH_OF_THUNDERSTORM))
-                    PreventHitDefaultEffect(effIndex);
+                if (Unit* caster = GetCaster())
+                {
+                    // Glyph of Thunderstorm
+                    if (caster->HasAura(SPELL_SHAMAN_GLYPH_OF_THUNDERSTORM))
+                    {
+                        PreventHitDefaultEffect(effIndex);
+                        return;
+                    }
+
+                    if (Unit* target = GetHitUnit())
+                        caster->CastSpell(target, SPELL_THUNDERSTORM_SLOW, true);
+                }
             }
 
             void Register()

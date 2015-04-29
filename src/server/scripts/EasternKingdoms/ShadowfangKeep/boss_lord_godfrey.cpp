@@ -74,6 +74,7 @@ public:
                 else
                     Talk(SAY_AGGRO_HORDE);
             }
+            _EnterCombat();
             me->ApplySpellImmune(0, IMMUNITY_ID, 93564, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 93784, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
@@ -84,7 +85,6 @@ public:
             events.ScheduleEvent(EVENT_SUMMON_BLOODTHIRSTY_GHOULS, 6000);
             if (IsHeroic())
                 events.ScheduleEvent(EVENT_PISTOL_BARRAGE, 12500);
-            _EnterCombat();
         }
 
         void JustDied(Unit* /*killer*/)

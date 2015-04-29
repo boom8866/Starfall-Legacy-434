@@ -1068,12 +1068,13 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
                     if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
                     {
                         int32 damage = aurEff->GetAmount() * 9;
+                        AddPct(damage, 200);
 
                         // Shadow Mastery
                         if (AuraEffect* shadowMastery = caster->GetAuraEffect(SPELL_WARLOCK_SHADOW_MASTERY, EFFECT_0, caster->GetGUID()))
                             AddPct(damage, shadowMastery->GetAmount());
 
-                        // backfire damage and silence
+                        // Backfire damage and silence
                         caster->CastCustomSpell(dispelInfo->GetDispeller(), SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL, &damage, NULL, NULL, true, NULL, aurEff);
                     }
                 }
@@ -1306,11 +1307,11 @@ public:
             return GetCaster()->GetTypeId() == TYPEID_PLAYER;
         }
 
-        void HandleHit(SpellEffIndex /*effIndex*/)
+        void HandleHit()
         {
             if (Unit* plr = GetCaster())
             {
-                if (Unit* unitTarget = GetHitUnit())
+                if (Unit* unitTarget = GetExplTargetUnit())
                 {
                     Aura* glyAur = plr->GetAura(SPELL_WARLOCK_GYLPH_OF_SOUL_SWAP);
 
@@ -1333,7 +1334,7 @@ public:
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_warl_soul_swap_exhale_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            AfterCast += SpellCastFn(spell_warl_soul_swap_exhale_SpellScript::HandleHit);
         }
     };
 

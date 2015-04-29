@@ -647,22 +647,20 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 {
                     case 42223: // Rain of Fire
                         // Aftermath r1
-                        if(m_caster->HasAura(85113) && roll_chance_i(6))
+                        if (m_caster->HasAura(85113) && roll_chance_i(6))
                             m_caster->CastSpell(unitTarget, 85387, true);
                         // Aftermath r2
-                        else if(m_caster->HasAura(85114) && roll_chance_i(12))
+                        else if (m_caster->HasAura(85114) && roll_chance_i(12))
                             m_caster->CastSpell(unitTarget, 85387, true);
                         break;
                     case 17962: // Conflagrate
-                    {
                         // Aftermath r1
-                        if(m_caster->HasAura(85113) && roll_chance_i(50))
+                        if (m_caster->HasAura(85113) && roll_chance_i(50))
                             m_caster->CastSpell(unitTarget, 18118, true);
                         // Aftermath r2
-                        else if(m_caster->HasAura(85114))
+                        else if (m_caster->HasAura(85114))
                             m_caster->CastSpell(unitTarget, 18118, true);
                         break;
-                    }
                     case 3110: // Imp's Firebolt
                         if (m_caster->isPet())
                         {
@@ -1241,7 +1239,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     {
                         // Improved Cone of Cold
                         if (m_caster->HasAura(11190))
-                            unitTarget->CastSpell(unitTarget, 83302, true, 0, 0, m_caster->GetGUID());
+                            unitTarget->CastSpell(unitTarget, 83301, true, 0, 0, m_caster->GetGUID());
                         else if (m_caster->HasAura(12489))
                             unitTarget->CastSpell(unitTarget, 83302, true, 0, 0, m_caster->GetGUID());
                         break;
@@ -2670,9 +2668,9 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     if (unitTarget)
                     {
                         if (m_caster->HasAura(50040)) // Chilblains r1
-                            m_caster->AddAura(96293, unitTarget);
+                            m_caster->CastSpell(unitTarget, 96293, true);
                         else if (m_caster->HasAura(50041)) // Chilblains r2
-                            m_caster->AddAura(96294, unitTarget);
+                            m_caster->CastSpell(unitTarget, 96294, true);
                     }
                     break;
                 }
@@ -4929,6 +4927,12 @@ void Spell::EffectSummonPet (SpellEffIndex effIndex)
             pet->SetPower(POWER_ENERGY, 100);
         }
     }
+
+    // Camouflage
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (m_caster->getClass() == CLASS_HUNTER)
+            if (m_caster->HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE))
+                m_caster->RemoveAurasByType(SPELL_AURA_MOD_CAMOUFLAGE);
 }
 
 void Spell::EffectLearnPetSpell (SpellEffIndex effIndex)
@@ -4964,6 +4968,11 @@ void Spell::EffectTaunt (SpellEffIndex /*effIndex*/)
 
     if (!unitTarget)
         return;
+
+    // Army of the Dead Taunt (Not useable in dungeons/raid)
+    if (m_spellInfo->Id == 29060)
+        if (unitTarget->GetMap() && unitTarget->GetMap()->Instanceable())
+            return;
 
     // this effect use before aura Taunt apply for prevent taunt already attacking target
     // for spell as marked "non effective at already attacking target"
@@ -7262,6 +7271,12 @@ void Spell::EffectDismissPet (SpellEffIndex effIndex)
 
     ExecuteLogEffectUnsummonObject(effIndex, pet);
     pet->GetOwner()->RemoveCurrentPet();
+
+    // Camouflage
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (m_caster->getClass() == CLASS_HUNTER)
+            if (m_caster->HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE))
+                m_caster->RemoveAurasByType(SPELL_AURA_MOD_CAMOUFLAGE);
 }
 
 void Spell::EffectSummonObject (SpellEffIndex effIndex)

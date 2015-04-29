@@ -379,6 +379,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);
             events.ScheduleEvent(EVENT_CHECK_SHADOW, 2000);
             if (IsHeroic())
@@ -599,9 +600,10 @@ public:
 
                 if (Unit* attacker = eventInfo.GetActor())
                 {
-                    caster->DeleteThreatList();
                     caster->AttackStop();
+                    caster->DeleteThreatList();
                     caster->ToCreature()->AI()->AttackStart(attacker);
+                    attacker->AddThreat(caster, 1.0f);
                 }
             }
         }
