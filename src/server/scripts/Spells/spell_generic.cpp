@@ -13444,6 +13444,45 @@ public:
     }
 };
 
+class spell_cw_summon_orphan : public SpellScriptLoader
+{
+public:
+    spell_cw_summon_orphan() : SpellScriptLoader("spell_cw_summon_orphan")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_CHILDREN_WEEK     = 10
+    };
+
+    class spell_cw_summon_orphan_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_cw_summon_orphan_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                // Children's Week
+                if (!sGameEventMgr->IsActiveEvent(EVENT_CHILDREN_WEEK))
+                    return SPELL_FAILED_NOT_INACTIVE;
+                return SPELL_CAST_OK;
+            }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_cw_summon_orphan_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_cw_summon_orphan_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -13706,4 +13745,5 @@ void AddSC_generic_spell_scripts()
     new spell_razgar_fillet_knife();
     new spell_simulate_alliance_presence();
     new spell_throw_frog();
+    new spell_cw_summon_orphan();
 }
