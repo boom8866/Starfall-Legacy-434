@@ -127,7 +127,8 @@ void WardenWin::InitializeModule()
     // Encrypt with warden RC4 key.
     EncryptData((uint8*)&Request, sizeof(WardenInitModuleRequest));
 
-    WorldPacket pkt(SMSG_WARDEN_DATA, sizeof(WardenInitModuleRequest));
+    WorldPacket pkt(SMSG_WARDEN_DATA, sizeof(WardenInitModuleRequest) + 4);
+    pkt << uint32(sizeof(WardenInitModuleRequest));
     pkt.append((uint8*)&Request, sizeof(WardenInitModuleRequest));
     _session->SendPacket(&pkt);
 }
@@ -144,7 +145,8 @@ void WardenWin::RequestHash()
     // Encrypt with warden RC4 key.
     EncryptData((uint8*)&Request, sizeof(WardenHashRequest));
 
-    WorldPacket pkt(SMSG_WARDEN_DATA, sizeof(WardenHashRequest));
+    WorldPacket pkt(SMSG_WARDEN_DATA, sizeof(WardenHashRequest) + 4);
+    pkt << uint32(sizeof(WardenHashRequest));
     pkt.append((uint8*)&Request, sizeof(WardenHashRequest));
     _session->SendPacket(&pkt);
 }
@@ -312,7 +314,8 @@ void WardenWin::RequestData()
     // Encrypt with warden RC4 key
     EncryptData(buff.contents(), buff.size());
 
-    WorldPacket pkt(SMSG_WARDEN_DATA, buff.size());
+    WorldPacket pkt(SMSG_WARDEN_DATA, buff.size() + 4);
+    pkt << uint32(buff.size());
     pkt.append(buff);
     _session->SendPacket(&pkt);
 

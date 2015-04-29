@@ -28,40 +28,17 @@ enum Texts
     SAY_ANNOUNCE_ENGULFING_FLAMES   = 11,
     SAY_ANNOUNCE_WORLD_IN_FLAMES    = 12,
     SAY_DEATH_NORMAL                = 13,
+    SAY_SUBMERGE_HEROIC             = 14,
+    SAY_EMERGE_HEROIC               = 15,
+    SAY_FREE_FROM_LAVA              = 16,
 
-
-    /*
-    SAY_DEATH_NORMAL            = 2,
-    SAY_DEATH_HEROIC            = 3,
-    SAY_ANNOUNCE_SPLIT          = 5,
-    SAY_SUBMERGE                = 6,
-    SAY_EMERGE                  = 7,
-    SAY_SONS_OF_FLAME_1         = 8,
-    SAY_SONS_OF_FLAME_2         = 9,
-    SAY_ANNOUNCE_EMERGE         = 10,
-    SAY_MAGMA_TRAP              = 11,
-    SAY_ANNOUNCE_SULFURAS_SMASH = 12,
-    SAY_SUBMERGE_HEROIC         = 13,
-    SAY_INTRO_HEROIC_1          = 14,
-    SAY_INTRO_HEROIC_2          = 15,
-    SAY_ENGULFING_FLAMES        = 16,
-    SAY_WORLD_IN_FLAMES         = 17,
-    SAY_EMPOWER_SULFURAS        = 18,
-    SAY_DREADFLAME              = 19,
-    */
     // Cenarius
-    SAY_CENARIUS_1 = 0,
-    SAY_CENARIUS_OUTRO_1 = 1,
-    SAY_CENARIUS_OUTRO_2 = 2,
-    SAY_CENARIUS_OUTRO_3 = 3,
+    SAY_CENARIUS_INTRO              = 0,
 
-    // Malfurion
-    SAY_MALFURION_1 = 0,
-    SAY_MALFURION_OUTRO_1 = 1,
-    SAY_MALFURION_OUTRO_2 = 2,
+    // Malfurion Stormrage
+    SAY_MALFURION_INTRO             = 0,
 
-    // Hamuul
-    SAY_HAMUUL_OUTRO_1 = 0,
+    // Hamuul Runetotem
 };
 
 enum Spells
@@ -69,7 +46,6 @@ enum Spells
     // Ragnaros
     SPELL_BASE_VISUAL                       = 98860,
     SPELL_BURNING_WOUNDS_AURA               = 99401,
-    SPELL_MAGMA_PERIODIC                    = 99908,
     SPELL_SULFURAS_SMASH_AOE                = 98703,
     SPELL_SULFURAS_SMASH                    = 98710,
     SPELL_SUMMON_SULFURAS_SMASH_TARGET      = 98706,
@@ -89,7 +65,9 @@ enum Spells
     SPELL_ENGULFING_FLAMES_VISUAL_RANGE     = 99218,
     SPELL_WOLRD_IN_FLAMES                   = 100171,
     SPELL_LIVING_METEOR                     = 99268,
-
+    SPELL_DREADFLAME_PEROIDIC               = 100691,
+    SPELL_DREADFLAME_SINGLE_MISSILE         = 100675,
+    SPELL_DREADFLAME_SUMMON                 = 100679, // summons the dreadflame handler
 
     // Molten Seed
     SPELL_MOLTEN_SEED                       = 98333,
@@ -127,14 +105,12 @@ enum Spells
     SPELL_LIVING_METEOR_DUMMY               = 99279,
 
     SPELL_LIVING_METEOR_DAMAGE_REDUCTION    = 100904,
-    SPELL_LIVING_METEOR_EXPLOSION_TRIGGER   = 99269,
-    SPELL_LIVING_METEOR_UNK                 = 99267,
-    SPELL_LIVING_METEOR_EXPLOSION           = 99287,
     SPELL_LIVING_METEOR_INCREASE_SPEED      = 100278,
 
     // Heroic Encounter
 
     // Ragnaros
+    SPELL_LEGS_SUBMERGE                     = 100312,
     SPELL_LEGS_HEAL                         = 100346,
     SPELL_TRANSFORM                         = 100420,
     SPELL_SUPERHEATED                       = 100593,
@@ -143,20 +119,6 @@ enum Spells
     SPELL_EMPOWER_SULFURAS                  = 100604,
     SPELL_EMPOWER_SULFURAS_TRIGGER          = 100605,
     SPELL_EMPOWER_SULFURAS_MISSILE          = 100606,
-
-    // Dreadflame
-    SPELL_SUMMON_DREADFLAME_PERIODIC        = 100691,
-    SPELL_SUMMON_DREADFLAME                 = 100675, //100679
-    SPELL_DREADFLAME_CONTROL_AURA_1         = 100695,
-    SPELL_DREADFLAME_AURA_1_TRIGERED        = 100966,
-    SPELL_DREADFLAME_CONTROL_AURA_2         = 100696, // this triggers another spell which causes a water effect
-    SPELL_DREADFLAME_AURA_2_TRIGERED        = 100823,
-    SPELL_DREADFLAME_DAMAGE_AURA            = 100692, // area aura (dynobjects)
-    SPELL_DREADFLAME_CONTROL_AURA_3         = 100905,
-    SPELL_DREADFLAME_AURA_3_TRIGERED        = 100906,
-    SPELL_DREADFLAME_DAMAGE                 = 100941,
-
-    SPELL_DREADFLAME_SUMMON_MISSILE         = 100675, // summons the spawn npc for a short while
 
     // Protection Traps
     SPELL_BREADTH_OF_FROST_SCRIPT           = 100472,
@@ -177,14 +139,14 @@ enum Spells
 
     // Hamuul Runetotem
     SPELL_TRANSFORM_HAMUUL                  = 100311,
-    SPELL_HAMUL_DRAW_FIRELORD               = 100344,
+    SPELL_HAMUUL_DRAW_OUT_FIRELORD          = 100344,
 
     // Malfurion Stormrage
     SPELL_TRANSFORM_MALFURION               = 100310,
-    SPELL_MALFURION_DRAW_FIRELORD           = 100342,
+    SPELL_MALFURION_DRAW_OUT_FIRELORD       = 100342,
 
     // Cenarius
-    SPELL_CENARIUS_DRAW_FIRELORD            = 100345,
+    SPELL_CENARIUS_DRAW_OUT_FIRELORD       = 100345,
 
     // Heart of Ragnaros
     SPELL_RAGE_OF_RAGNAROS                  = 101110,
@@ -219,6 +181,18 @@ enum Spells
     SPELL_BURNING_SPEED                     = 98473,
     SPELL_BURNING_SPEED_STACKS              = 99414,
     SPELL_SUPERNOVA                         = 99112,
+
+    // Dreadflame Spawn
+    /*dreadflame spawn is summoned twice for the spread*/
+
+    // Dreadflame
+    SPELL_DREADFLAME_VISUAL                 = 100692,
+    SPELL_DELUGE                            = 100757, // hit 54127
+    SPELL_DREADFLAME_DAMAGE                 = 100941,
+    SPELL_DREADFLAME_CONTROL_AURA_1         = 100695, // Handles the spread 1
+    SPELL_DREADFLAME_CONTROL_AURA_2         = 100696, // Handles the deluge check 1
+    SPELL_DREADFLAME_CONTROL_AURA_3         = 100905, // Pings the spawns
+
 };
 
 enum Phases
@@ -238,7 +212,6 @@ enum Events
     EVENT_INTRO = 1,
     EVENT_BASE_VISUAL,
     EVENT_ATTACK,
-    EVENT_SULFURAS_SMASH_TRIGGER,
     EVENT_SULFURAS_SMASH,
     EVENT_MAGMA_TRAP,
     EVENT_WRATH_OF_RAGNAROS,
@@ -251,8 +224,12 @@ enum Events
     EVENT_ENGULFING_FLAMES,
     EVENT_MOLTEN_SEED,
     EVENT_LIVING_METEOR,
-
-    EVENT_ATTACK_HEROIC,
+    EVENT_SUMMON_ARCHDRUIDS,
+    EVENT_TRANSFORM,
+    EVENT_EMERGE_HEROIC,
+    EVENT_TALK_HEROIC_INTRO,
+    EVENT_STAND_UP,
+    EVENT_DREADFLAME,
 
     // Magma Trap
     EVENT_PREPARE_TRAP,
@@ -272,46 +249,20 @@ enum Events
     EVENT_MAKE_COMBUSTIBLE,
 
     // Archdruids
-    EVENT_SAY_PULL,
-    EVENT_SAY_CAUGHT,
-    EVENT_DRAW_RAGNAROS,
-    EVENT_TRANSFORM,
-
-    // Ragnaros Heroic Events
-    EVENT_EMERGE_HEROIC,
-    EVENT_TALK,
-    EVENT_TAUNT_EMOTE,
-    EVENT_STANDUP,
-    EVENT_FREEZE_PLATFORM,
-    EVENT_BREAK_PLATFORM,
-    EVENT_IDLE,
-    EVENT_TRANSFORM_RAGNAROS,
-    EVENT_SUMMON_DREADFLAME,
-    EVENT_SCHEDULE_EMPOWER,
-    EVENT_EMPOWER_SULFURAS,
+    EVENT_DRUID_ARRIVED,
+    EVENT_TRANSFORM_DRUID,
+    EVENT_TALK_INTRO,
+    EVENT_DRAW_OUT_FIRELORD,
 
     // Cenarius
-    EVENT_BREADTH_OF_FROST,
-    EVENT_TALK_CENARIUS_1,
-    EVENT_TALK_CENARIUS_2,
-    EVENT_TALK_CENARIUS_3,
 
     // Hamuul
-    EVENT_ENTRAPPING_ROOTS,
-    EVENT_TALK_HAMUUL_1,
 
     // Malfurion
-    EVENT_CLOUDBURST,
-    EVENT_TALK_MALFURION_1,
-    EVENT_TALK_MALFURION_2,
 
     // Dreadflame
     EVENT_CHECK_PLAYER,
     EVENT_SPREAD_FLAME,
-
-    // Molten Erupter
-
-    // Molten Spewer
 };
 
 enum Actions
@@ -323,32 +274,29 @@ enum Actions
     ACTION_SON_OF_FLAME_KILLED,
     ACTION_ACTIVATE_SON_OF_FLAME,
     ACTION_CAST_ENGULFING_FLAMES,
-
-    ACTION_ACTIVATE_HEROIC,
+    ACTION_SUBMERGE_HEROIC,
 
     // Archdruids
+    ACTION_SCHEDULE_DRAW,
     ACTION_SCHEDULE_CLOUDBURST,
     ACTION_SCHEDULE_ROOTS,
     ACTION_SCHEDULE_BREADTH,
     ACTION_SCHEDULE_OUTRO,
-
-    // Molten Worms
-    ACTION_EMERGE_WORM,
 };
 
 enum AnimKits
 {
     // Ragnaros
-    ANIM_KIT_RESURFACE  = 1465,
-    ANIM_KIT_EMERGE     = 1467,
-    ANIM_KIT_TAUNT      = 1468,
-    ANIM_KIT_STAND_UP   = 1486,
-    ANIM_KIT_SUBMERGE   = 1522,
+    ANIM_KIT_RESURFACE      = 1465,
+    ANIM_KIT_EMERGE         = 1467,
+    ANIM_KIT_TAUNT          = 1468,
+    ANIM_KIT_STAND_UP       = 1486,
+    ANIM_KIT_EMERGE_HEROIC  = 1522,
     // Malfurion
-    ANIM_KIT_TALK       = 1523,
+    ANIM_KIT_TALK           = 1523,
 
     // Son of Flame
-    ANIM_KIT_UNK_1      = 1370,
+    ANIM_KIT_UNK_1          = 1370,
 };
 
 enum SplittingBlowSides
@@ -358,22 +306,28 @@ enum SplittingBlowSides
     SIDE_CENTER = 2,
 };
 
+enum PointIds
+{
+    POINT_HEROIC_INTRO = 1,
+};
+
 enum RagnarosQuest
 {
     QUEST_HEART_OF_FIRE = 29307,
 };
 
-Position const SplittingTriggerNorth  = { 1023.55f,  -57.158f,   55.4215f,   3.12414f    };
-Position const SplittingTriggerEast   = { 1035.45f,  -25.3646f,  55.4924f,   2.49582f    };
-Position const SplittingTriggerWest   = { 1036.27f,  -89.2396f,  55.5098f,   3.83972f    };
+Position const SplittingTriggerNorth    = { 1023.55f,  -57.158f,   55.4215f,   3.12414f };
+Position const SplittingTriggerEast     = { 1035.45f,  -25.3646f,  55.4924f,   2.49582f };
+Position const SplittingTriggerWest     = { 1036.27f,  -89.2396f,  55.5098f,   3.83972f };
 
-Position const CenariusSummonPosition = { 795.504f,  -60.138f,   83.652f,    0.02050f    };
-Position const HamuulSummonPosition   = { 790.017f,  -50.393f,   97.115f,    6.22572f    };
-Position const MalfurionSummonPosition = {781.208f,  -69.534f,   98.061f,    3.89547f    };
+Position const CenariusSummonPosition   = { 795.504f,  -60.138f,   83.652f,    0.02050f };
+Position const HamuulSummonPosition     = { 790.017f,  -50.393f,   97.115f,    6.22572f };
+Position const MalfurionSummonPosition  = { 781.208f,  -69.534f,   98.061f,    3.89547f };
+Position const MagmaSummonPosition      = { 1078.43f,  -57.5295f,  52.8818f,   0.0f     };
 
-Position const MalfurionPoint         = { 984.996f,  -73.638f,   55.348f   };
-Position const CenariusPoint          = { 984.1371f, -57.65625f, 55.36652f };
-Position const HamuulPoint            = { 982.9132f, -43.22049f, 55.35419f };
+Position const MalfurionPoint           = { 984.2274f, -77.62153f, 61.69744f };
+Position const CenariusPoint            = { 984.1371f, -57.65625f, 55.36652f };
+Position const HamuulPoint              = { 982.9132f, -43.22049f, 59.49538f };
 
 const Position SonsOfFlameWest[] =
 {
@@ -577,11 +531,19 @@ public:
             if (Creature* sulfuras = me->FindNearestCreature(NPC_SULFURAS_HAND_OF_RAGNAROS, 100.0f, true))
                 sulfuras->DespawnOrUnsummon(1);
 
-            if (Creature* lava = me->FindNearestCreature(NPC_MAGMA_POOL_TRIGGER, 100.0f, true))
-                if (!lava->HasAura(SPELL_MAGMA_PERIODIC))
-                    lava->CastSpell(lava, SPELL_MAGMA_PERIODIC, true);
-
             HandleDoor(false);
+
+            if (GameObject* go = me->FindNearestGameObject(GO_RAGNAROS_PLATFORM, 100.0f))
+                go->SetDestructibleState(GO_DESTRUCTIBLE_INTACT);
+
+            std::list<Creature*> units;
+            GetCreatureListWithEntryInGrid(units, me, NPC_CENARIUS, 500.0f);
+            GetCreatureListWithEntryInGrid(units, me, NPC_MALFURION, 500.0f);
+            GetCreatureListWithEntryInGrid(units, me, NPC_HAMUUL, 500.0f);
+
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->AI()->EnterEvadeMode();
+
             me->DespawnOrUnsummon(1);
         }
 
@@ -589,7 +551,6 @@ public:
         {
             _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            summons.DespawnAll();
 
             if (!IsHeroic())
             {
@@ -609,6 +570,8 @@ public:
                 me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
                 me->DespawnOrUnsummon(6000);
             }
+            // else
+            //     Talk(SAY_DEATH);
 
             std::list<Creature*> units;
             GetCreatureListWithEntryInGrid(units, me, NPC_LAVA_SCION, 500.0f);
@@ -629,7 +592,10 @@ public:
         {
             switch (summon->GetEntry())
             {
-                case NPC_LAVA_SCION: // We handle the despawn of the Lava Scions in a special case due to the encounter frame thing
+                case NPC_LAVA_SCION:
+                case NPC_MALFURION:
+                case NPC_HAMUUL:
+                case NPC_CENARIUS:
                     break;
                 default:
                     summons.Summon(summon);
@@ -662,7 +628,13 @@ public:
                     _encounterDone = true;
                 }
                 else
-                    DoAction(ACTION_ACTIVATE_HEROIC);
+                {
+                    events.SetPhase(PHASE_HEROIC);
+                    events.CancelEvent(EVENT_SULFURAS_SMASH);
+                    events.CancelEvent(EVENT_LIVING_METEOR);
+                    events.CancelEvent(EVENT_ENGULFING_FLAMES);
+                    events.ScheduleEvent(EVENT_SUMMON_ARCHDRUIDS, 1);
+                }
             }
         }
 
@@ -680,10 +652,7 @@ public:
                         instance->SetData(DATA_FIRST_RAGNAROS_SUMMON, 0);
                     }
 
-                    if (Creature* lava = me->FindNearestCreature(NPC_MAGMA_POOL_TRIGGER, 100.0f, true))
-                        if (!lava->HasAura(SPELL_MAGMA_PERIODIC))
-                            lava->CastSpell(lava, SPELL_MAGMA_PERIODIC, true);
-
+                    me->SummonCreature(NPC_MAGMA, MagmaSummonPosition, TEMPSUMMON_MANUAL_DESPAWN);
                     me->setActive(true);
                     me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
@@ -710,6 +679,22 @@ public:
                 case ACTION_CAST_ENGULFING_FLAMES:
                     me->ClearUnitState(UNIT_STATE_CASTING);
                     CastEngulfingFlames();
+                    break;
+                case ACTION_SUBMERGE_HEROIC:
+                    if (Creature* cenarius = me->FindNearestCreature(NPC_CENARIUS, 200.0f, true))
+                    {
+                        Talk(SAY_SUBMERGE_HEROIC);
+                        events.CancelEvent(EVENT_ATTACK);
+                        me->SetReactState(REACT_PASSIVE);
+                        me->AttackStop();
+                        me->CastStop();
+                        me->SetFacingToObject(cenarius);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                        me->RemoveAllAuras();
+                        DoCast(me, SPELL_LEGS_SUBMERGE);
+                        events.ScheduleEvent(EVENT_TRANSFORM, 6000);
+                        events.ScheduleEvent(EVENT_EMERGE_HEROIC, 14000);
+                    }
                     break;
                 default:
                     break;
@@ -844,6 +829,41 @@ public:
                             DoCast(target, SPELL_LIVING_METEOR);
                         events.ScheduleEvent(EVENT_LIVING_METEOR, 45000);
                         break;
+                    case EVENT_SUMMON_ARCHDRUIDS:
+                        me->SummonCreature(NPC_MALFURION, MalfurionSummonPosition, TEMPSUMMON_MANUAL_DESPAWN);
+                        me->SummonCreature(NPC_HAMUUL, HamuulSummonPosition, TEMPSUMMON_MANUAL_DESPAWN);
+                        me->SummonCreature(NPC_CENARIUS, CenariusSummonPosition, TEMPSUMMON_MANUAL_DESPAWN);
+                        break;
+                    case EVENT_TRANSFORM:
+                        DoCast(me, SPELL_TRANSFORM, true);
+                        DoCast(me, SPELL_LEGS_HEAL, true);
+                        break;
+                    case EVENT_EMERGE_HEROIC:
+                        summons.DespawnEntry(NPC_MAGMA);
+                        me->RemoveAurasDueToSpell(SPELL_LEGS_SUBMERGE);
+                        me->PlayOneShotAnimKit(ANIM_KIT_EMERGE_HEROIC);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                        events.ScheduleEvent(EVENT_TALK_HEROIC_INTRO, 3500);
+                        if (GameObject* go = me->FindNearestGameObject(GO_RAGNAROS_PLATFORM, 100.0f))
+                            go->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);
+                        break;
+                    case EVENT_TALK_HEROIC_INTRO:
+                        me->RemoveAurasDueToSpell(SPELL_CENARIUS_DRAW_OUT_FIRELORD);
+                        me->RemoveAurasDueToSpell(SPELL_MALFURION_DRAW_OUT_FIRELORD);
+                        me->RemoveAurasDueToSpell(SPELL_HAMUUL_DRAW_OUT_FIRELORD);
+                        me->PlayOneShotAnimKit(ANIM_KIT_TAUNT);
+                        Talk(SAY_EMERGE_HEROIC);
+                        events.ScheduleEvent(EVENT_STAND_UP, 9500);
+                        break;
+                    case EVENT_STAND_UP:
+                        me->SetHover(false);
+                        Talk(SAY_FREE_FROM_LAVA);
+                        me->PlayOneShotAnimKit(ANIM_KIT_STAND_UP);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                        if (GameObject* go = me->FindNearestGameObject(GO_RAGNAROS_PLATFORM, 100.0f))
+                            go->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+                        events.ScheduleEvent(EVENT_ATTACK, 6000);
+                        break;
                     default:
                         break;
                 }
@@ -851,7 +871,7 @@ public:
             if (Unit* victim = me->getVictim())
                 if (victim->IsWithinMeleeRange(me))
                     DoMeleeAttackIfReady();
-                else
+                else if (!(events.IsInPhase(PHASE_HEROIC)))
                     DoSpellAttackIfReady(SPELL_MAGMA_STRIKE);
         }
 
@@ -1167,10 +1187,7 @@ class npc_fl_son_of_flame : public CreatureScript
                         me->AddAura(SPELL_BURNING_SPEED_STACKS, me);
                         me->SetAuraStack(SPELL_BURNING_SPEED_STACKS, me, 10);
                         me->PlayOneShotAnimKit(ANIM_KIT_UNK_1);
-
-                        if (Creature* sulfuras = me->FindNearestCreature(NPC_SULFURAS_HAND_OF_RAGNAROS, 200.0f))
-                            me->GetMotionMaster()->MovePoint(0, sulfuras->GetPositionX(), sulfuras->GetPositionY(), sulfuras->GetPositionZ(), false);
-                        events.ScheduleEvent(EVENT_MOVE_HAMMER, 1000);
+                        events.ScheduleEvent(EVENT_MOVE_HAMMER, 2000);
                         break;
                     default:
                         break;
@@ -1485,127 +1502,41 @@ class npc_fl_living_meteor : public CreatureScript
         }
 };
 
-class npc_fl_archdruids : public CreatureScript
+class npc_fl_cenarius : public CreatureScript
 {
     public:
-        npc_fl_archdruids() :  CreatureScript("npc_fl_archdruids") { }
+        npc_fl_cenarius() : CreatureScript("npc_fl_cenarius") { }
 
-        struct npc_fl_archdruidsAI : public ScriptedAI
+        struct npc_fl_cenariusAI : public ScriptedAI
         {
-            npc_fl_archdruidsAI(Creature* creature) : ScriptedAI(creature)
+            npc_fl_cenariusAI(Creature* creature) : ScriptedAI(creature)
             {
-                casted = false;
             }
 
-            bool casted;
+            EventMap events;
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
             {
-                if (spell->Id == SPELL_CLOUDBURST_DUMMY)
-                {
-                    if (!casted)
-                    {
-                        if (target->GetEntry() == NPC_PLATFORM_TRIGGER)
-                        {
-                            if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0f, true))
-                                if (Unit* player = ragnaros->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                                    if (Unit* burst = player->FindNearestCreature(NPC_PLATFORM_TRIGGER, 200.0f, true))
-                                        DoCast(burst, SPELL_CLOUDBURST_SUMMON);
-                            casted = true;
-                        }
-                    }
-                }
             }
 
             void DoAction(int32 action)
             {
-                switch (action)
-                {
-                    case ACTION_SCHEDULE_CLOUDBURST:
-                        events.ScheduleEvent(EVENT_CLOUDBURST, 23000);
-                        break;
-                    case ACTION_SCHEDULE_ROOTS:
-                        events.ScheduleEvent(EVENT_ENTRAPPING_ROOTS, 1);
-                        break;
-                    case ACTION_SCHEDULE_BREADTH:
-                        events.ScheduleEvent(EVENT_BREADTH_OF_FROST, 6000);
-                        break;
-                    case ACTION_SCHEDULE_OUTRO:
-                        me->CastStop();
-                        events.CancelEvent(EVENT_CLOUDBURST);
-                        events.CancelEvent(EVENT_ENTRAPPING_ROOTS);
-                        events.CancelEvent(EVENT_BREADTH_OF_FROST);
-                        if (me->GetEntry() == NPC_MALFURION)
-                            events.ScheduleEvent(EVENT_TALK_MALFURION_1, 7000);
-                        if (me->GetEntry() == NPC_CENARIUS)
-                            events.ScheduleEvent(EVENT_TALK_CENARIUS_1, 10000);
-                        if (me->GetEntry() == NPC_HAMUUL)
-                            events.ScheduleEvent(EVENT_TALK_HAMUUL_1, 26000);
-
-                        break;
-                    default:
-                        break;
-                }
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
-                if (me->GetEntry() == NPC_CENARIUS)
-                {
-                    me->SetHover(true);
-                    me->SetCanFly(true);
-                    me->SetDisableGravity(true);
-                    me->SetSpeed(MOVE_RUN, 10.0f, true);
-                    me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
-                    me->GetMotionMaster()->MovePoint(1, CenariusPoint.GetPositionX(), CenariusPoint.GetPositionY(), CenariusPoint.GetPositionZ(), false);
-                }
-                else if (me->GetEntry() == NPC_MALFURION)
-                {
-                    me->SetHover(true);
-                    me->SetCanFly(true);
-                    me->SetDisableGravity(true);
-                    me->SetSpeed(MOVE_RUN, 10.0f, true);
-                    me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
-                    me->GetMotionMaster()->MovePoint(1, MalfurionPoint.GetPositionX(), MalfurionPoint.GetPositionY(), MalfurionPoint.GetPositionZ(), false);
-                }
-                else if (me->GetEntry() == NPC_HAMUUL)
-                {
-                    me->SetHover(true);
-                    me->SetCanFly(true);
-                    me->SetDisableGravity(true);
-                    me->SetSpeed(MOVE_RUN, 10.0f, true);
-                    me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
-                    me->GetMotionMaster()->MovePoint(1, HamuulPoint.GetPositionX(), HamuulPoint.GetPositionY(), HamuulPoint.GetPositionZ(), false);
-                }
+                me->GetMotionMaster()->MovePoint(POINT_HEROIC_INTRO, CenariusPoint);
             }
 
             void MovementInform(uint32 type, uint32 pointId)
             {
+                if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+                    return;
+
                 switch (pointId)
                 {
-                    case 1:
-                        me->SetHover(false);
-                        me->SetCanFly(false);
-                        me->SetDisableGravity(false);
-                        if (me->GetEntry() == NPC_CENARIUS)
-                        {
-                            if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0f, true))
-                                ragnaros->AI()->DoAction(ACTION_SUBMERGE);
-                            events.ScheduleEvent(EVENT_SAY_PULL, 3700);
-                            events.ScheduleEvent(EVENT_DRAW_RAGNAROS, 9600);
-                        }
-                        else if (me->GetEntry() == NPC_MALFURION)
-                        {
-                            DoCastAOE(SPELL_TRANSFORM_MALFURION);
-                            events.ScheduleEvent(EVENT_TRANSFORM, 1000);
-                            events.ScheduleEvent(EVENT_DRAW_RAGNAROS, 8300);
-                        }
-                        else if (me->GetEntry() == NPC_HAMUUL)
-                        {
-                            DoCastAOE(SPELL_TRANSFORM_HAMUUL);
-                            events.ScheduleEvent(EVENT_TRANSFORM, 1000);
-                            events.ScheduleEvent(EVENT_DRAW_RAGNAROS, 7100);
-                        }
+                    case POINT_HEROIC_INTRO:
+                        events.ScheduleEvent(EVENT_DRUID_ARRIVED, 1);
                         break;
                     default:
                         break;
@@ -1620,82 +1551,206 @@ class npc_fl_archdruids : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case EVENT_SAY_PULL:
-                            Talk(SAY_CENARIUS_1);
-                            break;
-                        case EVENT_DRAW_RAGNAROS:
-                            if (me->GetEntry() == NPC_CENARIUS)
-                                DoCastAOE(SPELL_CENARIUS_DRAW_FIRELORD);
-                            if (me->GetEntry() == NPC_HAMUUL)
-                                DoCastAOE(SPELL_HAMUL_DRAW_FIRELORD);
-                            if (me->GetEntry() == NPC_MALFURION)
+                        case EVENT_DRUID_ARRIVED:
+                            if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0f, true))
                             {
-                                DoCastAOE(SPELL_MALFURION_DRAW_FIRELORD);
-                                events.ScheduleEvent(EVENT_SAY_CAUGHT, 14500);
+                                me->SetFacingToObject(ragnaros);
+                                ragnaros->AI()->DoAction(ACTION_SUBMERGE_HEROIC);
                             }
+                            events.ScheduleEvent(EVENT_TALK_INTRO, 3000);
                             break;
-                        case EVENT_TRANSFORM:
-                            if (me->GetEntry() == NPC_MALFURION)
-                                DoCastAOE(SPELL_TRANSFORM_MALFURION);
-                            else if (me->GetEntry() == NPC_HAMUUL)
-                                DoCastAOE(SPELL_TRANSFORM_HAMUUL);
+                        case EVENT_TALK_INTRO:
+                            Talk(SAY_CENARIUS_INTRO);
+                            if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 50.0f, true))
+                                malfurion->AI()->DoAction(ACTION_SCHEDULE_DRAW);
+                            if (Creature* hamuul = me->FindNearestCreature(NPC_HAMUUL, 50.0f, true))
+                                hamuul->AI()->DoAction(ACTION_SCHEDULE_DRAW);
+                            events.ScheduleEvent(EVENT_DRAW_OUT_FIRELORD, 6600);
                             break;
-                        case EVENT_SAY_CAUGHT:
-                            Talk(SAY_MALFURION_1);
-                            break;
-                        case EVENT_CLOUDBURST:
-                            casted = false;
-                            DoCastAOE(SPELL_CLOUDBURST_DUMMY); 
-                            break;
-                        case EVENT_ENTRAPPING_ROOTS:
-                            if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0f, true))
-                                if (Unit* player = ragnaros->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                                    if (Unit* root = player->FindNearestCreature(NPC_PLATFORM_TRIGGER, 200.0f, true))
-                                        if (Creature* trap = me->SummonCreature(NPC_ENTRAPPING_ROOTS, root->GetPositionX(), root->GetPositionY(), root->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000))
-                                            DoCast(trap, SPELL_ENTRAPPING_ROOTS_AURA_MISSILE);
-                            break;
-                        case EVENT_BREADTH_OF_FROST:
-                            if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0f, true))
-                                if (Unit* player = ragnaros->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                                    if (Unit* root = player->FindNearestCreature(NPC_PLATFORM_TRIGGER, 200.0f, true))
-                                        if (Creature* trap = me->SummonCreature(NPC_BREADTH_OF_FROST, root->GetPositionX(), root->GetPositionY(), root->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000))
-                                            DoCast(trap, SPELL_BREADTH_OF_FROST_AURA);
-                            break;
-                        case EVENT_TALK_MALFURION_1:
-                            Talk(SAY_MALFURION_OUTRO_1);
-                            events.ScheduleEvent(EVENT_TALK_MALFURION_2, 5000);
-                            break;
-                        case EVENT_TALK_MALFURION_2:
-                            Talk(SAY_MALFURION_OUTRO_2);
-                            break;
-                        case EVENT_TALK_CENARIUS_1:
-                            Talk(SAY_CENARIUS_OUTRO_1);
-                            events.ScheduleEvent(EVENT_TALK_CENARIUS_2, 6000);
-                            events.ScheduleEvent(EVENT_TALK_CENARIUS_3, 28000);
-                            break;
-                        case EVENT_TALK_CENARIUS_2:
-                            Talk(SAY_CENARIUS_OUTRO_2);
-                            break;
-                        case EVENT_TALK_CENARIUS_3:
-                            Talk(SAY_CENARIUS_OUTRO_3);
-                            break;
-                        case EVENT_TALK_HAMUUL_1:
-                            Talk(SAY_HAMUUL_OUTRO_1);
+                        case EVENT_DRAW_OUT_FIRELORD:
+                            DoCast(me, SPELL_CENARIUS_DRAW_OUT_FIRELORD);
                             break;
                         default:
                             break;
                     }
                 }
             }
-
-        private:
-            EventMap events;
         };
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_fl_archdruidsAI(creature);
+            return new npc_fl_cenariusAI(creature);
         }
+};
+
+class npc_fl_malfurion : public CreatureScript
+{
+public:
+    npc_fl_malfurion() : CreatureScript("npc_fl_malfurion") { }
+
+    struct npc_fl_malfurionAI : public ScriptedAI
+    {
+        npc_fl_malfurionAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell)
+        {
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_SCHEDULE_DRAW:
+                    events.ScheduleEvent(EVENT_DRAW_OUT_FIRELORD, 5300);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            me->SetHover(true);
+            me->SetDisableGravity(true);
+            me->SetCanFly(true);
+            me->GetMotionMaster()->MovePoint(POINT_HEROIC_INTRO, MalfurionPoint);
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+                return;
+
+            switch (pointId)
+            {
+                case POINT_HEROIC_INTRO:
+                    events.ScheduleEvent(EVENT_DRUID_ARRIVED, 1);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_DRUID_ARRIVED:
+                        me->SetHover(false);
+                        me->SetDisableGravity(false);
+                        me->SetCanFly(false);
+                        DoCast(me, SPELL_TRANSFORM_MALFURION);
+                        me->GetMotionMaster()->MoveFall();
+                        break;
+                    case EVENT_DRAW_OUT_FIRELORD:
+                        DoCast(me, SPELL_MALFURION_DRAW_OUT_FIRELORD);
+                        events.ScheduleEvent(EVENT_TALK_INTRO, 14500);
+                        break;
+                    case EVENT_TALK_INTRO:
+                        Talk(SAY_MALFURION_INTRO);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_fl_malfurionAI(creature);
+    }
+};
+
+class npc_fl_hamuul : public CreatureScript
+{
+public:
+    npc_fl_hamuul() : CreatureScript("npc_fl_hamuul") { }
+
+    struct npc_fl_hamuulAI : public ScriptedAI
+    {
+        npc_fl_hamuulAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell)
+        {
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_SCHEDULE_DRAW:
+                    events.ScheduleEvent(EVENT_DRAW_OUT_FIRELORD, 4100);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            me->SetHover(true);
+            me->SetDisableGravity(true);
+            me->SetCanFly(true);
+            me->GetMotionMaster()->MovePoint(POINT_HEROIC_INTRO, HamuulPoint);
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+                return;
+
+            switch (pointId)
+            {
+                case POINT_HEROIC_INTRO:
+                    events.ScheduleEvent(EVENT_DRUID_ARRIVED, 1);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_DRUID_ARRIVED:
+                        me->SetHover(false);
+                        me->SetDisableGravity(false);
+                        me->SetCanFly(false);
+                        DoCast(me, SPELL_TRANSFORM_HAMUUL);
+                        me->GetMotionMaster()->MoveFall();
+                        break;
+                    case EVENT_DRAW_OUT_FIRELORD:
+                        DoCast(me, SPELL_HAMUUL_DRAW_OUT_FIRELORD);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_fl_hamuulAI(creature);
+    }
 };
 
 class npc_fl_dreadflame : public CreatureScript
@@ -1707,99 +1762,13 @@ class npc_fl_dreadflame : public CreatureScript
         {
             npc_fl_dreadflameAI(Creature* creature) : ScriptedAI(creature)
             {
-                casted = false;
-            }
-
-            EventMap events;
-            bool casted;
-
-            void InitializeAI()
-            {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_DISABLE_MOVE);
             }
 
             void IsSummonedBy(Unit* summoner)
             {
                 if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0, false))
-                {
                     if (ragnaros->isDead())
                         me->DespawnOrUnsummon(0);
-                }
-                else
-                {
-                    me->SetReactState(REACT_PASSIVE);
-                    if (summoner->GetEntry() == BOSS_RAGNAROS)
-                    {
-                        me->setFaction(summoner->getFaction());
-                        me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
-                    }
-                    else
-                    {
-                        events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
-                        events.ScheduleEvent(EVENT_SPREAD_FLAME, 5000);
-                        me->setFaction(summoner->getFaction());
-                        DoCastAOE(SPELL_DREADFLAME_DAMAGE_AURA);
-                    }
-                }
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_CHECK_PLAYER:
-                        {
-                            std::list<Creature*> units;
-                            GetCreatureListWithEntryInGrid(units, me, NPC_DREADFLAME_SPAWN, 0.1f);
-                            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                                if ((*itr)->GetGUID() != me->GetGUID())
-                                    (*itr)->DespawnOrUnsummon(1);
-
-                            if (Player* player = me->FindNearestPlayer(0.0f, true))
-                            {
-                                if (player->HasAura(SPELL_CLOUDBURST_PLAYER_AURA) && !casted)
-                                {
-                                    events.Reset();
-                                    DoCastAOE(SPELL_CLOUDBURST_VISUAL_WATER);
-                                    me->DespawnOrUnsummon(3000);
-                                    casted = true;
-                                }
-                            }
-                            events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
-                            break;
-                        }
-                        case EVENT_SPREAD_FLAME:
-                        {
-                            switch (urand(0, 4))
-                            {
-                                case 0:
-                                    me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX()+5, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
-                                    break;
-                                case 1:
-                                    me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX()-5, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
-                                    break;
-                                case 2:
-                                    me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX(), me->GetPositionY()+5, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
-                                    break;
-                                case 3:
-                                    me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX(), me->GetPositionY()-5, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
-                                    break;
-                                case 4:
-                                    break;
-                                default:
-                                    break;
-                            }
-                            events.ScheduleEvent(EVENT_SPREAD_FLAME, 5000);
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                }
             }
         };
 
@@ -2430,7 +2399,6 @@ public:
             if (Unit* caster = GetCaster())
             {
                 caster->ApplySpellImmune(0, IMMUNITY_ID, SPELL_SUPERHEATED_TRIGGERED, true);
-                caster->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DREADFLAME_DAMAGE, true);
             }
         }
 
@@ -2439,7 +2407,6 @@ public:
             if (Unit* caster = GetCaster())
             {
                 caster->ApplySpellImmune(0, IMMUNITY_ID, SPELL_SUPERHEATED_TRIGGERED, false);
-                caster->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DREADFLAME_DAMAGE, false);
             }
         }
 
@@ -2469,9 +2436,11 @@ void AddSC_boss_ragnaros_cata()
     new npc_fl_lava_scion();
     new npc_fl_blazing_heat();
     new npc_fl_living_meteor();
+    new npc_fl_cenarius();
+    new npc_fl_malfurion();
+    new npc_fl_hamuul();
 
-    /* Rewrites required */
-    new npc_fl_archdruids();
+
     new npc_fl_dreadflame();
     new npc_fl_cloudburst();
 
