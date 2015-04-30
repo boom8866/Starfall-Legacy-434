@@ -13462,13 +13462,11 @@ public:
 
         SpellCastResult CheckCast()
         {
-            if (Unit* caster = GetCaster())
-            {
-                // Children's Week
+            if (Unit* caster = GetCaster()) // Children's Week
                 if (!sGameEventMgr->IsActiveEvent(EVENT_CHILDREN_WEEK))
                     return SPELL_FAILED_NOT_INACTIVE;
-                return SPELL_CAST_OK;
-            }
+
+            return SPELL_CAST_OK;
         }
 
         void Register()
