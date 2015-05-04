@@ -81,7 +81,7 @@ enum CreatureIds
     NPC_LAVA_WAVE                   = 53363,
     NPC_ENGULFING_FLAME             = 53485,
     NPC_SPLITTING_BLOW              = 53393,
-    NPC_MAGMA_POOL_TRIGGER          = 53729,
+    NPC_MAGMA                       = 53729,
     NPC_PLATFORM_TRIGGER            = 53952,
     NPC_MAGMA_TRAP                  = 53086,
     NPC_SULFURAS_HAND_OF_RAGNAROS   = 53420,
