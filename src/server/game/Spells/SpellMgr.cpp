@@ -4288,11 +4288,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].BasePoints = 0;
                 spellInfo->SpellFamilyName = SPELLFAMILY_SHAMAN;
                 break;
-            case 8042:  // Earth Shock
-            case 8050:  // Flame Shock
-            case 8056:  // Frost Shock
-                spellInfo->StartRecoveryTime = 4500;
-                break;
             // Warlock
             case 54424: // Fel Intelligence
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
@@ -4554,9 +4549,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 34026: // Kill Command
                 spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MELEE;
-                break;
-            case 49184: // Howling Blast
-                spellInfo->StartRecoveryTime = 1500;
                 break;
             // SPELLS QUESTS
             case 95869: // Wyvern Ride Aura [INTERNAL]
