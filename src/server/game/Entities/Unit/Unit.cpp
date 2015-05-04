@@ -11891,6 +11891,10 @@ int32 Unit::SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask)
 
 bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType) const
 {
+    // Roar of Sacrifice (Immune to crit)
+    if (victim->HasAura(53480))
+        return false;
+
     // For all kind of player summons (Get critical chance from owner)
     if (GetTypeId() == TYPEID_UNIT && (ToCreature()->isSummon() || ToCreature()->isTotem()))
         if (Unit* owner = GetCharmerOrOwner())

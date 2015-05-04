@@ -424,7 +424,7 @@ public:
             if (summoner->GetEntry() != NPC_WORLDTRIGGER)
                 return;
 
-            if (Unit* target = me->SelectNearestPlayer(200.0f))
+            if (Unit* target = me->SelectNearestPlayer(500.0f))
             {
                 me->AddThreat(target, 0.0f);
                 me->SetInCombatWith(target);
@@ -433,12 +433,7 @@ public:
                 me->Attack(target, true);
             }
             else
-            {
-                Position pos;
-                me->GetPosition(&pos);
-                pos.m_positionZ = me->GetPositionZ();
-                me->GetMotionMaster()->MovePoint(POINT_NONE, pos);
-            }
+                me->GetMotionMaster()->MovePoint(0, 1320.08f, 997.83f, 208.37f, true);
         }
 
         void JustDied(Unit* /*victim*/)
@@ -786,10 +781,17 @@ public:
 // 79332 - Gravity Well (pull units within 10 yards)
 class PulledRecentlyCheck
 {
+
+    enum npcId
+    {
+        NPC_HIGH_PRIESTESS_AZIL_N = 42333,
+        NPC_HIGH_PRIESTESS_AZIL_H = 49624
+    };
+
 public:
     bool operator()(WorldObject* object) const
     {
-        return (object->ToUnit() && object->ToUnit()->HasAura(SPELL_GRAVITY_WELL_PULL));
+        return ((object->ToUnit() && object->ToUnit()->HasAura(SPELL_GRAVITY_WELL_PULL)) || (object->ToCreature()->GetEntry() == NPC_HIGH_PRIESTESS_AZIL_H || object->ToCreature()->GetEntry() == NPC_HIGH_PRIESTESS_AZIL_N));
     }
 };
 

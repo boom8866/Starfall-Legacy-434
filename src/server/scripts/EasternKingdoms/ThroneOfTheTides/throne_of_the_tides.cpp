@@ -617,12 +617,8 @@ public:
         void IsSummonedBy(Unit* /*who*/)
         {
             me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
-            events.ScheduleEvent(EVENT_SEARCH_PLAYER, 1500);
             events.ScheduleEvent(EVENT_CAST_AURA, 3000);
-        }
-
-        void EnterEvadeMode()
-        {
+            events.ScheduleEvent(EVENT_SEARCH_PLAYER, 3100);
         }
 
         void UpdateAI(uint32 diff)
@@ -633,24 +629,17 @@ public:
             {
                 switch (eventId)
                 {
-                    case EVENT_SEARCH_PLAYER:
-                    {
-                        if (me->getVictim())
-                        {
-                            if (Player* player = me->FindNearestPlayer(250.0f, true))
-                            {
-                                me->Attack(player, true);
-                                events.RescheduleEvent(EVENT_SEARCH_PLAYER, 2000);
-                                break;
-                            }
-                        }
-                        events.RescheduleEvent(EVENT_SEARCH_PLAYER, 1000);
-                        break;
-                    }
                     case EVENT_CAST_AURA:
                     {
                         me->AddAura(SPELL_AURA_OF_DREAD, me);
                         events.RescheduleEvent(EVENT_CAST_AURA, 15000);
+                        break;
+                    }
+                    case EVENT_SEARCH_PLAYER:
+                    {
+                        if (Player* player = me->FindNearestPlayer(500))
+                            AttackStart(player);
+                        events.CancelEvent(EVENT_SEARCH_PLAYER);
                         break;
                     }
                     default:
