@@ -84,6 +84,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // ToC Icehowl Arctic Breath
             else if (spellproto->SpellVisual[0] == 14153)
                 return DIMINISHING_NONE;
+            // Paralyze (Ozruk)
+            else if (spellproto->Id == 92427 || spellproto->Id == 92426)
+                return DIMINISHING_NONE;
             break;
         }
         // Event spells
@@ -5073,7 +5076,8 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
                 break;
             // * Ozruk
-            case 92427: // Paralyze
+            case 92426: // Paralyze
+            case 92427:
                 spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
                 break;
             // Throne of the Tides

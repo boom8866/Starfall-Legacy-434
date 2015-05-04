@@ -324,9 +324,47 @@ public:
     }
 };
 
+class spell_tsc_paralyze_damage : public SpellScriptLoader
+{
+public:
+    spell_tsc_paralyze_damage() : SpellScriptLoader("spell_tsc_paralyze_damage")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_PARALYZE_DAMAGE_TRIGGERED     = 94661
+    };
+
+    class spell_tsc_paralyze_damage_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_tsc_paralyze_damage_AuraScript);
+
+        void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                    target->CastSpell(target, SPELL_PARALYZE_DAMAGE_TRIGGERED, true);
+            }
+        }
+
+        void Register()
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_tsc_paralyze_damage_AuraScript::AfterRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_tsc_paralyze_damage_AuraScript();
+    }
+};
+
 void AddSC_boss_ozruk()
 {
     new boss_ozruk();
     new npc_tsc_rupture_controller();
     new npc_tsc_rupture();
+    new spell_tsc_paralyze_damage();
 }
