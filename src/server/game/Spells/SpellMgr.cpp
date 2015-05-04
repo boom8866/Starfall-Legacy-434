@@ -85,7 +85,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             else if (spellproto->SpellVisual[0] == 14153)
                 return DIMINISHING_NONE;
             // Paralyze (Ozruk)
-            else if (spellproto->Id == 92427 || spellproto->Id == 92426)
+            else if (spellproto->Id == 92427 || spellproto->Id == 92426 || spellproto->Id == 92428)
                 return DIMINISHING_NONE;
             break;
         }
@@ -5079,6 +5079,13 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92426: // Paralyze
             case 92427:
                 spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
+                break;
+            case 92428: // Paralyze (Duration)
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(31);
+                break;
+            case 94661: // Paralyze (Damage)
+                spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
+                spellInfo->Effects[EFFECT_0].BasePoints = 50000;
                 break;
             // Throne of the Tides
             // * Lady Naz'Jar
