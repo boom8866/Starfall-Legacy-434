@@ -9890,6 +9890,18 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             break;
         }
         case 46916:  // Slam! (Bloodsurge proc)
+        {
+            // Item - Warrior T10 Melee 4P Bonus
+            if (AuraEffect const* aurEff = GetAuraEffect(70847, 0))
+            {
+                if (!roll_chance_i(aurEff->GetAmount()))
+                    break;
+                CastSpell(this, 70849, true, castItem, triggeredByAura); // Extra Charge!
+                CastSpell(this, 71072, true, castItem, triggeredByAura); // Slam GCD Reduced
+                CastSpell(this, 71069, true, castItem, triggeredByAura); // Execute GCD Reduced
+            }
+            break;
+        }
         case 52437:  // Sudden Death
         {
             // Item - Warrior T10 Melee 4P Bonus
@@ -9902,10 +9914,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 CastSpell(this, 71069, true, castItem, triggeredByAura); // Execute GCD Reduced
             }
 
-            // Remove cd from Colossus Smash
-            if (auraSpellInfo->Id == 52437)
-                ToPlayer()->RemoveSpellCooldown(86346, true);
-
+            ToPlayer()->RemoveSpellCooldown(86346, true);
             break;
         }
         // Sword and Board
