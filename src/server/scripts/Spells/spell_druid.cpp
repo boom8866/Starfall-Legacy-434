@@ -710,6 +710,19 @@ class spell_dru_savage_roar : public SpellScriptLoader
         }
 };
 
+class TargetInCombatCheck
+{
+public:
+    TargetInCombatCheck()
+    {
+    }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->ToUnit()->isInCombat());
+    }
+};
+
 // -50294 - Starfall (AOE)
 class spell_dru_starfall_aoe : public SpellScriptLoader
 {
@@ -726,6 +739,7 @@ class spell_dru_starfall_aoe : public SpellScriptLoader
                     return;
 
                 targets.remove(GetExplTargetUnit());
+                targets.remove_if(TargetInCombatCheck());
             }
 
             void Register()

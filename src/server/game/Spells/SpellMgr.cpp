@@ -4053,6 +4053,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 79684: // Arcane Missiles Proc
                 spellInfo->ProcChance = 40.0f;
                 break;
+            case 6117: // Mage Armor
+                spellInfo->Effects[EFFECT_0].BasePoints = 45;
+                break;
             case 5143: // Arcane Missiles
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                 break;
@@ -5068,6 +5071,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 79021: // Seismic Shard
                 spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
+                break;
+            // * Ozruk
+            case 92427: // Paralyze
+                spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
                 break;
             // Throne of the Tides
             // * Lady Naz'Jar
