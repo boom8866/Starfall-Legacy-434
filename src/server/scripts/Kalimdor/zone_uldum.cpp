@@ -3870,11 +3870,8 @@ public:
             {
                 case ACTION_DO_TALK:
                 {
-                    if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
-                    {
-                        me->AI()->TalkWithDelay(1000, 0, playerOwner->GetGUID());
-                        me->AI()->TalkWithDelay(9000, 1, playerOwner->GetGUID());
-                    }
+                    me->AI()->TalkWithDelay(1000, 0);
+                    me->AI()->TalkWithDelay(9000, 1);
                     break;
                 }
                 default:
