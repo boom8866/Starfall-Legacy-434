@@ -1705,6 +1705,10 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
             {
                 case 88751: // Wild Mushrooms: Detonate
                 {
+                    float x, y, z;
+                    Unit* owner = NULL;
+                    bool coordsInited = false;
+
                     std::list<Creature*> templist;
 
                     CellCoord pair(Trinity::ComputeCellCoord(m_caster->GetPositionX(), m_caster->GetPositionY()));
@@ -1726,8 +1730,16 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                             if ((*itr)->GetOwner() != m_caster || !(*itr)->IsVisible())
                                 continue;
 
-                            if ((*itr)->GetOwner())
-                                (*itr)->GetOwner()->CastSpell((*itr), 78777, true);
+                            if (!coordsInited)
+                            {
+                                x = (*itr)->GetPositionX();
+                                y = (*itr)->GetPositionY();
+                                z = (*itr)->GetPositionZ();
+                                coordsInited = true;
+                            }
+
+                            if (!owner || owner == NULL)
+                                owner = (*itr)->GetOwner();
 
                             // Suicide spell
                             (*itr)->CastSpell((*itr), 92853, true);
@@ -1737,6 +1749,10 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
 
                         templist.clear();
                     }
+
+                    // Cast on position
+                    if (owner && owner != NULL && owner->IsInWorld() && coordsInited)
+                        owner->CastSpell(x, y, z, 78777, true);
                     break;
                 }
                 case 80964: // Skull Bash
