@@ -132,7 +132,9 @@ public:
 class npc_battered_red_drake_event : public CreatureScript
 {
 public:
-    npc_battered_red_drake_event() : CreatureScript("npc_battered_red_drake_event") { }
+    npc_battered_red_drake_event() : CreatureScript("npc_battered_red_drake_event")
+    {
+    }
 
     enum eventId
     {
@@ -155,16 +157,21 @@ public:
 
     struct npc_battered_red_drake_eventAI : public npc_escortAI
     {
-        npc_battered_red_drake_eventAI(Creature* creature) : npc_escortAI(creature) {instance = creature->GetInstanceScript();}
+        npc_battered_red_drake_eventAI(Creature* creature) : npc_escortAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
 
         InstanceScript* instance;
         EventMap events;
 
-        void OnCharmed(bool /*apply*/) {}
+        void OnCharmed(bool /*apply*/)
+        {
+        }
 
-        void WaypointReached(uint32 /*point*/) {}
-
-        void EnterEvadeMode() {}
+        void EnterEvadeMode()
+        {
+        }
 
         void Reset()
         {
@@ -182,13 +189,29 @@ public:
 
         void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
         {
-            if(apply && who->GetTypeId() == TYPEID_PLAYER)
+            if (who->GetTypeId() == TYPEID_PLAYER)
             {
-                playerPassenger = who;
-                instance->ProcessEvent(me, ACTION_START_DRAGON_EVENT);
-                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-                events.ScheduleEvent(EVENT_WHISPER_PASSENGER, 2000);
-                events.ScheduleEvent(EVENT_MOVE_TAKEOFF, 1000);
+                if (apply)
+                {
+                    playerPassenger = who;
+                    instance->ProcessEvent(me, ACTION_START_DRAGON_EVENT);
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                    events.ScheduleEvent(EVENT_MOVE_TAKEOFF, 1000);
+                }
+                else
+                    me->DisappearAndDie();
+            }
+        }
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 38:    // Waypoint End
+                    me->DisappearAndDie();
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -242,7 +265,6 @@ public:
                         events.CancelEvent(EVENT_WHISPER_PASSENGER);
                         if (playerPassenger && playerPassenger != NULL)
                             me->MonsterWhisper("Welcome, friend. Let's ride through Grim Batol and strike a blow against Deathwing that he won't soon forget!", playerPassenger->GetGUID(), false);
-
                         Start(false, true, NULL, NULL, false, false, true);
                         break;
                     }
@@ -252,16 +274,17 @@ public:
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ += 20.0f;
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
-                        events.ScheduleEvent(EVENT_DISABLE_GRAVITY, 2000);
+                        events.ScheduleEvent(EVENT_DISABLE_GRAVITY, 500);
                         me->SetDisableGravity(true);
                         break;
                     }
                     case EVENT_DISABLE_GRAVITY:
                     {
                         events.CancelEvent(EVENT_DISABLE_GRAVITY);
-                        me->SetSpeed(MOVE_FLIGHT, 2.0f, true);
+                        events.ScheduleEvent(EVENT_WHISPER_PASSENGER, 100);
+                        me->SetSpeed(MOVE_FLIGHT, 2.4f, true);
                         break;
                     }
                     default:
@@ -278,7 +301,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_battered_red_drake_eventAI (creature);
+        return new npc_battered_red_drake_eventAI(creature);
     }
 };
 
