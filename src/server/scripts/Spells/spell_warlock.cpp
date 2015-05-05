@@ -1068,7 +1068,6 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
                     if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
                     {
                         int32 damage = aurEff->GetAmount() * 9;
-                        AddPct(damage, 200);
 
                         // Shadow Mastery
                         if (AuraEffect* shadowMastery = caster->GetAuraEffect(SPELL_WARLOCK_SHADOW_MASTERY, EFFECT_0, caster->GetGUID()))
