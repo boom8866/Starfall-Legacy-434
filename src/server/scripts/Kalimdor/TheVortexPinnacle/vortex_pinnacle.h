@@ -62,6 +62,8 @@ enum CreatureIds
     NPC_GROUNDING_FIELD_STATIONARY  = 47085,
     NPC_STORM_TARGET                = 46387,
     NPC_SOTS_DUMMY                  = 47000,
+    NPC_SKYFALL_STAR_N              = 52019,
+    NPC_SKYFALL_STAR_H              = 52020
 };
 
 enum GameObjectIds

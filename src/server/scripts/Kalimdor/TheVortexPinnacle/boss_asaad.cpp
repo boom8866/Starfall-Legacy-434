@@ -28,7 +28,7 @@ enum Spells
 
 enum Events
 {
-    EVENT_CHAIN_LIGHTNING = 1,
+    EVENT_CHAIN_LIGHTNING           = 1,
     EVENT_STATIC_CLING,
     EVENT_UNSTABLE_GROUNDING_FIELD,
     EVENT_LIGHTNING_STORM_CAST,
@@ -47,7 +47,7 @@ enum Points
 
 enum Actions
 {
-    ACTION_TELEPORT_START = 1
+    ACTION_TELEPORT_START   = 1
 };
 
 float const floorZ = 646.680725f;
@@ -75,7 +75,6 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 14000);
             events.ScheduleEvent(EVENT_UNSTABLE_GROUNDING_FIELD, 18000);
-            events.ScheduleEvent(EVENT_SUMMON_SKYFALL_STAR, 10000);
             if (IsHeroic())
                 events.ScheduleEvent(EVENT_STATIC_CLING, 10000);
         }
@@ -126,6 +125,9 @@ public:
             GetCreatureListWithEntryInGrid(units, me, NPC_GROUNDING_FIELD_STATIONARY, 200.0f);
             for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                 (*itr)->DespawnOrUnsummon();
+
+            me->DespawnCreaturesInArea(NPC_SKYFALL_STAR_N);
+            me->DespawnCreaturesInArea(NPC_SKYFALL_STAR_H);
         }
 
         void KilledUnit(Unit* victim)
@@ -152,9 +154,11 @@ public:
                     tele.m_orientation = (trigger->GetOrientation() + (M_PI/1.1f));
 
                     uint32 distance = 6;
+                    me->StopMoving();
                     me->CastSpell(tele.m_positionX + cos(tele.m_orientation)*distance, tele.m_positionY + sin(tele.m_orientation)*distance, tele.m_positionZ - 4.0f, SPELL_SOTS_SUMMON, true);
                     DoTeleportTo(tele.m_positionX + cos(tele.m_orientation)*distance, tele.m_positionY + sin(tele.m_orientation)*distance, tele.m_positionZ);
                     me->UpdatePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                    me->SendMovementFlagUpdate(false);
                 }
                 DoCastAOE(SPELL_TELEPORT);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
@@ -174,23 +178,23 @@ public:
                 switch (eventId)
                 {
                     case EVENT_CHAIN_LIGHTNING:
-                        me->GetMotionMaster()->Clear();
+                        me->StopMoving();
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                             DoCast(target, SPELL_CHAIN_LIGHTNING);
                         events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 24000);
                         break;
                     case EVENT_SUMMON_SKYFALL_STAR:
                         DoCast(SPELL_SUMMON_SKYFALL_STAR);
-                        events.ScheduleEvent(EVENT_SUMMON_SKYFALL_STAR, 25000);
+                        events.CancelEvent(EVENT_SUMMON_SKYFALL_STAR);
                         break;
                     case EVENT_STATIC_CLING:
-                        me->GetMotionMaster()->Clear();
+                        me->StopMoving();
                         DoCastAOE(SPELL_STATIC_CLING);
                         DoCast(SPELL_SUMMON_SKYFALL_STAR);
                         events.ScheduleEvent(EVENT_STATIC_CLING, 31000);
                         break;
                     case EVENT_UNSTABLE_GROUNDING_FIELD:
-                        me->GetMotionMaster()->Clear();
+                        me->StopMoving();
                         Talk(SAY_FIELD);
                         Talk(ANNOUNCE_FIELD);
                         if (Creature* walker = me->SummonCreature(NPC_GROUNDING_FIELD_TRIGGER, me->GetPositionX()+rand()%10, me->GetPositionY()+rand()%10, me->GetPositionZ()))
@@ -212,6 +216,14 @@ public:
                         break;
                 }
             }
+
+            // Safety distance check to prevent exit out of area
+            if (me->GetDistance2d(-601.47f, 501.97f) > 55)
+            {
+                events.Reset();
+                EnterEvadeMode();
+            }
+
             DoMeleeAttackIfReady();
         }
     };

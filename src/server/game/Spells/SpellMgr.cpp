@@ -3986,6 +3986,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 85158: // Howling Gale (Knockback)
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_16_YARDS);
                 break;
+                // * Asaad
+            case 87474: // Grounding Field
+            case 87726:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(27);
+                break;
             // CATACLYSM
             // SPELLS CLASSES
             // Druid
