@@ -219,10 +219,7 @@ public:
 
             // Safety distance check to prevent exit out of area
             if (me->GetDistance2d(-601.47f, 501.97f) > 55)
-            {
-                events.Reset();
-                EnterEvadeMode();
-            }
+                _DespawnAtEvade();
 
             DoMeleeAttackIfReady();
         }
