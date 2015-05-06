@@ -791,7 +791,7 @@ class PulledRecentlyCheck
 public:
     bool operator()(WorldObject* object) const
     {
-        return ((object->ToUnit() && object->ToUnit()->HasAura(SPELL_GRAVITY_WELL_PULL)) || (object->ToCreature()->GetEntry() == NPC_HIGH_PRIESTESS_AZIL_H || object->ToCreature()->GetEntry() == NPC_HIGH_PRIESTESS_AZIL_N));
+        return ((object->ToUnit() && object->ToUnit()->HasAura(SPELL_GRAVITY_WELL_PULL)) || (object->ToCreature() && (object->ToCreature()->GetEntry() == NPC_HIGH_PRIESTESS_AZIL_H || object->ToCreature()->GetEntry() == NPC_HIGH_PRIESTESS_AZIL_N)));
     }
 };
 
