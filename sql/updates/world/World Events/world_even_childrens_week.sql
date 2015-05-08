@@ -51,7 +51,7 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry`=52585 AND `spell_id`=90105;
 UPDATE `creature_template` SET `npcflag`=1 WHERE `entry`=52585;
 UPDATE `creature_template` SET `unit_flags`=768, `InhabitType`=3, `ScriptName`='npc_cw_redhound_twoseater_trigger' WHERE `entry`=52585;
-UPDATE `creature_template` SET `minlevel`=5, `maxlevel`=5, `unit_flags`=768, `VehicleId`=1577, `InhabitType`=4, `ScriptName`='npc_vw_redhound_twoseater_vehicle' WHERE `entry`=52583;
+UPDATE `creature_template` SET `minlevel`=5, `maxlevel`=5, `unit_flags`=768, `VehicleId`=1577, `InhabitType`=4, `ScriptName`='npc_cw_redhound_twoseater_vehicle' WHERE `entry`=52583;
 
 DELETE FROM `script_waypoint` WHERE `entry` = '52583';
 INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
@@ -113,3 +113,71 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (14444,9,0,'I did it! I Got us back to the track!',12,0,100,0,0,0,'Comment'),
 (14444,10,0,'This is the only button I haven\'t pushed yet. Let\'s give it a try!',12,0,100,0,0,0,'Comment'),
 (14444,11,0,'Whooooooooooa!',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `minlevel`=5, `maxlevel`=5, `npcflag`=1, `unit_flags`=768, `ScriptName`='npc_cw_rental_chopper_trigger' WHERE `entry`=52189;
+UPDATE `creature_template` SET `minlevel`=5, `maxlevel`=5, `unit_flags`=768, `VehicleId`=335, `ScriptName`='npc_cw_rental_chopper_vehicle' WHERE `entry`=52188;
+
+DELETE FROM `script_waypoint` WHERE `entry` = '52188';
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
+(52188, 1, -10640.20, 1001.94, 32.82, 'Rental Chopper (CW)'),
+(52188, 2, -10589.90, 989.42, 36.89, 'Rental Chopper (CW)'),
+(52188, 3, -10522.21, 956.56, 41.08, 'Rental Chopper (CW)'),
+(52188, 4, -10478.94, 952.79, 36.90, 'Rental Chopper (CW)'),
+(52188, 5, -10460.65, 958.80, 35.24, 'Rental Chopper (CW)'),
+(52188, 6, -10445.83, 970.43, 35.15, 'Rental Chopper (CW)'),
+(52188, 7, -10430.26, 1073.13, 38.14, 'Rental Chopper (CW)'),
+(52188, 8, -10425.89, 1104.92, 33.14, 'Rental Chopper (CW)'),
+(52188, 9, -10420.99, 1150.15, 34.76, 'Rental Chopper (CW)'),
+(52188, 10, -10424.04, 1212.71, 44.17, 'Rental Chopper (CW)'),
+(52188, 11, -10367.50, 1297.64, 39.65, 'Rental Chopper (CW)'),
+(52188, 12, -10347.39, 1392.32, 42.19, 'Rental Chopper (CW)'),
+(52188, 13, -10338.14, 1464.01, 38.07, 'Rental Chopper (CW)'),
+(52188, 14, -10298.95, 1530.28, 36.34, 'Rental Chopper (CW)'),
+(52188, 15, -10286.43, 1591.41, 32.66, 'Rental Chopper (CW)'),
+(52188, 16, -10267.06, 1689.00, 29.20, 'Rental Chopper (CW)'),
+(52188, 17, -10266.66, 1702.39, 30.22, 'Rental Chopper (CW)'),
+(52188, 18, -10257.89, 1805.32, 39.04, 'Rental Chopper (CW)'),
+(52188, 19, -10271.18, 1831.94, 37.60, 'Rental Chopper (CW)'),
+(52188, 20, -10343.12, 1843.74, 35.41, 'Rental Chopper (CW)'),
+(52188, 21, -10374.55, 1845.68, 34.97, 'Rental Chopper (CW)'),
+(52188, 22, -10425.91, 1840.07, 28.51, 'Rental Chopper (CW)'),
+(52188, 23, -10449.71, 1809.51, 26.17, 'Rental Chopper (CW)'),
+(52188, 24, -10454.22, 1760.43, -11.17, 'Rental Chopper (CW)'),
+(52188, 25, -10463.60, 1741.76, -9.31, 'Rental Chopper (CW)'),
+(52188, 26, -10479.39, 1725.47, -5.49, 'Rental Chopper (CW)'),
+(52188, 27, -10485.98, 1687.28, -8.02, 'Rental Chopper (CW)'),
+(52188, 28, -10472.75, 1643.07, -6.03, 'Rental Chopper (CW)'),
+(52188, 29, -10474.73, 1614.02, 0.89, 'Rental Chopper (CW)'),
+(52188, 30, -10436.75, 1591.60, -10.88, 'Rental Chopper (CW)'),
+(52188, 31, -10429.54, 1595.66, -13.51, 'Rental Chopper (CW)'),
+(52188, 32, -10408.86, 1612.89, -32.84, 'Rental Chopper (CW)'),
+(52188, 33, -10393.64, 1637.09, -37.52, 'Rental Chopper (CW)'),
+(52188, 34, -10391.53, 1660.76, -16.75, 'Rental Chopper (CW)'),
+(52188, 35, -10391.03, 1680.28, -4.63, 'Rental Chopper (CW)'),
+(52188, 36, -10409.94, 1676.71, 4.71, 'Rental Chopper (CW)'),
+(52188, 37, -10415.67, 1653.93, 4.71, 'Rental Chopper (CW)'),
+(52188, 38, -10380.07, 1653.35, 16.30, 'Rental Chopper (CW)'),
+(52188, 39, -10368.33, 1696.55, 45.74, 'Rental Chopper (CW)'),
+(52188, 40, -10411.31, 1714.82, 49.35, 'Rental Chopper (CW)'),
+(52188, 41, -10447.91, 1679.72, 49.35, 'Rental Chopper (CW)'),
+(52188, 42, -10390.10, 1592.19, 69.75, 'Rental Chopper (CW)'),
+(52188, 43, -10369.55, 1519.53, 28.90, 'Rental Chopper (CW)'),
+(52188, 44, -10370.10, 1306.63, 40.48, 'Rental Chopper (CW)'),
+(52188, 45, -10391.57, 1208.17, 43.50, 'Rental Chopper (CW)'),
+(52188, 46, -10453.90, 979.66, 36.82, 'Rental Chopper (CW)'),
+(52188, 47, -10470.96, 954.90, 36.01, 'Rental Chopper (CW)'),
+(52188, 48, -10514.11, 955.50, 40.79, 'Rental Chopper (CW)'),
+(52188, 49, -10635.25, 1008.93, 32.03, 'Rental Chopper (CW)');
+
+DELETE FROM `creature_text` WHERE `entry`=14305;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(14305,0,0,'Wow, this sure goes fast!',12,0,100,0,0,0,'Comment'),
+(14305,1,0,'Look, someones\'s attacking Sentinel Hill. C\'mon guards, you just hafta win!',12,0,100,0,0,0,'Comment'),
+(14305,2,0,'I thought the Park fell into big hole, but this one\'s way bigger and it has a whirlwind!',12,0,100,0,0,0,'Comment'),
+(14305,3,0,'That looks fun! I wanna drive but the orphan matron says I can\'t get a mount \'til I\'m older. ',12,0,100,0,0,0,'Comment'),
+(14305,4,0,'I\'ve never seen a flying tree before. Let\'s get closer! ',12,0,100,0,0,0,'Comment'),
+(14305,5,0,'Look at all that slime. One is flying straight at me!',12,0,100,0,0,0,'Comment'),
+(14305,6,0,'Eeeeeeeeeeeeeeew, it\'s on my head! Help! ',12,0,100,0,0,0,'Comment'),
+(14305,7,0,'My tummy doesn\'t feel so good..',12,0,100,0,0,0,'Comment'),
+(14305,8,0,'Whoa! Did you see how high we went?',12,0,100,0,0,0,'Comment'),
+(14305,9,0,'That was great! Let\'s do it again! ',12,0,100,0,0,0,'Comment');
