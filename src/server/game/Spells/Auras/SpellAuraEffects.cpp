@@ -568,6 +568,20 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             }
             break;
         }
+        case SPELL_AURA_MOD_INCREASE_HEALTH_2:
+        {
+            switch (GetId())
+            {
+                // Frenzied Regeneration
+                case 22842:
+                {
+                    if (caster->GetShapeshiftForm() == FORM_BEAR)
+                        amount = GetBase()->GetUnitOwner()->CountPctFromMaxHealth(30);
+                    break;
+                }
+            }
+            break;
+        }
         case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
         {
             if (caster)
@@ -4396,7 +4410,6 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint
     // Special cases
     switch (aurApp->GetBase()->GetSpellInfo()->Id)
     {
-        case 22842: // Frenzied Regeneration
         case 79437: // Soulburn: Healthstone
         {
             if (apply)
@@ -4411,24 +4424,16 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint
 
     if (apply)
     {
-        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, amount, apply);
-        // Frenzied Regeneration
-        if (aurApp->GetBase()->GetSpellInfo()->Id == 22842)
-        {
-            // "increases health to 30% (if below that value)"
-            if (target->GetHealth() < amount)
-                target->SetHealth(amount);
-        }
-        else
-            target->ModifyHealth(amount);
+        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
+        target->ModifyHealth(GetAmount());
     }
     else
     {
-        if (int32(target->GetHealth()) > amount)
-            target->ModifyHealth(-amount);
+        if (int32(target->GetHealth()) > GetAmount())
+            target->ModifyHealth(-GetAmount());
         else
             target->SetHealth(1);
-        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, amount, apply);
+        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
     }
 }
 

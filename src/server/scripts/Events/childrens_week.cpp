@@ -15,10 +15,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellAuras.h"
 #include "Player.h"
+#include "ScriptedEscortAI.h"
+#include "Vehicle.h"
 
 enum Orphans
 {
@@ -1043,6 +1046,325 @@ class npc_grizzlemaw_cw_trigger : public CreatureScript
         }
 };
 
+class npc_cw_redhound_twoseater_trigger : public CreatureScript
+{
+public:
+    npc_cw_redhound_twoseater_trigger() : CreatureScript("npc_cw_redhound_twoseater_trigger")
+    {
+    }
+
+    enum entryId
+    {
+        QUEST_RIDIN_THE_ROCKETWAY           = 29146,
+        SPELL_SUMMON_REDHOUND_TWOSEATER     = 97227,
+        NPC_ORCISH_ORPHAN                   = 14444
+    };
+
+    bool OnGossipHello(Player* player, Creature* /*creature*/)
+    {
+        bool checkOrphan = false;
+        if (player->GetQuestStatus(QUEST_RIDIN_THE_ROCKETWAY) == QUEST_STATUS_INCOMPLETE)
+        {
+            // Remove the orphan before
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(player, 15.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+            player->VisitNearbyObject(15.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->ToCreature() && (*itr)->ToTempSummon() && (*itr)->ToCreature()->GetEntry() == NPC_ORCISH_ORPHAN && (*itr)->ToTempSummon()->GetSummoner() == player)
+                    checkOrphan = true;
+            }
+
+            if (checkOrphan == true)
+                player->CastSpell(player, SPELL_SUMMON_REDHOUND_TWOSEATER);
+        }
+        return true;
+    }
+};
+
+class npc_vw_redhound_twoseater_vehicle : public CreatureScript
+{
+public:
+    npc_vw_redhound_twoseater_vehicle() : CreatureScript("npc_vw_redhound_twoseater_vehicle")
+    {
+    }
+
+    enum actionId
+    {
+        ACTION_WP_START     = 1
+    };
+
+    enum spellId
+    {
+        SPELL_ROCKETWAY_CREDIT      = 97376,
+        SPELL_ROCKETWAY_TAKEOFF     = 97256,
+        SPELL_SPEED_BOOST_IMPROVED  = 81492,
+        SPELL_THE_SMOKE             = 73628
+    };
+
+    enum eventId
+    {
+        EVENT_SUMMON_AND_RIDE_ORPHAN    = 1,
+        EVENT_RESTART_WP
+    };
+
+    enum npcId
+    {
+        NPC_ORPHAN          = 14444
+    };
+
+    struct npc_vw_redhound_twoseater_vehicleAI : public npc_escortAI
+    {
+        npc_vw_redhound_twoseater_vehicleAI(Creature* creature) : npc_escortAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void OnCharmed(bool apply)
+        {
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+            me->SetReactState(REACT_PASSIVE);
+            me->CastSpell(me, SPELL_ROCKETWAY_TAKEOFF, true);
+            wpInProgress = false;
+            events.ScheduleEvent(EVENT_SUMMON_AND_RIDE_ORPHAN, 500);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void PassengerBoarded(Unit* passenger, int8 seatId, bool apply)
+        {
+            if (apply && passenger->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (wpInProgress == false)
+                {
+                    DoAction(ACTION_WP_START);
+                    wpInProgress = true;
+                }
+            }
+        }
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 1:
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(1))
+                            passenger->ToCreature()->AI()->Talk(0);
+                    break;
+                case 4:
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(0))
+                            passenger->MonsterSay("Yeehaw!", 0);
+                    break;
+                case 5:
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(1))
+                            passenger->ToCreature()->AI()->Talk(1);
+                    break;
+                case 8:
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(0))
+                            passenger->MonsterSay("Oh no...", 0);
+                    break;
+                case 9:
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(1))
+                            passenger->ToCreature()->AI()->Talk(2);
+                    break;
+                case 11:
+                    me->CastSpell(me, SPELL_SPEED_BOOST_IMPROVED, true);
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(0))
+                            passenger->MonsterSay("Noo!", 0);
+                    me->SetSpeed(MOVE_FLIGHT, 4.0f, true);
+                    me->SetSpeed(MOVE_RUN, 4.0f, true);
+                    break;
+                case 13:
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(0))
+                            passenger->MonsterSay("Yeah!", 0);
+                    break;
+                case 14:
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(1))
+                            passenger->ToCreature()->AI()->Talk(3);
+                    break;
+                case 18:
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(0))
+                            passenger->HandleEmoteCommand(EMOTE_ONESHOT_CHEER);
+                    break;
+                case 22:
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(1))
+                            passenger->ToCreature()->AI()->Talk(4);
+                    break;
+                case 23:
+                    me->SendGravityDisable();
+                    me->SetCanFly(true);
+                    me->SetDisableGravity(true);
+                    break;
+                case 26:
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(1))
+                            passenger->ToCreature()->AI()->Talk(5);
+                    break;
+                case 27:
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(0))
+                            passenger->MonsterSay("You probably shouldn't...", 0);
+                    break;
+                case 28:
+                    SetEscortPaused(true);
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                    {
+                        if (Unit* passenger = vehicle->GetPassenger(0))
+                            passenger->MonsterSay("Hair!", 0);
+                        if (Unit* orphan = vehicle->GetPassenger(1))
+                            orphan->ToCreature()->AI()->TalkWithDelay(1000, 6);
+                    }
+                    me->AddAura(73628, me);
+                    events.ScheduleEvent(EVENT_RESTART_WP, 3500);
+                    break;
+                case 32:
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(1))
+                            passenger->ToCreature()->AI()->Talk(7);
+                    break;
+                case 34:
+                    SetEscortPaused(true);
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(1))
+                            passenger->ToCreature()->AI()->Talk(8);
+                    events.ScheduleEvent(EVENT_RESTART_WP, 2500);
+                    break;
+                case 35:
+                    SetEscortPaused(false);
+                    events.ScheduleEvent(EVENT_RESTART_WP, 1500);
+                    me->RemoveAurasDueToSpell(SPELL_SPEED_BOOST_IMPROVED);
+                    me->SetCanFly(false);
+                    me->SetDisableGravity(false);
+                    me->SetSpeed(MOVE_FLIGHT, 2.2f, true);
+                    me->SetSpeed(MOVE_RUN, 2.2f, true);
+                    me->RemoveAurasDueToSpell(SPELL_THE_SMOKE);
+                    break;
+                case 37:
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(1))
+                            passenger->ToCreature()->AI()->Talk(9);
+                    break;
+                case 39:
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                    {
+                        if (Unit* passenger = vehicle->GetPassenger(1))
+                            passenger->ToCreature()->AI()->Talk(10);
+                        if (Unit* passenger = vehicle->GetPassenger(0))
+                            passenger->MonsterSay("''phew''", 0);
+                    }
+                    break;
+                case 40:    // Quest Complete
+                    me->CastSpell(me, SPELL_ROCKETWAY_CREDIT, true);
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                    {
+                        if (Unit* passenger = vehicle->GetPassenger(1))
+                        {
+                            passenger->ToCreature()->AI()->Talk(11);
+                            passenger->ExitVehicle();
+                            passenger->GetMotionMaster()->MoveJump(passenger->GetPositionX(), passenger->GetPositionY(), passenger->GetPositionZ()+3, 1.0f, 45.5f, 100);
+                            passenger->ToCreature()->DespawnOrUnsummon(3000);
+                        }
+                        if (Unit* passenger = vehicle->GetPassenger(0))
+                        {
+                            passenger->CastSpell(passenger, 46419, true);
+                            passenger->MonsterSay("Nooo!", 0);
+                            passenger->ExitVehicle();
+                            passenger->GetMotionMaster()->MoveJump(passenger->GetPositionX(), passenger->GetPositionY(), passenger->GetPositionZ()+3, 1.0f, 45.5f, 100);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_WP_START:
+                {
+                    me->SetWalk(true);
+                    Start(false, true, NULL, NULL, false, true);
+                    me->SetSpeed(MOVE_FLIGHT, 2.2f, true);
+                    me->SetSpeed(MOVE_RUN, 2.2f, true);
+                    SetDespawnAtEnd(true);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            npc_escortAI::UpdateAI(diff);
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SUMMON_AND_RIDE_ORPHAN:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            // Handle Orphan
+                            std::list<Creature*> creatures;
+                            GetCreatureListWithEntryInGrid(creatures, me, NPC_ORPHAN, 20.0f);
+                            if (!creatures.empty())
+                            {
+                                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                                {
+                                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                        (*iter)->EnterVehicle(me, 1);
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_SUMMON_AND_RIDE_ORPHAN);
+                        break;
+                    }
+                    case EVENT_RESTART_WP:
+                    {
+                        SetEscortPaused(false);
+                        events.CancelEvent(EVENT_RESTART_WP);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        bool wpInProgress;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_vw_redhound_twoseater_vehicleAI(creature);
+    }
+};
+
 void AddSC_event_childrens_week()
 {
     new npc_elder_kekek();
@@ -1055,4 +1377,6 @@ void AddSC_event_childrens_week()
     new npc_grizzlemaw_cw_trigger();
     new npc_cw_area_trigger();
     new npc_alexstraza_the_lifebinder();
+    new npc_cw_redhound_twoseater_trigger();
+    new npc_vw_redhound_twoseater_vehicle();
 }
