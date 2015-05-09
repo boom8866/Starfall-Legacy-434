@@ -13637,6 +13637,11 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
                     ModifyMoney(urand(90445, 285200));
                     break;
                 }
+                case 23022: // Curmudgeons Payoff
+                {
+                    ModifyMoney(50000);
+                    break;
+                }
                 default:
                     break;
             }
