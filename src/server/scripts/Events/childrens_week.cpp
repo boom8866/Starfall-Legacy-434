@@ -969,36 +969,6 @@ class npc_cw_area_trigger : public CreatureScript
                                     questId = QUEST_VISIT_THE_THRONE_OF_ELEMENTS;
                                     orphanId = ORPHAN_BLOOD_ELF;
                                     break;
-                                case NPC_SILVERMOON_01_CW_TRIGGER:
-                                    if (player->GetQuestStatus(QUEST_NOW_WHEN_I_GROW_UP) == QUEST_STATUS_INCOMPLETE && getOrphanGUID(player, ORPHAN_BLOOD_ELF))
-                                    {
-                                        player->AreaExploredOrEventHappens(QUEST_NOW_WHEN_I_GROW_UP);
-                                        if (player->GetQuestStatus(QUEST_NOW_WHEN_I_GROW_UP) == QUEST_STATUS_COMPLETE)
-                                            if (Creature* samuro = me->FindNearestCreature(25151, 20.0f))
-                                            {
-                                                uint32 emote = 0;
-                                                switch (urand(1, 5))
-                                                {
-                                                    case 1:
-                                                        emote = EMOTE_ONESHOT_WAVE;
-                                                        break;
-                                                    case 2:
-                                                        emote = EMOTE_ONESHOT_ROAR;
-                                                        break;
-                                                    case 3:
-                                                        emote = EMOTE_ONESHOT_FLEX;
-                                                        break;
-                                                    case 4:
-                                                        emote = EMOTE_ONESHOT_SALUTE;
-                                                        break;
-                                                    case 5:
-                                                        emote = EMOTE_ONESHOT_DANCE;
-                                                        break;
-                                                }
-                                                samuro->HandleEmoteCommand(emote);
-                                            }
-                                    }
-                                    break;
                             }
                             if (questId && orphanId && getOrphanGUID(player, orphanId) && player->GetQuestStatus(questId) == QUEST_STATUS_INCOMPLETE)
                                 player->AreaExploredOrEventHappens(questId);
@@ -1009,40 +979,6 @@ class npc_cw_area_trigger : public CreatureScript
         CreatureAI* GetAI(Creature* creature) const
         {
             return new npc_cw_area_triggerAI(creature);
-        }
-};
-
-/*######
-## npc_grizzlemaw_cw_trigger
-######*/
-class npc_grizzlemaw_cw_trigger : public CreatureScript
-{
-    public:
-        npc_grizzlemaw_cw_trigger() : CreatureScript("npc_grizzlemaw_cw_trigger") {}
-
-        struct npc_grizzlemaw_cw_triggerAI : public ScriptedAI
-        {
-            npc_grizzlemaw_cw_triggerAI(Creature* creature) : ScriptedAI(creature)
-            {
-                me->SetDisplayId(DISPLAY_INVISIBLE);
-            }
-
-            void MoveInLineOfSight(Unit* who)
-            {
-                if (who && who->GetDistance2d(me) < 10.0f)
-                    if (Player* player = who->ToPlayer())
-                        if (player->GetQuestStatus(QUEST_HOME_OF_THE_BEAR_MEN) == QUEST_STATUS_INCOMPLETE)
-                            if (Creature* orphan = Creature::GetCreature(*me, getOrphanGUID(player, ORPHAN_WOLVAR)))
-                            {
-                                player->AreaExploredOrEventHappens(QUEST_HOME_OF_THE_BEAR_MEN);
-                                orphan->AI()->Talk(TEXT_WOLVAR_ORPHAN_10);
-                            }
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_grizzlemaw_cw_triggerAI(creature);
         }
 };
 
@@ -1639,6 +1575,544 @@ public:
     }
 };
 
+class npc_cw_salandria : public CreatureScript
+{
+public:
+    npc_cw_salandria() : CreatureScript("npc_cw_salandria")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_CHECK_SAMURO  = 1,
+        EVENT_UNLOCK
+    };
+
+    enum spellId
+    {
+        SPELL_SPOTLIGHT     = 68041
+    };
+
+    struct npc_cw_salandriaAI : public ScriptedAI
+    {
+        npc_cw_salandriaAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* owner)
+        {
+            events.ScheduleEvent(EVENT_CHECK_SAMURO, 1);
+            eventInProgress = false;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_SAMURO:
+                    {
+                        if (Unit* owner = me->GetCharmerOrOwner())
+                        {
+                            if (owner->GetTypeId() != TYPEID_PLAYER || eventInProgress)
+                                break;
+
+                            if (owner->ToPlayer()->GetQuestStatus(QUEST_NOW_WHEN_I_GROW_UP) == QUEST_STATUS_INCOMPLETE && owner->HasAura(SPELL_ORPHAN_OUT))
+                            {
+                                if (Creature* samuro = me->FindNearestCreature(25151, 20.0f))
+                                {
+                                    uint32 emote = 0;
+                                    switch (urand(1, 5))
+                                    {
+                                        case 1:
+                                            emote = EMOTE_ONESHOT_WAVE;
+                                            break;
+                                        case 2:
+                                            emote = EMOTE_ONESHOT_ROAR;
+                                            break;
+                                        case 3:
+                                            emote = EMOTE_ONESHOT_FLEX;
+                                            break;
+                                        case 4:
+                                            emote = EMOTE_ONESHOT_SALUTE;
+                                            break;
+                                        case 5:
+                                            emote = EMOTE_ONESHOT_DANCE;
+                                            break;
+                                    }
+                                    samuro->HandleEmoteCommand(emote);
+                                    me->CastWithDelay(6000, me, SPELL_SPOTLIGHT, true);
+                                    me->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+                                    Talk(0);
+                                    TalkWithDelay(6000, 1);
+                                    TalkWithDelay(12000, 2);
+                                    owner->ToPlayer()->AreaExploredOrEventHappens(QUEST_NOW_WHEN_I_GROW_UP);
+                                    me->SetControlled(true, UNIT_STATE_ROOT);
+                                    eventInProgress = true;
+                                    events.CancelEvent(EVENT_CHECK_SAMURO);
+                                    events.ScheduleEvent(EVENT_UNLOCK, 15000);
+                                    break;
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_SAMURO, 2000);
+                        break;
+                    }
+                    case EVENT_UNLOCK:
+                    {
+                        me->SetControlled(false, UNIT_STATE_ROOT);
+                        events.CancelEvent(EVENT_UNLOCK);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        bool eventInProgress;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_cw_salandriaAI(creature);
+    }
+};
+
+class npc_cw_oracle_orphan : public CreatureScript
+{
+public:
+    npc_cw_oracle_orphan() : CreatureScript("npc_cw_oracle_orphan")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_CHECK_GRIZZLEMAW  = 1
+    };
+
+    enum spellId
+    {
+        SPELL_THROW_PAPER_ZEPPELIN  = 65357
+    };
+
+    struct npc_cw_oracle_orphanAI : public ScriptedAI
+    {
+        npc_cw_oracle_orphanAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* owner)
+        {
+            events.ScheduleEvent(EVENT_CHECK_GRIZZLEMAW, 1);
+            eventInProgress = false;
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_THROW_PAPER_ZEPPELIN:
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->ToPlayer()->KilledMonsterCredit(36209);
+                    Talk(14);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_GRIZZLEMAW:
+                    {
+                        if (Unit* owner = me->GetCharmerOrOwner())
+                        {
+                            if (owner->GetTypeId() != TYPEID_PLAYER || eventInProgress)
+                                break;
+
+                            if (owner->ToPlayer()->GetQuestStatus(QUEST_THE_BIGGEST_TREE_EVER) == QUEST_STATUS_INCOMPLETE && owner->HasAura(SPELL_ORPHAN_OUT))
+                            {
+                                if (Creature* grizzlemawTrigger = me->FindNearestCreature(36209, 25.0f))
+                                {
+                                    owner->ToPlayer()->AreaExploredOrEventHappens(QUEST_THE_BIGGEST_TREE_EVER);
+                                    Talk(1);
+                                    TalkWithDelay(4000, 4);
+                                    events.CancelEvent(EVENT_CHECK_GRIZZLEMAW);
+                                    break;
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_GRIZZLEMAW, 2000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        bool eventInProgress;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_cw_oracle_orphanAI(creature);
+    }
+};
+
+class npc_cw_wolvar_orphan : public CreatureScript
+{
+public:
+    npc_cw_wolvar_orphan() : CreatureScript("npc_cw_wolvar_orphan")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_CHECK_GRIZZLEMAW = 1
+    };
+
+    enum spellId
+    {
+        SPELL_THROW_PAPER_ZEPPELIN = 65357
+    };
+
+    struct npc_cw_wolvar_orphanAI : public ScriptedAI
+    {
+        npc_cw_wolvar_orphanAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* owner)
+        {
+            events.ScheduleEvent(EVENT_CHECK_GRIZZLEMAW, 1);
+            eventInProgress = false;
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_THROW_PAPER_ZEPPELIN:
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->ToPlayer()->KilledMonsterCredit(36209);
+                    Talk(14);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_GRIZZLEMAW:
+                    {
+                        if (Unit* owner = me->GetCharmerOrOwner())
+                        {
+                            if (owner->GetTypeId() != TYPEID_PLAYER || eventInProgress)
+                                break;
+
+                            if (owner->ToPlayer()->GetQuestStatus(QUEST_HOME_OF_THE_BEAR_MEN) == QUEST_STATUS_INCOMPLETE && owner->HasAura(SPELL_ORPHAN_OUT))
+                            {
+                                if (Creature* grizzlemawTrigger = me->FindNearestCreature(36209, 25.0f))
+                                {
+                                    owner->ToPlayer()->AreaExploredOrEventHappens(QUEST_HOME_OF_THE_BEAR_MEN);
+                                    Talk(1);
+                                    TalkWithDelay(4000, 4);
+                                    events.CancelEvent(EVENT_CHECK_GRIZZLEMAW);
+                                    break;
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_GRIZZLEMAW, 2000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        bool eventInProgress;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_cw_wolvar_orphanAI(creature);
+    }
+};
+
+class npc_cw_orcish_orphan : public CreatureScript
+{
+public:
+    npc_cw_orcish_orphan() : CreatureScript("npc_cw_orcish_orphan")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_CHECK_SYLVANAS    = 1,
+        EVENT_AMBASSADOR,
+        EVENT_CHECK_BAINE
+    };
+
+    enum questId
+    {
+        QUEST_THE_BANSHEE_QUEEN     = 29167,
+        QUEST_THE_FALLEN_CHIEFTAIN  = 29176
+    };
+
+    struct npc_cw_orcish_orphanAI : public ScriptedAI
+    {
+        npc_cw_orcish_orphanAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* owner)
+        {
+            events.ScheduleEvent(EVENT_CHECK_SYLVANAS, 1);
+            events.ScheduleEvent(EVENT_CHECK_BAINE, 1);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_SYLVANAS:
+                    {
+                        if (Unit* owner = me->GetCharmerOrOwner())
+                        {
+                            if (owner->GetTypeId() != TYPEID_PLAYER)
+                                break;
+
+                            if (owner->ToPlayer()->GetQuestStatus(QUEST_THE_BANSHEE_QUEEN) == QUEST_STATUS_INCOMPLETE && owner->HasAura(SPELL_ORPHAN_OUT))
+                            {
+                                if (Creature* sylvanas = me->FindNearestCreature(10181, 10.0f))
+                                {
+                                    owner->ToPlayer()->AreaExploredOrEventHappens(QUEST_THE_BANSHEE_QUEEN);
+                                    me->SetFacingToObject(sylvanas);
+                                    me->SetControlled(true, UNIT_STATE_ROOT);
+                                    TalkWithDelay(1000, 12);
+                                    TalkWithDelay(8000, 13);
+                                    sylvanas->AI()->TalkWithDelay(24000, 2);
+                                    sylvanas->AI()->TalkWithDelay(32000, 3);
+                                    TalkWithDelay(40000, 14);
+                                    sylvanas->AI()->TalkWithDelay(48000, 4);
+                                    events.ScheduleEvent(EVENT_AMBASSADOR, 17000);
+                                    events.CancelEvent(EVENT_CHECK_SYLVANAS);
+                                    break;
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_SYLVANAS, 2000);
+                        break;
+                    }
+                    case EVENT_AMBASSADOR:
+                    {
+                        if (Creature* ambassador = me->FindNearestCreature(16287, 20.0f))
+                            ambassador->MonsterSay("You forget yourself, child! Do you know who stands before you?", 0);
+                        events.CancelEvent(EVENT_AMBASSADOR);
+                        break;
+                    }
+                    case EVENT_CHECK_BAINE:
+                    {
+                        if (Unit* owner = me->GetCharmerOrOwner())
+                        {
+                            if (owner->GetTypeId() != TYPEID_PLAYER)
+                                break;
+
+                            if (owner->ToPlayer()->GetQuestStatus(QUEST_THE_FALLEN_CHIEFTAIN) == QUEST_STATUS_INCOMPLETE && owner->HasAura(SPELL_ORPHAN_OUT))
+                            {
+                                if (Creature* baine = me->FindNearestCreature(52700, 15.0f))
+                                {
+                                    owner->ToPlayer()->AreaExploredOrEventHappens(QUEST_THE_FALLEN_CHIEFTAIN);
+                                    Talk(15);
+                                    baine->AI()->TalkWithDelay(6000, 0);
+                                    baine->AI()->TalkWithDelay(14000, 1);
+                                    events.CancelEvent(EVENT_CHECK_BAINE);
+                                    if (Creature* hamuul = me->FindNearestCreature(52729, 50.0f))
+                                        hamuul->AI()->TalkWithDelay(21000, 0);
+                                    if (Creature* kador = me->FindNearestCreature(52787, 50.0f))
+                                    {
+                                        kador->AI()->TalkWithDelay(29000, 0);
+                                        kador->AI()->TalkWithDelay(37000, 1);
+                                        baine->AI()->TalkWithDelay(45000, 2);
+                                    }
+                                    if (Creature* runetotem = me->FindNearestCreature(52777, 50.0f))
+                                        runetotem->AI()->TalkWithDelay(52000, 0);
+                                    break;
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_BAINE, 2000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_cw_orcish_orphanAI(creature);
+    }
+};
+
+class npc_cw_human_orphan : public CreatureScript
+{
+public:
+    npc_cw_human_orphan() : CreatureScript("npc_cw_human_orphan")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_CHECK_DIAMOND     = 1,
+        EVENT_CHECK_MALFURION,
+        EVENT_UNLOCK
+    };
+
+    enum questId
+    {
+        QUEST_THE_BIGGEST_DIAMOND_EVER  = 29106,
+        QUEST_MALFURION_HAS_RETURNED    = 29107
+    };
+
+    enum spellId
+    {
+        SPELL_MALFURION_WINGS   = 96807
+    };
+
+    struct npc_cw_human_orphanAI : public ScriptedAI
+    {
+        npc_cw_human_orphanAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* owner)
+        {
+            events.ScheduleEvent(EVENT_CHECK_DIAMOND, 1);
+            events.ScheduleEvent(EVENT_CHECK_MALFURION, 1);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_DIAMOND:
+                    {
+                        if (Unit* owner = me->GetCharmerOrOwner())
+                        {
+                            if (owner->GetTypeId() != TYPEID_PLAYER)
+                                break;
+
+                            if (owner->ToPlayer()->GetQuestStatus(QUEST_THE_BIGGEST_DIAMOND_EVER) == QUEST_STATUS_INCOMPLETE && owner->HasAura(SPELL_ORPHAN_OUT))
+                            {
+                                if (Creature* diamondTrigger = me->FindNearestCreature(34281, 10.0f))
+                                {
+                                    owner->ToPlayer()->AreaExploredOrEventHappens(QUEST_THE_BIGGEST_DIAMOND_EVER);
+                                    TalkWithDelay(500, 10);
+                                    me->HandleEmoteCommand(EMOTE_ONESHOT_APPLAUD);
+                                    events.CancelEvent(EVENT_CHECK_DIAMOND);
+                                    break;
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_DIAMOND, 2000);
+                        break;
+                    }
+                    case EVENT_CHECK_MALFURION:
+                    {
+                        if (Unit* owner = me->GetCharmerOrOwner())
+                        {
+                            if (owner->GetTypeId() != TYPEID_PLAYER)
+                                break;
+
+                            if (owner->ToPlayer()->GetQuestStatus(QUEST_MALFURION_HAS_RETURNED) == QUEST_STATUS_INCOMPLETE && owner->HasAura(SPELL_ORPHAN_OUT))
+                            {
+                                if (Creature* malfurion = me->FindNearestCreature(43845, 8.0f))
+                                {
+                                    owner->ToPlayer()->AreaExploredOrEventHappens(QUEST_MALFURION_HAS_RETURNED);
+                                    me->SetFacingToObject(malfurion);
+                                    me->SetControlled(true, UNIT_STATE_ROOT);
+                                    TalkWithDelay(500, 11);
+                                    TalkWithDelay(8000, 12);
+                                    TalkWithDelay(16000, 13);
+                                    malfurion->AI()->TalkWithDelay(24000, 0);
+                                    TalkWithDelay(32000, 14);
+                                    me->CastWithDelay(38000, me, SPELL_MALFURION_WINGS, true);
+                                    TalkWithDelay(39500, 15);
+                                    events.ScheduleEvent(EVENT_UNLOCK, 40000);
+                                    events.CancelEvent(EVENT_CHECK_MALFURION);
+                                    break;
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_MALFURION, 2000);
+                        break;
+                    }
+                    case EVENT_UNLOCK:
+                    {
+                        me->SetControlled(false, UNIT_STATE_ROOT);
+                        events.CancelEvent(EVENT_UNLOCK);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_cw_human_orphanAI(creature);
+    }
+};
+
 void AddSC_event_childrens_week()
 {
     new npc_elder_kekek();
@@ -1648,11 +2122,15 @@ void AddSC_event_childrens_week()
     new npc_the_etymidian();
     new npc_the_biggest_tree();
     new at_bring_your_orphan_to();
-    new npc_grizzlemaw_cw_trigger();
     new npc_cw_area_trigger();
     new npc_alexstraza_the_lifebinder();
     new npc_cw_redhound_twoseater_trigger();
     new npc_cw_redhound_twoseater_vehicle();
     new npc_cw_rental_chopper_trigger();
     new npc_cw_rental_chopper_vehicle();
+    new npc_cw_salandria();
+    new npc_cw_oracle_orphan();
+    new npc_cw_wolvar_orphan();
+    new npc_cw_orcish_orphan();
+    new npc_cw_human_orphan();
 }

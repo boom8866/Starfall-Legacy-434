@@ -112,7 +112,11 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (14444,8,0,'I think I found the emergency button. Rockets have those, don\'t they?',12,0,100,0,0,0,'Comment'),
 (14444,9,0,'I did it! I Got us back to the track!',12,0,100,0,0,0,'Comment'),
 (14444,10,0,'This is the only button I haven\'t pushed yet. Let\'s give it a try!',12,0,100,0,0,0,'Comment'),
-(14444,11,0,'Whooooooooooa!',12,0,100,0,0,0,'Comment');
+(14444,11,0,'Whooooooooooa!',12,0,100,0,0,0,'Comment'),
+(14444,12,0,'Wow, so you\'re the Banshee Queen? I kind of expected you to be taller!',12,0,100,0,0,0,'Comment'),
+(14444,13,0,'Everyone says you had a fight with the warchief and you\'re going to abandon the Horde. Is that true?',12,0,100,0,0,0,'Comment'),
+(14444,14,0,'So it\'s not true? Thank the ancestors! I wouldn\'t want you to be my enemy. Lady Sylvanas.',12,0,100,0,0,0,'Comment'),
+(14444,15,0,'So this is how a chieftain is honored!',12,0,100,0,0,0,'Comment');
 
 UPDATE `creature_template` SET `minlevel`=5, `maxlevel`=5, `npcflag`=1, `unit_flags`=768, `ScriptName`='npc_cw_rental_chopper_trigger' WHERE `entry`=52189;
 UPDATE `creature_template` SET `minlevel`=5, `maxlevel`=5, `unit_flags`=768, `VehicleId`=335, `ScriptName`='npc_cw_rental_chopper_vehicle' WHERE `entry`=52188;
@@ -171,13 +175,131 @@ INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `
 
 DELETE FROM `creature_text` WHERE `entry`=14305;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(14305,0,0,'Wow, this sure goes fast!',12,0,100,0,0,0,'Comment'),
-(14305,1,0,'Look, someones\'s attacking Sentinel Hill. C\'mon guards, you just hafta win!',12,0,100,0,0,0,'Comment'),
-(14305,2,0,'I thought the Park fell into big hole, but this one\'s way bigger and it has a whirlwind!',12,0,100,0,0,0,'Comment'),
-(14305,3,0,'That looks fun! I wanna drive but the orphan matron says I can\'t get a mount \'til I\'m older. ',12,0,100,0,0,0,'Comment'),
-(14305,4,0,'I\'ve never seen a flying tree before. Let\'s get closer! ',12,0,100,0,0,0,'Comment'),
-(14305,5,0,'Look at all that slime. One is flying straight at me!',12,0,100,0,0,0,'Comment'),
-(14305,6,0,'Eeeeeeeeeeeeeeew, it\'s on my head! Help! ',12,0,100,0,0,0,'Comment'),
-(14305,7,0,'My tummy doesn\'t feel so good..',12,0,100,0,0,0,'Comment'),
-(14305,8,0,'Whoa! Did you see how high we went?',12,0,100,0,0,0,'Comment'),
-(14305,9,0,'That was great! Let\'s do it again! ',12,0,100,0,0,0,'Comment');
+(14305,0,0,'Wow, this sure goes fast!',12,0,100,1,0,0,'Comment'),
+(14305,1,0,'Look, someones\'s attacking Sentinel Hill. C\'mon guards, you just hafta win!',12,0,100,1,0,0,'Comment'),
+(14305,2,0,'I thought the Park fell into big hole, but this one\'s way bigger and it has a whirlwind!',12,0,100,1,0,0,'Comment'),
+(14305,3,0,'That looks fun! I wanna drive but the orphan matron says I can\'t get a mount \'til I\'m older. ',12,0,100,1,0,0,'Comment'),
+(14305,4,0,'I\'ve never seen a flying tree before. Let\'s get closer! ',12,0,100,1,0,0,'Comment'),
+(14305,5,0,'Look at all that slime. One is flying straight at me!',12,0,100,1,0,0,'Comment'),
+(14305,6,0,'Eeeeeeeeeeeeeeew, it\'s on my head! Help! ',12,0,100,1,0,0,'Comment'),
+(14305,7,0,'My tummy doesn\'t feel so good..',12,0,100,1,0,0,'Comment'),
+(14305,8,0,'Whoa! Did you see how high we went?',12,0,100,1,0,0,'Comment'),
+(14305,9,0,'That was great! Let\'s do it again! ',12,0,100,1,0,0,'Comment'),
+(14305,10,0,'This has to be the biggest diamond ever!',12,0,100,1,0,0,'Comment'),
+(14305,11,0,'Wow, you sure don\’t look like any night elf I\’ve seen before!',12,0,100,1,0,0,'Comment'),
+(14305,12,0,'Our orphan matron says druids can turn in to birds, cats, and bears, but you look like a combination of all of them!',12,0,100,1,0,0,'Comment'),
+(14305,13,0,'I see what you\’re doing. You\’re gonna take all of the druid forms and make them into one super-form!',12,0,100,1,0,0,'Comment'),
+(14305,14,0,'The Emerald Dream doesn\’t sound like a place for me. What if it turns me into a turtle? I\’ve always wanted wings, though…',12,0,100,1,0,0,'Comment'),
+(14305,15,0,'Wheeee! I’m a bird-boy!',12,0,100,1,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=22817;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(22817,0,0,'Hello sir, I\'m ready to rock!',12,0,100,0,0,0,'Comment'),
+(22817,0,1,'Hey guys, I\'m your biggest fan! I\'m ready to rock!',12,0,100,0,0,0,'Comment'),
+(22817,0,2,'Check this out guys! I can rock like you guys!',12,0,100,0,0,0,'Comment'),
+(22817,1,0,'Salandria begins to play air guitar and sing The Power of the Horde.',16,0,100,0,0,0,'Comment'),
+(22817,2,0,'Salandria Waves her hands in the air.',16,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_cw_salandria' WHERE `entry`=22817;
+UPDATE `creature_template` SET `ScriptName`='' WHERE `entry`=36209;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_cw_oracle_orphan' WHERE `entry`=33533;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_cw_wolvar_orphan' WHERE `entry`=33532;
+
+DELETE FROM `creature_text` WHERE `entry`=10181;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(10181,0,0,'%s kneels down and pick up the amulet.',16,0,100,0,0,0,'npc_lady_sylvanas_windrunner EMOTE_LAMENT_END'),
+(10181,1,0,'Belore...',14,0,100,0,0,0,'npc_lady_sylvanas_windrunner SAY_LAMENT_END'),
+(10181,2,0,'I do not require defending, ambassador. Young one, as I have told the warchief, my loyalties have never been in doubt.',12,0,100,0,0,0,'Comment'),
+(10181,3,0,'The Horde embraced my people when we stood alone and we Forsaken never forget a debt...',12,0,100,0,0,0,'Comment'),
+(10181,4,0,'You needn\'t worry, child. The warchief "observers" are here to make certain of that.',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_cw_orcish_orphan' WHERE `entry`=14444;
+
+DELETE FROM `creature` WHERE `guid` IN (45918, 45919);
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(45918, 52189, 0, 1, 1, 0, 0, -10643.8, 997.114, 33.0073, 1.04967, 300, 0, 0, 42, 0, 0, 0, 0, 0),
+(45919, 52189, 0, 1, 1, 0, 0, -10638.3, 993.985, 33.4375, 1.04967, 300, 0, 0, 42, 0, 0, 0, 0, 0);
+
+UPDATE `game_event` SET `description`='Children\'s Week' WHERE `eventEntry`=10;
+
+DELETE FROM `game_event_creature` WHERE `guid` IN (45918, 45919);
+INSERT INTO `game_event_creature` (`eventEntry`, `guid`) VALUES
+(10, 45918),
+(10, 45919);
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`IN (734858, 738917, 738915, 738924, 738923, 738922, 738920, 738919, 738916, 738918);
+
+DELETE FROM `game_event_creature` WHERE `guid` IN
+(734858, 738917, 738915, 738924, 738923, 738922, 738920, 738919, 738916, 738918);
+INSERT INTO `game_event_creature` (`eventEntry`, `guid`) VALUES
+(10, 734858),
+(10, 738917),
+(10, 738915),
+(10, 738924),
+(10, 738923),
+(10, 738922),
+(10, 738920),
+(10, 738919),
+(10, 738916),
+(10, 738918);
+
+DELETE FROM `creature_text` WHERE `entry`=52700;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(52700,0,0,'Elders of Thunder Bluff, I have called you together in the sight of the ancestors to honor my father, Cairne Bloodhoof.',12,0,100,1,0,0,'Comment'),
+(52700,1,0,'Father, you were a man who led wisely, who battled skillfully, and who always sought the best for your people.',12,0,100,1,0,0,'Comment'),
+(52700,2,0,'May your spirit continue to guide us, father, as you did in life.',12,0,100,1,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=52729;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(52729,0,0,'When my druids and I were ambushed by renegade orcs, you challenged Warchief Garrosh to trial by combat to answer for their deaths, chieftain.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=52787;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(52787,0,0,'You fought bravely, chieftain, but Grimtotem treachery poisoned Garrosh\'s weapon and denied you fair combat.',12,0,100,0,0,0,'Comment'),
+(52787,1,0,'May your spirit know peace. Magatha and her kin were driven from the city and your worthy son carries on your legacy.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=52777;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(52777,0,0,'We know you, Cairne Bloodhoof, and your people have told us of your deeds. You are welcome at the hearth of the ancestors.',12,0,100,0,0,0,'Comment');
+
+UPDATE `quest_template` SET `PrevQuestId`='0' WHERE `Id` IN (5502, 171);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '5502' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 5502, 29176, 0),
+(20, 8, 5502, 29167, 0),
+(20, 8, 5502, 29191, 0),
+(20, 8, 5502, 29146, 0),
+(20, 8, 5502, 29190, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '5502' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 5502, 29176, 0),
+(19, 8, 5502, 29167, 0),
+(19, 8, 5502, 29191, 0),
+(19, 8, 5502, 29146, 0),
+(19, 8, 5502, 29190, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '171' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 171, 29093, 0),
+(20, 8, 171, 29117, 0),
+(20, 8, 171, 29107, 0),
+(20, 8, 171, 29106, 0),
+(20, 8, 171, 29119, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '171' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 171, 29093, 0),
+(19, 8, 171, 29117, 0),
+(19, 8, 171, 29107, 0),
+(19, 8, 171, 29106, 0),
+(19, 8, 171, 29119, 0);
+
+UPDATE `creature_template` SET `ScriptName`='npc_cw_human_orphan' WHERE `entry`=14305;
+UPDATE `creature_template` SET `speed_walk`=0.3, `speed_run`=0.45, `InhabitType`=4 WHERE `entry`=54116;
+UPDATE `creature` SET `spawndist`=6, `MovementType`=1 WHERE `guid`=139764;
+
+DELETE FROM `creature_text` WHERE `entry`=43845;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(43845,0,0,'No, little one, it\’s nothing like that. My spirit spent many years in the Emerald Dream while my body slept, and it started to take on attributes of our animal forms.',12,0,100,0,0,0,'Comment');
