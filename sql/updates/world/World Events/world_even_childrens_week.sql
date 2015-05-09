@@ -364,3 +364,5 @@ INSERT INTO `game_event_gameobject` (`eventEntry`, `guid`) VALUES
 (10, 729139),
 (10, 729161),
 (10, 729137);
+
+UPDATE `quest_template` SET `PrevQuestId`='172' WHERE `Id` IN (29146,29167,29176,29190,29191);
