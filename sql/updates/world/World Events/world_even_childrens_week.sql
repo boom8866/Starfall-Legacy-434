@@ -366,3 +366,4 @@ INSERT INTO `game_event_gameobject` (`eventEntry`, `guid`) VALUES
 (10, 729137);
 
 UPDATE `quest_template` SET `PrevQuestId`='172' WHERE `Id` IN (29146,29167,29176,29190,29191);
+UPDATE `quest_template` SET `RequiredRaces`=946 WHERE `Id` IN (5502, 11975, 10963);
