@@ -725,7 +725,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         break;
                     case 31117: // Unstable Affliction (dispel)
                         float spellpower = (float)(m_caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW)) * 1.80f;
-                        damage += int32((damage + spellpower) * 2);
+                        damage = int32((damage + spellpower) * 2);
                         break;
                 }
                 break;

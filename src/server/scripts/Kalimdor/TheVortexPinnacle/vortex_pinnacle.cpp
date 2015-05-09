@@ -1273,10 +1273,13 @@ public:
         void EnterCombat(Unit* /*target*/)
         {
             events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(4000, 8000));
-            if (!me->GetCharmerOrOwner())
+            if (me->ToTempSummon())
             {
-                events.ScheduleEvent(EVENT_MOVE, 4000);
-                me->GetMotionMaster()->MoveRandom(40.0f);
+                if (!me->ToTempSummon()->GetSummoner())
+                {
+                    events.ScheduleEvent(EVENT_MOVE, 4000);
+                    me->GetMotionMaster()->MoveRandom(20.0f);
+                }
             }
         }
 
