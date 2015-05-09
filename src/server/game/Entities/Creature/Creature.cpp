@@ -534,6 +534,8 @@ void Creature::Update(uint32 diff)
         case 45183: // Ophelia
         case 51354: // Alexstrasza (TH)
         case 51356: // Calen (TH)
+        case 26693: // Skadi the Ruthless (N)
+        case 30807: // Skadi the Ruthless (H)
             break;
         default:
             if (cinfo->InhabitType & INHABIT_AIR && cinfo->InhabitType & INHABIT_GROUND && isInAir)
