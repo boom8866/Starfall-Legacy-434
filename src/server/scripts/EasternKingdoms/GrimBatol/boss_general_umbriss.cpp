@@ -174,6 +174,8 @@ public:
                 {
                     case EVENT_GROUND_SIEGE:
                         Talk(SAY_SIEGE_WARNING);
+                        me->StopMoving();
+                        me->SendMovementFlagUpdate(false);
                         DoCast(SPELL_SUMMON_SIEGE_DUMMY);
                         events.ScheduleEvent(EVENT_ATTACK, 4200);
                         events.ScheduleEvent(EVENT_GROUND_SIEGE, 23000);
@@ -370,6 +372,7 @@ class npc_gb_ground_siege_dummy : public CreatureScript
                 if (Creature* umbriss = me->FindNearestCreature(BOSS_GENERAL_UMBRISS, 500.0f, true))
                 {
                     umbriss->SetFacingToObject(me);
+                    umbriss->SetOrientation(me->GetOrientation() + M_PI);
                     umbriss->AI()->DoCastAOE(SPELL_GROUND_SIEGE);
                     umbriss->AddUnitState(UNIT_STATE_CANNOT_TURN);
                 }

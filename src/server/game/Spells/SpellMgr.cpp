@@ -5142,6 +5142,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 90764: // Burning Flames
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 break;
+            case 74986: // Cave In
+            case 90722:
+                spellInfo->AttributesEx |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
+                break;
             case 74909: // Glancing Blows
             case 76480:
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
