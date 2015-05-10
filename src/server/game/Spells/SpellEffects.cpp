@@ -3097,7 +3097,7 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
             {
                 // Only Direct Heal
                 if (m_spellInfo->IsPeriodicDamage())
-                    break;
+                    return;
 
                 // Nature's Blessing
                 if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2012, EFFECT_0))
@@ -3113,7 +3113,10 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
             }
             case 20167: // Seal of Insight
             {
-                int32 ap = caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.155f;
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                int32 ap = caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.15f;
                 addhealth += ap;
                 break;
             }
@@ -3159,11 +3162,11 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
             {
                 // Only for player casters
                 if (caster->GetTypeId() != TYPEID_PLAYER)
-                    break;
+                    return;
 
                 // Need Mastery
                 if (!caster->HasAura(86470))
-                    break;
+                    return;
 
                 // Increase direct healing by 10% and 1.25% bonus per mastery points
                 float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
