@@ -5138,6 +5138,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->CategoryRecoveryTime = 1000;
                 spellInfo->StartRecoveryTime = 1000;
                 break;
+            case 74634: // Ground Siege
+            case 90249:
+                spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
+                break;
             // * Forgemaster Throngus
             case 90764: // Burning Flames
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
