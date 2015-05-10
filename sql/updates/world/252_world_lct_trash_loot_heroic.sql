@@ -1,0 +1,16 @@
+UPDATE creature_template SET lootid = '44896' WHERE entry = '49317';
+UPDATE creature_template SET lootid = '44897' WHERE entry = '49318';
+UPDATE creature_template SET lootid = '44898' WHERE entry = '49320';
+UPDATE creature_template SET lootid = '44922' WHERE entry = '49319';
+UPDATE creature_template SET lootid = '44924' WHERE entry = '49321';
+UPDATE creature_template SET lootid = '44926' WHERE entry = '49322';
+UPDATE creature_template SET lootid = '44932' WHERE entry = '49323';
+UPDATE creature_template SET lootid = '44976' WHERE entry = '49324';
+UPDATE creature_template SET lootid = '44977' WHERE entry = '49325';
+UPDATE creature_template SET lootid = '44980' WHERE entry = '49326';
+UPDATE creature_template SET lootid = '44981' WHERE entry = '49327';
+UPDATE creature_template SET lootid = '44982' WHERE entry = '49328';
+UPDATE creature_template SET lootid = '45062' WHERE entry = '49330';
+UPDATE creature_template SET lootid = '45096' WHERE entry = '49332';
+UPDATE creature_template SET lootid = '45097' WHERE entry = '49333';
+UPDATE creature_template SET lootid = '45122' WHERE entry = '49334';
