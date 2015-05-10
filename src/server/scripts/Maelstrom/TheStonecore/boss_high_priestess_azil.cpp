@@ -357,12 +357,12 @@ public:
                     case EVENT_SUMMON_WAVE_SOUTH:
                         if (Creature* worldtrigger = me->FindNearestCreature(NPC_WORLDTRIGGER, 300.0f))
                             worldtrigger->CastSpell(worldtrigger, SPELL_SUMMON_WAVE_SOUTH);
-                        events.ScheduleEvent(EVENT_SUMMON_WAVE_SOUTH, 12000);
+                        events.ScheduleEvent(EVENT_SUMMON_WAVE_SOUTH, 20000);
                         break;
                     case EVENT_SUMMON_WAVE_WEST:
                         if (Creature* worldtrigger = me->FindNearestCreature(NPC_WORLDTRIGGER, 300.0f))
                             worldtrigger->CastSpell(worldtrigger, SPELL_SUMMON_WAVE_WEST);
-                        events.ScheduleEvent(EVENT_SUMMON_WAVE_WEST, 20000);
+                        events.ScheduleEvent(EVENT_SUMMON_WAVE_WEST, 35000);
                         break;
                     case EVENT_START_TIMED_ACHIEVEMENT:
                         events.ScheduleEvent(EVENT_STOP_TIMED_ACHIEVEMENT, 10000);
