@@ -173,6 +173,7 @@ public:
         {
             instance->SetBossState(DATA_HIGH_PRIESTESS_AZIL, FAIL);
             _JustReachedHome();
+            countDevoutKills = 0;
         }
 
         void Reset()
@@ -183,6 +184,7 @@ public:
             me->SetCanFly(false);
             me->SetDisableGravity(false);
             me->SetReactState(REACT_PASSIVE);
+            countDevoutKills = 0;
         }
 
         void EnterCombat(Unit* /*victim*/)
@@ -396,7 +398,7 @@ public:
 
     private:
         uint8 countSeismicShard;
-        uint8 countDevoutKills;
+        uint16 countDevoutKills;
     };
 
     CreatureAI* GetAI(Creature* creature) const
