@@ -7485,7 +7485,7 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         case 94447: // Lifebloom (Tree of Life)
         {
             if (caster->GetTypeId() != TYPEID_PLAYER)
-                break;
+                return;
 
             // Revitalize chance init
             if (roll_chance_i(20))
@@ -7505,7 +7505,10 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         }
         case 59545: // Gift of the Naaru
         {
-            damage = int32(caster->GetMaxHealth() * 0.04f);
+            if (!target || !caster)
+                return;
+
+            damage = int32(target->GetMaxHealth() * 0.04f);
             break;
         }
         case 29841: // Second Wind

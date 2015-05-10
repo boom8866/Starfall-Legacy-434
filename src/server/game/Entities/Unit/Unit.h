@@ -1876,7 +1876,7 @@ class Unit : public WorldObject
         bool HasAuraTypeWithMiscvalue(AuraType auratype, int32 miscvalue) const;
         bool HasAuraTypeWithAffectMask(AuraType auratype, SpellInfo const* affectedSpell) const;
         bool HasAuraTypeWithValue(AuraType auratype, int32 value) const;
-        bool HasNegativeAuraWithInterruptFlag(uint32 flag, uint64 guid = 0) const;
+        bool HasNegativeAuraWithInterruptFlag(uint32 flag, uint64 guid = 0);
         bool HasNegativeAuraWithAttribute(uint32 flag, uint64 guid = 0);
         bool HasAuraWithMechanic(uint32 mechanicMask);
 
