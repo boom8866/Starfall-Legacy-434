@@ -5023,7 +5023,7 @@ void Spell::TakeRunePower(bool didHit)
         case 49184: // Howling Blast
         {
             // Rime
-            if (m_caster->HasAura(59052))
+            if (player->HasAura(59052))
                 didHit = false;
             break;
         }
@@ -5035,6 +5035,15 @@ void Spell::TakeRunePower(bool didHit)
         if (int32 rp = int32(runeCostData->runePowerGain * sWorld->getRate(RATE_POWER_RUNICPOWER_INCOME)))
         {
             rp += player->GetTotalAuraModifier(SPELL_AURA_MOD_RUNE_REGEN_SPEED) * rp / 100;
+
+            // Improved Frost Presence (Blood and Unholy)
+            if (player->HasAura(48265) || player->HasAura(48263))
+            {
+                if (player->HasAura(50384))
+                    rp += 5;
+                if (player->HasAura(50385))
+                    rp += 10;
+            }
             player->ModifyPower(POWER_RUNIC_POWER, int32(rp));
         }
     }
