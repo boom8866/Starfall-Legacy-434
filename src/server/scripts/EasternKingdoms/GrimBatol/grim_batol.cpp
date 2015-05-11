@@ -142,7 +142,8 @@ public:
         EVENT_CHECK_FOR_NET,
         EVENT_WHISPER_PASSENGER,
         EVENT_MOVE_TAKEOFF,
-        EVENT_DISABLE_GRAVITY
+        EVENT_DISABLE_GRAVITY,
+        EVENT_INCREASE_SPEED
     };
 
     enum actionId
@@ -193,6 +194,8 @@ public:
             {
                 if (apply)
                 {
+                    me->SetWalk(false);
+                    me->SetControlled(true, UNIT_STATE_ROOT);
                     playerPassenger = who;
                     instance->ProcessEvent(me, ACTION_START_DRAGON_EVENT);
                     me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
@@ -208,6 +211,8 @@ public:
             switch (point)
             {
                 case 38:    // Waypoint End
+                    if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                        passenger->SetControlled(false, UNIT_STATE_ROOT);
                     me->DisappearAndDie();
                     break;
                 default:
@@ -238,6 +243,13 @@ public:
             {
                 switch (eventId)
                 {
+                    case EVENT_INCREASE_SPEED:
+                    {
+                        me->SetSpeed(MOVE_FLIGHT, 2.6f, true);
+                        me->SetSpeed(MOVE_FLIGHT_BACK, 2.6f, true);
+                        events.RescheduleEvent(EVENT_INCREASE_SPEED, 1250);
+                        break;
+                    }
                     case EVENT_ASK_FOR_HELP:
                     {
                         if (me->HasAura(SPELL_NET))
@@ -265,6 +277,7 @@ public:
                         events.CancelEvent(EVENT_WHISPER_PASSENGER);
                         if (playerPassenger && playerPassenger != NULL)
                             me->MonsterWhisper("Welcome, friend. Let's ride through Grim Batol and strike a blow against Deathwing that he won't soon forget!", playerPassenger->GetGUID(), false);
+                        me->SetControlled(false, UNIT_STATE_ROOT);
                         Start(false, true, NULL, NULL, false, false, true);
                         break;
                     }
@@ -284,7 +297,7 @@ public:
                     {
                         events.CancelEvent(EVENT_DISABLE_GRAVITY);
                         events.ScheduleEvent(EVENT_WHISPER_PASSENGER, 100);
-                        me->SetSpeed(MOVE_FLIGHT, 2.4f, true);
+                        events.ScheduleEvent(EVENT_INCREASE_SPEED, 500);
                         break;
                     }
                     default:

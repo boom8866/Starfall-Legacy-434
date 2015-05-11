@@ -3097,7 +3097,7 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
             {
                 // Only Direct Heal
                 if (m_spellInfo->IsPeriodicDamage())
-                    break;
+                    return;
 
                 // Nature's Blessing
                 if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2012, EFFECT_0))
@@ -3113,7 +3113,10 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
             }
             case 20167: // Seal of Insight
             {
-                int32 ap = caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.155f;
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                int32 ap = caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.15f;
                 addhealth += ap;
                 break;
             }
@@ -3159,11 +3162,11 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
             {
                 // Only for player casters
                 if (caster->GetTypeId() != TYPEID_PLAYER)
-                    break;
+                    return;
 
                 // Need Mastery
                 if (!caster->HasAura(86470))
-                    break;
+                    return;
 
                 // Increase direct healing by 10% and 1.25% bonus per mastery points
                 float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
@@ -6679,20 +6682,21 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         // Get diseases on target of spell
                         if (m_targets.GetUnitTarget() && (m_targets.GetUnitTarget() != unitTarget))
                         {
-                            AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, EFFECT_0);
-                            int32 bp0 = aurEff ? (aurEff->GetAmount()) : 0;
-
                             // Blood Plague
                             if (AuraEffect* bloodPlague = m_targets.GetUnitTarget()->GetAuraEffect(55078, EFFECT_0, m_caster->GetGUID()))
                             {
-                                bp0 += bp0 * bloodPlague->GetAmount() / 100;
-                                m_caster->CastCustomSpell(unitTarget, 55078, &bp0, NULL, NULL, true);
+                                int32 bloodPlagueAmount = bloodPlague->GetAmount();
+                                m_caster->CastCustomSpell(unitTarget, 55078, &bloodPlagueAmount, NULL, NULL, true);
+                                if (Aura* bPlague = unitTarget->GetAura(55078, m_caster->GetGUID()))
+                                    bPlague->GetEffect(EFFECT_0)->SetCanBeRecalculated(false);
                             }
                             // Frost Fever
                             if (AuraEffect* frostFever = m_targets.GetUnitTarget()->GetAuraEffect(55095, EFFECT_0, m_caster->GetGUID()))
                             {
-                                bp0 += bp0 * frostFever->GetAmount() / 100;
-                                m_caster->CastCustomSpell(unitTarget, 55095, &bp0, NULL, NULL, true);
+                                int32 frostFeverAmount = frostFever->GetAmount();
+                                m_caster->CastCustomSpell(unitTarget, 55095, &frostFeverAmount, NULL, NULL, true);
+                                if (Aura* fFever = unitTarget->GetAura(55095, m_caster->GetGUID()))
+                                    fFever->GetEffect(EFFECT_0)->SetCanBeRecalculated(false);
                             }
                             // Ebon Plague
                             if (AuraEffect* ebonPlague = m_targets.GetUnitTarget()->GetAuraEffect(65142, EFFECT_0, m_caster->GetGUID()))

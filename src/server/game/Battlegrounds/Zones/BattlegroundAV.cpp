@@ -319,7 +319,8 @@ Creature* BattlegroundAV::AddAVCreature(uint16 cinfoid, uint16 type)
     }
 
     if (level != 0)
-        level += m_MaxLevel - 60; //maybe we can do this more generic for custom level-range.. actually it's blizzlike
+        level += m_MaxLevel - 63; //maybe we can do this more generic for custom level-range.. actually it's blizzlike
+
     creature->SetLevel(level);
 
     uint32 triggerSpawnID = 0;

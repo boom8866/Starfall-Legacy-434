@@ -1,0 +1,1 @@
+UPDATE `gameobject_template` SET `ScriptName`='go_tsc_stalactite_los' WHERE `entry`=204337;

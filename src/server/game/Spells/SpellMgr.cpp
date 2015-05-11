@@ -4486,7 +4486,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 51698: // Honor Among Thieves
                 spellInfo->SpellFamilyName = SPELLFAMILY_ROGUE;
                 break;
-            case 2818: // Deadly Poison
+            case 79140: // Vendetta
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+                break;
+            case 2818:  // Deadly Poison
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 break;
             case 51460: // Runic Corruption
@@ -5271,13 +5274,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92427:
                 spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
                 break;
-            case 92428: // Paralyze (Duration)
-                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(31);
-                break;
-            case 94661: // Paralyze (Damage)
-                spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
-                spellInfo->Effects[EFFECT_0].BasePoints = 50000;
-                break;
             // Throne of the Tides
             // * Lady Naz'Jar
             case 75700: // Geyser N
@@ -5338,9 +5334,17 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->CategoryRecoveryTime = 1000;
                 spellInfo->StartRecoveryTime = 1000;
                 break;
+            case 74634: // Ground Siege
+            case 90249:
+                spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
+                break;
             // * Forgemaster Throngus
             case 90764: // Burning Flames
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
+                break;
+            case 74986: // Cave In
+            case 90722:
+                spellInfo->AttributesEx |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
                 break;
             case 74909: // Glancing Blows
             case 76480:

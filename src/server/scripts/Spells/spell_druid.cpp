@@ -1473,10 +1473,16 @@ class spell_dru_maul : public SpellScriptLoader
                 if (!caster || !target || !targetGUID)
                     return;
 
-                if (target->GetGUID() == targetGUID)
-                    SetHitDamage(GetHitDamage());
-                else
-                    SetHitDamage(GetHitDamage() / 2);
+                uint32 damage = GetHitDamage();
+
+                // Half damage on secondary target
+                if (target->GetGUID() != targetGUID)
+                {
+                    damage += caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.19f;
+                    damage /= 2;
+                }
+
+                SetHitDamage(damage);
 
                 // Bleed effect damage taken increased
                 if (target->HasAuraTypeWithMiscvalue(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT, 15))

@@ -2812,6 +2812,11 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         if (effectMask & (1 << effectNumber))
             HandleEffects(unit, NULL, NULL, effectNumber, SPELL_EFFECT_HANDLE_HIT_TARGET);
 
+    // Exception for Cloak of Shadows
+    if (m_spellInfo && unitTarget->HasAura(31224))
+        if (!(m_spellInfo->Attributes & SPELL_ATTR3_IGNORE_HIT_RESULT))
+            return SPELL_MISS_MISS;
+
     return SPELL_MISS_NONE;
 }
 
@@ -5023,7 +5028,7 @@ void Spell::TakeRunePower(bool didHit)
         case 49184: // Howling Blast
         {
             // Rime
-            if (m_caster->HasAura(59052))
+            if (player->HasAura(59052))
                 didHit = false;
             break;
         }
@@ -5035,6 +5040,15 @@ void Spell::TakeRunePower(bool didHit)
         if (int32 rp = int32(runeCostData->runePowerGain * sWorld->getRate(RATE_POWER_RUNICPOWER_INCOME)))
         {
             rp += player->GetTotalAuraModifier(SPELL_AURA_MOD_RUNE_REGEN_SPEED) * rp / 100;
+
+            // Improved Frost Presence (Blood and Unholy)
+            if (player->HasAura(48265) || player->HasAura(48263))
+            {
+                if (player->HasAura(50384))
+                    rp += 5;
+                if (player->HasAura(50385))
+                    rp += 10;
+            }
             player->ModifyPower(POWER_RUNIC_POWER, int32(rp));
         }
     }

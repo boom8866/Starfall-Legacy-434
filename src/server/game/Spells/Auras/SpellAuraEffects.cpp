@@ -7048,27 +7048,42 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 if (!caster)
                     return;
 
-                damage += (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.32; // BasePoints = 0 + Level * 0,32
-                if (caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    // Mastery: Frozen Heart
-                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    if (caster->HasAura(77514))
-                        damage += damage * (0.160f + (0.020f * masteryPoints));
-                }
+                damage = (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.32; // BasePoints = 0 + Level * 0,32
 
-                // Virulence
-                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
-                    damage += (damage * aurEff->GetAmount()) / 100;
-
-                if (target)
+                // Half damage if spreaded by pestilence
+                if (!CanBeRecalculated())
                 {
-                    // Ebon Plague
-                    if (target->HasAura(65142))
+                    damage /= 2;
+                    // Handle Contagion talent (Unholy)
+                    if (AuraEffect* contagion = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, EFFECT_0))
                     {
-                        if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
-                            damage += (damage * aurEff->GetAmount()) / 100;
-                        damage += damage * 0.08f;
+                        float multiplier = contagion->GetId() == 91319 ? 1.0f : 0.50f;
+                        damage += damage * multiplier;
+                    }
+                }
+                else
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Mastery: Frozen Heart
+                        float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        if (caster->HasAura(77514))
+                            damage += damage * (0.160f + (0.020f * masteryPoints));
+                    }
+
+                    // Virulence
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
+                        damage += (damage * aurEff->GetAmount()) / 100;
+
+                    if (target)
+                    {
+                        // Ebon Plague
+                        if (target->HasAura(65142))
+                        {
+                            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+                                damage += (damage * aurEff->GetAmount()) / 100;
+                            damage += damage * 0.08f;
+                        }
                     }
                 }
                 break;
@@ -7079,27 +7094,42 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 if (!caster)
                     return;
 
-                damage += (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.39; // BasePoints = 0 + Level * 0,39
-                if (caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    // Mastery: Dreadblade
-                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    if (caster->HasAura(77515))
-                        damage += damage * (0.200f + (0.0250f * masteryPoints));
-                }
+                damage = (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.39; // BasePoints = 0 + Level * 0,39
 
-                // Virulence
-                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
-                    damage += (damage * aurEff->GetAmount()) / 100;
-
-                if (target)
+                // Half damage if spreaded by pestilence
+                if (!CanBeRecalculated())
                 {
-                    // Ebon Plague
-                    if (target->HasAura(65142))
+                    damage /= 2;
+                    // Handle Contagion talent (Unholy)
+                    if (AuraEffect* contagion = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, EFFECT_0))
                     {
-                        if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
-                            damage += (damage * aurEff->GetAmount()) / 100;
-                        damage += damage * 0.08f;
+                        float multiplier = contagion->GetId() == 91319 ? 1.0f : 0.50f;
+                        damage += damage * multiplier;
+                    }
+                }
+                else
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Mastery: Dreadblade
+                        float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        if (caster->HasAura(77515))
+                            damage += damage * (0.200f + (0.0250f * masteryPoints));
+                    }
+
+                    // Virulence
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
+                        damage += (damage * aurEff->GetAmount()) / 100;
+
+                    if (target)
+                    {
+                        // Ebon Plague
+                        if (target->HasAura(65142))
+                        {
+                            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+                                damage += (damage * aurEff->GetAmount()) / 100;
+                            damage += damage * 0.08f;
+                        }
                     }
                 }
                 break;
@@ -7485,7 +7515,7 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         case 94447: // Lifebloom (Tree of Life)
         {
             if (caster->GetTypeId() != TYPEID_PLAYER)
-                break;
+                return;
 
             // Revitalize chance init
             if (roll_chance_i(20))
@@ -7505,7 +7535,10 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         }
         case 59545: // Gift of the Naaru
         {
-            damage = int32(caster->GetMaxHealth() * 0.04f);
+            if (!target || !caster)
+                return;
+
+            damage = int32(target->GetMaxHealth() * 0.04f);
             break;
         }
         case 29841: // Second Wind

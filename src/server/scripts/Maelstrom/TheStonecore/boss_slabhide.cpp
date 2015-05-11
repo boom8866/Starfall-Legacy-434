@@ -1,6 +1,7 @@
 
 #include "ScriptPCH.h"
 #include "the_stonecore.h"
+#include "GameObjectAI.h"
 
 enum Spells
 {
@@ -47,6 +48,7 @@ enum Events
     EVENT_CRYSTAL_STORM_AURA,
     EVENT_ATTACK,
     EVENT_SAND_BLAST,
+    EVENT_ENABLE_LOS
 };
 
 enum Points
@@ -458,6 +460,45 @@ public:
     }
 };
 
+class go_tsc_stalactite_los : public GameObjectScript
+{
+public:
+    go_tsc_stalactite_los() : GameObjectScript("go_tsc_stalactite_los") {}
+
+    struct go_tsc_stalactite_losAI : public GameObjectAI
+    {
+        EventMap events;
+
+        go_tsc_stalactite_losAI(GameObject* go) : GameObjectAI(go)
+        {
+            events.ScheduleEvent(EVENT_ENABLE_LOS, 2000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ENABLE_LOS:
+                        go->SetGoState(GO_STATE_READY);
+                        events.CancelEvent(EVENT_ENABLE_LOS);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    GameObjectAI* GetAI(GameObject* go) const
+    {
+        return new go_tsc_stalactite_losAI(go);
+    }
+};
+
 void AddSC_boss_slabhide()
 {
     new at_tsc_slabhide_event();
@@ -466,4 +507,5 @@ void AddSC_boss_slabhide()
     new npc_tsc_stalactit();
     new npc_tsc_lava_fissure();
     new spell_tsc_crystal_storm();
+    new go_tsc_stalactite_los();
 }

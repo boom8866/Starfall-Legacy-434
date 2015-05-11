@@ -173,6 +173,7 @@ public:
         {
             instance->SetBossState(DATA_HIGH_PRIESTESS_AZIL, FAIL);
             _JustReachedHome();
+            countDevoutKills = 0;
         }
 
         void Reset()
@@ -183,6 +184,7 @@ public:
             me->SetCanFly(false);
             me->SetDisableGravity(false);
             me->SetReactState(REACT_PASSIVE);
+            countDevoutKills = 0;
         }
 
         void EnterCombat(Unit* /*victim*/)
@@ -355,12 +357,12 @@ public:
                     case EVENT_SUMMON_WAVE_SOUTH:
                         if (Creature* worldtrigger = me->FindNearestCreature(NPC_WORLDTRIGGER, 300.0f))
                             worldtrigger->CastSpell(worldtrigger, SPELL_SUMMON_WAVE_SOUTH);
-                        events.ScheduleEvent(EVENT_SUMMON_WAVE_SOUTH, 12000);
+                        events.ScheduleEvent(EVENT_SUMMON_WAVE_SOUTH, 20000);
                         break;
                     case EVENT_SUMMON_WAVE_WEST:
                         if (Creature* worldtrigger = me->FindNearestCreature(NPC_WORLDTRIGGER, 300.0f))
                             worldtrigger->CastSpell(worldtrigger, SPELL_SUMMON_WAVE_WEST);
-                        events.ScheduleEvent(EVENT_SUMMON_WAVE_WEST, 20000);
+                        events.ScheduleEvent(EVENT_SUMMON_WAVE_WEST, 35000);
                         break;
                     case EVENT_START_TIMED_ACHIEVEMENT:
                         events.ScheduleEvent(EVENT_STOP_TIMED_ACHIEVEMENT, 10000);
@@ -396,7 +398,7 @@ public:
 
     private:
         uint8 countSeismicShard;
-        uint8 countDevoutKills;
+        uint16 countDevoutKills;
     };
 
     CreatureAI* GetAI(Creature* creature) const
