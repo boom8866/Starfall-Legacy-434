@@ -9304,7 +9304,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 81208: // Chakra: Serenity
         {
             // Procs only with: Holy Word: Serenity, Flash Heal, Heal and Greater Heal
-            if (!procSpell || (procSpell->Id != 88684 && procSpell->Id != 2061 && procSpell->Id != 2060 && procSpell->Id != 2050))
+            if (!procSpell || (procSpell->Id != 88684 && procSpell->Id != 2061 && procSpell->Id != 2060 && procSpell->Id != 2050 && procSpell->Id != 101062))
                 return false;
 
             CastSpell(this, trigger_spell_id, true);
