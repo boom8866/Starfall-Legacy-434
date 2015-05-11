@@ -4293,7 +4293,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 51698: // Honor Among Thieves
                 spellInfo->SpellFamilyName = SPELLFAMILY_ROGUE;
                 break;
-            case 2818: // Deadly Poison
+            case 79140: // Vendetta
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+                break;
+            case 2818:  // Deadly Poison
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 break;
             case 51460: // Runic Corruption
