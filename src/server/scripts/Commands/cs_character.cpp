@@ -416,9 +416,6 @@ public:
         stmt->setUInt16(0, uint16(AT_LOGIN_CHANGE_FACTION));
         if (target)
         {
-            if (handler->GetSession()->GetSecurity() < SEC_GAMEMASTER)
-                target = handler->GetSession()->GetPlayer();
-
             handler->PSendSysMessage(LANG_CUSTOMIZE_PLAYER, handler->GetNameLink(target).c_str());
             target->SetAtLoginFlag(AT_LOGIN_CHANGE_FACTION);
             stmt->setUInt32(1, target->GetGUIDLow());
@@ -446,9 +443,6 @@ public:
         stmt->setUInt16(0, uint16(AT_LOGIN_CHANGE_RACE));
         if (target)
         {
-            if (handler->GetSession()->GetSecurity() < SEC_GAMEMASTER)
-                target = handler->GetSession()->GetPlayer();
-
             handler->PSendSysMessage(LANG_CUSTOMIZE_PLAYER, handler->GetNameLink(target).c_str());
             target->SetAtLoginFlag(AT_LOGIN_CHANGE_RACE);
             stmt->setUInt32(1, target->GetGUIDLow());
