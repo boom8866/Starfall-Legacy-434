@@ -7053,14 +7053,13 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 // Half damage if spreaded by pestilence
                 if (!CanBeRecalculated())
                 {
+                    damage /= 2;
                     // Handle Contagion talent (Unholy)
                     if (AuraEffect* contagion = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, EFFECT_0))
                     {
-                        float multiplier = contagion->GetId() == 91396 ? 0.25f : 0.50f;
-                        damage *= multiplier;
+                        float multiplier = contagion->GetId() == 91319 ? 1.0f : 0.50f;
+                        damage += damage * multiplier;
                     }
-                    else
-                        damage /= 2;
                 }
                 else
                 {
@@ -7100,14 +7099,13 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 // Half damage if spreaded by pestilence
                 if (!CanBeRecalculated())
                 {
+                    damage /= 2;
                     // Handle Contagion talent (Unholy)
                     if (AuraEffect* contagion = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, EFFECT_0))
                     {
-                        float multiplier = contagion->GetId() == 91396 ? 0.25f : 0.50f;
-                        damage *= multiplier;
+                        float multiplier = contagion->GetId() == 91319 ? 1.0f : 0.50f;
+                        damage += damage * multiplier;
                     }
-                    else
-                        damage /= 2;
                 }
                 else
                 {
