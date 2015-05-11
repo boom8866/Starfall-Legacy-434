@@ -2812,6 +2812,11 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         if (effectMask & (1 << effectNumber))
             HandleEffects(unit, NULL, NULL, effectNumber, SPELL_EFFECT_HANDLE_HIT_TARGET);
 
+    // Exception for Cloak of Shadows
+    if (m_spellInfo && unitTarget->HasAura(31224))
+        if (!(m_spellInfo->Attributes & SPELL_ATTR3_IGNORE_HIT_RESULT))
+            return SPELL_MISS_MISS;
+
     return SPELL_MISS_NONE;
 }
 
