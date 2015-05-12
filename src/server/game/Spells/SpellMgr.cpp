@@ -4294,6 +4294,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->SpellFamilyName = SPELLFAMILY_ROGUE;
                 break;
             case 79140: // Vendetta
+            case 22959: // Critical Mass
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
             case 2818:  // Deadly Poison
