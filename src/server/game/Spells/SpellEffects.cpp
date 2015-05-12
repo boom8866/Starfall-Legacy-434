@@ -5175,6 +5175,10 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                             searingFlames->Remove();
                         }
                     }
+
+                    // Primal Wisdom
+                    if (m_caster->HasAura(51522) && roll_chance_i(40))
+                        m_caster->CastSpell(m_caster, 63375, true);
                     break;
                 }
             }

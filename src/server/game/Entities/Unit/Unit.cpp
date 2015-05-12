@@ -7304,6 +7304,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     for (uint32 i = 0; i < 3; ++i)
                         CastCustomSpell(victim, triggered_spell_id, &basepoints0, NULL, NULL, true, castItem, triggeredByAura);
 
+                    // Primal Wisdom
+                    if (player->HasAura(51522) && roll_chance_i(40))
+                        player->CastSpell(player, 63375, true);
+
                     return true;
                 }
                 // Feedback
