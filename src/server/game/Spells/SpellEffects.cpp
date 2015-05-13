@@ -6563,7 +6563,7 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
             if (m_spellInfo->SpellFamilyFlags[2] & 0x1)
             {
                 m_caster->CastSpell(m_caster, 53353, true);
-                if (unitTarget->GetAura(1978))
+                if (unitTarget->GetAura(1978, m_caster->GetGUID()))
                     unitTarget->GetAura(1978)->RefreshDuration();
             }
             break;

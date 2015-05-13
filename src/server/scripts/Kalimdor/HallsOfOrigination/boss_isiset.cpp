@@ -120,18 +120,24 @@ public:
 
         void EnterEvadeMode()
         {
+            _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SetBossState(DATA_ISISET, FAIL);
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->SetVisible(true);
+            events.Reset();
+            _DespawnAtEvade();
+        }
+
+        void Reset()
+        {
             RemoveSummons();
             isPhased = false;
             astralRain = false;
             veilSky = false;
             celestialCall = false;
             Phase = 0;
-            _EnterEvadeMode();
-            _DespawnAtEvade();
-            me->SetVisible(true);
-            events.Reset();
+            _Reset();
         }
 
         void SummonedCreatureDespawn(Creature* summon)
@@ -213,13 +219,13 @@ public:
 
             if ((me->GetHealth() * 100 / me->GetMaxHealth() <= 66) && Phase == 0 && me->isInCombat())
             {
+                me->StopMoving();
+                me->SendMovementFlagUpdate(false);
+                me->CastStop();
+                me->RemoveAllAuras();
+                me->SetPower(POWER_MANA, me->GetMaxPower(POWER_MANA));
                 me->SetPhaseMask(3, true);
                 Phase = 1;
-                me->SetReactState(REACT_PASSIVE);
-                isPhased = true;
-                astralRain = true;
-                veilSky = true;
-                celestialCall = true;
                 Position pos;
                 me->GetPosition(&pos);
                 me->SummonCreature(39720, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
@@ -227,6 +233,11 @@ public:
                 me->SummonCreature(39722, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
 
                 DoCast(me, SPELL_ASTRAL_SHIFT_VISUAL, true);
+
+                isPhased = true;
+                astralRain = true;
+                veilSky = true;
+                celestialCall = true;
 
                 // Init events for phase two
                 events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_TWO, 3000);
@@ -236,11 +247,15 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
-            if ((me->GetHealth() * 100 / me->GetMaxHealth() <= 33) && Phase == 1)
+            if ((me->GetHealth() * 100 / me->GetMaxHealth() <= 33) && Phase == 1 && me->isInCombat())
             {
+                me->StopMoving();
+                me->SendMovementFlagUpdate(false);
+                me->CastStop();
+                me->RemoveAllAuras();
+                me->SetPower(POWER_MANA, me->GetMaxPower(POWER_MANA));
+                me->SetPhaseMask(3, true);
                 Phase = 2;
-                me->SetReactState(REACT_PASSIVE);
-                isPhased = true;
                 Position pos;
                 me->GetPosition(&pos);
                 if (astralRain == false)
@@ -261,6 +276,11 @@ public:
 
                 DoCast(me, SPELL_ASTRAL_SHIFT_VISUAL, true);
 
+                isPhased = true;
+                astralRain = true;
+                veilSky = true;
+                celestialCall = true;
+
                 // Init events for phase three
                 events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_THREE, 3000);
                 events.ScheduleEvent(EVENT_CELESTIAL_CALL_PHASE_THREE, 5000);
@@ -272,6 +292,9 @@ public:
             if (Phase == 0)
             {
                 isPhased = false;
+                astralRain = false;
+                veilSky = false;
+                celestialCall = false;
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
@@ -329,8 +352,6 @@ public:
                         astral->SetPhaseMask(2, true);
                     }
 
-                    me->SetReactState(REACT_AGGRESSIVE);
-
                     isPhased = false;
 
                     while (uint32 eventId = events.ExecuteEvent())
@@ -382,8 +403,6 @@ public:
                         astral->SetPhaseMask(2, true);
                     }
 
-                    me->SetReactState(REACT_AGGRESSIVE);
-
                     isPhased = false;
 
                     while (uint32 eventId = events.ExecuteEvent())
@@ -433,8 +452,6 @@ public:
                         veil->SetPhaseMask(2, true);
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, veil);
                     }
-
-                    me->SetReactState(REACT_AGGRESSIVE);
 
                     isPhased = false;
 
@@ -489,8 +506,6 @@ public:
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, astral);
                     }
 
-                    me->SetReactState(REACT_AGGRESSIVE);
-
                     isPhased = false;
 
                     while (uint32 eventId = events.ExecuteEvent())
@@ -543,8 +558,6 @@ public:
                         astral->SetPhaseMask(2, true);
                     }
 
-                    me->SetReactState(REACT_AGGRESSIVE);
-
                     isPhased = false;
 
                     while (uint32 eventId = events.ExecuteEvent())
@@ -594,8 +607,6 @@ public:
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, veil);
                         veil->SetPhaseMask(2, true);
                     }
-
-                    me->SetReactState(REACT_AGGRESSIVE);
 
                     isPhased = false;
 
