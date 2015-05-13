@@ -3096,28 +3096,28 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
             case 61295: // Riptide
             {
                 // Only Direct Heal
-                if (m_spellInfo->IsPeriodicDamage())
-                    return;
-
-                // Nature's Blessing
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2012, EFFECT_0))
+                if (!m_spellInfo->IsPeriodicDamage())
                 {
-                    // Earth Shield
-                    if (unitTarget && unitTarget->HasAura(974))
+                    // Nature's Blessing
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2012, EFFECT_0))
                     {
-                        int32 healAmount = aurEff->GetAmount();
-                        addhealth += (addhealth * healAmount) / 100;
+                        // Earth Shield
+                        if (unitTarget && unitTarget->HasAura(974))
+                        {
+                            int32 healAmount = aurEff->GetAmount();
+                            addhealth += (addhealth * healAmount) / 100;
+                        }
                     }
                 }
                 break;
             }
             case 20167: // Seal of Insight
             {
-                if (caster->GetTypeId() != TYPEID_PLAYER)
-                    return;
-
-                int32 ap = caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.15f;
-                addhealth += ap;
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    int32 ap = caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.15f;
+                    addhealth += ap;
+                }
                 break;
             }
             case 87188: // Enlightened Judgements
@@ -3161,22 +3161,22 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
             case 50464: // Nourish
             {
                 // Only for player casters
-                if (caster->GetTypeId() != TYPEID_PLAYER)
-                    return;
-
-                // Need Mastery
-                if (!caster->HasAura(86470))
-                    return;
-
-                // Increase direct healing by 10% and 1.25% bonus per mastery points
-                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                addhealth += addhealth * (0.10f + (0.0125f * masteryPoints));
-
-                // Mastery: Harmony
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 1929, 1))
+                if (caster->GetTypeId() == TYPEID_PLAYER)
                 {
-                    int32 bp0 = aurEff->GetAmount();
-                    m_caster->CastCustomSpell(m_caster, 100977, &bp0, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                    // Need Mastery
+                    if (caster->HasAura(86470))
+                    {
+                        // Increase direct healing by 10% and 1.25% bonus per mastery points
+                        float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        addhealth += addhealth * (0.10f + (0.0125f * masteryPoints));
+
+                        // Mastery: Harmony
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 1929, 1))
+                        {
+                            int32 bp0 = aurEff->GetAmount();
+                            m_caster->CastCustomSpell(m_caster, 100977, &bp0, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                        }
+                    }
                 }
                 break;
             }
