@@ -75,6 +75,12 @@ enum phaseId
     PHASE_THREE
 };
 
+enum imagePhase
+{
+    MIRROR_ENABLED  = 1,
+    MIRROR_DISABLED
+};
+
 class boss_isiset : public CreatureScript
 {
 public:
@@ -99,7 +105,7 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
-            events.SetPhase(1);
+            events.SetPhase(PHASE_ONE);
             astralRain = false;
             veilSky = false;
             celestialCall = false;
@@ -160,13 +166,13 @@ public:
         {
             switch (summon->GetEntry())
             {
-                case 39720: // Mirror: Astral Rain
+                case NPC_ASTRAL_RAIN:
                     astralRain = false;
                     break;
-                case 39721: // Mirror: Celestial Call
+                case NPC_CELESTIAL_CALL:
                     celestialCall = false;
                     break;
-                case 39722: // Mirror: Veil of Sky
+                case NPC_VEIL_OF_SKY:
                     veilSky = false;
                     break;
                 default:
@@ -202,7 +208,7 @@ public:
             {
                 case ACTION_HIDE_MIRROR:
                 {
-                    SwitchImagePhase(2);
+                    SwitchImagePhase(MIRROR_DISABLED);
                     me->SetVisible(true);
                     me->RemoveAllAuras();
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
@@ -221,7 +227,7 @@ public:
                     Position pos;
                     me->GetPosition(&pos);
 
-                    if (events.IsInPhase(2))
+                    if (events.IsInPhase(PHASE_TWO))
                     {
                         me->SummonCreature(NPC_ASTRAL_RAIN, pos, TEMPSUMMON_CORPSE_DESPAWN, 1);
                         me->SummonCreature(NPC_CELESTIAL_CALL, pos, TEMPSUMMON_CORPSE_DESPAWN, 1);
@@ -229,7 +235,7 @@ public:
 
                         DoCast(me, SPELL_ASTRAL_SHIFT_VISUAL, true);
 
-                        SwitchImagePhase(1);
+                        SwitchImagePhase(MIRROR_ENABLED);
 
                         astralRain = true;
                         veilSky = true;
@@ -243,11 +249,11 @@ public:
                         events.ScheduleEvent(EVENT_CHECK_PHASING_HEALTH, 1);
                     }
 
-                    if (events.IsInPhase(3))
+                    if (events.IsInPhase(PHASE_THREE))
                     {
                         DoCast(me, SPELL_ASTRAL_SHIFT_VISUAL, true);
 
-                        SwitchImagePhase(1);
+                        SwitchImagePhase(MIRROR_ENABLED);
 
                         // Init events for phase three
                         events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_THREE, 3000, 0, PHASE_THREE);
@@ -295,7 +301,7 @@ public:
                                 (*itr)->NearTeleportTo(pos, true);
                                 (*itr)->SetHealth((*itr)->GetMaxHealth());
                                 (*itr)->SetPower((*itr)->getPowerType(), (*itr)->GetMaxPower((*itr)->getPowerType()));
-                                (*itr)->RemoveAllAuras();
+                                (*itr)->RemoveAllAurasExceptType(SPELL_AURA_MANA_SHIELD);
                             }
                         }
                         break;
@@ -321,16 +327,16 @@ public:
                 {
                     case EVENT_CHECK_PHASING_HEALTH:
                     {
-                        if (me->GetHealthPct() < 66 && me->isInCombat() && events.IsInPhase(1))
+                        if (me->GetHealthPct() < 66 && me->isInCombat() && events.IsInPhase(PHASE_ONE))
                         {
-                            events.SetPhase(2);
+                            events.SetPhase(PHASE_TWO);
                             events.CancelEvent(EVENT_CHECK_PHASING_HEALTH);
                             DoAction(ACTION_CALL_MIRROR);
                             break;
                         }
-                        if (me->GetHealthPct() < 33 && me->isInCombat() && events.IsInPhase(2))
+                        if (me->GetHealthPct() < 33 && me->isInCombat() && events.IsInPhase(PHASE_TWO))
                         {
-                            events.SetPhase(3);
+                            events.SetPhase(PHASE_THREE);
                             events.CancelEvent(EVENT_CHECK_PHASING_HEALTH);
                             DoAction(ACTION_CALL_MIRROR);
                             break;
@@ -616,8 +622,10 @@ public:
 
         void Reset()
         {
-            me->SetMaxPower(POWER_ENERGY, 100);
-            me->SetPower(POWER_ENERGY, 100);
+            if (Unit* owner = me->GetCharmerOrOwner())
+                me->setPowerType(POWER_MANA);
+            me->SetMaxPower(POWER_MANA, 140000);
+            me->SetPower(POWER_MANA, 140000);
             events.Reset();
         }
 
@@ -696,8 +704,10 @@ public:
 
         void Reset()
         {
-            me->SetMaxPower(POWER_ENERGY, 100);
-            me->SetPower(POWER_ENERGY, 100);
+            if (Unit* owner = me->GetCharmerOrOwner())
+                me->setPowerType(POWER_MANA);
+            me->SetMaxPower(POWER_MANA, 140000);
+            me->SetPower(POWER_MANA, 140000);
             events.Reset();
         }
 
@@ -777,8 +787,10 @@ public:
 
         void Reset()
         {
-            me->SetMaxPower(POWER_ENERGY, 100);
-            me->SetPower(POWER_ENERGY, 100);
+            if (Unit* owner = me->GetCharmerOrOwner())
+                me->setPowerType(POWER_MANA);
+            me->SetMaxPower(POWER_MANA, 140000);
+            me->SetPower(POWER_MANA, 140000);
             events.Reset();
         }
 

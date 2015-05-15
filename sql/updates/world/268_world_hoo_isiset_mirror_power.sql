@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `unit_class`=8 WHERE `entry` IN (39720, 39721, 39722);
