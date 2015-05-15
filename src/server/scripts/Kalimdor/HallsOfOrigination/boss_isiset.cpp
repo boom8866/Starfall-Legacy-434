@@ -1596,6 +1596,37 @@ public:
     }
 };
 
+class spell_hoo_energy_flux : public SpellScriptLoader
+{
+public:
+    spell_hoo_energy_flux() : SpellScriptLoader("spell_hoo_energy_flux")
+    {
+    }
+
+    class spell_hoo_energy_flux_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hoo_energy_flux_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hoo_energy_flux_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hoo_energy_flux_SpellScript();
+    }
+};
+
 void AddSC_boss_isiset()
 {
     new boss_isiset();
@@ -1613,4 +1644,5 @@ void AddSC_boss_isiset()
     new npc_hoo_star_shard();
     new npc_hoo_flux_animator();
     new npc_hoo_spatial_anomaly();
+    new spell_hoo_energy_flux();
 }
