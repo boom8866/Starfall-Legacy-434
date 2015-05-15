@@ -68,6 +68,13 @@ enum actionId
     ACTION_CALL_MIRROR
 };
 
+enum phaseId
+{
+    PHASE_ONE   = 1,
+    PHASE_TWO,
+    PHASE_THREE
+};
+
 class boss_isiset : public CreatureScript
 {
 public:
@@ -100,9 +107,9 @@ public:
             Talk(SAY_AGGRO);
 
             // Init events for phase one
-            events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_ONE, 3000, 0, 1);
-            events.ScheduleEvent(EVENT_CELESTIAL_CALL_PHASE_ONE, 5000, 0, 1);
-            events.ScheduleEvent(EVENT_VEIL_SKY_PHASE_ONE, 8000, 0, 1);
+            events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_ONE, 3000, 0, PHASE_ONE);
+            events.ScheduleEvent(EVENT_CELESTIAL_CALL_PHASE_ONE, 5000, 0, PHASE_ONE);
+            events.ScheduleEvent(EVENT_VEIL_SKY_PHASE_ONE, 8000, 0, PHASE_ONE);
             events.ScheduleEvent(EVENT_SUPERNOVA, 18000);
             events.ScheduleEvent(EVENT_CHECK_PHASING_HEALTH, 1);
 
@@ -229,9 +236,9 @@ public:
                         celestialCall = true;
 
                         // Init events for phase two
-                        events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_TWO, 3000, 0, 2);
-                        events.ScheduleEvent(EVENT_CELESTIAL_CALL_PHASE_TWO, 5000, 0, 2);
-                        events.ScheduleEvent(EVENT_VEIL_SKY_PHASE_TWO, 8000, 0, 2);
+                        events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_TWO, 3000, 0, PHASE_TWO);
+                        events.ScheduleEvent(EVENT_CELESTIAL_CALL_PHASE_TWO, 5000, 0, PHASE_TWO);
+                        events.ScheduleEvent(EVENT_VEIL_SKY_PHASE_TWO, 8000, 0, PHASE_TWO);
                         events.ScheduleEvent(EVENT_SUPERNOVA, 18000);
                         events.ScheduleEvent(EVENT_CHECK_PHASING_HEALTH, 1);
                     }
@@ -243,9 +250,9 @@ public:
                         SwitchImagePhase(1);
 
                         // Init events for phase three
-                        events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_THREE, 3000, 0, 3);
-                        events.ScheduleEvent(EVENT_CELESTIAL_CALL_PHASE_THREE, 5000, 0 , 3);
-                        events.ScheduleEvent(EVENT_VEIL_SKY_PHASE_THREE, 8000, 0, 3);
+                        events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_THREE, 3000, 0, PHASE_THREE);
+                        events.ScheduleEvent(EVENT_CELESTIAL_CALL_PHASE_THREE, 5000, 0, PHASE_THREE);
+                        events.ScheduleEvent(EVENT_VEIL_SKY_PHASE_THREE, 8000, 0, PHASE_THREE);
                         events.ScheduleEvent(EVENT_SUPERNOVA, 18000);
                     }
 
@@ -334,19 +341,19 @@ public:
                     case EVENT_CELESTIAL_CALL_PHASE_ONE:
                     {
                         DoCast(me, SPELL_CELESTIAL_CALL_FIRST);
-                        events.RescheduleEvent(EVENT_CELESTIAL_CALL_PHASE_ONE, urand(15000, 20000), 0, 1);
+                        events.RescheduleEvent(EVENT_CELESTIAL_CALL_PHASE_ONE, urand(15000, 20000), 0, PHASE_ONE);
                         break;
                     }
                     case EVENT_VEIL_SKY_PHASE_ONE:
                     {
                         DoCast(me, SPELL_VEIL_OF_SKY_FIRST);
-                        events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_ONE, 40000, 0, 1);
+                        events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_ONE, 40000, 0, PHASE_ONE);
                         break;
                     }
                     case EVENT_ASTRAL_RAIN_PHASE_ONE:
                     {
                         DoCast(SPELL_ASTRAL_RAIN_FIRST);
-                        events.RescheduleEvent(EVENT_ASTRAL_RAIN_PHASE_ONE, 35000, 0, 1);
+                        events.RescheduleEvent(EVENT_ASTRAL_RAIN_PHASE_ONE, 35000, 0, PHASE_ONE);
                         break;
                     }
                     case EVENT_VEIL_SKY_PHASE_TWO:
@@ -356,7 +363,7 @@ public:
 
                         DoCast(me, SPELL_VEIL_OF_SKY_SECOND);
                         events.CancelEvent(EVENT_VEIL_SKY_PHASE_ONE);
-                        events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_TWO, 40000, 0, 2);
+                        events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_TWO, 40000, 0, PHASE_TWO);
                         break;
                     }
                     case EVENT_ASTRAL_RAIN_PHASE_TWO:
@@ -365,7 +372,7 @@ public:
                             break;
 
                         DoCast(SPELL_ASTRAL_RAIN_SECOND);
-                        events.RescheduleEvent(EVENT_ASTRAL_RAIN_PHASE_TWO, 35000, 0, 2);
+                        events.RescheduleEvent(EVENT_ASTRAL_RAIN_PHASE_TWO, 35000, 0, PHASE_TWO);
                         break;
                     }
                     case EVENT_CELESTIAL_CALL_PHASE_TWO:
@@ -374,7 +381,7 @@ public:
                             break;
 
                         DoCast(me, SPELL_CELESTIAL_CALL_SECOND);
-                        events.RescheduleEvent(EVENT_CELESTIAL_CALL_PHASE_TWO, urand(15000, 20000), 0, 2);
+                        events.RescheduleEvent(EVENT_CELESTIAL_CALL_PHASE_TWO, urand(15000, 20000), 0, PHASE_TWO);
                         break;
                     }
                     case EVENT_VEIL_SKY_PHASE_THREE:
@@ -385,7 +392,7 @@ public:
                         DoCast(me, SPELL_VEIL_OF_SKY_THIRD);
                         events.CancelEvent(EVENT_VEIL_SKY_PHASE_ONE);
                         events.CancelEvent(EVENT_VEIL_SKY_PHASE_TWO);
-                        events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_THREE, 40000, 0, 3);
+                        events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_THREE, 40000, 0, PHASE_THREE);
                         break;
                     }
                     case EVENT_ASTRAL_RAIN_PHASE_THREE:
@@ -394,7 +401,7 @@ public:
                             break;
 
                         DoCast(SPELL_ASTRAL_RAIN_THIRD);
-                        events.RescheduleEvent(EVENT_ASTRAL_RAIN_PHASE_THREE, 35000, 0, 3);
+                        events.RescheduleEvent(EVENT_ASTRAL_RAIN_PHASE_THREE, 35000, 0, PHASE_THREE);
                         break;
                     }
                     case EVENT_CELESTIAL_CALL_PHASE_THREE:
@@ -403,7 +410,7 @@ public:
                             break;
 
                         DoCast(me, SPELL_CELESTIAL_CALL_THIRD);
-                        events.RescheduleEvent(EVENT_CELESTIAL_CALL_PHASE_THREE, urand(15000, 20000), 0, 3);
+                        events.RescheduleEvent(EVENT_CELESTIAL_CALL_PHASE_THREE, urand(15000, 20000), 0, PHASE_THREE);
                         break;
                     }
                     case EVENT_SUPERNOVA:
