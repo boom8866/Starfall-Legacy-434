@@ -77,7 +77,9 @@ enum Spells
     SPELL_DESTRUCTION_PROTOCOL          = 77437,
     SPELL_ALPHA_BEAMS                   = 76184,
     SPELL_ALPHA_BEAMS_BACK_CAST         = 76912,
+    SPELL_ALPHA_BEAMS_BACK_CAST_H       = 91205,
     SPELL_CRUMBLING_RUIN                = 75609,
+    SPELL_CRUMBLING_RUIN_H              = 75609,
     SPELL_NEMESIS_STRIKE                = 75604,
     SPELL_OMEGA_STANCE_SUMMON           = 77106,
     SPELL_OMEGA_STANCE                  = 75622,
@@ -155,6 +157,7 @@ public:
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CRUMBLING_RUIN);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CRUMBLING_RUIN_H);
             Talk(ANRAPHET_SAY_DEATH);
 
             if (Creature* brann = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BRANN_0_GUID)))
@@ -255,6 +258,7 @@ public:
                         events.ScheduleEvent(EVENT_ANRAPHET_NEMESIS_STRIKE, 21500, 0, PHASE_COMBAT);
                         break;
                     case EVENT_ANRAPHET_ALPHA_BEAMS:
+                        me->StopMoving();
                         DoCast(me, SPELL_ALPHA_BEAMS);
                         events.ScheduleEvent(EVENT_ANRAPHET_CRUMBLING_RUIN, 12500, 0, PHASE_COMBAT);
                         events.ScheduleEvent(EVENT_ANRAPHET_ALPHA_BEAMS, urand(40000, 45000), 0, PHASE_COMBAT);
@@ -297,7 +301,19 @@ class npc_alpha_beam : public CreatureScript
             void IsSummonedBy(Unit* /*summoner*/)
             {
                 if (Creature* anraphet = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ANRAPHET_GUID)))
-                    anraphet->CastSpell(me, SPELL_ALPHA_BEAMS_BACK_CAST);
+                {
+                    switch (anraphet->GetMap()->GetDifficulty())
+                    {
+                        case DUNGEON_DIFFICULTY_NORMAL:
+                            anraphet->CastSpell(me, SPELL_ALPHA_BEAMS_BACK_CAST);
+                            break;
+                        case DUNGEON_DIFFICULTY_HEROIC:
+                            me->CastSpell(me, SPELL_ALPHA_BEAMS_BACK_CAST_H, true);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
 
             void UpdateAI(uint32 diff)
