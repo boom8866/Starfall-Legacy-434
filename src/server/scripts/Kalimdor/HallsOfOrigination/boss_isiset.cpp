@@ -197,6 +197,7 @@ public:
                 {
                     SwitchImagePhase(2);
                     me->SetVisible(true);
+                    me->RemoveAllAuras();
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                     break;
                 }
@@ -278,7 +279,18 @@ public:
                         if (phase == 2)
                             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, (*itr));
                         else
+                        {
                             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, (*itr));
+                            if (Creature* isiset = (*itr)->FindNearestCreature(BOSS_ISISET, 500.0f))
+                            {
+                                Position pos;
+                                isiset->GetPosition(&pos);
+                                (*itr)->NearTeleportTo(pos, true);
+                                (*itr)->SetHealth((*itr)->GetMaxHealth());
+                                (*itr)->SetPower((*itr)->getPowerType(), (*itr)->GetMaxPower((*itr)->getPowerType()));
+                                (*itr)->RemoveAllAuras();
+                            }
+                        }
                         break;
                     }
                     default:
@@ -322,7 +334,7 @@ public:
                     case EVENT_CELESTIAL_CALL_PHASE_ONE:
                     {
                         DoCast(me, SPELL_CELESTIAL_CALL_FIRST);
-                        events.CancelEvent(EVENT_CELESTIAL_CALL_PHASE_ONE);
+                        events.RescheduleEvent(EVENT_CELESTIAL_CALL_PHASE_ONE, urand(15000, 20000), 0, 1);
                         break;
                     }
                     case EVENT_VEIL_SKY_PHASE_ONE:
@@ -362,7 +374,7 @@ public:
                             break;
 
                         DoCast(me, SPELL_CELESTIAL_CALL_SECOND);
-                        events.CancelEvent(EVENT_CELESTIAL_CALL_PHASE_TWO);
+                        events.RescheduleEvent(EVENT_CELESTIAL_CALL_PHASE_TWO, urand(15000, 20000), 0, 2);
                         break;
                     }
                     case EVENT_VEIL_SKY_PHASE_THREE:
@@ -391,7 +403,7 @@ public:
                             break;
 
                         DoCast(me, SPELL_CELESTIAL_CALL_THIRD);
-                        events.CancelEvent(EVENT_CELESTIAL_CALL_PHASE_THREE);
+                        events.RescheduleEvent(EVENT_CELESTIAL_CALL_PHASE_THREE, urand(15000, 20000), 0, 3);
                         break;
                     }
                     case EVENT_SUPERNOVA:
