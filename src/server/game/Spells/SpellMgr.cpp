@@ -3917,6 +3917,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 77347: // Aqua Bomb
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(38);
                 break;
+            // * Earthrager Ptah
+            case 94974: // Earth Spike
+                spellInfo->AttributesEx3 &= ~SPELL_ATTR3_ONLY_TARGET_PLAYERS;
+                break;
             // * Anraphet
             case 75609: // Crumbling Ruin
             case 91206: // Crumbling Ruin
