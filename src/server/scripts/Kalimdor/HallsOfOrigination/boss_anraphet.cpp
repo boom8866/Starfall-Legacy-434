@@ -70,6 +70,8 @@ enum Events
     EVENT_ANRAPHET_OMEGA_STANCE     = 17,
     EVENT_ANRAPHET_CRUMBLING_RUIN   = 18,
     EVENT_ANRAPHET_ACTIVATE_OMEGA   = 19,
+
+    EVENT_VAULT_TIMED_ACHIEVEMENT   = 20
 };
 
 enum Spells
@@ -96,6 +98,11 @@ enum Points
 {
     POINT_ANRAPHET_ACTIVATE     = 0,
     MAX_BRANN_WAYPOINTS_INTRO   = 17
+};
+
+enum achievementId
+{
+    ACHIEVEMENT_FASTER_THAN_THE_SPEED_OF_LIGHT  = 5296
 };
 
 Position const AnraphetActivatePos = {-193.656f, 366.689f, 75.91001f, 3.138207f};
@@ -180,6 +187,7 @@ public:
             instance->SetBossState(DATA_ANRAPHET, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CRUMBLING_RUIN);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CRUMBLING_RUIN_H);
             me->GetMotionMaster()->MoveTargetedHome();
             summons.DespawnAll();
             me->DespawnCreaturesInArea(NPC_ALPHA_BEAM, 500.0f);
@@ -308,6 +316,7 @@ class npc_alpha_beam : public CreatureScript
                             anraphet->CastSpell(me, SPELL_ALPHA_BEAMS_BACK_CAST);
                             break;
                         case DUNGEON_DIFFICULTY_HEROIC:
+                            anraphet->CastSpell(me, SPELL_ALPHA_BEAMS_BACK_CAST);
                             me->CastSpell(me, SPELL_ALPHA_BEAMS_BACK_CAST_H, true);
                             break;
                         default:
@@ -373,7 +382,11 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
                         {
                             _instance->DoCastSpellOnPlayers(SPELL_VAULT_OF_LIGHTS_CREDIT);
                             if (Creature* anraphet = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ANRAPHET_GUID)))
+                            {
                                 anraphet->AI()->DoAction(ACTION_ANRAPHET_INTRO);
+                                if (unlockVaultAchievement)
+                                    _instance->DoCompleteAchievement(ACHIEVEMENT_FASTER_THAN_THE_SPEED_OF_LIGHT);
+                            }
                         }
                         break;
                     }
@@ -399,7 +412,12 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
                         case EVENT_BRANN_UNLOCK_DOOR:
                             Talk(BRANN_SAY_UNLOCK_DOOR);
                             _instance->SetBossState(DATA_VAULT_OF_LIGHTS, DONE);
-                            _instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_VAULT_OF_LIGHTS_EVENT);
+                            // Achievement: Faster Than the Speed of Light
+                            if (me->GetMap()->IsHeroic())
+                            {
+                                unlockVaultAchievement = true;
+                                events.ScheduleEvent(EVENT_VAULT_TIMED_ACHIEVEMENT, 300000);
+                            }
                             events.ScheduleEvent(EVENT_BRANN_MOVE_INTRO, 3500);
                             break;
                         case EVENT_BRANN_THINK:
@@ -429,6 +447,10 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
                             break;
                         case EVENT_BRANN_SET_ORIENTATION_4:
                             me->SetFacingTo(3.141593f);
+                            break;
+                        case EVENT_VAULT_TIMED_ACHIEVEMENT:
+                            unlockVaultAchievement = false;
+                            events.CancelEvent(EVENT_VAULT_TIMED_ACHIEVEMENT);
                             break;
                     }
                 }
@@ -485,6 +507,7 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
             EventMap events;
             uint32 _currentPoint;
             InstanceScript* _instance;
+            bool unlockVaultAchievement;
         };
 
         CreatureAI* GetAI(Creature* creature) const
