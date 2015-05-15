@@ -81,7 +81,7 @@ enum Spells
     SPELL_ALPHA_BEAMS_BACK_CAST         = 76912,
     SPELL_ALPHA_BEAMS_BACK_CAST_H       = 91205,
     SPELL_CRUMBLING_RUIN                = 75609,
-    SPELL_CRUMBLING_RUIN_H              = 75609,
+    SPELL_CRUMBLING_RUIN_H              = 91206,
     SPELL_NEMESIS_STRIKE                = 75604,
     SPELL_OMEGA_STANCE_SUMMON           = 77106,
     SPELL_OMEGA_STANCE                  = 75622,
