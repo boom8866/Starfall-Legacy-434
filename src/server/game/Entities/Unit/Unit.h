@@ -801,16 +801,25 @@ enum DiminishingLevels
     DIMINISHING_LEVEL_TAUNT_IMMUNE  = 4
 };
 
+struct DiminishingReturnSpellData
+{
+    DiminishingReturnSpellData(uint32 lhtime, uint32 id) : lastHitTime(lhtime), spellId(id) {}
+
+    uint32                  lastHitTime;
+    uint32                  spellId;
+};
+
 struct DiminishingReturn
 {
     DiminishingReturn(DiminishingGroup group, uint32 t, uint32 count)
-        : DRGroup(group), stack(0), hitTime(t), hitCount(count)
+        : DRGroup(group), stack(0), hitTime(t), hitCount(count), spellIdList()
     {}
 
-    DiminishingGroup        DRGroup:16;
-    uint16                  stack:16;
-    uint32                  hitTime;
-    uint32                  hitCount;
+    DiminishingGroup                        DRGroup:16;
+    uint16                                  stack:16;
+    uint32                                  hitTime;
+    uint32                                  hitCount;;
+    std::list<DiminishingReturnSpellData>   spellIdList;
 };
 
 enum MeleeHitOutcome
@@ -1284,6 +1293,7 @@ class Unit : public WorldObject
         typedef std::list<AuraEffect*> AuraEffectList;
         typedef std::list<Aura*> AuraList;
         typedef std::list<AuraApplication *> AuraApplicationList;
+        typedef std::list<DiminishingReturnSpellData> DiminishingSpellsData;
         typedef std::list<DiminishingReturn> Diminishing;
         typedef std::set<uint32> ComboPointHolderSet;
 
@@ -1301,8 +1311,8 @@ class Unit : public WorldObject
         void CleanupsBeforeDelete(bool finalCleanup = true);                        // used in ~Creature/~Player (or before mass creature delete to remove cross-references to already deleted units)
 
         DiminishingLevels GetDiminishing(DiminishingGroup  group);
-        void IncrDiminishing(DiminishingGroup group);
-        float ApplyDiminishingToDuration(DiminishingGroup  group, int32 &duration, Unit* caster, DiminishingLevels Level, int32 limitduration);
+        void IncrDiminishing(DiminishingGroup group, uint32 spellId);
+        float ApplyDiminishingToDuration(DiminishingGroup  group, int32 &duration, Unit* caster, DiminishingLevels Level, int32 limitduration, SpellInfo const* spellInfo);
         void ApplyDiminishingAura(DiminishingGroup  group, bool apply);
         void ClearDiminishings() { m_Diminishing.clear(); }
 

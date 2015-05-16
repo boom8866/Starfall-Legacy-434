@@ -98,29 +98,29 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             if (spellproto->SpellFamilyFlags[1] & 0x80000000)
                 return DIMINISHING_ROOT;
             // Shattered Barrier
-            else if (spellproto->SpellVisual[0] == 12297)
+            else if (spellproto->Id == 55080 || spellproto->Id == 83073)
                 return DIMINISHING_ROOT;
+            // Slow - limit duration to 8s in PvP
+            else if (spellproto->Id == 31589)
+                return DIMINISHING_LIMITONLY;
             // Frost Nova / Freeze (Water Elemental)
-            else if (spellproto->SpellIconID == 193)
+            else if (spellproto->Id == 122 || spellproto->Id == 33395)
                 return DIMINISHING_CONTROLLED_ROOT;
             // Dragon's Breath
-            else if (spellproto->SpellFamilyFlags[0] & 0x800000)
+            else if (spellproto->Id == 31661)
                 return DIMINISHING_DRAGONS_BREATH;
-            // Polymorph
+            // Polymorph / Deep Freeze
             else if (spellproto->Id == 118 || spellproto->Id == 28271 || spellproto->Id == 28272
                 || spellproto->Id == 59634 || spellproto->Id == 61025 || spellproto->Id == 61305
                 || spellproto->Id == 61721 || spellproto->Id == 61780 || spellproto->Id == 71379
-                || spellproto->Id == 82691)
+                || spellproto->Id == 82691 || spellproto->Id == 44572)
                 return DIMINISHING_CONTROLLED_STUN;
-            // Dragon's Breath
-            else if (spellproto->Id == 31661)
-                return DIMINISHING_LIMITONLY;
             // Improved Polymorph
             else if (spellproto->Id == 83046 || spellproto->Id == 83047)
                 return DIMINISHING_NONE;
-            // Deep Freeze and Ring of Frost
-            else if (spellproto->Id == 44572 || spellproto->Id == 82691)
-                return DIMINISHING_SPECIAL;
+            // Ring of Frost
+            else if (spellproto->Id == 82691)
+                return DIMINISHING_DISORIENT;
             break;
         }
         case SPELLFAMILY_WARRIOR:
