@@ -679,7 +679,7 @@ class spell_rog_main_gauche : public SpellScriptLoader
        {
            PrepareAuraScript(spell_rog_main_gauche_AuraScript);
 
-           enum
+           enum spellId
            {
                 SPELL_MAIN_GAUCHE_TRIGGERED = 86392
            };
