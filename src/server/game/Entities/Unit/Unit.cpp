@@ -2490,6 +2490,38 @@ void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool ext
             AddPct(damageInfo.damage, mod);
         }
 
+        // For rogues only (Vendetta and Bandit's Guile)
+        if (getClass() == CLASS_ROGUE && (attType == BASE_ATTACK || attType == OFF_ATTACK))
+        {
+            if (IsInWorld())
+            {
+                // Vendetta
+                if (AuraEffect* vendetta = victim->GetAuraEffect(79140, EFFECT_0, GetGUID()))
+                {
+                    uint32 amount = vendetta->GetAmount();
+                    AddPct(damageInfo.damage, amount);
+                }
+                // Bandit's Guile - Deep Insight
+                if (AuraEffect* deepInsight = GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2646, EFFECT_0))
+                {
+                    uint32 amount = deepInsight->GetAmount();
+                    AddPct(damageInfo.damage, amount);
+                }
+                // Bandit's Guile - Moderate Insight
+                if (AuraEffect* moderateInsight = GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2748, EFFECT_0))
+                {
+                    uint32 amount = moderateInsight->GetAmount();
+                    AddPct(damageInfo.damage, amount);
+                }
+                // Bandit's Guile - Shallow Insight
+                if (AuraEffect* shallowInsight = GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2745, EFFECT_0))
+                {
+                    uint32 amount = shallowInsight->GetAmount();
+                    AddPct(damageInfo.damage, amount);
+                }
+            }
+        }
+
         DealDamageMods(victim, damageInfo.damage, &damageInfo.absorb);
         SendAttackStateUpdate(&damageInfo);
 
@@ -15218,7 +15250,7 @@ float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, 
         }
 
         // Check this because it's useless add duration reduction when immune
-        if(diminish != DIMINISHING_LEVEL_IMMUNE)
+        if (diminish != DIMINISHING_LEVEL_IMMUNE)
         {
             uint32 toMatchId1 = 0, toMatchId2 = 0;
 
@@ -15232,14 +15264,14 @@ float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, 
                     toMatchId1 = 83301;
                     toMatchId2 = 83302;
                     break;
-                // Improved Cone of Cold freeze
+                    // Improved Cone of Cold freeze
                 case 83301:
                 case 83302:
                     // Improved Cone of Cold freeze shares diminishing with Shattered Barrier
                     toMatchId1 = 55080;
                     toMatchId2 = 83073;
                     break;
-                // Deep Freeze & Ring of Frost
+                    // Deep Freeze & Ring of Frost
                 case 44572:
                     toMatchId1 = 82691;
                     break;
@@ -15248,7 +15280,7 @@ float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, 
                     break;
             }
 
-            if(toMatchId1)
+            if (toMatchId1)
             {
                 for (Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
                 {
@@ -15257,7 +15289,7 @@ float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, 
                         DiminishingReturnSpellData DRSpellData = (*j);
 
                         // Prevent application of lower DR than its own
-                        if((DRSpellData.spellId == toMatchId1 || DRSpellData.spellId == toMatchId2) && diminish < (int32)i->hitCount)
+                        if ((DRSpellData.spellId == toMatchId1 || DRSpellData.spellId == toMatchId2) && diminish < (int32)i->hitCount)
                         {
                             // MS diff check to prevent expired DR calculation
                             if (getMSTimeDiff(DRSpellData.lastHitTime, getMSTime()) < 15000)
