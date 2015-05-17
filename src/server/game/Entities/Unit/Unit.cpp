@@ -6992,7 +6992,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (effIndex != 0)
                     return false;
 
-                if (procSpell && (procSpell->Id == 20187 || procSpell->Id == 24275 || procSpell->Id == 85126 || procSpell->Id == 101423 || procSpell->Id == 20424))
+                if (procSpell && (procSpell->Id == 20187 || procSpell->Id == 24275 || procSpell->Id == 85126 || procSpell->Id == 101423 || procSpell->Id == 20424 || procSpell->Id == 53385))
                     return false;
 
                 if (HasAura(85126))

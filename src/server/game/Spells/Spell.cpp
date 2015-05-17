@@ -8103,6 +8103,15 @@ bool Spell::HasGlobalCooldown() const
 void Spell::TriggerGlobalCooldown()
 {
     int32 gcd = m_spellInfo->StartRecoveryTime;
+    bool isItemCast = false;
+
+    // Items
+    if (!gcd && !m_spellInfo->RecoveryTime && !m_spellInfo->CategoryRecoveryTime && !m_spellInfo->StartRecoveryCategory)
+    {
+        gcd = MAX_GCD;
+        isItemCast = true;
+    }
+
     if (!gcd)
         return;
 
@@ -8122,18 +8131,32 @@ void Spell::TriggerGlobalCooldown()
             m_caster->ToPlayer()->ApplySpellMod(m_spellInfo->Id, SPELLMOD_GLOBAL_COOLDOWN, gcd, this);
 
         // Apply haste rating
-        gcd = int32(float(gcd) * m_caster->GetHasteMod(CTYPE_CAST) * 0.50f);
+        gcd = int32(float(gcd) * m_caster->GetHasteMod(CTYPE_CAST));
         if (gcd < MIN_GCD)
             gcd = MIN_GCD;
         else if (gcd > MAX_GCD)
             gcd = MAX_GCD;
     }
 
+    // We have to add player latency to avoid exploits with GCD using macros
+    if (Player* player = m_caster->ToPlayer())
+        if (player->GetSession() && !isItemCast)
+            gcd += player->GetSession()->GetLatency();
+
     // Only players or controlled units have global cooldown
     if (m_caster->GetCharmInfo())
         m_caster->GetCharmInfo()->GetGlobalCooldownMgr().AddGlobalCooldown(m_spellInfo, gcd);
     else if (m_caster->GetTypeId() == TYPEID_PLAYER)
         m_caster->ToPlayer()->GetGlobalCooldownMgr().AddGlobalCooldown(m_spellInfo, gcd);
+
+    // Crusader Strike + Divine Storm for unknown reasons sometime can be casted in the same time, so let's add a fake cooldown
+    if (m_caster->ToPlayer())
+    {
+        if (m_spellInfo->Id == 35395)
+            m_caster->ToPlayer()->AddSpellCooldown(53385, 0, time(NULL) + 4);
+        if (m_spellInfo->Id == 53385)
+            m_caster->ToPlayer()->AddSpellCooldown(35395, 0, time(NULL) + 4);
+    }
 }
 
 void Spell::CancelGlobalCooldown()
