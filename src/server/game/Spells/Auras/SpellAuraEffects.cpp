@@ -730,7 +730,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
             m_tickNumber = 0;
         }
 
-        if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY) || m_spellInfo->Id == 64843 || m_spellInfo->Id == 64901)
+        if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY) || m_spellInfo->Id == 64843 || m_spellInfo->Id == 64901 || m_spellInfo->Id == 15407)
             m_periodicTimer += m_amplitude;
     }
 }

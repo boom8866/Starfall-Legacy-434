@@ -3182,7 +3182,11 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
                 victim->RewardRage(40,true);
             else if(victim->HasAura(12725))
                 victim->RewardRage(60,true);
-            return SPELL_MISS_REFLECT;
+
+            if (!spell->CheckTargetCreatureType(this))
+                return SPELL_MISS_IMMUNE;
+            else
+                return SPELL_MISS_REFLECT;
         }
     }
 
@@ -6988,7 +6992,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (effIndex != 0)
                     return false;
 
-                if (procSpell && (procSpell->Id == 20187 || procSpell->Id == 24275 || procSpell->Id == 85126))
+                if (procSpell && (procSpell->Id == 20187 || procSpell->Id == 24275 || procSpell->Id == 85126 || procSpell->Id == 101423 || procSpell->Id == 20424))
                     return false;
 
                 if (HasAura(85126))
@@ -9681,7 +9685,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 85126:
         {
             // Procs only from Seal of Righteousness, Seal of Truth and Seal of Justice
-            if (!procSpell || (!(procSpell->Id == 25742 || procSpell->Id == 101423 || procSpell->Id == 42463 || procSpell->Id == 20170)))
+            if (!procSpell || (!(procSpell->Id == 25742 || procSpell->Id == 42463 || procSpell->Id == 20170 || procSpell->Id == 101423)))
                 return false;
             break;
         }

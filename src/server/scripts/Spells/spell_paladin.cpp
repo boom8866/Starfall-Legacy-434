@@ -2021,6 +2021,37 @@ public:
     }
 };
 
+class spell_pal_seals_of_command_triggered : public SpellScriptLoader
+{
+public:
+    spell_pal_seals_of_command_triggered() : SpellScriptLoader("spell_pal_seals_of_command_triggered")
+    {
+    }
+
+    class spell_pal_seals_of_command_triggered_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pal_seals_of_command_triggered_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_seals_of_command_triggered_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pal_seals_of_command_triggered_SpellScript();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_ardent_defender();
@@ -2051,4 +2082,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_sanctuary();
     new spell_pal_lights_beacon();
     new spell_pal_judgement_damage();
+    new spell_pal_seals_of_command_triggered();
 }
