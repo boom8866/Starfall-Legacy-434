@@ -3838,6 +3838,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 66599: // Rolling with my Homies: Summon Gobber
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
+            case 8122:  // Psychic Scream
+            case 5782:  // Fear
+                spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_NONE;
+                break;
             case 74070: // Volcano: Fiery Boulder
             case 74072:
             case 74076:

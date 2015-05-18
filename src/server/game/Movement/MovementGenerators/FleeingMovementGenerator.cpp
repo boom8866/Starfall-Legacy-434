@@ -39,7 +39,12 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T* owner)
     if (owner->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
         return;
 
-    owner->AddUnitState(UNIT_STATE_FLEEING_MOVE);
+    // For special glyphs like Glyph of Psychic Scream or Glyph of Fear
+    if (Unit* fright = ObjectAccessor::GetUnit(*owner, i_frightGUID))
+        if (fright->HasAura(55676) || fright->HasAura(56244) || fright->HasAura(63327))
+            return;
+
+    owner->SendMovementFlagUpdate(false);
 
     float x, y, z;
     _getPoint(owner, x, y, z);
@@ -47,11 +52,7 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T* owner)
     // Add LOS check for target point
     Position mypos;
     owner->GetPosition(&mypos);
-    bool isInLOS = VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(owner->GetMapId(),
-                                                                                mypos.m_positionX,
-                                                                                mypos.m_positionY,
-                                                                                mypos.m_positionZ + 2.0f,
-                                                                                x, y, z + 2.0f);
+    bool isInLOS = VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(owner->GetMapId(), mypos.m_positionX, mypos.m_positionY, mypos.m_positionZ + 5.0f,x, y, z + 5.0f);
     if (!isInLOS)
     {
         i_nextCheckTime.Reset(200);
@@ -59,7 +60,8 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T* owner)
     }
 
     PathGenerator path(owner);
-    path.SetPathLengthLimit(30.0f);
+    path.SetUseStraightPath(false);
+    path.SetPathLengthLimit(15.0f);
     bool result = path.CalculatePath(x, y, z);
     if (!result || (path.GetPathType() & PATHFIND_NOPATH))
     {
@@ -78,6 +80,7 @@ template<class T>
 void FleeingMovementGenerator<T>::_getPoint(T* owner, float &x, float &y, float &z)
 {
     float dist_from_caster, angle_to_caster;
+
     if (Unit* fright = ObjectAccessor::GetUnit(*owner, i_frightGUID))
     {
         dist_from_caster = fright->GetDistance(owner);
@@ -133,6 +136,7 @@ void FleeingMovementGenerator<Player>::DoFinalize(Player* owner)
     owner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
     owner->ClearUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
     owner->StopMoving();
+    owner->SendMovementFlagUpdate(false);
 }
 
 template<>

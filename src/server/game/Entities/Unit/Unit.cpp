@@ -18217,18 +18217,7 @@ void Unit::SetFeared(bool apply)
         if (!caster)
             caster = getAttackerForHelper();
 
-        // Glyphs: Psychic Scream, Fear and Intimidating Shout (Ignore fleeing movements)
-        if (caster)
-        {
-            if (!caster->HasAura(55676) && !caster->HasAura(56244) && !caster->HasAura(63327))
-                GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);
-            else
-            {
-                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-                AddUnitState(UNIT_STATE_FLEEING);
-                ClearUnitState(UNIT_STATE_FLEEING_MOVE);
-            }
-        }
+        GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);
     }
     else
     {
@@ -18238,15 +18227,6 @@ void Unit::SetFeared(bool apply)
                 GetMotionMaster()->MovementExpired();
             if (getVictim())
                 SetTarget(getVictim()->GetGUID());
-        }
-        if (!HasAuraType(SPELL_AURA_MOD_FEAR))
-        {
-            if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING))
-                RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-            if (HasUnitState(UNIT_STATE_FLEEING))
-                ClearUnitState(UNIT_STATE_FLEEING);
-            if (HasUnitState(UNIT_STATE_FLEEING_MOVE))
-                ClearUnitState(UNIT_STATE_FLEEING_MOVE);
         }
     }
 
