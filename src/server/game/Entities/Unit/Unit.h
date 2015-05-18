@@ -1854,6 +1854,7 @@ class Unit : public WorldObject
         void RemoveAllAurasOnDeath();
         void RemoveAllAurasRequiringDeadTarget();
         void RemoveAllAurasExceptType(AuraType type);
+        void RemoveAllAurasExceptType(AuraType type1, AuraType type2, AuraType type3);
         void DelayOwnedAuras(uint32 spellId, uint64 caster, int32 delaytime);
         void RemoveRespecAuras();
 
