@@ -52,7 +52,12 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T* owner)
     // Add LOS check for target point
     Position mypos;
     owner->GetPosition(&mypos);
-    bool isInLOS = VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(owner->GetMapId(), mypos.m_positionX, mypos.m_positionY, mypos.m_positionZ + 5.0f,x, y, z + 5.0f);
+
+    // For Dalaran Sewers
+    if (owner->GetMapId() == 617 && mypos.m_positionZ >= 6.5f && z < 7.0f)
+        return;
+
+    bool isInLOS = VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(owner->GetMapId(), mypos.m_positionX, mypos.m_positionY, mypos.m_positionZ + 0.5f,x, y, z + 0.5f);
     if (!isInLOS)
     {
         i_nextCheckTime.Reset(200);
