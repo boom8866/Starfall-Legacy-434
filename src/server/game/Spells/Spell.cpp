@@ -1261,6 +1261,11 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                     maxSize = 3;
                     power = POWER_MANA;
                 }
+                else if (m_spellInfo->Id == 81751) // Atonement
+                {
+                   maxSize = 1;
+                   power = POWER_HEALTH;
+                }
                 else
                     break;
 
@@ -8166,10 +8171,6 @@ void Spell::TriggerGlobalCooldown()
         else if (gcd > MAX_GCD)
             gcd = MAX_GCD;
     }
-
-    // Just in case...
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        gcd += 10;
 
     // Only players or controlled units have global cooldown
     if (m_caster->GetCharmInfo())
