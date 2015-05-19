@@ -8139,7 +8139,7 @@ void Spell::TriggerGlobalCooldown()
 
     // Items
     if (!gcd && isItemCast)
-        gcd = 500;
+        gcd = MIN_GCD;
 
     if (!gcd)
         return;
@@ -8167,7 +8167,7 @@ void Spell::TriggerGlobalCooldown()
             gcd = MAX_GCD;
     }
 
-    // We have to add player latency to avoid exploits with GCD using macros
+    // Serverdiff base
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         gcd += 50;
 
