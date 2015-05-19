@@ -2490,6 +2490,38 @@ void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool ext
             AddPct(damageInfo.damage, mod);
         }
 
+        // For rogues only (Vendetta and Bandit's Guile)
+        if (getClass() == CLASS_ROGUE && (attType == BASE_ATTACK || attType == OFF_ATTACK))
+        {
+            if (IsInWorld())
+            {
+                // Vendetta
+                if (AuraEffect* vendetta = victim->GetAuraEffect(79140, EFFECT_0, GetGUID()))
+                {
+                    uint32 amount = vendetta->GetAmount();
+                    AddPct(damageInfo.damage, amount);
+                }
+                // Bandit's Guile - Deep Insight
+                if (AuraEffect* deepInsight = GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2646, EFFECT_0))
+                {
+                    uint32 amount = deepInsight->GetAmount();
+                    AddPct(damageInfo.damage, amount);
+                }
+                // Bandit's Guile - Moderate Insight
+                if (AuraEffect* moderateInsight = GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2748, EFFECT_0))
+                {
+                    uint32 amount = moderateInsight->GetAmount();
+                    AddPct(damageInfo.damage, amount);
+                }
+                // Bandit's Guile - Shallow Insight
+                if (AuraEffect* shallowInsight = GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2745, EFFECT_0))
+                {
+                    uint32 amount = shallowInsight->GetAmount();
+                    AddPct(damageInfo.damage, amount);
+                }
+            }
+        }
+
         DealDamageMods(victim, damageInfo.damage, &damageInfo.absorb);
         SendAttackStateUpdate(&damageInfo);
 
@@ -3150,7 +3182,11 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
                 victim->RewardRage(40,true);
             else if(victim->HasAura(12725))
                 victim->RewardRage(60,true);
-            return SPELL_MISS_REFLECT;
+
+            if (!spell->CheckTargetCreatureType(this))
+                return SPELL_MISS_IMMUNE;
+            else
+                return SPELL_MISS_REFLECT;
         }
     }
 
@@ -4588,19 +4624,40 @@ void Unit::RemoveAllAurasExceptType(AuraType type)
     for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
     {
         Aura const* aura = iter->second->GetBase();
-        if (!aura->GetSpellInfo()->HasAura(type))
-            _UnapplyAura(iter, AURA_REMOVE_BY_DEFAULT);
-        else
+        if (aura->GetSpellInfo()->HasAura(type))
             ++iter;
+        else
+            _UnapplyAura(iter, AURA_REMOVE_BY_DEFAULT);
     }
 
     for (AuraMap::iterator iter = m_ownedAuras.begin(); iter != m_ownedAuras.end();)
     {
         Aura* aura = iter->second;
-        if (!aura->GetSpellInfo()->HasAura(type))
-            RemoveOwnedAura(iter, AURA_REMOVE_BY_DEFAULT);
-        else
+        if (aura->GetSpellInfo()->HasAura(type))
             ++iter;
+        else
+            RemoveOwnedAura(iter, AURA_REMOVE_BY_DEFAULT);
+    }
+}
+
+void Unit::RemoveAllAurasExceptType(AuraType type1, AuraType type2, AuraType type3)
+{
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    {
+        Aura const* aura = iter->second->GetBase();
+        if (aura->GetSpellInfo()->HasAura(type1) || aura->GetSpellInfo()->HasAura(type2) || aura->GetSpellInfo()->HasAura(type3))
+            ++iter;
+        else
+            _UnapplyAura(iter, AURA_REMOVE_BY_DEFAULT);
+    }
+
+    for (AuraMap::iterator iter = m_ownedAuras.begin(); iter != m_ownedAuras.end();)
+    {
+        Aura* aura = iter->second;
+        if (aura->GetSpellInfo()->HasAura(type1) || aura->GetSpellInfo()->HasAura(type2) || aura->GetSpellInfo()->HasAura(type3))
+            ++iter;
+        else
+            RemoveOwnedAura(iter, AURA_REMOVE_BY_DEFAULT);
     }
 }
 
@@ -6956,7 +7013,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (effIndex != 0)
                     return false;
 
-                if (procSpell && (procSpell->Id == 20187 || procSpell->Id == 24275 || procSpell->Id == 85126))
+                if (procSpell && (procSpell->Id == 20187 || procSpell->Id == 24275 || procSpell->Id == 85126 || procSpell->Id == 101423 || procSpell->Id == 20424 || procSpell->Id == 53385))
                     return false;
 
                 if (HasAura(85126))
@@ -7303,6 +7360,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     // Attack thrice
                     for (uint32 i = 0; i < 3; ++i)
                         CastCustomSpell(victim, triggered_spell_id, &basepoints0, NULL, NULL, true, castItem, triggeredByAura);
+
+                    // Primal Wisdom
+                    if (player->HasAura(51522) && roll_chance_i(40))
+                        player->CastSpell(player, 63375, true);
 
                     return true;
                 }
@@ -9645,7 +9706,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 85126:
         {
             // Procs only from Seal of Righteousness, Seal of Truth and Seal of Justice
-            if (!procSpell || (!(procSpell->Id == 25742 || procSpell->Id == 101423 || procSpell->Id == 42463 || procSpell->Id == 20170)))
+            if (!procSpell || (!(procSpell->Id == 25742 || procSpell->Id == 42463 || procSpell->Id == 20170 || procSpell->Id == 101423)))
                 return false;
             break;
         }
@@ -15109,6 +15170,7 @@ DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)
         // If last spell was casted more than 15 seconds ago - reset the count.
         if (i->stack == 0 && getMSTimeDiff(i->hitTime, getMSTime()) > 15000)
         {
+            i->spellIdList.clear();
             i->hitCount = DIMINISHING_LEVEL_1;
             return DIMINISHING_LEVEL_1;
         }
@@ -15119,7 +15181,7 @@ DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)
     return DIMINISHING_LEVEL_1;
 }
 
-void Unit::IncrDiminishing(DiminishingGroup group)
+void Unit::IncrDiminishing(DiminishingGroup group, uint32 spellId)
 {
     // Checking for existing in the table
     for (Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
@@ -15127,13 +15189,37 @@ void Unit::IncrDiminishing(DiminishingGroup group)
         if (i->DRGroup != group)
             continue;
         if (int32(i->hitCount) < GetDiminishingReturnsMaxLevel(group))
+        {
             i->hitCount += 1;
+
+            bool canPush = true;
+            for (DiminishingSpellsData::iterator j = i->spellIdList.begin(); j != i->spellIdList.end(); ++j)
+            {
+                if((*j).spellId == spellId)
+                {
+                    canPush = false;
+
+                    // Updates last hit time without pushing the item into the list
+                    (*j).lastHitTime = getMSTime();
+                }
+            }
+
+            if(canPush)
+            {
+                DiminishingReturnSpellData DRSpellData(getMSTime(), spellId);
+                i->spellIdList.push_back(DRSpellData);
+            }
+        }
         return;
     }
     m_Diminishing.push_back(DiminishingReturn(group, getMSTime(), DIMINISHING_LEVEL_2));
+
+    // The DR is just pushed. I'm sure this specific DR will no longer be pushed this way. No "canPush" check needed
+    DiminishingReturnSpellData DRSpellData(getMSTime(), spellId);
+    m_Diminishing.back().spellIdList.push_back(DRSpellData);
 }
 
-float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, Unit* caster, DiminishingLevels Level, int32 limitduration)
+float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, Unit* caster, DiminishingLevels Level, int32 limitduration, SpellInfo const* spellInfo)
 {
     if (duration == -1 || group == DIMINISHING_NONE)
         return 1.0f;
@@ -15186,6 +15272,66 @@ float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, 
             case DIMINISHING_LEVEL_3: mod = 0.25f; break;
             case DIMINISHING_LEVEL_IMMUNE: mod = 0.0f; break;
             default: break;
+        }
+
+        // Check this because it's useless add duration reduction when immune
+        if (diminish != DIMINISHING_LEVEL_IMMUNE)
+        {
+            uint32 toMatchId1 = 0, toMatchId2 = 0;
+
+            // Handles mixed diminishing by spell not by group
+            switch (spellInfo->Id)
+            {
+                // Shattered Barrier
+                case 55080:
+                case 83073:
+                    // Shattered Barrier shares diminishing with Improved Cone of Cold freeze
+                    toMatchId1 = 83301;
+                    toMatchId2 = 83302;
+                    break;
+                    // Improved Cone of Cold freeze
+                case 83301:
+                case 83302:
+                    // Improved Cone of Cold freeze shares diminishing with Shattered Barrier
+                    toMatchId1 = 55080;
+                    toMatchId2 = 83073;
+                    break;
+                    // Deep Freeze & Ring of Frost
+                case 44572:
+                    toMatchId1 = 82691;
+                    break;
+                case 82691:
+                    toMatchId1 = 44572;
+                    break;
+            }
+
+            if (toMatchId1)
+            {
+                for (Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
+                {
+                    for (DiminishingSpellsData::iterator j = i->spellIdList.begin(); j != i->spellIdList.end(); ++j)
+                    {
+                        DiminishingReturnSpellData DRSpellData = (*j);
+
+                        // Prevent application of lower DR than its own
+                        if ((DRSpellData.spellId == toMatchId1 || DRSpellData.spellId == toMatchId2) && diminish < (int32)i->hitCount)
+                        {
+                            // MS diff check to prevent expired DR calculation
+                            if (getMSTimeDiff(DRSpellData.lastHitTime, getMSTime()) < 15000)
+                            {
+                                switch (i->hitCount)
+                                {
+                                    case DIMINISHING_LEVEL_1: break;
+                                    case DIMINISHING_LEVEL_2: mod = 0.5f; break;
+                                    case DIMINISHING_LEVEL_3: mod = 0.25f; break;
+                                    case DIMINISHING_LEVEL_IMMUNE: mod = 0.0f; break;
+                                    default: break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -18086,18 +18232,7 @@ void Unit::SetFeared(bool apply)
         if (!caster)
             caster = getAttackerForHelper();
 
-        // Glyphs: Psychic Scream, Fear and Intimidating Shout (Ignore fleeing movements)
-        if (caster)
-        {
-            if (!caster->HasAura(55676) && !caster->HasAura(56244) && !caster->HasAura(63327))
-                GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);
-            else
-            {
-                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-                AddUnitState(UNIT_STATE_FLEEING);
-                ClearUnitState(UNIT_STATE_FLEEING_MOVE);
-            }
-        }
+        GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);
     }
     else
     {
@@ -18107,15 +18242,6 @@ void Unit::SetFeared(bool apply)
                 GetMotionMaster()->MovementExpired();
             if (getVictim())
                 SetTarget(getVictim()->GetGUID());
-        }
-        if (!HasAuraType(SPELL_AURA_MOD_FEAR))
-        {
-            if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING))
-                RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-            if (HasUnitState(UNIT_STATE_FLEEING))
-                ClearUnitState(UNIT_STATE_FLEEING);
-            if (HasUnitState(UNIT_STATE_FLEEING_MOVE))
-                ClearUnitState(UNIT_STATE_FLEEING_MOVE);
         }
     }
 

@@ -458,7 +458,8 @@ class spell_warr_execute : public SpellScriptLoader
                         caster->SetPower(POWER_RAGE, uint32(newRage));
 
                         /// Formula taken from the DBC: "${10+$AP*0.437*$m1/100}"
-                        int32 baseDamage = int32(10 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.437f * GetEffectValue() / 100.0f);
+                        int32 baseDamage = int32(57 + (caster->getLevel() * 0.67) * 0.30);
+                        baseDamage += int32(10 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.437f * GetEffectValue() / 100.0f);
                         /// Formula taken from the DBC: "${$ap*0.874*$m1/100-1} = 20 rage"
                         int32 moreDamage = int32(rageUsed * (caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.874f * GetEffectValue() / 100.0f - 1) / 200);
                         SetHitDamage(baseDamage + moreDamage);
@@ -468,6 +469,25 @@ class spell_warr_execute : public SpellScriptLoader
                             SetHitDamage(GetHitDamage() + (GetHitDamage() * 0.10f));
 
                         uint32 finalDamage = GetHitDamage();
+
+                        // Lambs to the Slaughter (Rank 3)
+                        if (Aura* slaughter = caster->GetAura(84586, caster->GetGUID()))
+                        {
+                            uint32 stackAmount = slaughter->GetStackAmount();
+                            AddPct(finalDamage, 10 * stackAmount);
+                        }
+                        // Lambs to the Slaughter (Rank 2)
+                        if (Aura* slaughter = caster->GetAura(84585, caster->GetGUID()))
+                        {
+                            uint32 stackAmount = slaughter->GetStackAmount();
+                            AddPct(finalDamage, 10 * stackAmount);
+                        }
+                        // Lambs to the Slaughter (Rank 1)
+                        if (Aura* slaughter = caster->GetAura(84584, caster->GetGUID()))
+                        {
+                            uint32 stackAmount = slaughter->GetStackAmount();
+                            AddPct(finalDamage, 10 * stackAmount);
+                        }
 
                         // Calculate also damage reductions
                         Unit::AuraEffectList const& mDamageTakenPct = GetHitUnit()->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);

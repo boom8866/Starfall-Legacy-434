@@ -77,6 +77,8 @@ enum PaladinSpells
     SPELL_PALADIN_RIGHTEOUS_DEFENSE_TAUNT        = 31790,
 
     SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS          = 25742,
+    SPELL_PALADIN_SEALS_OF_COMMAND               = 85126,
+    SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS_TRIG     = 101423,
 
     SPELL_PALADIN_AURA_MASTERY                   = 19891,
 
@@ -103,7 +105,7 @@ class spell_pal_ardent_defender : public SpellScriptLoader
 
             uint32 absorbPct, healPct;
 
-            enum
+            enum spellId
             {
                 PAL_SPELL_ARDENT_DEFENDER_HEAL = 66235,
             };
@@ -343,6 +345,13 @@ class spell_pal_divine_storm : public SpellScriptLoader
                 }
             }
 
+            void HandleSealsOfCommand()
+            {
+                if (Unit* caster = GetCaster())
+                    if (caster->HasAura(SPELL_PALADIN_SEALS_OF_COMMAND))
+                        caster->CastSpell(caster, SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS_TRIG, true);
+            }
+
             void HandleEnergize()
             {
                 GetCaster()->EnergizeBySpell(GetCaster(), SPELL_PALADIN_DIVINE_STORM_DUMMY, 1, POWER_HOLY_POWER);
@@ -354,6 +363,7 @@ class spell_pal_divine_storm : public SpellScriptLoader
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_divine_storm_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
                 OnEffectHitTarget += SpellEffectFn(spell_pal_divine_storm_SpellScript::CalculateDamage, EFFECT_2, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
                 AfterHit += SpellHitFn(spell_pal_divine_storm_SpellScript::TriggerHeal);
+                AfterCast += SpellCastFn(spell_pal_divine_storm_SpellScript::HandleSealsOfCommand);
             }
 
         private:

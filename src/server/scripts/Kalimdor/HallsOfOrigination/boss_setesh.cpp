@@ -448,6 +448,10 @@ public:
 
         EventMap events;
 
+        void EnterEvadeMode()
+        {
+        }
+
         void IsSummonedBy(Unit* /*summoner*/)
         {
             DoCastAOE(SPELL_SEED_OF_CHAOS_VISUAL);
@@ -486,6 +490,7 @@ public:
                         }
                         else
                             events.ScheduleEvent(EVENT_CHECK_PLAYERS, 500);
+                        break;
                     default:
                         break;
                 }

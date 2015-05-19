@@ -98,29 +98,29 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             if (spellproto->SpellFamilyFlags[1] & 0x80000000)
                 return DIMINISHING_ROOT;
             // Shattered Barrier
-            else if (spellproto->SpellVisual[0] == 12297)
+            else if (spellproto->Id == 55080 || spellproto->Id == 83073)
                 return DIMINISHING_ROOT;
+            // Slow - limit duration to 8s in PvP
+            else if (spellproto->Id == 31589)
+                return DIMINISHING_LIMITONLY;
             // Frost Nova / Freeze (Water Elemental)
-            else if (spellproto->SpellIconID == 193)
+            else if (spellproto->Id == 122 || spellproto->Id == 33395)
                 return DIMINISHING_CONTROLLED_ROOT;
             // Dragon's Breath
-            else if (spellproto->SpellFamilyFlags[0] & 0x800000)
+            else if (spellproto->Id == 31661)
                 return DIMINISHING_DRAGONS_BREATH;
-            // Polymorph
+            // Polymorph / Deep Freeze
             else if (spellproto->Id == 118 || spellproto->Id == 28271 || spellproto->Id == 28272
                 || spellproto->Id == 59634 || spellproto->Id == 61025 || spellproto->Id == 61305
                 || spellproto->Id == 61721 || spellproto->Id == 61780 || spellproto->Id == 71379
-                || spellproto->Id == 82691)
+                || spellproto->Id == 82691 || spellproto->Id == 44572)
                 return DIMINISHING_CONTROLLED_STUN;
-            // Dragon's Breath
-            else if (spellproto->Id == 31661)
-                return DIMINISHING_LIMITONLY;
             // Improved Polymorph
             else if (spellproto->Id == 83046 || spellproto->Id == 83047)
                 return DIMINISHING_NONE;
-            // Deep Freeze and Ring of Frost
-            else if (spellproto->Id == 44572 || spellproto->Id == 82691)
-                return DIMINISHING_SPECIAL;
+            // Ring of Frost
+            else if (spellproto->Id == 82691)
+                return DIMINISHING_DISORIENT;
             break;
         }
         case SPELLFAMILY_WARRIOR:
@@ -4031,6 +4031,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 66599: // Rolling with my Homies: Summon Gobber
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
+            case 8122:  // Psychic Scream
+            case 5782:  // Fear
+                spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_NONE;
+                break;
             case 74070: // Volcano: Fiery Boulder
             case 74072:
             case 74076:
@@ -4109,6 +4113,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 77347: // Aqua Bomb
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(38);
+                break;
+            // * Earthrager Ptah
+            case 94974: // Earth Spike
+                spellInfo->AttributesEx3 &= ~SPELL_ATTR3_ONLY_TARGET_PLAYERS;
                 break;
             // * Anraphet
             case 75609: // Crumbling Ruin
@@ -4487,6 +4495,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->SpellFamilyName = SPELLFAMILY_ROGUE;
                 break;
             case 79140: // Vendetta
+            case 22959: // Critical Mass
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
             case 2818:  // Deadly Poison

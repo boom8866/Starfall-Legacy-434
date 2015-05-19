@@ -730,7 +730,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
             m_tickNumber = 0;
         }
 
-        if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY) || m_spellInfo->Id == 64843 || m_spellInfo->Id == 64901)
+        if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY) || m_spellInfo->Id == 64843 || m_spellInfo->Id == 64901 || m_spellInfo->Id == 15407)
             m_periodicTimer += m_amplitude;
     }
 }
@@ -1627,9 +1627,6 @@ void AuraEffect::HandleModInvisibility(AuraApplication const* aurApp, uint8 mode
         }
 
         target->m_invisibility.AddValue(type, -GetAmount());
-
-        // Send update to nearest objects to avoid visibility problems
-        target->SendMovementFlagUpdate(false);
     }
 
     // call functions which may have additional effects after chainging state of unit
@@ -1698,9 +1695,6 @@ void AuraEffect::HandleModStealth(AuraApplication const* aurApp, uint8 mode, boo
         // Overkill
         if (Aura* overkill = target->GetAura(58427, target->GetGUID()))
             overkill->SetDuration(20000); // 20 seconds
-
-        // Send update to nearest objects to avoid visibility problems
-        target->SendMovementFlagUpdate(false);
     }
 
     // call functions which may have additional effects after chainging state of unit
@@ -7475,7 +7469,7 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         // Wild Growth = amount + (6 - 2*doneTicks) * ticks* amount / 100
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellIconID == 2864)
         {
-            int32 addition = int32(float(damage * GetTotalTicks()) * ((6-float(2*(GetTickNumber()-1)))/100));
+            uint32 addition = uint32(float(damage * GetTotalTicks()) * ((6 - float(2 * (GetTickNumber() - 1))) / 100));
 
             // Item - Druid T10 Restoration 2P Bonus
             if (AuraEffect* aurEff = caster->GetAuraEffect(70658, 0))

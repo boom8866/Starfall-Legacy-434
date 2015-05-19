@@ -2712,7 +2712,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         DiminishingReturnsType type = GetDiminishingReturnsGroupType(m_diminishGroup);
         // Increase Diminishing on unit, current informations for actually casts will use values above
         if ((type == DRTYPE_PLAYER && unit->GetCharmerOrOwnerPlayerOrPlayerItself()) || type == DRTYPE_ALL)
-            unit->IncrDiminishing(m_diminishGroup);
+            unit->IncrDiminishing(m_diminishGroup, m_spellInfo->Id);
     }
 
     uint8 aura_effmask = 0;
@@ -2760,7 +2760,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                 // Now Reduce spell duration using data received at spell hit
                 int32 duration = m_spellAura->GetMaxDuration();
                 int32 limitduration = GetDiminishingReturnsLimitDuration(m_diminishGroup, aurSpellInfo);
-                float diminishMod = unit->ApplyDiminishingToDuration(m_diminishGroup, duration, m_originalCaster, m_diminishLevel, limitduration);
+                float diminishMod = unit->ApplyDiminishingToDuration(m_diminishGroup, duration, m_originalCaster, m_diminishLevel, limitduration, m_spellInfo);
 
                 // unit is immune to aura if it was diminished to 0 duration
                 if (diminishMod == 0.0f)
@@ -2783,7 +2783,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
 
                     duration = m_originalCaster->ModSpellDuration(aurSpellInfo, unit, duration, positive, effectMask);
 
-                    if (duration > 0 && (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION) && m_spellInfo->Id != 64843 && m_spellInfo->Id != 64901)
+                    if (duration > 0 && (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION) && m_spellInfo->Id != 64843 && m_spellInfo->Id != 64901 && m_spellInfo->Id != 15407)
                     {
                         int32 origDuration = duration;
                         duration = 0;
@@ -3453,7 +3453,7 @@ void Spell::handle_immediate()
             if (Player* modOwner = m_caster->GetSpellModOwner())
                 modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
             // Apply haste mods
-            if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION && m_spellInfo->Id != 64843 && m_spellInfo->Id != 64901)
+            if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION && m_spellInfo->Id != 64843 && m_spellInfo->Id != 64901 && m_spellInfo->Id != 15407)
                 m_caster->ModSpellCastTime(m_spellInfo, duration, this);
 
             m_spellState = SPELL_STATE_CASTING;
@@ -5798,6 +5798,19 @@ SpellCastResult Spell::CheckCast(bool strict)
                         !m_caster->ToPlayer()->CanUseBattlegroundObject(m_targets.GetGOTarget()))
                         return SPELL_FAILED_TRY_AGAIN;
 
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (m_targets.GetGOTarget() && m_targets.GetGOTarget()->GetGOInfo()->type != GAMEOBJECT_TYPE_TRAP && m_caster->ToPlayer()->InBattleground())
+                    {
+                        if (m_caster->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                            m_caster->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                        if (m_caster->HasAuraType(SPELL_AURA_MOD_INVISIBILITY))
+                            m_caster->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
+                        if (m_caster->HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE))
+                            m_caster->RemoveAurasByType(SPELL_AURA_MOD_CAMOUFLAGE);
+                    }
+                }
+
                 // get the lock entry
                 uint32 lockId = 0;
                 if (GameObject* go = m_targets.GetGOTarget())
@@ -6146,6 +6159,25 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 break;
             }
+            default:
+                break;
+        }
+    }
+
+    if (m_spellInfo)
+    {
+        switch (m_spellInfo->Id)
+        {
+            case 8690:  // Hearthstone
+            case 2641:  // Dismiss Pet
+            case 883:   // Call Pet 1-5
+            case 83242:
+            case 83243:
+            case 83244:
+            case 83245:
+                if (m_caster->HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE))
+                    m_caster->RemoveAurasByType(SPELL_AURA_MOD_CAMOUFLAGE);
+                break;
             default:
                 break;
         }
@@ -8103,6 +8135,15 @@ bool Spell::HasGlobalCooldown() const
 void Spell::TriggerGlobalCooldown()
 {
     int32 gcd = m_spellInfo->StartRecoveryTime;
+    bool isItemCast = false;
+
+    // Items
+    if (!gcd && !m_spellInfo->RecoveryTime && !m_spellInfo->CategoryRecoveryTime && !m_spellInfo->StartRecoveryCategory)
+    {
+        gcd = MAX_GCD;
+        isItemCast = true;
+    }
+
     if (!gcd)
         return;
 
@@ -8122,18 +8163,32 @@ void Spell::TriggerGlobalCooldown()
             m_caster->ToPlayer()->ApplySpellMod(m_spellInfo->Id, SPELLMOD_GLOBAL_COOLDOWN, gcd, this);
 
         // Apply haste rating
-        gcd = int32(float(gcd) * m_caster->GetHasteMod(CTYPE_CAST) * 0.50f);
+        gcd = int32(float(gcd) * m_caster->GetHasteMod(CTYPE_CAST));
         if (gcd < MIN_GCD)
             gcd = MIN_GCD;
         else if (gcd > MAX_GCD)
             gcd = MAX_GCD;
     }
 
+    // We have to add player latency to avoid exploits with GCD using macros
+    if (Player* player = m_caster->ToPlayer())
+        if (player->GetSession() && !isItemCast)
+            gcd += player->GetSession()->GetLatency();
+
     // Only players or controlled units have global cooldown
     if (m_caster->GetCharmInfo())
         m_caster->GetCharmInfo()->GetGlobalCooldownMgr().AddGlobalCooldown(m_spellInfo, gcd);
     else if (m_caster->GetTypeId() == TYPEID_PLAYER)
         m_caster->ToPlayer()->GetGlobalCooldownMgr().AddGlobalCooldown(m_spellInfo, gcd);
+
+    // Crusader Strike + Divine Storm for unknown reasons sometime can be casted in the same time, so let's add a fake cooldown
+    if (m_caster->ToPlayer())
+    {
+        if (m_spellInfo->Id == 35395)
+            m_caster->ToPlayer()->AddSpellCooldown(53385, 0, time(NULL) + 4);
+        if (m_spellInfo->Id == 53385)
+            m_caster->ToPlayer()->AddSpellCooldown(35395, 0, time(NULL) + 4);
+    }
 }
 
 void Spell::CancelGlobalCooldown()

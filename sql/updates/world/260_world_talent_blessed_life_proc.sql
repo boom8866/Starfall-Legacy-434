@@ -1,0 +1,1 @@
+UPDATE `spell_proc_event` SET `procFlags`=8872 WHERE `entry` IN (31829, 31828);

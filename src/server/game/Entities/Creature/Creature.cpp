@@ -1872,12 +1872,23 @@ void Creature::Respawn(bool force)
 
         //Re-initialize reactstate that could be altered by movementgenerators
         InitializeReactState();
+
+        // Reset original flags
+        if (CreatureTemplate const* cinfo = GetCreatureTemplate())
+        {
+            SetFlag(UNIT_NPC_FLAGS, cinfo->npcflag);
+            SetFlag(UNIT_FIELD_FLAGS, cinfo->unit_flags);
+            LoadCreaturesAddon();
+        }
     }
 
-    if (GetAI() && GetAIName() == "SmartAI")
-        AI()->EnterEvadeMode();
-    else
-        GetMotionMaster()->MoveTargetedHome();
+    if (GetAI() && !IsInEvadeMode())
+    {
+        if (GetAIName() == "SmartAI")
+            AI()->EnterEvadeMode();
+        else
+            GetMotionMaster()->MoveTargetedHome();
+    }
 
     if (CreatureTemplate const* cinfo = GetCreatureTemplate())
         HandleInhabitType(cinfo->InhabitType);
@@ -2212,6 +2223,10 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
 
     // skip fighting creature
     if (isInCombat())
+        return false;
+
+    // only creature not moving home
+    if (GetMotionMaster()->GetCurrentMovementGeneratorType() == HOME_MOTION_TYPE)
         return false;
 
     // only free creature
