@@ -8167,9 +8167,9 @@ void Spell::TriggerGlobalCooldown()
             gcd = MAX_GCD;
     }
 
-    // Serverdiff base
+    // Just in case...
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        gcd += 50;
+        gcd += 10;
 
     // Only players or controlled units have global cooldown
     if (m_caster->GetCharmInfo())
@@ -8180,10 +8180,29 @@ void Spell::TriggerGlobalCooldown()
     // Crusader Strike + Divine Storm for unknown reasons sometime can be casted in the same time, so let's add a fake cooldown
     if (m_caster->ToPlayer())
     {
-        if (m_spellInfo->Id == 35395)
-            m_caster->ToPlayer()->AddSpellCooldown(53385, 0, time(NULL) + 4);
-        if (m_spellInfo->Id == 53385)
-            m_caster->ToPlayer()->AddSpellCooldown(35395, 0, time(NULL) + 4);
+        switch (m_spellInfo->Id)
+        {
+            case 35395: // Crusader Strike
+                m_caster->ToPlayer()->AddSpellCooldown(53385, 0, time(NULL) + 4);
+                break;
+            case 53385: // Divine Storm
+                m_caster->ToPlayer()->AddSpellCooldown(35395, 0, time(NULL) + 4);
+                break;
+            case 8056:  // Frost Shock
+                m_caster->ToPlayer()->AddSpellCooldown(8050, 0, time(NULL) + 3);
+                m_caster->ToPlayer()->AddSpellCooldown(8042, 0, time(NULL) + 3);
+                break;
+            case 8050:  // Flame Shock
+                m_caster->ToPlayer()->AddSpellCooldown(8056, 0, time(NULL) + 3);
+                m_caster->ToPlayer()->AddSpellCooldown(8042, 0, time(NULL) + 3);
+                break;
+            case 8042:  // Earth Shock
+                m_caster->ToPlayer()->AddSpellCooldown(8056, 0, time(NULL) + 3);
+                m_caster->ToPlayer()->AddSpellCooldown(8050, 0, time(NULL) + 3);
+                break;
+            default:
+                break;
+        }
     }
 }
 
