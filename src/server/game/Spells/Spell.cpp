@@ -8170,11 +8170,6 @@ void Spell::TriggerGlobalCooldown()
             gcd = MAX_GCD;
     }
 
-    // We have to add player latency to avoid exploits with GCD using macros
-    if (Player* player = m_caster->ToPlayer())
-        if (player->GetSession() && !isItemCast)
-            gcd += player->GetSession()->GetLatency();
-
     // Only players or controlled units have global cooldown
     if (m_caster->GetCharmInfo())
         m_caster->GetCharmInfo()->GetGlobalCooldownMgr().AddGlobalCooldown(m_spellInfo, gcd);
