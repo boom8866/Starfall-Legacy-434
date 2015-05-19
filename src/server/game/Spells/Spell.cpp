@@ -8135,14 +8135,11 @@ bool Spell::HasGlobalCooldown() const
 void Spell::TriggerGlobalCooldown()
 {
     int32 gcd = m_spellInfo->StartRecoveryTime;
-    bool isItemCast = false;
+    bool isItemCast = m_CastItem ? true : false;
 
     // Items
-    if (!gcd && !m_spellInfo->RecoveryTime && !m_spellInfo->CategoryRecoveryTime && !m_spellInfo->StartRecoveryCategory && m_spellInfo->Id != 6603 && m_spellInfo->Id != 75 && m_spellInfo->Id != 53254)
-    {
+    if (!gcd && isItemCast)
         gcd = 500;
-        isItemCast = true;
-    }
 
     if (!gcd)
         return;
@@ -8152,11 +8149,6 @@ void Spell::TriggerGlobalCooldown()
         if (m_caster->ToPlayer()->GetCommandStatus(CHEAT_COOLDOWN))
             return;
     }
-
-    // We have to add player latency to avoid exploits with GCD using macros
-    if (Player* player = m_caster->ToPlayer())
-        if (player->GetSession() && !isItemCast)
-            gcd += uint32(player->GetSession()->GetLatency() / 2);
 
     // Global cooldown can't leave range 1..1.5 secs
     // There are some spells (mostly not casted directly by player) that have < 1 sec and > 1.5 sec global cooldowns
@@ -8174,6 +8166,10 @@ void Spell::TriggerGlobalCooldown()
         else if (gcd > MAX_GCD)
             gcd = MAX_GCD;
     }
+
+    // We have to add player latency to avoid exploits with GCD using macros
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        gcd += 50;
 
     // Only players or controlled units have global cooldown
     if (m_caster->GetCharmInfo())
