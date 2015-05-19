@@ -8138,7 +8138,7 @@ void Spell::TriggerGlobalCooldown()
     bool isItemCast = false;
 
     // Items
-    if (!gcd && !m_spellInfo->RecoveryTime && !m_spellInfo->CategoryRecoveryTime && !m_spellInfo->StartRecoveryCategory)
+    if (!gcd && !m_spellInfo->RecoveryTime && !m_spellInfo->CategoryRecoveryTime && !m_spellInfo->StartRecoveryCategory && m_spellInfo->Id != 6603 && m_spellInfo->Id != 75 && m_spellInfo->Id != 53254)
     {
         gcd = MAX_GCD;
         isItemCast = true;
