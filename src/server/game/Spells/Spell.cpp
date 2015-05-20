@@ -8158,14 +8158,19 @@ void Spell::TriggerGlobalCooldown()
     // Global cooldown can't leave range 1..1.5 secs
     // There are some spells (mostly not casted directly by player) that have < 1 sec and > 1.5 sec global cooldowns
     // but as tests show are not affected by any spell mods.
-    if (m_spellInfo->StartRecoveryTime >= MIN_GCD && m_spellInfo->StartRecoveryTime <= MAX_GCD)
+    if (m_spellInfo->StartRecoveryTime >= MIN_GCD && m_spellInfo->StartRecoveryTime <= MAX_GCD && !isItemCast)
     {
         // gcd modifier auras are applied only to own spells and only players have such mods
         if (m_caster->GetTypeId() == TYPEID_PLAYER)
             m_caster->ToPlayer()->ApplySpellMod(m_spellInfo->Id, SPELLMOD_GLOBAL_COOLDOWN, gcd, this);
 
         // Apply haste rating
-        gcd = int32(float(gcd) * m_caster->GetHasteMod(CTYPE_CAST));
+        gcd = int32(float(gcd) * (m_caster->GetHasteMod(CTYPE_CAST) * 0.50f));
+
+        if (Player* player = m_caster->ToPlayer())
+            if (WorldSession* session = player->GetSession())
+                gcd -= session->GetLatency();
+
         if (gcd < MIN_GCD)
             gcd = MIN_GCD;
         else if (gcd > MAX_GCD)
