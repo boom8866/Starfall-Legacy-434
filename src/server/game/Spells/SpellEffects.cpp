@@ -2691,6 +2691,13 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->CastSpell(m_caster, 90507, true);
                     break;
                 }
+                case 59052: // Freezing Fog
+                {
+                    if (Player* player = m_caster->ToPlayer())
+                        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(45477))
+                            player->GetGlobalCooldownMgr().AddGlobalCooldown(spellInfo, 1000);
+                    break;
+                }
             }
             break;
         }
