@@ -1272,7 +1272,8 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                 // Remove targets outside caster's raid
                 for (std::list<Unit*>::iterator itr = unitTargets.begin(); itr != unitTargets.end();)
                 {
-                    if (!(*itr)->IsInRaidWith(m_caster))
+                    // Exception for Atonement!
+                    if (!(*itr)->IsInRaidWith(m_caster) || (m_spellInfo->Id == 81751 && (m_caster->getAttackerForHelper() && !m_caster->getAttackerForHelper()->IsWithinDistInMap((*itr), 20.0f) && (*itr) != m_caster)))
                         itr = unitTargets.erase(itr);
                     else
                         ++itr;

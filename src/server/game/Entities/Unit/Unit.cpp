@@ -6497,7 +6497,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 case 14523:
                 case 81749:
                 {
-                    basepoints0 = int32(ApplyPct(damage, triggerAmount));
+                    basepoints0 = CalculatePct(int32(damage), triggerAmount);
+                    basepoints0 -= (1 + getLevel());
+
+                    // Half on self
+                    if (this == victim)
+                        basepoints0 /= 2;
+
                     triggered_spell_id = 81751;
                     break;
                 }

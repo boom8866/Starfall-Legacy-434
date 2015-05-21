@@ -2695,7 +2695,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                 {
                     if (Player* player = m_caster->ToPlayer())
                         if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(45477))
-                            player->GetGlobalCooldownMgr().AddGlobalCooldown(spellInfo, 1000);
+                            player->GetGlobalCooldownMgr().AddGlobalCooldown(spellInfo, 500);
                     break;
                 }
             }
