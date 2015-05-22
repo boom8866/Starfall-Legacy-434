@@ -3382,6 +3382,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_CONFUSED | SPELL_ATTR5_USABLE_WHILE_FEARED | SPELL_ATTR5_USABLE_WHILE_STUNNED;
                 break;
             case 81751: // Atonement
+            case 94472: // Atonement (secondary)
             case 22482: // Blade Flurry
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
                 spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;

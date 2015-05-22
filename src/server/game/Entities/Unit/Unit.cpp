@@ -6500,11 +6500,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     basepoints0 = CalculatePct(int32(damage), triggerAmount);
                     basepoints0 -= (1 + getLevel());
 
-                    // Half on self
-                    if (this == victim)
-                        basepoints0 /= 2;
-
-                    triggered_spell_id = 81751;
+                    if (procEx & PROC_EX_CRITICAL_HIT)
+                        triggered_spell_id = 94472;
+                    else
+                        triggered_spell_id = 81751;
                     break;
                 }
                 // Vampiric Embrace
@@ -9611,6 +9610,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             return false;
             break;
         }
+        case 81749: // Atonement
+        case 14523:
+        {
+            // Special exception for Holy Fire DoT effect
+            if (procSpell && procSpell->IsPeriodicDamage() && procSpell->Id != 17140)
+                return false;
+            break;
+        }
         // Battle Trance
         case 12322:
         case 85741:
@@ -12063,6 +12070,10 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
     if ((spellProto->AttributesEx2 & SPELL_ATTR2_CANT_CRIT))
         return false;
 
+    // Atonement (secondary, 100% crit)
+    if (spellProto->Id == 94472)
+        return true;
+
     float crit_chance = 0.0f;
 
     // Hunter Pets handling
@@ -12760,10 +12771,18 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
         TakenTotal += int32(TakenAdvertisedBenefit * coeff * factorMod);
     }
 
-    AuraEffectList const& mHealingGet= GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_RECEIVED);
+    AuraEffectList const& mHealingGet = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_RECEIVED);
     for (AuraEffectList::const_iterator i = mHealingGet.begin(); i != mHealingGet.end(); ++i)
+    {
         if (caster->GetGUID() == (*i)->GetCasterGUID() && (*i)->IsAffectingSpell(spellProto))
+        {
+            // Atonement and Grace shouldn't work
+            if (((*i)->GetId() == 77613 || (*i)->GetId() == 47930) && (spellProto->Id == 81751 || spellProto->Id == 94472))
+                continue;
+
             AddPct(TakenTotalMod, (*i)->GetAmount());
+        }
+    }
 
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {

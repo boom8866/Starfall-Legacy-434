@@ -3097,7 +3097,7 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
         if (unitTarget->HasAura(48920) && (unitTarget->GetHealth() + addhealth >= unitTarget->GetMaxHealth()))
             unitTarget->RemoveAura(48920);
 
-        // Healing Rain / Holy Word: Sanctuary
+        // Healing Rain
         if (m_spellInfo->AttributesCu & SPELL_ATTR0_CU_DIMINISH_HEAL)
         {
             uint32 count = 0;
@@ -3111,6 +3111,26 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
         // Init switch for special spell procs
         switch (m_spellInfo->Id)
         {
+            case 81751: // Atonement
+            {
+                if (unitTarget == m_caster)
+                    addhealth /= 2;
+
+                // Cap at 30% of caster max health
+                if (addhealth >= (int32(m_caster->GetMaxHealth() * 0.30f)))
+                    addhealth = int32(m_caster->GetMaxHealth() * 0.30f);
+                break;
+            }
+            case 94472: // Atonement (secondary)
+            {
+                if (unitTarget == m_caster)
+                    addhealth /= 2;
+
+                // Cap at 30% of caster max health
+                if (addhealth >= (int32(m_caster->GetMaxHealth() * 0.15f)))
+                    addhealth = int32(m_caster->GetMaxHealth() * 0.15f);
+                break;
+            }
             case 61295: // Riptide
             {
                 // Only Direct Heal

@@ -1261,7 +1261,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                     maxSize = 3;
                     power = POWER_MANA;
                 }
-                else if (m_spellInfo->Id == 81751) // Atonement
+                else if (m_spellInfo->Id == 81751 || m_spellInfo->Id == 94472) // Atonement
                 {
                    maxSize = 1;
                    power = POWER_HEALTH;
@@ -1273,7 +1273,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                 for (std::list<Unit*>::iterator itr = unitTargets.begin(); itr != unitTargets.end();)
                 {
                     // Exception for Atonement!
-                    if (!(*itr)->IsInRaidWith(m_caster) || (m_spellInfo->Id == 81751 && (m_caster->getAttackerForHelper() && !m_caster->getAttackerForHelper()->IsWithinDistInMap((*itr), 20.0f) && (*itr) != m_caster)))
+                    if (!(*itr)->IsInRaidWith(m_caster) || ((m_spellInfo->Id == 81751 || m_spellInfo->Id == 94472) && (m_caster->getAttackerForHelper() && !m_caster->getAttackerForHelper()->IsWithinDistInMap((*itr), 20.0f) && (*itr) != m_caster)))
                         itr = unitTargets.erase(itr);
                     else
                         ++itr;
