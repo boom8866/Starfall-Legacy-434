@@ -8196,9 +8196,13 @@ void Spell::TriggerGlobalCooldown()
         {
             case 35395: // Crusader Strike
                 m_caster->ToPlayer()->AddSpellCooldown(53385, 0, time(NULL) + 4);
+                m_caster->ToPlayer()->AddSpellCooldown(53595, 0, time(NULL) + 3);
                 break;
             case 53385: // Divine Storm
                 m_caster->ToPlayer()->AddSpellCooldown(35395, 0, time(NULL) + 4);
+                break;
+            case 53595: // Hammer of the Righteous
+                m_caster->ToPlayer()->AddSpellCooldown(35395, 0, time(NULL) + 3);
                 break;
             case 8056:  // Frost Shock
                 m_caster->ToPlayer()->AddSpellCooldown(8050, 0, time(NULL) + 3);

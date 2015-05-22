@@ -8166,10 +8166,8 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 case 86172:
                 {
                     *handled = true;
-                    // Judgement, Exorcism, Templar's Verdict, Divine Storm, Inquisition, Holy Wrath, Hammer of Wrath
-                    if (procSpell->Id == 54158 || procSpell->Id == 879 || procSpell->Id == 85256
-                        || procSpell->Id == 53385 || procSpell->Id == 84963 || procSpell->Id == 2812
-                        || procSpell->Id == 24275)
+                    // Judgement, Exorcism, Templar's Verdict, Inquisition, Holy Wrath, Hammer of Wrath
+                    if (procSpell->Id == 54158 || procSpell->Id == 879 || procSpell->Id == 85256 || procSpell->Id == 84963 || procSpell->Id == 2812 || procSpell->Id == 24275)
                     {
                         // Selfless Healer (Effect)
                         if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 2170, 0))

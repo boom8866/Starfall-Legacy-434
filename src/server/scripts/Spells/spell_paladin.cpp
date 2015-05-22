@@ -59,6 +59,8 @@ enum PaladinSpells
     SPELL_PALADIN_DIVINE_SACRIFICE               = 64205,
 
     SPELL_PALADIN_DIVINE_PURPOSE_PROC            = 90174,
+    SPELL_PALADIN_DIVINE_PURPOSE_R1              = 85117,
+    SPELL_PALADIN_DIVINE_PURPOSE_R2              = 86172,
 
     SPELL_PALADIN_CONSECRATION_SUMMON            = 82366,
     SPELL_PALADIN_CONSECRATION_DAMAGE            = 81297,
@@ -348,8 +350,16 @@ class spell_pal_divine_storm : public SpellScriptLoader
             void HandleSealsOfCommand()
             {
                 if (Unit* caster = GetCaster())
+                {
                     if (caster->HasAura(SPELL_PALADIN_SEALS_OF_COMMAND))
                         caster->CastSpell(caster, SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS_TRIG, true);
+
+                    if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_R1) && roll_chance_i(7))
+                        caster->CastSpell(caster, SPELL_PALADIN_DIVINE_PURPOSE_PROC, true);
+
+                    if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_R2) && roll_chance_i(15))
+                        caster->CastSpell(caster, SPELL_PALADIN_DIVINE_PURPOSE_PROC, true);
+                }
             }
 
             void HandleEnergize()
