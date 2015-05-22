@@ -2918,7 +2918,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 break;
             case 73921: // Healing Rain
-            case 88686: // Holy Word Sanctuary
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_DIMINISH_HEAL;
                 break;
             case 18500: // Wing Buffet
