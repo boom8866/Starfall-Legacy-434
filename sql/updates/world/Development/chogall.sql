@@ -13,3 +13,4 @@ DELETE FROM `creature_template_addon` WHERE `entry`= 43324;
 
 UPDATE `creature_template` SET `flags_extra`=128, `ScriptName`='npc_bot_shadow_portal' WHERE `entry`=47019;
 UPDATE `creature_template` SET `flags_extra`=128, `ScriptName`='npc_bot_fire_portal' WHERE `entry`=47020;
+UPDATE `creature_template` SET `flags_extra`=128, `ScriptName`='npc_bot_blaze' WHERE `entry`=43585;

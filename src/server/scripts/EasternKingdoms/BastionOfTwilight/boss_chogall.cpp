@@ -15,10 +15,12 @@ enum Spells
     SPELL_BOSS_HITTIN_YA        = 73878,
     SPELL_CORRUPTED_BLOOD       = 93104,
     SPELL_CORRUPTED_BLOOD_BAR   = 93103,
-    SPELL_FLAMES_ORDER          = 81171,
-    SPELL_SHADOWS_ORDER         = 87575,
+    SPELL_FLAMES_ORDERS         = 81171,
+    SPELL_SHADOWS_ORDERS        = 87575,
     SPELL_ABSORB_FIRE           = 81196,
-    SPELL_CONVERSION            = 91303
+    SPELL_ABSORB_SHADOW         = 81566,
+    SPELL_CONVERSION            = 91303,
+    SPELL_BLAZE                 = 81536
 };
 
 enum Phases
@@ -30,8 +32,8 @@ enum Phases
 
 enum Events
 {
-    EVENT_FLAME_ORDERS      = 1,
-    EVENT_SHADOW_ORDERS,
+    EVENT_FLAMES_ORDERS      = 1,
+    EVENT_SHADOWS_ORDERS,
     EVENT_FURY_OF_CHOGALL,
     EVENT_SUMMON_ADHERENT,
     EVENT_FESTER_BLOOD,
@@ -105,8 +107,8 @@ public:
             me->RemoveAurasDueToSpell(SPELL_SIT_THRONE);
             DoCast(me, SPELL_CORRUPTED_BLOOD);
             events.SetPhase(PHASE_ONE);
-            events.ScheduleEvent(EVENT_FLAME_ORDERS, 5000, 0, PHASE_ONE);
-            events.ScheduleEvent(EVENT_SHADOW_ORDERS, 15000, 0, PHASE_ONE);
+            events.ScheduleEvent(EVENT_FLAMES_ORDERS, 5000, 0, PHASE_ONE);
+            events.ScheduleEvent(EVENT_SHADOWS_ORDERS, 15000, 0, PHASE_ONE);
         }
 
         void EnterEvadeMode()
@@ -116,13 +118,18 @@ public:
             instance->SetBossState(DATA_CHOGALL, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTED_BLOOD_BAR);
+            me->DespawnCreaturesInArea(NPC_BLAZE);
+            me->DespawnCreaturesInArea(NPC_FIRE_PORTAL);
+            me->DespawnCreaturesInArea(NPC_SHADOW_PORTAL);
             summons.DespawnAll();
+            events.Reset();
             _DespawnAtEvade();
         }
 
         void JustDied(Unit* /*killer*/)
         {
             _JustDied();
+            events.Reset();
             instance->SetBossState(DATA_CHOGALL, DONE);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTED_BLOOD_BAR);
@@ -167,13 +174,13 @@ public:
             {
                 switch (eventId)
                 {
-                    case EVENT_FLAME_ORDERS:
-                        DoCast(SPELL_FLAMES_ORDER);
-                        DoCast(SPELL_FO_PERIODIC);
+                    case EVENT_FLAMES_ORDERS:
+                        DoCast(SPELL_FLAMES_ORDERS);
+                        events.RescheduleEvent(EVENT_FLAMES_ORDERS, 50000, 0, PHASE_ONE);
                         break;
-                    case EVENT_SHADOW_ORDERS:
-                        DoCast(SPELL_SHADOWS_ORDER);
-                        DoCast(SPELL_SO_PERIODIC);
+                    case EVENT_SHADOWS_ORDERS:
+                        DoCast(SPELL_SHADOWS_ORDERS);
+                        events.RescheduleEvent(EVENT_SHADOWS_ORDERS, 50000, 0, PHASE_ONE);
                         break;
                     default:
                         break;
@@ -195,11 +202,10 @@ public:
 
     struct npc_bot_fire_portalAI : public ScriptedAI
     {
-
         npc_bot_fire_portalAI(Creature * creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
-            creature->CastSpell(creature, SPELL_FIRE_PORTAL_VISUAL, true);
+            DoCast(SPELL_FIRE_PORTAL_VISUAL);
         }
 
         InstanceScript* instance;
@@ -207,17 +213,13 @@ public:
 
         void JustSummoned(Creature* creature)
         {
-            creature->AI()->DoZoneInCombat();
-
             if (creature->GetEntry() == NPC_FIRE_LORD)
             {
-                creature->CastSpell(creature, SPELL_FIRE_PORTAL_VISUAL);
+                creature->CastSpell(creature, SPELL_ABSORB_FIRE, true);
                 creature->SetReactState(REACT_PASSIVE);
                 creature->SetSpeed(MOVE_WALK, 0.75f, true);
                 creature->SetSpeed(MOVE_RUN, 0.75f, true);
                 creature->SetReactState(REACT_PASSIVE);
-                if (Unit* chogall = creature->FindNearestCreature(BOSS_CHOGALL, 500.0f))
-                    creature->GetMotionMaster()->MoveChase(chogall);
             }
         }
 
@@ -237,7 +239,7 @@ public:
                     case EVENT_SUMMON_FLAME_LORD:
                     {
                         DoCast(me, SPELL_SUMMON_FLAME_LORD);
-                        me->DespawnOrUnsummon();
+                        me->DespawnOrUnsummon(5000);
                         return;
                     }
                     default:
@@ -260,11 +262,10 @@ public:
 
     struct npc_bot_shadow_portalAI : public ScriptedAI
     {
-
         npc_bot_shadow_portalAI(Creature * creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
-            creature->CastSpell(creature, SPELL_SHADOW_PORTAL_VISUAL, true);
+            DoCast(SPELL_SHADOW_PORTAL_VISUAL);
         }
 
         InstanceScript* instance;
@@ -272,16 +273,12 @@ public:
 
         void JustSummoned(Creature* creature)
         {
-            creature->AI()->DoZoneInCombat();
-
             if (creature->GetEntry() == NPC_SHADOW_LORD)
             {
-                creature->CastSpell(creature, SPELL_FIRE_PORTAL_VISUAL);
+                creature->CastSpell(creature, SPELL_ABSORB_SHADOW, true);
                 creature->SetSpeed(MOVE_WALK, 0.75f, true);
                 creature->SetSpeed(MOVE_RUN, 0.75f, true);
                 creature->SetReactState(REACT_PASSIVE);
-                if (Unit* chogall = creature->FindNearestCreature(BOSS_CHOGALL, 500.0f))
-                    creature->GetMotionMaster()->MoveChase(chogall);
             }
         }
 
@@ -301,7 +298,7 @@ public:
                     case EVENT_SUMMON_SHADOW_LORD:
                     {
                         DoCast(me, SPELL_SUMMON_SHADOW_LORD);
-                        me->DespawnOrUnsummon();
+                        me->DespawnOrUnsummon(5000);
                         return;
                     }
                     default:
@@ -317,10 +314,43 @@ public:
     }
 };
 
+class npc_bot_blaze : public CreatureScript
+{
+public:
+    npc_bot_blaze() : CreatureScript("npc_bot_blaze") {}
+
+    struct npc_bot_blazeAI : public ScriptedAI
+    {
+
+        npc_bot_blazeAI(Creature * creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+
+        void IsSummonedBy(Unit* /*owner*/)
+        {
+            me->AddAura(SPELL_BLAZE, me);
+            me->DespawnOrUnsummon(25000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_bot_blazeAI(creature);
+    }
+};
+
 void AddSC_boss_chogall()
 {
     new at_chogall_intro();
     new boss_chogall();
     new npc_bot_fire_portal();
     new npc_bot_shadow_portal();
+    new npc_bot_blaze();
 }
