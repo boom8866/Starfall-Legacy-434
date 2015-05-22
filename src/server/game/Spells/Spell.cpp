@@ -1291,6 +1291,11 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                     maxSize = 5;
                     power = POWER_HEALTH;
                 }
+                else if (m_spellInfo->Id == 81269) // Efflorescence
+                {
+                   maxSize = 3;
+                   power = POWER_HEALTH;
+                }
                 else
                     break;
 

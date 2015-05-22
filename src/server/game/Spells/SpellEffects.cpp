@@ -3097,6 +3097,17 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
         if (unitTarget->HasAura(48920) && (unitTarget->GetHealth() + addhealth >= unitTarget->GetMaxHealth()))
             unitTarget->RemoveAura(48920);
 
+        // Healing Rain / Holy Word: Sanctuary
+        if (m_spellInfo->AttributesCu & SPELL_ATTR0_CU_DIMINISH_HEAL)
+        {
+            uint32 count = 0;
+            for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                ++count;
+
+            if (count > 6)
+                addhealth *= (6.0f / count);
+        }
+
         // Init switch for special spell procs
         switch (m_spellInfo->Id)
         {

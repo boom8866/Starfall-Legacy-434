@@ -2917,6 +2917,10 @@ void SpellMgr::LoadSpellCustomAttr()
                 // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 break;
+            case 73921: // Healing Rain
+            case 88686: // Holy Word Sanctuary
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_DIMINISH_HEAL;
+                break;
             case 18500: // Wing Buffet
             case 33086: // Wild Bite
             case 49749: // Piercing Blow
