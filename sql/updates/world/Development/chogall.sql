@@ -54,3 +54,5 @@ UPDATE `creature_template` SET `faction`=16 WHERE `entry`=43622;
 DELETE FROM `spell_script_names` WHERE `spell_id` = '81628';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (81628, 'spell_bot_summon_corrupted_adherent');
+
+UPDATE `creature_template` SET `mechanic_immune_mask`=617299967, `ScriptName`='npc_bot_corrupting_adherent' WHERE `entry`=43622;

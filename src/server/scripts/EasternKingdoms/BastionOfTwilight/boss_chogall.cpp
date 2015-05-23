@@ -58,7 +58,8 @@ enum Events
     EVENT_SHADOW_POWER,
     EVENT_FLAMING_DESTRUCTION,
     EVENT_EMPOWERED_SHADOWS,
-    EVENT_CONVERSION
+    EVENT_CONVERSION,
+    EVENT_UNROOT_CHOGALL
 };
 
 enum Actions
@@ -70,8 +71,9 @@ enum Actions
 
 enum npcId
 {
-    NPC_FIRE_LORD       = 47017,
-    NPC_SHADOW_LORD     = 47016,
+    NPC_FIRE_LORD           = 47017,
+    NPC_SHADOW_LORD         = 47016,
+    NPC_CORRUPTED_ADHERENT  = 43622
 };
 
 enum portalEvents
@@ -88,6 +90,21 @@ enum portalSpells
     SPELL_SHADOW_PORTAL_VISUAL  = 81559,
     SPELL_SUMMON_SHADOW_LORD    = 87583,
     SPELL_SO_PERIODIC           = 87576
+};
+
+enum adherentEvents
+{
+    EVENT_DEPRAVITY         = 1,
+    EVENT_CORRUPTING_CRASH
+};
+
+enum adherentSpells
+{
+    SPELL_SELF_ROOT         = 42716,
+    SPELL_DEPRAVITY         = 81713,
+    SPELL_CORRUPT_CRASH     = 81685,
+    SPELL_SPILLED_VISUAL    = 81771,
+    SPELL_SPILLED_POOL      = 81757
 };
 
 class at_chogall_intro : public AreaTriggerScript
@@ -135,7 +152,7 @@ public:
             events.ScheduleEvent(EVENT_FLAMES_ORDERS, 5000, 0, PHASE_ONE);
             events.ScheduleEvent(EVENT_CONVERSION, 10000, 0, PHASE_ONE);
             events.ScheduleEvent(EVENT_SHADOWS_ORDERS, 15000, 0, PHASE_ONE);
-            events.ScheduleEvent(EVENT_SUMMON_ADHERENT, 65000, 0, PHASE_ONE);
+            events.ScheduleEvent(EVENT_SUMMON_ADHERENT, 68000, 0, PHASE_ONE);
         }
 
         void EnterEvadeMode()
@@ -150,6 +167,9 @@ public:
             me->DespawnCreaturesInArea(NPC_BLAZE);
             me->DespawnCreaturesInArea(NPC_FIRE_PORTAL);
             me->DespawnCreaturesInArea(NPC_SHADOW_PORTAL);
+            me->DespawnCreaturesInArea(NPC_FIRE_LORD);
+            me->DespawnCreaturesInArea(NPC_SHADOW_LORD);
+            me->DespawnCreaturesInArea(NPC_CORRUPTED_ADHERENT);
             summons.DespawnAll();
             events.Reset();
             _DespawnAtEvade();
@@ -257,9 +277,16 @@ public:
                         events.RescheduleEvent(EVENT_CONVERSION, 25000, 0, PHASE_ONE);
                         break;
                     case EVENT_SUMMON_ADHERENT:
+                        me->StopMoving();
                         Talk(SAY_ADHERENT_SPECIAL);
+                        me->SetControlled(true, UNIT_STATE_ROOT);
                         DoCast(SPELL_SUMMON_ADHERENT_T);
                         Talk(SAY_ADHERENT);
+                        events.ScheduleEvent(EVENT_UNROOT_CHOGALL, 1800, 0, PHASE_ONE);
+                        events.RescheduleEvent(EVENT_SUMMON_ADHERENT, 90000, 0, PHASE_ONE);
+                        break;
+                    case EVENT_UNROOT_CHOGALL:
+                        me->SetControlled(false, UNIT_STATE_ROOT);
                         break;
                     default:
                         break;
@@ -486,8 +513,8 @@ public:
             {
                 if (caster->GetMap()->IsHeroic() && caster->GetMap()->Is25ManRaid())
                 {
-                    caster->CastSpell(caster, SPELL_SUMMON_ADHERENT_L);
-                    caster->CastSpell(caster, SPELL_SUMMON_ADHERENT_R);
+                    caster->CastSpell(caster, SPELL_SUMMON_ADHERENT_L, true);
+                    caster->CastSpell(caster, SPELL_SUMMON_ADHERENT_R, true);
                 }
                 else
                 {
@@ -495,10 +522,10 @@ public:
                     switch (selectPosition)
                     {
                         case 1:
-                            caster->CastSpell(caster, SPELL_SUMMON_ADHERENT_L);
+                            caster->CastSpell(caster, SPELL_SUMMON_ADHERENT_L, true);
                             break;
                         case 2:
-                            caster->CastSpell(caster, SPELL_SUMMON_ADHERENT_R);
+                            caster->CastSpell(caster, SPELL_SUMMON_ADHERENT_R, true);
                             break;
                         default:
                             break;
@@ -519,6 +546,79 @@ public:
     }
 };
 
+class npc_bot_corrupting_adherent : public CreatureScript
+{
+public:
+    npc_bot_corrupting_adherent() : CreatureScript("npc_bot_corrupting_adherent") {}
+
+    struct npc_bot_corrupting_adherentAI : public ScriptedAI
+    {
+        npc_bot_corrupting_adherentAI(Creature * creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+            deathVisual = false;
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+        bool deathVisual;
+
+        void IsSummonedBy(Unit* /*owner*/)
+        {
+            events.ScheduleEvent(EVENT_DEPRAVITY, urand(3000, 9000));
+            events.ScheduleEvent(EVENT_CORRUPTING_CRASH, urand(11000, 17000));
+            me->SetInCombatWithZone();
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (me->HealthBelowPct(6) && !deathVisual)
+            {
+                me->RemoveAllAuras();
+                DoCast(me, SPELL_SPILLED_VISUAL, true);
+                DoCast(me, SPELL_SPILLED_POOL, true);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                me->SetFlag(UNIT_NPC_EMOTESTATE, EMOTE_STATE_DEAD);
+                me->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_DEAD);
+                me->SetReactState(REACT_PASSIVE);
+                me->SetControlled(true, UNIT_STATE_ROOT);
+                deathVisual = true;
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING) || deathVisual)
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_DEPRAVITY:
+                        DoCast(me, SPELL_DEPRAVITY);
+                        events.ScheduleEvent(EVENT_DEPRAVITY, (Is25ManRaid() ? 12000 : 6000));
+                        break;
+                    case EVENT_CORRUPTING_CRASH:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                            DoCast(target, SPELL_CORRUPT_CRASH);
+                        events.ScheduleEvent(EVENT_CORRUPTING_CRASH, urand(9500, 16500));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (!deathVisual)
+                DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_bot_corrupting_adherentAI(creature);
+    }
+};
+
 void AddSC_boss_chogall()
 {
     new at_chogall_intro();
@@ -528,4 +628,5 @@ void AddSC_boss_chogall()
     new npc_bot_blaze();
     new spell_bot_conversion();
     new spell_bot_summon_corrupted_adherent();
+    new npc_bot_corrupting_adherent();
 }
