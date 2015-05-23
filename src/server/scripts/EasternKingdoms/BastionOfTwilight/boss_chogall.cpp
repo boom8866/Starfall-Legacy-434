@@ -6,6 +6,13 @@ enum Texts
 {
     SAY_INTRO       = 7,
     SAY_AGGRO       = 8,
+    SAY_CONVERSION  = 9,
+    SAY_ADHERENT    = 10,
+    SAY_OLDGOD      = 11,
+    SAY_DARKENED    = 12,
+    SAY_KILL        = 13,
+    SAY_WIPE        = 14,
+    SAY_DEATH       = 15
 };
 
 enum Spells
@@ -20,7 +27,10 @@ enum Spells
     SPELL_ABSORB_FIRE           = 81196,
     SPELL_ABSORB_SHADOW         = 81566,
     SPELL_CONVERSION            = 91303,
-    SPELL_BLAZE                 = 81536
+    SPELL_BLAZE                 = 81536,
+    SPELL_RIDE_VEHICLE          = 43671,
+    SPELL_FLAMING_DESTRUCTION   = 81194,
+    SPELL_EMPOWERED_SHADOWS     = 81572
 };
 
 enum Phases
@@ -37,11 +47,17 @@ enum Events
     EVENT_FURY_OF_CHOGALL,
     EVENT_SUMMON_ADHERENT,
     EVENT_FESTER_BLOOD,
+    EVENT_FIRE_POWER,
+    EVENT_SHADOW_POWER,
+    EVENT_FLAMING_DESTRUCTION,
+    EVENT_EMPOWERED_SHADOWS
 };
 
 enum Actions
 {
-    ACTION_TALK_INTRO = 1,
+    ACTION_TALK_INTRO   = 1,
+    ACTION_FIRE_POWER,
+    ACTION_SHADOW_POWER
 };
 
 enum npcId
@@ -155,6 +171,12 @@ public:
                         _introDone = true;
                     }
                     break;
+                case ACTION_FIRE_POWER:
+                    events.ScheduleEvent(EVENT_FIRE_POWER, 2000, 0, PHASE_ONE);
+                    break;
+                case ACTION_SHADOW_POWER:
+                    events.ScheduleEvent(EVENT_SHADOW_POWER, 2000, 0, PHASE_ONE);
+                    break;
                 default:
                     break;
             }
@@ -182,10 +204,35 @@ public:
                         DoCast(SPELL_SHADOWS_ORDERS);
                         events.RescheduleEvent(EVENT_SHADOWS_ORDERS, 50000, 0, PHASE_ONE);
                         break;
+                    case EVENT_FIRE_POWER:
+                        if (Creature* fireLord = me->FindNearestCreature(NPC_FIRE_LORD, 500.0f))
+                        {
+                            fireLord->CastSpell(me, SPELL_RIDE_VEHICLE, true);
+                            fireLord->SetObjectScale(0.1f);
+                            fireLord->DespawnOrUnsummon(2500);
+                            events.ScheduleEvent(EVENT_FLAMING_DESTRUCTION, 1500, 0, PHASE_ONE);
+                        }
+                        break;
+                    case EVENT_SHADOW_POWER:
+                        if (Creature* shadowLord = me->FindNearestCreature(NPC_SHADOW_LORD, 500.0f))
+                        {
+                            shadowLord->CastSpell(me, SPELL_RIDE_VEHICLE, true);
+                            shadowLord->SetObjectScale(0.1f);
+                            shadowLord->DespawnOrUnsummon(2500);
+                            events.ScheduleEvent(EVENT_EMPOWERED_SHADOWS, 1500, 0, PHASE_ONE);
+                        }
+                        break;
+                    case EVENT_FLAMING_DESTRUCTION:
+                        DoCast(me, SPELL_FLAMING_DESTRUCTION, true);
+                        break;
+                    case EVENT_EMPOWERED_SHADOWS:
+                        DoCast(me, SPELL_EMPOWERED_SHADOWS, true);
+                        break;
                     default:
                         break;
                 }
             }
+
             DoMeleeAttackIfReady();
         }
     };
@@ -215,11 +262,12 @@ public:
         {
             if (creature->GetEntry() == NPC_FIRE_LORD)
             {
-                creature->CastSpell(creature, SPELL_ABSORB_FIRE, true);
+                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                creature->AddAura(SPELL_ABSORB_FIRE, creature);
                 creature->SetReactState(REACT_PASSIVE);
-                creature->SetSpeed(MOVE_WALK, 0.75f, true);
-                creature->SetSpeed(MOVE_RUN, 0.75f, true);
                 creature->SetReactState(REACT_PASSIVE);
+                if (Creature* chogall = creature->FindNearestCreature(BOSS_CHOGALL, 500.0f))
+                    chogall->AI()->DoAction(ACTION_FIRE_POWER);
             }
         }
 
@@ -275,10 +323,11 @@ public:
         {
             if (creature->GetEntry() == NPC_SHADOW_LORD)
             {
-                creature->CastSpell(creature, SPELL_ABSORB_SHADOW, true);
-                creature->SetSpeed(MOVE_WALK, 0.75f, true);
-                creature->SetSpeed(MOVE_RUN, 0.75f, true);
+                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                creature->AddAura(SPELL_ABSORB_SHADOW, creature);
                 creature->SetReactState(REACT_PASSIVE);
+                if (Creature* chogall = creature->FindNearestCreature(BOSS_CHOGALL, 500.0f))
+                    chogall->AI()->DoAction(ACTION_SHADOW_POWER);
             }
         }
 

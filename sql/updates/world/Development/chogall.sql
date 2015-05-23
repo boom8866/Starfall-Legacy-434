@@ -4,13 +4,36 @@ REPLACE INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
 
 UPDATE `creature_template` SET `scriptname`= 'boss_chogall' WHERE `entry`= 43324;
 
-REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(43324, 7, 0, 'Foolish mortals-(Usurper''s children!) nothing you have done- (Spawn of a lesser god!) I am TRYING to speak here. (Words, words, words. The Master wants murder.) ALL falls to chaos. ALL will be destroyed. (Chaos, chaos!) Your work here today changes nothing. (Chaos, chaos, all things end) No mortal may see what you have and live. Your end has come.', 14, 0, 100, 0, 0, 22068, 'Cho''gall - Cho''gall Intro'),
-(43324, 8, 0, 'Enough! (To His will all flesh succumbs. From His kingdom, chaos comes.) Yes - what he said.', 14, 0, 100, 0, 0, 22081, 'Cho''gall - Aggro');
-
 UPDATE `creature` SET `phaseMask`= 1 WHERE `id`= 43324;
 DELETE FROM `creature_template_addon` WHERE `entry`= 43324;
 
 UPDATE `creature_template` SET `flags_extra`=128, `ScriptName`='npc_bot_shadow_portal' WHERE `entry`=47019;
-UPDATE `creature_template` SET `flags_extra`=128, `ScriptName`='npc_bot_fire_portal' WHERE `entry`=47020;
-UPDATE `creature_template` SET `flags_extra`=128, `ScriptName`='npc_bot_blaze' WHERE `entry`=43585;
+UPDATE `creature_template` SET `flags_extra`=128, `ScriptName`='npc_bot_fire_portal' WHERE `entry`=43393;
+UPDATE `creature_template` SET UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `faction`=16, `flags_extra`=128, `ScriptName`='npc_bot_blaze' WHERE `entry`=43585;
+
+DELETE FROM `creature_text` WHERE `entry`=43324;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(43324,3,0,'Valiona, Theralion, put them in their place.',14,0,100,0,0,22063,'Cho\'Gall - Theralion and Valiona Intro'),
+(43324,4,0,'Welcome, mortals. (Frail little children). Few have laid eyes on this inner sanctum. (They reach out to touch the fire!)',14,0,100,0,0,22065,'Cho\'gall - Ascendant Countil Intro'),
+(43324,5,0,'It is here the chosen realize their destiny. (One with eternity). And it is here that you will realize yours.(End of the flesh. End of the flesh)!',14,0,100,0,0,22066,'Cho\'gall - Ascendant Countil Intro'),
+(43324,6,0,'Brothers of Twilight! The Hammer calls to you! (Fire water earth air). Leave your mortal shell behind. (Fire water earth air). Embrace your new forms for here and everafter! (Burn and drown and crush and suffocate). And use your gifts to destroy the unbelievers. (Burn and drown and crush and suffocate)!!',14,0,100,0,0,22067,'Cho\'gall - Ascendant Countil Intro'),
+(43324,7,0,'Foolish mortals-(Usurper\'s children!) nothing you have done- (Spawn of a lesser god!) I am TRYING to speak here. (Words, words, words. The Master wants murder.) ALL falls to chaos. ALL will be destroyed. (Chaos, chaos!) Your work here today changes nothing. (Chaos, chaos, all things end) No mortal may see what you have and live. Your end has come.',14,0,100,0,0,22068,'Cho\'gall - Cho\'gall Intro'),
+(43324,8,0,'Enough! (To His will all flesh succumbs. From His kingdom, chaos comes.) Yes - what he said.',14,0,100,0,0,22081,'Cho\'gall - Aggro'),
+(43324,9,0,'Give me your strength!',14,0,100,0,0,22078,'Comment'),
+(43324,9,1,'Behold the might of the Hammer!',14,0,100,0,0,22079,'Comment'),
+(43324,9,2,'Everyone succumbs in the end!',14,0,100,0,0,22089,'Comment'),
+(43324,10,0,'Behold the destiny of your fragile world!',14,0,100,0,0,22084,'Comment'),
+(43324,10,1,'(Come brothers! Feast on hope!)',14,0,100,0,0,22086,'Comment'),
+(43324,10,2,'More, more! (More! They need more!)',14,0,100,0,0,22085,'Comment'),
+(43324,11,0,'Brother... it cannot be... (Destiny has come!) My strength... (Too proud! He speaks in blood! Listen!) My mind... (It is for His glory we serve!) What... is happening...? (Gone is the dawn. Come shades of twilight! Come madness! Come Havoc! Come infinite night!)',14,0,100,0,0,22093,'Comment'),
+(43324,12,0,'(The claws of fate grasp the unbelievers!!)',14,0,100,0,0,22094,'Comment'),
+(43324,12,1,'What madness have we wrought... (Not yet enough!)',14,0,100,0,0,22096,'Comment'),
+(43324,12,2,'I can\'t take much more... (Brother, it merely begins!!)',14,0,100,0,0,22097,'Comment'),
+(43324,12,3,'(The master SEES!! The master SEES!!!) ',14,0,100,0,0,22095,'Comment'),
+(43324,12,4,'(The master\'s eye sees all that was and all to be, or not!)',14,0,100,0,0,22098,'Comment'),
+(43324,13,0,'Cho\'gall cackles maniacally.',16,0,100,0,0,0,'Comment'),
+(43324,13,1,'(NOW they see the darkness! Their eyes are open!!)',14,0,100,0,0,22090,'Comment'),
+(43324,13,2,'Now the master has them!',14,0,100,0,0,22091,'Comment'),
+(43324,13,3,'(Chaos! Madness! Like a hug for your brain!!)',14,0,100,0,0,22091,'Comment'),
+(43324,14,0,'It is finished. (The fate of all!)',14,0,100,0,0,22101,'Comment'),
+(43324,15,0,'Brother... we are shattered... (But the master... I still hear... so angry... Master...)',14,0,100,0,0,22099,'Comment');

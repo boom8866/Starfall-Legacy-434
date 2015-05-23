@@ -5314,6 +5314,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92488:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_OTHER_CASTS;
                 break;
+            // * Cho'gall
+            case 81566: // Absorb Shadow
+            case 81196: // Absorb Fire
+                spellInfo->InterruptFlags = 0;
+                break;
             // Throne of the four Winds
             //  * Conclave of Wind
             case 85422: // Anshal - Nurture (due to some visual bugs)
