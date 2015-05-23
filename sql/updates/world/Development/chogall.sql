@@ -56,3 +56,17 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (81628, 'spell_bot_summon_corrupted_adherent');
 
 UPDATE `creature_template` SET `mechanic_immune_mask`=617299967, `ScriptName`='npc_bot_corrupting_adherent' WHERE `entry`=43622;
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `faction`=16, `ScriptName`='npc_bot_blood_old_god' WHERE `entry`=43707;
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `faction`=14, `ScriptName`='npc_bot_darkened_creation' WHERE `entry`=44045;
+UPDATE `creature_template` SET `ScriptName`='npc_bot_malformation_chogall' WHERE `entry`=43888;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (81831, 81943, 82363, 81761, 82919, 81689, 81713, 82337);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(81831, 'spell_bot_corruption_sickness'),
+(81943, 'spell_bot_corruption_accelerated'),
+(82363, 'spell_bot_corruption_old_god'),
+(81761, 'spell_bot_spilled_blood_of_the_old_god'),
+(82919, 'spell_bot_sprayed_corruption'),
+(81689, 'spell_corrupting_crash'),
+(81713, 'spell_bot_depravity'),
+(82337, 'spell_bot_fester_blood');
