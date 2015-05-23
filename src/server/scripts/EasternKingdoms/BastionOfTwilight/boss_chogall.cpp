@@ -4,15 +4,19 @@
 
 enum Texts
 {
-    SAY_INTRO       = 7,
-    SAY_AGGRO       = 8,
-    SAY_CONVERSION  = 9,
-    SAY_ADHERENT    = 10,
-    SAY_OLDGOD      = 11,
-    SAY_DARKENED    = 12,
-    SAY_KILL        = 13,
-    SAY_WIPE        = 14,
-    SAY_DEATH       = 15
+    SAY_INTRO               = 7,
+    SAY_AGGRO               = 8,
+    SAY_CONVERSION          = 9,
+    SAY_ADHERENT            = 10,
+    SAY_OLDGOD              = 11,
+    SAY_DARKENED            = 12,
+    SAY_KILL                = 13,
+    SAY_WIPE                = 14,
+    SAY_DEATH               = 15,
+
+    // Special
+    SAY_CONVERSION_SPECIAL  = 16,
+    SAY_ADHERENT_SPECIAL    = 17
 };
 
 enum Spells
@@ -30,7 +34,10 @@ enum Spells
     SPELL_BLAZE                 = 81536,
     SPELL_RIDE_VEHICLE          = 43671,
     SPELL_FLAMING_DESTRUCTION   = 81194,
-    SPELL_EMPOWERED_SHADOWS     = 81572
+    SPELL_EMPOWERED_SHADOWS     = 81572,
+    SPELL_SUMMON_ADHERENT_T     = 81628,
+    SPELL_SUMMON_ADHERENT_L     = 81611,
+    SPELL_SUMMON_ADHERENT_R     = 81618
 };
 
 enum Phases
@@ -50,7 +57,8 @@ enum Events
     EVENT_FIRE_POWER,
     EVENT_SHADOW_POWER,
     EVENT_FLAMING_DESTRUCTION,
-    EVENT_EMPOWERED_SHADOWS
+    EVENT_EMPOWERED_SHADOWS,
+    EVENT_CONVERSION
 };
 
 enum Actions
@@ -122,14 +130,19 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             me->RemoveAurasDueToSpell(SPELL_SIT_THRONE);
             DoCast(me, SPELL_CORRUPTED_BLOOD);
+            DoCast(SPELL_BOSS_HITTIN_YA); // Dunno what's it, but is from sniffs... need more research
             events.SetPhase(PHASE_ONE);
             events.ScheduleEvent(EVENT_FLAMES_ORDERS, 5000, 0, PHASE_ONE);
+            events.ScheduleEvent(EVENT_CONVERSION, 10000, 0, PHASE_ONE);
             events.ScheduleEvent(EVENT_SHADOWS_ORDERS, 15000, 0, PHASE_ONE);
+            events.ScheduleEvent(EVENT_SUMMON_ADHERENT, 65000, 0, PHASE_ONE);
         }
 
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            if (me->isAlive())
+                Talk(SAY_WIPE);
             me->GetMotionMaster()->MoveTargetedHome();
             instance->SetBossState(DATA_CHOGALL, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -144,6 +157,7 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
+            Talk(SAY_DEATH);
             _JustDied();
             events.Reset();
             instance->SetBossState(DATA_CHOGALL, DONE);
@@ -158,6 +172,12 @@ public:
 
         void JustSummoned(Creature* summon)
         {
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_KILL);
         }
 
         void DoAction(int32 action)
@@ -197,10 +217,12 @@ public:
                 switch (eventId)
                 {
                     case EVENT_FLAMES_ORDERS:
+                        me->StopMoving();
                         DoCast(SPELL_FLAMES_ORDERS);
                         events.RescheduleEvent(EVENT_FLAMES_ORDERS, 50000, 0, PHASE_ONE);
                         break;
                     case EVENT_SHADOWS_ORDERS:
+                        me->StopMoving();
                         DoCast(SPELL_SHADOWS_ORDERS);
                         events.RescheduleEvent(EVENT_SHADOWS_ORDERS, 50000, 0, PHASE_ONE);
                         break;
@@ -227,6 +249,17 @@ public:
                         break;
                     case EVENT_EMPOWERED_SHADOWS:
                         DoCast(me, SPELL_EMPOWERED_SHADOWS, true);
+                        break;
+                    case EVENT_CONVERSION:
+                        Talk(SAY_CONVERSION_SPECIAL);
+                        DoCast(SPELL_CONVERSION);
+                        Talk(SAY_CONVERSION);
+                        events.RescheduleEvent(EVENT_CONVERSION, 25000, 0, PHASE_ONE);
+                        break;
+                    case EVENT_SUMMON_ADHERENT:
+                        Talk(SAY_ADHERENT_SPECIAL);
+                        DoCast(SPELL_SUMMON_ADHERENT_T);
+                        Talk(SAY_ADHERENT);
                         break;
                     default:
                         break;
@@ -395,6 +428,97 @@ public:
     }
 };
 
+class spell_bot_conversion : public SpellScriptLoader
+{
+public:
+    spell_bot_conversion() : SpellScriptLoader("spell_bot_conversion")
+    {
+    }
+
+    class spell_bot_conversion_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_bot_conversion_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 2);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_bot_conversion_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_bot_conversion_SpellScript();
+    }
+};
+
+class spell_bot_summon_corrupted_adherent : public SpellScriptLoader
+{
+public:
+    spell_bot_summon_corrupted_adherent() : SpellScriptLoader("spell_bot_summon_corrupted_adherent") { }
+
+    class spell_bot_summon_corrupted_adherent_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_bot_summon_corrupted_adherent_SpellScript);
+
+        bool Validate(SpellInfo const* spellEntry)
+        {
+            if (!sSpellStore.LookupEntry(spellEntry->Id))
+                return false;
+            return true;
+        }
+
+        bool Load()
+        {
+            return true;
+        }
+
+        void EffectScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetMap()->IsHeroic() && caster->GetMap()->Is25ManRaid())
+                {
+                    caster->CastSpell(caster, SPELL_SUMMON_ADHERENT_L);
+                    caster->CastSpell(caster, SPELL_SUMMON_ADHERENT_R);
+                }
+                else
+                {
+                    uint8 selectPosition = urand(1, 2);
+                    switch (selectPosition)
+                    {
+                        case 1:
+                            caster->CastSpell(caster, SPELL_SUMMON_ADHERENT_L);
+                            break;
+                        case 2:
+                            caster->CastSpell(caster, SPELL_SUMMON_ADHERENT_R);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_bot_summon_corrupted_adherent_SpellScript::EffectScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_bot_summon_corrupted_adherent_SpellScript();
+    }
+};
+
 void AddSC_boss_chogall()
 {
     new at_chogall_intro();
@@ -402,4 +526,6 @@ void AddSC_boss_chogall()
     new npc_bot_fire_portal();
     new npc_bot_shadow_portal();
     new npc_bot_blaze();
+    new spell_bot_conversion();
+    new spell_bot_summon_corrupted_adherent();
 }

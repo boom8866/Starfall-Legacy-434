@@ -36,4 +36,21 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (43324,13,2,'Now the master has them!',14,0,100,0,0,22091,'Comment'),
 (43324,13,3,'(Chaos! Madness! Like a hug for your brain!!)',14,0,100,0,0,22091,'Comment'),
 (43324,14,0,'It is finished. (The fate of all!)',14,0,100,0,0,22101,'Comment'),
-(43324,15,0,'Brother... we are shattered... (But the master... I still hear... so angry... Master...)',14,0,100,0,0,22099,'Comment');
+(43324,15,0,'Brother... we are shattered... (But the master... I still hear... so angry... Master...)',14,0,100,0,0,22099,'Comment'),
+(43324,16,0,'Cho\'gall beckons and casts |cFF006EFD|Hspell:91303|h[Conversion]|h|r!',41,0,100,0,0,0,'Comment'),
+(43324,17,0,'|TInterface\\Icons\\spell_shadow_shadesofdarkness.blp:20|t%s begins to summon |cFFFF0000Darkened Creations|r to aid him!',41,0,100,0,0,0,'Comment');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (91303, 93203, 93204, 93205);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(91303, 'spell_bot_conversion'),
+(93203, 'spell_bot_conversion'),
+(93204, 'spell_bot_conversion'),
+(93205, 'spell_bot_conversion');
+
+UPDATE `spell_target_position` SET `target_orientation`=3.40 WHERE `id`=81611 AND `effIndex`=0;
+UPDATE `spell_target_position` SET `target_orientation`=5.96 WHERE `id`=81618 AND `effIndex`=0;
+UPDATE `creature_template` SET `faction`=16 WHERE `entry`=43622;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '81628';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(81628, 'spell_bot_summon_corrupted_adherent');
