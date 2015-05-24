@@ -60,7 +60,7 @@ UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `faction`=
 UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `faction`=14, `ScriptName`='npc_bot_darkened_creation' WHERE `entry`=44045;
 UPDATE `creature_template` SET `ScriptName`='npc_bot_malformation_chogall' WHERE `entry`=43888;
 
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (81831, 81943, 82363, 81761, 82919, 81689, 81713, 82337, 82411);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (81831, 81943, 82363, 81761, 82919, 81689, 81713, 82411);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (81831, 'spell_bot_corruption_sickness'),
 (81943, 'spell_bot_corruption_accelerated'),
@@ -69,7 +69,6 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (82919, 'spell_bot_sprayed_corruption'),
 (81689, 'spell_corrupting_crash'),
 (81713, 'spell_bot_depravity'),
-(82337, 'spell_bot_fester_blood'),
 (82411, 'spell_bot_debilitating_beam');
 
 DELETE FROM `conditions` WHERE `SourceEntry` = '91331';
@@ -96,8 +95,6 @@ UPDATE `spell_target_position` SET `target_position_x`=-1233.114, `target_positi
 DELETE FROM `spell_script_names` WHERE `spell_id` = '82299';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (82299, 'spell_bot_fester_blood');
-
-DELETE FROM `spell_script_names` WHERE `spell_id`=82337 AND `ScriptName`='spell_bot_fester_blood';
 
 DELETE FROM `conditions` WHERE `SourceEntry` = '82299';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES

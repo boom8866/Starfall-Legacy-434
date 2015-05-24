@@ -296,22 +296,16 @@ public:
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTION_MALFORMATION);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTION_SICKNESS);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ABSOLUTE_TRANSFORM);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTED_BLOOD_BAR);
         }
 
         void RemoveCharmedPlayers()
         {
             Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
             if (!PlayerList.isEmpty())
-            {
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                {
                     if (i->getSource()->isCharmed())
-                    {
                         i->getSource()->RemoveCharmedBy(me);
-                        i->getSource()->Kill(i->getSource(), true);
-                    }
-                }
-            }
         }
 
         void DoAction(int32 action)
