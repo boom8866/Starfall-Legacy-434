@@ -15842,6 +15842,40 @@ void Unit::SetPower(Powers power, int32 val)
         SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER ? true : false);
     }
 
+    // The Bastion of Twilight (Cho'gall encounter - Corrupted Blood)
+    if (GetMapId() == 671 && power == POWER_ALTERNATE_POWER)
+    {
+        // Corruption: Accelerated
+        if (GetPower(POWER_ALTERNATE_POWER) >= 25)
+            if (!HasAura(81836))
+                CastSpell(this, 81836, true);
+
+        // Corruption: Sickness
+        if (GetPower(POWER_ALTERNATE_POWER) >= 50)
+            if (!HasAura(81829))
+                CastSpell(this, 81829, true);
+
+        // Corruption: Malformation
+        if (GetPower(POWER_ALTERNATE_POWER) >= 75)
+        {
+            if (!HasAura(82125))
+            {
+                CastSpell(this, 82125, true);
+                SummonCreature(43888, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            }
+        }
+
+        // Corruption: Absolute
+        if (GetPower(POWER_ALTERNATE_POWER) >= 100)
+        {
+            if (!HasAura(82170))
+            {
+                CastSpell(this, 82170, true);
+                CastSpell(this, 82193, true);
+            }
+        }
+    }
+
     // group update
     if (Player* player = ToPlayer())
     {
@@ -20693,9 +20727,9 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     vehicle->GetBase()->AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
                     break;
                 }
-                // Minecart (Kaja Cola)
-                case 39329:
+                case 39329: // Minecart (Kaja Cola)
                 case 46372: // Fusion Core
+                case 43888: // Malformation (Cho'gall)
                 {
                     ToCreature()->DespawnOrUnsummon(1000);
                     break;

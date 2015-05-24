@@ -5323,6 +5323,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 81196: // Absorb Fire
                 spellInfo->InterruptFlags = 0;
                 break;
+            case 93103: // Corrupted Blood
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+                break;
             // Throne of the four Winds
             //  * Conclave of Wind
             case 85422: // Anshal - Nurture (due to some visual bugs)

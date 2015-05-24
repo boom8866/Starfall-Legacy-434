@@ -80,7 +80,8 @@ enum npcId
     NPC_FIRE_LORD               = 47017,
     NPC_SHADOW_LORD             = 47016,
     NPC_CORRUPTED_ADHERENT      = 43622,
-    NPC_BLOOD_OF_THE_OLD_GOD    = 43707
+    NPC_BLOOD_OF_THE_OLD_GOD    = 43707,
+    NPC_MALFORMATION            = 43888
 };
 
 enum portalEvents
@@ -148,6 +149,15 @@ enum portalId
     GO_CENTER_HOLE      = 205898
 };
 
+enum powerBarSpells
+{
+    SPELL_CORRUPTION_ACCELERATED    = 81836,
+    SPELL_CORRUPTION_SICKNESS       = 81829,
+    SPELL_CORRUPTION_MALFORMATION   = 82125,
+    SPELL_CORRUPTION_ABSOLUTE       = 82170,
+    SPELL_ABSOLUTE_TRANSFORM        = 82193
+};
+
 class at_chogall_intro : public AreaTriggerScript
 {
 public:
@@ -204,6 +214,8 @@ public:
                 rightPortal->SetGoState(GO_STATE_ACTIVE);
             if (GameObject* centerHole = me->FindNearestGameObject(GO_CENTER_HOLE, 500.0f))
                 centerHole->setActive(true);
+
+            CleanupAuras();
         }
 
         void EnterEvadeMode()
@@ -217,6 +229,8 @@ public:
                 leftPortal->SetGoState(GO_STATE_READY);
             if (GameObject* rightPortal = me->FindNearestGameObject(GO_PORTAL_RIGHT, 500.0f))
                 rightPortal->SetGoState(GO_STATE_READY);
+
+            CleanupAuras();
 
             me->GetMotionMaster()->MoveTargetedHome();
             instance->SetBossState(DATA_CHOGALL, FAIL);
@@ -240,6 +254,8 @@ public:
                 leftPortal->SetGoState(GO_STATE_READY);
             if (GameObject* rightPortal = me->FindNearestGameObject(GO_PORTAL_RIGHT, 500.0f))
                 rightPortal->SetGoState(GO_STATE_READY);
+
+            CleanupAuras();
 
             events.Reset();
             instance->SetBossState(DATA_CHOGALL, DONE);
@@ -271,6 +287,15 @@ public:
             me->DespawnCreaturesInArea(NPC_SHADOW_LORD);
             me->DespawnCreaturesInArea(NPC_CORRUPTED_ADHERENT);
             me->DespawnCreaturesInArea(NPC_BLOOD_OF_THE_OLD_GOD);
+        }
+
+        void CleanupAuras()
+        {
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTION_ABSOLUTE);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTION_ACCELERATED);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTION_MALFORMATION);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTION_SICKNESS);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ABSOLUTE_TRANSFORM);
         }
 
         void RemoveCharmedPlayers()
@@ -384,6 +409,8 @@ public:
                         }
                         if (!isFirstFury)
                             events.ScheduleEvent(EVENT_CONVERSION, 20000, 0, PHASE_ONE);
+                        else
+                            events.ScheduleEvent(EVENT_CONVERSION, 42000, 0, PHASE_ONE);
                         break;
                     case EVENT_SUMMON_ADHERENT:
                         me->StopMoving();
@@ -411,7 +438,6 @@ public:
                         events.CancelEvent(EVENT_SHADOWS_ORDERS);
                         events.CancelEvent(EVENT_FLAMES_ORDERS);
                         events.ScheduleEvent(EVENT_FLAMES_ORDERS, 15000, 0, PHASE_ONE);
-                        events.ScheduleEvent(EVENT_CONVERSION, 10000, 0, PHASE_ONE);
 
                         me->StopMoving();
                         me->SendMovementFlagUpdate(false);
@@ -1254,9 +1280,11 @@ public:
         InstanceScript* instance;
         EventMap events;
 
-        void IsSummonedBy(Unit* /*owner*/)
+        void IsSummonedBy(Unit* owner)
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            if (owner)
+                me->EnterVehicle(owner, 0);
         }
 
         void UpdateAI(uint32 diff)
@@ -1318,6 +1346,10 @@ public:
         {
             if (Unit* target = GetTarget())
             {
+                if (Player* player = target->ToPlayer())
+                    if (WorldSession* session = player->GetSession())
+                        session->SendNotification("You are not in control of your actions");
+
                 if (Creature* chogall = target->FindNearestCreature(BOSS_CHOGALL, 500.0f))
                 {
                     target->SetFacingToObject(chogall);
