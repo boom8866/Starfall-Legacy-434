@@ -2673,6 +2673,10 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                 case 61987: // Avenging Wrath Marker
                 case 61988: // Divine Shield exclude aura
                 case 81318: // Tombshroom aura
+                case 91317: // Worshipping
+                case 93365:
+                case 93366:
+                case 93367:
                     return false;
                 case 30877: // Tag Murloc
                 case 61716: // Rabbit Costume

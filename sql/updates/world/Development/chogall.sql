@@ -60,7 +60,7 @@ UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `faction`=
 UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `faction`=14, `ScriptName`='npc_bot_darkened_creation' WHERE `entry`=44045;
 UPDATE `creature_template` SET `ScriptName`='npc_bot_malformation_chogall' WHERE `entry`=43888;
 
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (81831, 81943, 82363, 81761, 82919, 81689, 81713, 82337);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (81831, 81943, 82363, 81761, 82919, 81689, 81713, 82337, 82411);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (81831, 'spell_bot_corruption_sickness'),
 (81943, 'spell_bot_corruption_accelerated'),
@@ -69,4 +69,36 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (82919, 'spell_bot_sprayed_corruption'),
 (81689, 'spell_corrupting_crash'),
 (81713, 'spell_bot_depravity'),
-(82337, 'spell_bot_fester_blood');
+(82337, 'spell_bot_fester_blood'),
+(82411, 'spell_bot_debilitating_beam');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '91331';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 7, 91331, 0, 0, 31, 0, 3, 43324, 0, 0, 0, '', 'Targeting -> Chogall');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (91331, 93206, 93207, 93208);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(91331, 'spell_bot_twisted_devotion'),
+(93206, 'spell_bot_twisted_devotion'),
+(93207, 'spell_bot_twisted_devotion'),
+(93208, 'spell_bot_twisted_devotion');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (91317, 93365, 93366, 93367);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(91317, 'spell_bot_worshipping'),
+(93365, 'spell_bot_worshipping'),
+(93366, 'spell_bot_worshipping'),
+(93367, 'spell_bot_worshipping');
+
+UPDATE `spell_target_position` SET `target_position_x`=-1092.60, `target_position_y`=-798.77, `target_position_z`=840.41 WHERE `id`=81611 AND `effIndex`=0;
+UPDATE `spell_target_position` SET `target_position_x`=-1233.114, `target_position_y`=-799.028, `target_position_z`=836.842 WHERE `id`=81618 AND `effIndex`=0;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '82299';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(82299, 'spell_bot_fester_blood');
+
+DELETE FROM `spell_script_names` WHERE `spell_id`=82337 AND `ScriptName`='spell_bot_fester_blood';
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '82299';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 7, 82299, 0, 0, 31, 0, 3, 43622, 0, 0, 0, '', 'Targeting -> Adherent');

@@ -5312,6 +5312,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92486:
             case 92487:
             case 92488:
+            case 91317: // Worshipping
+            case 93365:
+            case 93366:
+            case 93367:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_OTHER_CASTS;
                 break;
             // * Cho'gall

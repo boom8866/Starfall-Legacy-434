@@ -40,7 +40,8 @@ enum Spells
     SPELL_SUMMON_ADHERENT_R     = 81618,
     SPELL_BERSERK               = 47008,
     SPELL_FURY_OF_CHOGALL       = 82524,
-    SPELL_WORSHIPPING           = 91317
+    SPELL_WORSHIPPING           = 91317,
+    SPELL_WORSHIPPING_LINKED    = 92314
 };
 
 enum Phases
@@ -63,7 +64,8 @@ enum Events
     EVENT_EMPOWERED_SHADOWS,
     EVENT_CONVERSION,
     EVENT_UNROOT_CHOGALL,
-    EVENT_BERSERK
+    EVENT_BERSERK,
+    EVENT_CHECK_FIRST_FURY
 };
 
 enum Actions
@@ -139,6 +141,13 @@ enum spellSpecials
     SPELL_FESTERING_BLOOD   = 82914, // Living adherents use this - damage spell, triggers 82919 which is actual damage spell needs radius and script eff for applying corruption.
 };
 
+enum portalId
+{
+    GO_PORTAL_LEFT      = 205950,
+    GO_PORTAL_RIGHT     = 205951,
+    GO_CENTER_HOLE      = 205898
+};
+
 class at_chogall_intro : public AreaTriggerScript
 {
 public:
@@ -165,6 +174,7 @@ public:
         }
 
         bool _introDone;
+        bool isFirstFury;
 
         void Reset()
         {
@@ -176,6 +186,7 @@ public:
         {
             Talk(SAY_AGGRO);
             _EnterCombat();
+            isFirstFury = false;
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             me->RemoveAurasDueToSpell(SPELL_SIT_THRONE);
             DoCast(me, SPELL_CORRUPTED_BLOOD);
@@ -183,11 +194,16 @@ public:
             events.SetPhase(PHASE_ONE);
             events.ScheduleEvent(EVENT_FLAMES_ORDERS, 5000, 0, PHASE_ONE);
             events.ScheduleEvent(EVENT_CONVERSION, 10000, 0, PHASE_ONE);
-            events.ScheduleEvent(EVENT_SHADOWS_ORDERS, 15000, 0, PHASE_ONE);
             events.ScheduleEvent(EVENT_SUMMON_ADHERENT, 68000, 0, PHASE_ONE);
-            events.ScheduleEvent(EVENT_FURY_OF_CHOGALL, 21000, 0, PHASE_ONE);
-            events.ScheduleEvent(EVENT_FESTER_BLOOD, 108000, 0, PHASE_ONE);
+            events.ScheduleEvent(EVENT_CHECK_FIRST_FURY, 2000);
             events.ScheduleEvent(EVENT_BERSERK, 600000);
+
+            if (GameObject* leftPortal = me->FindNearestGameObject(GO_PORTAL_LEFT, 500.0f))
+                leftPortal->SetGoState(GO_STATE_ACTIVE);
+            if (GameObject* rightPortal = me->FindNearestGameObject(GO_PORTAL_RIGHT, 500.0f))
+                rightPortal->SetGoState(GO_STATE_ACTIVE);
+            if (GameObject* centerHole = me->FindNearestGameObject(GO_CENTER_HOLE, 500.0f))
+                centerHole->setActive(true);
         }
 
         void EnterEvadeMode()
@@ -195,17 +211,19 @@ public:
             _EnterEvadeMode();
             if (me->isAlive())
                 Talk(SAY_WIPE);
+            RemoveCharmedPlayers();
+            isFirstFury = false;
+            if (GameObject* leftPortal = me->FindNearestGameObject(GO_PORTAL_LEFT, 500.0f))
+                leftPortal->SetGoState(GO_STATE_READY);
+            if (GameObject* rightPortal = me->FindNearestGameObject(GO_PORTAL_RIGHT, 500.0f))
+                rightPortal->SetGoState(GO_STATE_READY);
+
             me->GetMotionMaster()->MoveTargetedHome();
             instance->SetBossState(DATA_CHOGALL, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTED_BLOOD_BAR);
-            me->DespawnCreaturesInArea(NPC_BLAZE);
-            me->DespawnCreaturesInArea(NPC_FIRE_PORTAL);
-            me->DespawnCreaturesInArea(NPC_SHADOW_PORTAL);
-            me->DespawnCreaturesInArea(NPC_FIRE_LORD);
-            me->DespawnCreaturesInArea(NPC_SHADOW_LORD);
-            me->DespawnCreaturesInArea(NPC_CORRUPTED_ADHERENT);
             summons.DespawnAll();
+            DespawnAllSummonsInArea();
             events.Reset();
             _DespawnAtEvade();
         }
@@ -213,7 +231,16 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             Talk(SAY_DEATH);
+            isFirstFury = false;
             _JustDied();
+            DespawnAllSummonsInArea();
+            RemoveCharmedPlayers();
+
+            if (GameObject* leftPortal = me->FindNearestGameObject(GO_PORTAL_LEFT, 500.0f))
+                leftPortal->SetGoState(GO_STATE_READY);
+            if (GameObject* rightPortal = me->FindNearestGameObject(GO_PORTAL_RIGHT, 500.0f))
+                rightPortal->SetGoState(GO_STATE_READY);
+
             events.Reset();
             instance->SetBossState(DATA_CHOGALL, DONE);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -235,6 +262,33 @@ public:
                 Talk(SAY_KILL);
         }
 
+        void DespawnAllSummonsInArea()
+        {
+            me->DespawnCreaturesInArea(NPC_BLAZE);
+            me->DespawnCreaturesInArea(NPC_FIRE_PORTAL);
+            me->DespawnCreaturesInArea(NPC_SHADOW_PORTAL);
+            me->DespawnCreaturesInArea(NPC_FIRE_LORD);
+            me->DespawnCreaturesInArea(NPC_SHADOW_LORD);
+            me->DespawnCreaturesInArea(NPC_CORRUPTED_ADHERENT);
+            me->DespawnCreaturesInArea(NPC_BLOOD_OF_THE_OLD_GOD);
+        }
+
+        void RemoveCharmedPlayers()
+        {
+            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+            if (!PlayerList.isEmpty())
+            {
+                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                {
+                    if (i->getSource()->isCharmed())
+                    {
+                        i->getSource()->RemoveCharmedBy(me);
+                        i->getSource()->Kill(i->getSource(), true);
+                    }
+                }
+            }
+        }
+
         void DoAction(int32 action)
         {
             switch (action)
@@ -247,10 +301,10 @@ public:
                     }
                     break;
                 case ACTION_FIRE_POWER:
-                    events.ScheduleEvent(EVENT_FIRE_POWER, 2000, 0, PHASE_ONE);
+                    events.ScheduleEvent(EVENT_FIRE_POWER, 500, 0, PHASE_ONE);
                     break;
                 case ACTION_SHADOW_POWER:
-                    events.ScheduleEvent(EVENT_SHADOW_POWER, 2000, 0, PHASE_ONE);
+                    events.ScheduleEvent(EVENT_SHADOW_POWER, 500, 0, PHASE_ONE);
                     break;
                 default:
                     break;
@@ -275,13 +329,19 @@ public:
                 {
                     case EVENT_FLAMES_ORDERS:
                         me->StopMoving();
-                        DoCast(SPELL_FLAMES_ORDERS);
-                        events.RescheduleEvent(EVENT_FLAMES_ORDERS, 50000, 0, PHASE_ONE);
+                        me->SendMovementFlagUpdate(false);
+                        DoCast(me, SPELL_FLAMES_ORDERS, true);
+
+                        // Flames orders is 15 seconds after first fury, regardless whether or not shadow was last.
+                        if (!isFirstFury)
+                            events.ScheduleEvent(EVENT_FLAMES_ORDERS, 29000, 0, PHASE_ONE);
+
+                        events.ScheduleEvent(EVENT_SHADOWS_ORDERS, 10000, 0, PHASE_ONE);
                         break;
                     case EVENT_SHADOWS_ORDERS:
                         me->StopMoving();
-                        DoCast(SPELL_SHADOWS_ORDERS);
-                        events.RescheduleEvent(EVENT_SHADOWS_ORDERS, 50000, 0, PHASE_ONE);
+                        me->SendMovementFlagUpdate(false);
+                        DoCast(me, SPELL_SHADOWS_ORDERS, true);
                         break;
                     case EVENT_FIRE_POWER:
                         if (Creature* fireLord = me->FindNearestCreature(NPC_FIRE_LORD, 500.0f))
@@ -308,24 +368,33 @@ public:
                         DoCast(me, SPELL_EMPOWERED_SHADOWS, true);
                         break;
                     case EVENT_CONVERSION:
-                        SelectTargetList(targets, NonTankTargetSelector(me), RAID_MODE(1, 2, 2, 4), SELECT_TARGET_RANDOM);
+                        SelectTargetList(targets, NonTankTargetSelector(me), RAID_MODE(2, 3, 2, 4), SELECT_TARGET_RANDOM);
                         if (!targets.empty())
                         {
                             Talk(SAY_CONVERSION_SPECIAL);
                             for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                (*itr)->CastStop(SPELL_WORSHIPPING);
+                                (*itr)->RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
+                                (*itr)->StopMoving();
+                                (*itr)->SetControlled(true, UNIT_STATE_ROOT);
                                 (*itr)->CastSpell(me, SPELL_WORSHIPPING, true);
+                            }
                             Talk(SAY_CONVERSION);
                         }
-                        events.ScheduleEvent(EVENT_CONVERSION, urand(30000, 35000), PHASE_ONE);
+                        if (!isFirstFury)
+                            events.ScheduleEvent(EVENT_CONVERSION, 20000, 0, PHASE_ONE);
                         break;
                     case EVENT_SUMMON_ADHERENT:
                         me->StopMoving();
+                        me->SendMovementFlagUpdate(false);
                         Talk(SAY_ADHERENT_SPECIAL);
                         me->SetControlled(true, UNIT_STATE_ROOT);
                         DoCast(SPELL_SUMMON_ADHERENT_T);
                         Talk(SAY_ADHERENT);
                         events.ScheduleEvent(EVENT_UNROOT_CHOGALL, 1800, 0, PHASE_ONE);
                         events.RescheduleEvent(EVENT_SUMMON_ADHERENT, 90000, 0, PHASE_ONE);
+                        events.ScheduleEvent(EVENT_FESTER_BLOOD, 36000, 0, PHASE_ONE);
                         break;
                     case EVENT_UNROOT_CHOGALL:
                         me->SetControlled(false, UNIT_STATE_ROOT);
@@ -334,14 +403,36 @@ public:
                         DoCast(SPELL_BERSERK);
                         break;
                     case EVENT_FURY_OF_CHOGALL:
+                        if (!isFirstFury)
+                            isFirstFury = true;
+
+                        // Worship is 10 seconds after first fury, regardless of what timer was at before 85%
+                        events.CancelEvent(EVENT_CONVERSION);
+                        events.CancelEvent(EVENT_SHADOWS_ORDERS);
+                        events.CancelEvent(EVENT_FLAMES_ORDERS);
+                        events.ScheduleEvent(EVENT_FLAMES_ORDERS, 15000, 0, PHASE_ONE);
+                        events.ScheduleEvent(EVENT_CONVERSION, 10000, 0, PHASE_ONE);
+
+                        me->StopMoving();
+                        me->SendMovementFlagUpdate(false);
                         if (Unit* target = me->getVictim())
                             DoCast(target, SPELL_FURY_OF_CHOGALL);
-                        events.ScheduleEvent(EVENT_FURY_OF_CHOGALL, urand(45000, 49000), PHASE_ONE);
+
+                        events.ScheduleEvent(EVENT_FURY_OF_CHOGALL, 47000, PHASE_ONE);
                         break;
                     case EVENT_FESTER_BLOOD:
                         me->StopMoving();
+                        me->SendMovementFlagUpdate(false);
                         DoCast(me, SPELL_FESTER_BLOOD);
-                        events.ScheduleEvent(EVENT_FESTER_BLOOD, 130000, PHASE_ONE);
+                        break;
+                    case EVENT_CHECK_FIRST_FURY:
+                        if (me->GetHealthPct() <= 85)
+                        {
+                            events.ScheduleEvent(EVENT_FURY_OF_CHOGALL, 1, 0, PHASE_ONE);
+                            events.CancelEvent(EVENT_CHECK_FIRST_FURY);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_FIRST_FURY, 1500, 0, PHASE_ONE);
                         break;
                     default:
                         break;
@@ -351,6 +442,7 @@ public:
             DoMeleeAttackIfReady();
         }
     };
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new boss_chogallAI(creature);
@@ -510,37 +602,6 @@ public:
     }
 };
 
-class spell_bot_conversion : public SpellScriptLoader
-{
-public:
-    spell_bot_conversion() : SpellScriptLoader("spell_bot_conversion")
-    {
-    }
-
-    class spell_bot_conversion_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_bot_conversion_SpellScript);
-
-        void FilterTargets(std::list<WorldObject*>& targets)
-        {
-            if (targets.empty())
-                return;
-
-            Trinity::Containers::RandomResizeList(targets, 2);
-        }
-
-        void Register()
-        {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_bot_conversion_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_bot_conversion_SpellScript();
-    }
-};
-
 class spell_bot_summon_corrupted_adherent : public SpellScriptLoader
 {
 public:
@@ -620,8 +681,11 @@ public:
 
         void IsSummonedBy(Unit* /*owner*/)
         {
-            events.ScheduleEvent(EVENT_DEPRAVITY, urand(3000, 9000));
-            events.ScheduleEvent(EVENT_CORRUPTING_CRASH, urand(11000, 17000));
+            events.ScheduleEvent(EVENT_DEPRAVITY, 12000);
+            events.ScheduleEvent(EVENT_CORRUPTING_CRASH, 15000);
+
+            me->SetInCombatWithZone();
+
             if (Player* player = me->FindNearestPlayer(500.0f))
                 AttackStart(player);
         }
@@ -651,9 +715,11 @@ public:
                 switch (eventId)
                 {
                     case EVENT_DEPRAVITY:
+                    {
                         DoCast(me, SPELL_DEPRAVITY);
-                        events.ScheduleEvent(EVENT_DEPRAVITY, (Is25ManRaid() ? 12000 : 6000));
+                        events.ScheduleEvent(EVENT_DEPRAVITY, (Is25ManRaid() ? 6000 : 12000));
                         break;
+                    }
                     case EVENT_CORRUPTING_CRASH:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_CORRUPT_CRASH);
@@ -741,6 +807,7 @@ public:
 
         void IsSummonedBy(Unit* /*owner*/)
         {
+            me->SetInCombatWithZone();
             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true))
                 AttackStart(target);
         }
@@ -816,10 +883,23 @@ public:
             return true;
         }
 
-        void EffectScriptEffect(SpellEffIndex /*effIndex*/)
+        void EffectBlockAll(SpellEffIndex effIndex)
         {
+            PreventHitDefaultEffect(effIndex);
+        }
+
+        void EffectApplyAura(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+
             if (Unit* caster = GetCaster())
             {
+                if (!caster->ToCreature())
+                    return;
+
+                if (caster->ToCreature()->HasSpellCooldown(GetSpellInfo()->Id))
+                    return;
+
                 std::list<Creature*> adherents;
                 caster->GetCreatureListWithEntryInGrid(adherents, NPC_CORRUPTED_ADHERENT, 300.0f);
                 for (std::list<Creature*>::iterator itr = adherents.begin(); itr != adherents.end(); ++itr)
@@ -832,12 +912,15 @@ public:
                             (*itr)->SummonCreature(NPC_BLOOD_OF_THE_OLD_GOD, (*itr)->GetPositionX(), (*itr)->GetPositionY(), (*itr)->GetPositionZ(), (*itr)->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
                     }
                 }
+
+                caster->ToCreature()->_AddCreatureSpellCooldown(GetSpellInfo()->Id, time(NULL) + 1);
             }
         }
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_bot_fester_blood_SpellScript::EffectScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_bot_fester_blood_SpellScript::EffectApplyAura, EFFECT_1, SPELL_EFFECT_FORCE_CAST);
+            OnEffectHitTarget += SpellEffectFn(spell_bot_fester_blood_SpellScript::EffectBlockAll, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
         }
     };
 
@@ -1207,6 +1290,83 @@ public:
     }
 };
 
+class CheckIfIsPlayer
+{
+public:
+    CheckIfIsPlayer()
+    {
+    }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->ToPlayer());
+    }
+};
+
+class spell_bot_twisted_devotion : public SpellScriptLoader{public:    spell_bot_twisted_devotion() : SpellScriptLoader("spell_bot_twisted_devotion") {}    class spell_bot_twisted_devotion_SpellScript : public SpellScript    {        PrepareSpellScript(spell_bot_twisted_devotion_SpellScript);        void FilterTargets(std::list<WorldObject*>& targets)        {            if (targets.empty())                return;            targets.remove_if(CheckIfIsPlayer());        }        void Register()        {            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_bot_twisted_devotion_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_NEARBY_ENTRY);            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_bot_twisted_devotion_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_NEARBY_ENTRY);        }    };    SpellScript* GetSpellScript() const    {        return new spell_bot_twisted_devotion_SpellScript();    }};
+
+class spell_bot_worshipping : public SpellScriptLoader
+{
+public:
+    spell_bot_worshipping() : SpellScriptLoader("spell_bot_worshipping") { }
+
+    class spell_bot_worshipping_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_bot_worshipping_AuraScript);
+
+        void HandleWorshippingApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (Creature* chogall = target->FindNearestCreature(BOSS_CHOGALL, 500.0f))
+                {
+                    target->SetFacingToObject(chogall);
+                    target->SetCharmedBy(chogall, CHARM_TYPE_CHARM);
+                }
+
+                target->CastSpell(target, SPELL_WORSHIPPING_LINKED, true);
+                target->SetControlled(true, UNIT_STATE_ROOT);
+
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                    target->ToPlayer()->SetClientControl(target, 0);
+            }
+        }
+
+        void HandleWorshippingRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                target->SetControlled(false, UNIT_STATE_ROOT);
+
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                    target->ToPlayer()->SetClientControl(target, 1);
+
+                target->RemoveAurasDueToSpell(SPELL_WORSHIPPING_LINKED);
+
+                if (Creature* chogall = target->FindNearestCreature(BOSS_CHOGALL, 500.0f))
+                {
+                    if (target->isCharmed())
+                    {
+                        target->RemoveCharmedBy(chogall);
+                        chogall->SetInCombatWithZone();
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_bot_worshipping_AuraScript::HandleWorshippingApply, EFFECT_1, SPELL_AURA_MOD_FACTION, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_bot_worshipping_AuraScript::HandleWorshippingRemove, EFFECT_1, SPELL_AURA_MOD_FACTION, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_bot_worshipping_AuraScript();
+    }
+};
+
 void AddSC_boss_chogall()
 {
     new at_chogall_intro();
@@ -1214,7 +1374,6 @@ void AddSC_boss_chogall()
     new npc_bot_fire_portal();
     new npc_bot_shadow_portal();
     new npc_bot_blaze();
-    new spell_bot_conversion();
     new spell_bot_summon_corrupted_adherent();
     new npc_bot_corrupting_adherent();
     new npc_bot_darkened_creation();
@@ -1229,4 +1388,6 @@ void AddSC_boss_chogall()
     new spell_bot_corruption_accelerated();
     new spell_bot_corruption_sickness();
     new npc_bot_malformation_chogall();
+    new spell_bot_twisted_devotion();
+    new spell_bot_worshipping();
 }

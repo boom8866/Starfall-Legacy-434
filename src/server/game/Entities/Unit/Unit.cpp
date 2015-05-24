@@ -3553,7 +3553,22 @@ void Unit::InterruptSpellWithSource(CurrentSpellTypes spellType, Unit* source, b
         && (withInstant || spell->GetCastTime() > 0))
     {
         if (spell->GetSpellInfo()->AttributesCu & SPELL_ATTR0_CU_IGNORE_OTHER_CASTS)
-            return;
+        {
+            switch (spell->GetSpellInfo()->Id)
+            {
+                case 91317: // Worshipping (The Bastion of Twilight: Cho'gall)
+                case 93365:
+                case 93366:
+                case 93367:
+                {
+                    if (source == this)
+                        return;
+                    break;
+                }
+                default:
+                    return;
+            }
+        }
 
         // for example, do not let self-stun aura interrupt itself
         if (!spell->IsInterruptable())
