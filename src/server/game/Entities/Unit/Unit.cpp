@@ -15846,7 +15846,7 @@ void Unit::SetPower(Powers power, int32 val)
     {
         switch (GetMapId())
         {
-            case 617:   // The Bastion of Twilight (Corrupted Blood - Cho'gall)
+            case 671:   // The Bastion of Twilight (Corrupted Blood - Cho'gall)
             {
                 // Corruption: Accelerated
                 if (GetPower(POWER_ALTERNATE_POWER) >= 25 && GetPower(POWER_ALTERNATE_POWER) < 50)

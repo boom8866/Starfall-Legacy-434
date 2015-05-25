@@ -1,3 +1,6 @@
+/*
+    Copyright 2014-2015 - Northstrider & john2308
+*/
 
 #include "bastion_of_twilight.h"
 #include "Vehicle.h"
@@ -172,6 +175,8 @@ enum achievementId
 {
     ACHIEVEMENT_THE_ABYSS_WILL_GAZE_BACK_INTO_YOU   = 5312
 };
+
+#define DARKENED_CREATIONS   RAID_MODE<uint32>(3, 9, 3, 9)
 
 class at_chogall_intro : public AreaTriggerScript
 {
@@ -348,10 +353,10 @@ public:
                     }
                     break;
                 case ACTION_FIRE_POWER:
-                    events.ScheduleEvent(EVENT_FIRE_POWER, 500, 0, PHASE_ONE);
+                    events.ScheduleEvent(EVENT_FIRE_POWER, 800, 0, PHASE_ONE);
                     break;
                 case ACTION_SHADOW_POWER:
-                    events.ScheduleEvent(EVENT_SHADOW_POWER, 500, 0, PHASE_ONE);
+                    events.ScheduleEvent(EVENT_SHADOW_POWER, 800, 0, PHASE_ONE);
                     break;
                 default:
                     break;
@@ -375,18 +380,12 @@ public:
                 switch (eventId)
                 {
                     case EVENT_FLAMES_ORDERS:
-                        me->StopMoving();
-                        me->SendMovementFlagUpdate(false);
                         DoCast(me, SPELL_FLAMES_ORDERS, true);
-
                         if (!isFirstFury)
                             events.ScheduleEvent(EVENT_FLAMES_ORDERS, 29000, 0, PHASE_ONE);
-
                         events.ScheduleEvent(EVENT_SHADOWS_ORDERS, 10000, 0, PHASE_ONE);
                         break;
                     case EVENT_SHADOWS_ORDERS:
-                        me->StopMoving();
-                        me->SendMovementFlagUpdate(false);
                         DoCast(me, SPELL_SHADOWS_ORDERS, true);
                         break;
                     case EVENT_FIRE_POWER:
@@ -434,8 +433,6 @@ public:
                             events.ScheduleEvent(EVENT_CONVERSION, 42000, 0, PHASE_ONE);
                         break;
                     case EVENT_SUMMON_ADHERENT:
-                        me->StopMoving();
-                        me->SendMovementFlagUpdate(false);
                         Talk(SAY_ADHERENT_SPECIAL);
                         me->SetControlled(true, UNIT_STATE_ROOT);
                         DoCast(SPELL_SUMMON_ADHERENT_T);
@@ -467,8 +464,6 @@ public:
                         events.ScheduleEvent(EVENT_FURY_OF_CHOGALL, 47000, PHASE_ONE);
                         break;
                     case EVENT_FESTER_BLOOD:
-                        me->StopMoving();
-                        me->SendMovementFlagUpdate(false);
                         DoCast(me, SPELL_FESTER_BLOOD);
                         break;
                     case EVENT_CHECK_FIRST_FURY:
@@ -489,6 +484,7 @@ public:
                             me->SendMovementFlagUpdate(false);
                             DoCast(SPELL_CONSUME_BLOOD);
                             DoCast(SPELL_CONSUME_BLOOD_EFFECT);
+                            me->DespawnCreaturesInArea(NPC_BLOOD_OF_THE_OLD_GOD);
                             events.ScheduleEvent(EVENT_DARKENED_CREATION, 5000);
                             events.CancelEvent(EVENT_CHECK_PHASE_TWO);
                             break;
@@ -497,7 +493,12 @@ public:
                         break;
                     case EVENT_DARKENED_CREATION:
                     {
+                        Talk(SAY_DARKENED);
                         DoCast(SPELL_DARKENED_CREATIONS);
+
+                        for (int8 i = 0; i < int32(DARKENED_CREATIONS); i++)
+                            DoCast(me, SPELL_DARKENED_CREATIONS, true);
+
                         events.RescheduleEvent(EVENT_DARKENED_CREATION, 30000, 0, PHASE_TWO);
                         break;
                     }
@@ -1031,7 +1032,7 @@ public:
         }
     };
 
-    SpellScript * GetSpellScript() const
+    SpellScript* GetSpellScript() const
     {
         return new spell_bot_fester_blood_SpellScript();
     }
@@ -1070,7 +1071,7 @@ public:
         }
     };
 
-    SpellScript * GetSpellScript() const
+    SpellScript* GetSpellScript() const
     {
         return new spell_bot_depravity_SpellScript();
     }
@@ -1109,7 +1110,7 @@ public:
         }
     };
 
-    SpellScript * GetSpellScript() const
+    SpellScript* GetSpellScript() const
     {
         return new spell_bot_corrupting_crash_SpellScript();
     }
@@ -1148,7 +1149,7 @@ public:
         }
     };
 
-    SpellScript * GetSpellScript() const
+    SpellScript* GetSpellScript() const
     {
         return new spell_bot_sprayed_corruption_SpellScript();
     }
@@ -1187,7 +1188,7 @@ public:
         }
     };
 
-    SpellScript * GetSpellScript() const
+    SpellScript* GetSpellScript() const
     {
         return new spell_bot_spilled_blood_of_the_old_god_SpellScript();
     }
@@ -1261,7 +1262,7 @@ public:
         }
     };
 
-    SpellScript * GetSpellScript() const
+    SpellScript* GetSpellScript() const
     {
         return new spell_bot_corruption_old_god_SpellScript();
     }
@@ -1300,7 +1301,7 @@ public:
         }
     };
 
-    SpellScript * GetSpellScript() const
+    SpellScript* GetSpellScript() const
     {
         return new spell_bot_corruption_accelerated_SpellScript();
     }
@@ -1339,7 +1340,7 @@ public:
         }
     };
 
-    SpellScript * GetSpellScript() const
+    SpellScript* GetSpellScript() const
     {
         return new spell_bot_corruption_sickness_SpellScript();
     }
@@ -1533,7 +1534,7 @@ public:
         }
     };
 
-    SpellScript * GetSpellScript() const
+    SpellScript* GetSpellScript() const
     {
         return new spell_bot_consume_blood_SpellScript();
     }

@@ -121,3 +121,6 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 DELETE FROM `spell_script_names` WHERE `spell_id` = '82659';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (82659, 'spell_bot_consume_blood');
+
+UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `exp`=3, `faction`=35, `scale`=2 WHERE `entry` IN (47017, 43592);
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=44045;
