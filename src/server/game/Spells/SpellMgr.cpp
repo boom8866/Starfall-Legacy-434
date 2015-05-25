@@ -5329,6 +5329,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 82634: // Consume Blood
                 spellInfo->Effects[EFFECT_0].BasePoints = 0;
                 break;
+            case 85412: // Pooled Blood
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_NONE;
+                break;
             // Throne of the four Winds
             //  * Conclave of Wind
             case 85422: // Anshal - Nurture (due to some visual bugs)

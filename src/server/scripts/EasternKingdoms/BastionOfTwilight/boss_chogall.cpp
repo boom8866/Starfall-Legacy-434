@@ -48,7 +48,8 @@ enum Spells
     SPELL_CONSUME_BLOOD         = 82630,
     SPELL_CONSUME_BLOOD_EFFECT  = 82659,
     SPELL_BLOOD_CONSUMED        = 82361,
-    SPELL_DARKENED_CREATIONS    = 82414
+    SPELL_DARKENED_CREATIONS    = 82414,
+    SPELL_CORRUPTED_CHOGALL     = 95821
 };
 
 enum Phases
@@ -76,7 +77,8 @@ enum Events
     EVENT_CHECK_PHASE_TWO,
     EVENT_REMOVE_SUMMONS,
     EVENT_DARKENED_CREATION,
-    EVENT_CHECK_ACHIEVEMENT
+    EVENT_CHECK_ACHIEVEMENT,
+    EVENT_CHECK_OWNER
 };
 
 enum Actions
@@ -168,7 +170,8 @@ enum powerBarSpells
     SPELL_CORRUPTION_SICKNESS       = 81829,
     SPELL_CORRUPTION_MALFORMATION   = 82125,
     SPELL_CORRUPTION_ABSOLUTE       = 82170,
-    SPELL_ABSOLUTE_TRANSFORM        = 82193
+    SPELL_ABSOLUTE_TRANSFORM        = 82193,
+    SPELL_ABSOLUTE_GROW             = 85414
 };
 
 enum achievementId
@@ -330,6 +333,7 @@ public:
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTION_MALFORMATION);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTION_SICKNESS);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ABSOLUTE_TRANSFORM);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ABSOLUTE_GROW);
         }
 
         void RemoveCharmedPlayers()
@@ -494,6 +498,10 @@ public:
                     case EVENT_DARKENED_CREATION:
                     {
                         Talk(SAY_DARKENED);
+
+                        if (!me->HasAura(SPELL_CORRUPTED_CHOGALL))
+                            DoCast(me, SPELL_CORRUPTED_CHOGALL, true);
+
                         DoCast(SPELL_DARKENED_CREATIONS);
 
                         for (int8 i = 0; i < int32(DARKENED_CREATIONS); i++)
@@ -557,7 +565,6 @@ public:
             {
                 creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 creature->AddAura(SPELL_ABSORB_FIRE, creature);
-                creature->SetReactState(REACT_PASSIVE);
                 creature->SetReactState(REACT_PASSIVE);
                 if (Creature* chogall = creature->FindNearestCreature(BOSS_CHOGALL, 500.0f))
                     chogall->AI()->DoAction(ACTION_FIRE_POWER);
@@ -1366,7 +1373,10 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             if (owner)
+            {
                 me->EnterVehicle(owner, 0);
+                events.ScheduleEvent(EVENT_CHECK_OWNER, 1);
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -1385,6 +1395,15 @@ public:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_MALFORMATION_SHADOWBOLT);
                         events.ScheduleEvent(EVENT_MALFORMATION_SHADOWBOLT, urand(7000, 14000));
+                        break;
+                    }
+                    case EVENT_CHECK_OWNER:
+                    {
+                        if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                            if (!owner || !owner->HasAura(SPELL_CORRUPTION_MALFORMATION))
+                                me->DisappearAndDie();
+
+                        events.RescheduleEvent(EVENT_CHECK_OWNER, 2000);
                         break;
                     }
                     default:
@@ -1524,7 +1543,13 @@ public:
                 }
 
                 if (Creature* adherent = caster->FindNearestCreature(NPC_CORRUPTED_ADHERENT, 500.0f))
+                {
                     adherent->CastSpell(adherent, SPELL_BLOOD_CONSUMED, true);
+
+                    // Move to center
+                    adherent->NearTeleportTo(-1162.70f, -798.82f, 835.85f, 6.25f);
+                    adherent->UpdatePosition(-1162.70f, -798.82f, 835.85f, 6.25f);
+                }
             }
         }
 

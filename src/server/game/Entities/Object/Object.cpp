@@ -51,6 +51,7 @@
 #include "Group.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
+#include "MMapFactory.h"
 
 enum uniquePhasing
 {
@@ -1857,6 +1858,10 @@ void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
 
 void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
 {
+    uint32 mapId = GetMapId();
+    if (!MMAP::MMapFactory::IsPathfindingEnabled(mapId))
+        return;
+
     if (GetTransport())
         return;
 

@@ -122,5 +122,19 @@ DELETE FROM `spell_script_names` WHERE `spell_id` = '82659';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (82659, 'spell_bot_consume_blood');
 
-UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `exp`=3, `faction`=35, `scale`=2 WHERE `entry` IN (47017, 43592);
+UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `exp`=3, `faction`=35, `scale`=2 WHERE `entry` IN (47017, 47016);
 UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=44045;
+
+DELETE FROM `disables` WHERE `sourceType` = '7' AND `entry` = '671';
+INSERT INTO `disables` (`sourceType`, `entry`, `flags`, `params_0`, `params_1`, `comment`) VALUES
+(7, 671, 0, '', '', 'MMAP - The Bastion of Twilight');
+
+UPDATE `creature_template` SET `faction`=14, `unit_class`=8 WHERE `entry` IN (45676,45699,45700,45687,50193,50200,50202,50201);
+UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `exp`=3, `faction`=14 WHERE `entry` IN (45703, 45721);
+UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `exp`=3, `faction`=14 WHERE `entry`=45721;
+
+DELETE FROM `creature_template_addon` WHERE `entry` = '45721';
+INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
+(45721, '85470, 85290');
+
+UPDATE `creature_template` SET `unit_flags`=33554436 WHERE `entry`=45721;

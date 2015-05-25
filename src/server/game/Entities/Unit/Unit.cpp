@@ -15881,6 +15881,7 @@ void Unit::SetPower(Powers power, int32 val)
                         RemoveAurasDueToSpell(82125);
                         CastSpell(this, 82170, true);
                         CastSpell(this, 82193, true);
+                        CastSpell(this, 85414, true);
                     }
                 }
                 break;
@@ -20743,7 +20744,6 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                 }
                 case 39329: // Minecart (Kaja Cola)
                 case 46372: // Fusion Core
-                case 43888: // Malformation (Cho'gall)
                 {
                     ToCreature()->DespawnOrUnsummon(1000);
                     break;
