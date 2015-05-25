@@ -41,7 +41,11 @@ enum Spells
     SPELL_BERSERK               = 47008,
     SPELL_FURY_OF_CHOGALL       = 82524,
     SPELL_WORSHIPPING           = 91317,
-    SPELL_WORSHIPPING_LINKED    = 92314
+    SPELL_WORSHIPPING_LINKED    = 92314,
+    SPELL_CONSUME_BLOOD         = 82630,
+    SPELL_CONSUME_BLOOD_EFFECT  = 82659,
+    SPELL_BLOOD_CONSUMED        = 82361,
+    SPELL_DARKENED_CREATIONS    = 82414
 };
 
 enum Phases
@@ -65,14 +69,19 @@ enum Events
     EVENT_CONVERSION,
     EVENT_UNROOT_CHOGALL,
     EVENT_BERSERK,
-    EVENT_CHECK_FIRST_FURY
+    EVENT_CHECK_FIRST_FURY,
+    EVENT_CHECK_PHASE_TWO,
+    EVENT_REMOVE_SUMMONS,
+    EVENT_DARKENED_CREATION,
+    EVENT_CHECK_ACHIEVEMENT
 };
 
 enum Actions
 {
     ACTION_TALK_INTRO   = 1,
     ACTION_FIRE_POWER,
-    ACTION_SHADOW_POWER
+    ACTION_SHADOW_POWER,
+    ACTION_FINAL_PHASE
 };
 
 enum npcId
@@ -81,7 +90,8 @@ enum npcId
     NPC_SHADOW_LORD             = 47016,
     NPC_CORRUPTED_ADHERENT      = 43622,
     NPC_BLOOD_OF_THE_OLD_GOD    = 43707,
-    NPC_MALFORMATION            = 43888
+    NPC_MALFORMATION            = 43888,
+    NPC_DARKENED_CREATION       = 44045
 };
 
 enum portalEvents
@@ -138,8 +148,8 @@ enum malformationEvents
 
 enum spellSpecials
 {
-    SPELL_FESTER_BLOOD      = 82299, // Cast by boss -> after 3 sec 82337 with script eff for Festered Blood (82333) which summons Blood of the Old God oozes - npc 43707 (from dead adh).
-    SPELL_FESTERING_BLOOD   = 82914, // Living adherents use this - damage spell, triggers 82919 which is actual damage spell needs radius and script eff for applying corruption.
+    SPELL_FESTER_BLOOD      = 82299,
+    SPELL_FESTERING_BLOOD   = 82914
 };
 
 enum portalId
@@ -156,6 +166,11 @@ enum powerBarSpells
     SPELL_CORRUPTION_MALFORMATION   = 82125,
     SPELL_CORRUPTION_ABSOLUTE       = 82170,
     SPELL_ABSOLUTE_TRANSFORM        = 82193
+};
+
+enum achievementId
+{
+    ACHIEVEMENT_THE_ABYSS_WILL_GAZE_BACK_INTO_YOU   = 5312
 };
 
 class at_chogall_intro : public AreaTriggerScript
@@ -185,6 +200,7 @@ public:
 
         bool _introDone;
         bool isFirstFury;
+        bool achievementUnlock;
 
         void Reset()
         {
@@ -195,8 +211,11 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             Talk(SAY_AGGRO);
+            CleanupAuras();
             _EnterCombat();
+            achievementUnlock = true;
             isFirstFury = false;
+            me->setActive(true);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             me->RemoveAurasDueToSpell(SPELL_SIT_THRONE);
             DoCast(me, SPELL_CORRUPTED_BLOOD);
@@ -207,15 +226,18 @@ public:
             events.ScheduleEvent(EVENT_SUMMON_ADHERENT, 68000, 0, PHASE_ONE);
             events.ScheduleEvent(EVENT_CHECK_FIRST_FURY, 2000);
             events.ScheduleEvent(EVENT_BERSERK, 600000);
+            events.ScheduleEvent(EVENT_CHECK_PHASE_TWO, 5000, 0, PHASE_ONE);
+            events.ScheduleEvent(EVENT_CHECK_ACHIEVEMENT, 1000);
 
             if (GameObject* leftPortal = me->FindNearestGameObject(GO_PORTAL_LEFT, 500.0f))
                 leftPortal->SetGoState(GO_STATE_ACTIVE);
             if (GameObject* rightPortal = me->FindNearestGameObject(GO_PORTAL_RIGHT, 500.0f))
                 rightPortal->SetGoState(GO_STATE_ACTIVE);
             if (GameObject* centerHole = me->FindNearestGameObject(GO_CENTER_HOLE, 500.0f))
+            {
+                centerHole->EnableCollision(true);
                 centerHole->setActive(true);
-
-            CleanupAuras();
+            }
         }
 
         void EnterEvadeMode()
@@ -223,21 +245,24 @@ public:
             _EnterEvadeMode();
             if (me->isAlive())
                 Talk(SAY_WIPE);
+
             RemoveCharmedPlayers();
+            CleanupAuras();
+            DespawnAllSummonsInArea();
+
             isFirstFury = false;
+
             if (GameObject* leftPortal = me->FindNearestGameObject(GO_PORTAL_LEFT, 500.0f))
                 leftPortal->SetGoState(GO_STATE_READY);
             if (GameObject* rightPortal = me->FindNearestGameObject(GO_PORTAL_RIGHT, 500.0f))
                 rightPortal->SetGoState(GO_STATE_READY);
 
-            CleanupAuras();
-
             me->GetMotionMaster()->MoveTargetedHome();
+
             instance->SetBossState(DATA_CHOGALL, FAIL);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTED_BLOOD_BAR);
+
             summons.DespawnAll();
-            DespawnAllSummonsInArea();
             events.Reset();
             _DespawnAtEvade();
         }
@@ -249,18 +274,20 @@ public:
             _JustDied();
             DespawnAllSummonsInArea();
             RemoveCharmedPlayers();
+            CleanupAuras();
 
             if (GameObject* leftPortal = me->FindNearestGameObject(GO_PORTAL_LEFT, 500.0f))
                 leftPortal->SetGoState(GO_STATE_READY);
             if (GameObject* rightPortal = me->FindNearestGameObject(GO_PORTAL_RIGHT, 500.0f))
                 rightPortal->SetGoState(GO_STATE_READY);
 
-            CleanupAuras();
-
             events.Reset();
             instance->SetBossState(DATA_CHOGALL, DONE);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTED_BLOOD_BAR);
+
+            if (achievementUnlock)
+                instance->DoCompleteAchievement(ACHIEVEMENT_THE_ABYSS_WILL_GAZE_BACK_INTO_YOU);
         }
 
         void JustRespawned()
@@ -268,7 +295,7 @@ public:
             Reset();
         }
 
-        void JustSummoned(Creature* summon)
+        void JustSummoned(Creature* /*summon*/)
         {
         }
 
@@ -287,16 +314,17 @@ public:
             me->DespawnCreaturesInArea(NPC_SHADOW_LORD);
             me->DespawnCreaturesInArea(NPC_CORRUPTED_ADHERENT);
             me->DespawnCreaturesInArea(NPC_BLOOD_OF_THE_OLD_GOD);
+            me->DespawnCreaturesInArea(NPC_DARKENED_CREATION);
         }
 
         void CleanupAuras()
         {
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTED_BLOOD_BAR);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTION_ABSOLUTE);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTION_ACCELERATED);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTION_MALFORMATION);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTION_SICKNESS);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ABSOLUTE_TRANSFORM);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTED_BLOOD_BAR);
         }
 
         void RemoveCharmedPlayers()
@@ -351,7 +379,6 @@ public:
                         me->SendMovementFlagUpdate(false);
                         DoCast(me, SPELL_FLAMES_ORDERS, true);
 
-                        // Flames orders is 15 seconds after first fury, regardless whether or not shadow was last.
                         if (!isFirstFury)
                             events.ScheduleEvent(EVENT_FLAMES_ORDERS, 29000, 0, PHASE_ONE);
 
@@ -427,7 +454,6 @@ public:
                         if (!isFirstFury)
                             isFirstFury = true;
 
-                        // Worship is 10 seconds after first fury, regardless of what timer was at before 85%
                         events.CancelEvent(EVENT_CONVERSION);
                         events.CancelEvent(EVENT_SHADOWS_ORDERS);
                         events.CancelEvent(EVENT_FLAMES_ORDERS);
@@ -454,6 +480,45 @@ public:
                         }
                         events.RescheduleEvent(EVENT_CHECK_FIRST_FURY, 1500, 0, PHASE_ONE);
                         break;
+                    case EVENT_CHECK_PHASE_TWO:
+                        if (me->GetHealthPct() <= 25 && events.IsInPhase(PHASE_ONE))
+                        {
+                            events.SetPhase(PHASE_TWO);
+                            Talk(SAY_OLDGOD);
+                            me->StopMoving();
+                            me->SendMovementFlagUpdate(false);
+                            DoCast(SPELL_CONSUME_BLOOD);
+                            DoCast(SPELL_CONSUME_BLOOD_EFFECT);
+                            events.ScheduleEvent(EVENT_DARKENED_CREATION, 5000);
+                            events.CancelEvent(EVENT_CHECK_PHASE_TWO);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_PHASE_TWO, 1500, 0, PHASE_ONE);
+                        break;
+                    case EVENT_DARKENED_CREATION:
+                    {
+                        DoCast(SPELL_DARKENED_CREATIONS);
+                        events.RescheduleEvent(EVENT_DARKENED_CREATION, 30000, 0, PHASE_TWO);
+                        break;
+                    }
+                    case EVENT_CHECK_ACHIEVEMENT:
+                    {
+                        Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+                        if (!PlayerList.isEmpty())
+                        {
+                            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                            {
+                                if (i->getSource()->GetPower(POWER_ALTERNATE_POWER) && i->getSource()->GetPower(POWER_ALTERNATE_POWER) > 30)
+                                {
+                                    achievementUnlock = false;
+                                    events.CancelEvent(EVENT_CHECK_ACHIEVEMENT);
+                                    break;
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_ACHIEVEMENT, 1000);
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -693,21 +758,35 @@ public:
         {
             instance = creature->GetInstanceScript();
             deathVisual = false;
+            finalPhase = false;
         }
 
         InstanceScript* instance;
         EventMap events;
         bool deathVisual;
+        bool finalPhase;
 
         void IsSummonedBy(Unit* /*owner*/)
         {
             events.ScheduleEvent(EVENT_DEPRAVITY, 12000);
             events.ScheduleEvent(EVENT_CORRUPTING_CRASH, 15000);
-
+            me->setActive(true);
             me->SetInCombatWithZone();
 
             if (Player* player = me->FindNearestPlayer(500.0f))
                 AttackStart(player);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_FINAL_PHASE:
+                    finalPhase = true;
+                    break;
+                default:
+                    break;
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -725,8 +804,14 @@ public:
                 deathVisual = true;
             }
 
-            if (me->HasUnitState(UNIT_STATE_CASTING) || deathVisual)
+            if (me->HasUnitState(UNIT_STATE_CASTING) || deathVisual || me->HasUnitState(UNIT_STATE_STUNNED))
                 return;
+
+            if (finalPhase)
+            {
+                events.Reset();
+                return;
+            }
 
             events.Update(diff);
 
@@ -780,6 +865,7 @@ public:
         void IsSummonedBy(Unit* /*owner*/)
         {
             events.ScheduleEvent(EVENT_DEBILITATING_BEAM, 1000);
+            me->SetControlled(true, UNIT_STATE_ROOT);
         }
 
         void UpdateAI(uint32 diff)
@@ -834,6 +920,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            me->setActive(true);
             events.ScheduleEvent(EVENT_FIXATE, 100);
             events.ScheduleEvent(EVENT_MELEE_INCREASE_CORRUPTION, 2100);
         }
@@ -1393,6 +1480,65 @@ public:
     }
 };
 
+class spell_bot_consume_blood : public SpellScriptLoader
+{
+public:
+    spell_bot_consume_blood() : SpellScriptLoader("spell_bot_consume_blood") { }
+
+    class spell_bot_consume_blood_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_bot_consume_blood_SpellScript);
+
+        bool Validate(SpellInfo const* spellEntry)
+        {
+            if (!sSpellStore.LookupEntry(spellEntry->Id))
+                return false;
+            return true;
+        }
+
+        bool Load()
+        {
+            return true;
+        }
+
+        void EffectScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                std::list<Creature*> creatures;
+                GetCreatureListWithEntryInGrid(creatures, caster, NPC_CORRUPTED_ADHERENT, 200.0f);
+                if (creatures.empty())
+                    return;
+
+                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                {
+                    (*iter)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                    (*iter)->RemoveAllAuras();
+                    (*iter)->SetFlag(UNIT_NPC_EMOTESTATE, EMOTE_STATE_DEAD);
+                    (*iter)->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_DEAD);
+                    (*iter)->SetReactState(REACT_PASSIVE);
+                    (*iter)->SetControlled(true, UNIT_STATE_ROOT);
+                    (*iter)->SetDisplayId(11686);
+                    (*iter)->AI()->DoAction(ACTION_FINAL_PHASE);
+                }
+
+                if (Creature* adherent = caster->FindNearestCreature(NPC_CORRUPTED_ADHERENT, 500.0f))
+                    adherent->CastSpell(adherent, SPELL_BLOOD_CONSUMED, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_bot_consume_blood_SpellScript::EffectScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript * GetSpellScript() const
+    {
+        return new spell_bot_consume_blood_SpellScript();
+    }
+};
+
 void AddSC_boss_chogall()
 {
     new at_chogall_intro();
@@ -1416,4 +1562,5 @@ void AddSC_boss_chogall()
     new npc_bot_malformation_chogall();
     new spell_bot_twisted_devotion();
     new spell_bot_worshipping();
+    new spell_bot_consume_blood();
 }

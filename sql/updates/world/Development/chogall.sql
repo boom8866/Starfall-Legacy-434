@@ -103,3 +103,21 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 DELETE FROM `creature_template_addon` WHERE `entry` = '43888';
 INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
 (43888, '82167');
+
+UPDATE `gameobject_template` SET `flags`=40 WHERE `entry`=205898;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '82630';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 7, 82630, 0, 0, 31, 0, 3, 43622, 0, 0, 0, '', 'Targeting -> Adherent');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '82659';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 7, 82659, 0, 0, 31, 0, 3, 43622, 0, 0, 0, '', 'Targeting -> Adherent');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '82356';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 7, 82356, 0, 0, 31, 0, 3, 43622, 0, 0, 0, '', 'Targeting -> Adherent');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '82659';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(82659, 'spell_bot_consume_blood');

@@ -15842,37 +15842,51 @@ void Unit::SetPower(Powers power, int32 val)
         SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER ? true : false);
     }
 
-    // The Bastion of Twilight (Cho'gall encounter - Corrupted Blood)
-    if (GetMapId() == 671 && power == POWER_ALTERNATE_POWER)
+    if (power == POWER_ALTERNATE_POWER)
     {
-        // Corruption: Accelerated
-        if (GetPower(POWER_ALTERNATE_POWER) >= 25)
-            if (!HasAura(81836))
-                CastSpell(this, 81836, true);
-
-        // Corruption: Sickness
-        if (GetPower(POWER_ALTERNATE_POWER) >= 50)
-            if (!HasAura(81829))
-                CastSpell(this, 81829, true);
-
-        // Corruption: Malformation
-        if (GetPower(POWER_ALTERNATE_POWER) >= 75)
+        switch (GetMapId())
         {
-            if (!HasAura(82125))
+            case 617:   // The Bastion of Twilight (Corrupted Blood - Cho'gall)
             {
-                CastSpell(this, 82125, true);
-                SummonCreature(43888, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                // Corruption: Accelerated
+                if (GetPower(POWER_ALTERNATE_POWER) >= 25 && GetPower(POWER_ALTERNATE_POWER) < 50)
+                {
+                    if (!HasAura(81836))
+                        CastSpell(this, 81836, true);
+                }
+                // Corruption: Sickness
+                if (GetPower(POWER_ALTERNATE_POWER) >= 50 && GetPower(POWER_ALTERNATE_POWER) < 75)
+                {
+                    if (!HasAura(81829))
+                    {
+                        RemoveAurasDueToSpell(81836);
+                        CastSpell(this, 81829, true);
+                    }
+                }
+                // Corruption: Malformation
+                if (GetPower(POWER_ALTERNATE_POWER) >= 75 && GetPower(POWER_ALTERNATE_POWER) < 100)
+                {
+                    if (!HasAura(82125))
+                    {
+                        RemoveAurasDueToSpell(81829);
+                        CastSpell(this, 82125, true);
+                        SummonCreature(43888, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                    }
+                }
+                // Corruption: Absolute
+                if (GetPower(POWER_ALTERNATE_POWER) >= 100)
+                {
+                    if (!HasAura(82170))
+                    {
+                        RemoveAurasDueToSpell(82125);
+                        CastSpell(this, 82170, true);
+                        CastSpell(this, 82193, true);
+                    }
+                }
+                break;
             }
-        }
-
-        // Corruption: Absolute
-        if (GetPower(POWER_ALTERNATE_POWER) >= 100)
-        {
-            if (!HasAura(82170))
-            {
-                CastSpell(this, 82170, true);
-                CastSpell(this, 82193, true);
-            }
+            default:
+                break;
         }
     }
 

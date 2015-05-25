@@ -5326,6 +5326,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 93103: // Corrupted Blood
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
                 break;
+            case 82634: // Consume Blood
+                spellInfo->Effects[EFFECT_0].BasePoints = 0;
+                break;
             // Throne of the four Winds
             //  * Conclave of Wind
             case 85422: // Anshal - Nurture (due to some visual bugs)
