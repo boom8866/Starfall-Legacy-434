@@ -489,6 +489,10 @@ public:
                             DoCast(SPELL_CONSUME_BLOOD);
                             DoCast(SPELL_CONSUME_BLOOD_EFFECT);
                             me->DespawnCreaturesInArea(NPC_BLOOD_OF_THE_OLD_GOD);
+                            me->DespawnCreaturesInArea(NPC_FIRE_LORD);
+                            me->DespawnCreaturesInArea(NPC_SHADOW_LORD);
+                            me->DespawnCreaturesInArea(NPC_FIRE_PORTAL);
+                            me->DespawnCreaturesInArea(NPC_SHADOW_PORTAL);
                             events.ScheduleEvent(EVENT_DARKENED_CREATION, 5000);
                             events.CancelEvent(EVENT_CHECK_PHASE_TWO);
                             break;
@@ -1400,7 +1404,7 @@ public:
                     case EVENT_CHECK_OWNER:
                     {
                         if (Unit* owner = me->ToTempSummon()->GetSummoner())
-                            if (!owner || !owner->HasAura(SPELL_CORRUPTION_MALFORMATION))
+                            if (!owner->isAlive() || !owner->HasAura(SPELL_CORRUPTION_MALFORMATION))
                                 me->DisappearAndDie();
 
                         events.RescheduleEvent(EVENT_CHECK_OWNER, 2000);
