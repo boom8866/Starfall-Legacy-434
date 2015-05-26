@@ -561,6 +561,11 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             damage += damage * (maxDuration - duration);
                         }
                         break;
+                    case 86825: // Blackout (Theralion & Valiona - The Bastion of Twilight)
+                        // Prevent damage if target is under Ice Block, Divine Shield or Cloak of Shadows
+                        if (unitTarget->HasAura(27619) || unitTarget->HasAura(642) || unitTarget->HasAura(31224))
+                            damage = 0;
+                        break;
                     default:
                         break;
                 }
