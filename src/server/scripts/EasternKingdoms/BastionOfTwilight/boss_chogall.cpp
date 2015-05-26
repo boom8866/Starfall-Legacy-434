@@ -452,6 +452,7 @@ public:
                         DoCast(SPELL_BERSERK);
                         break;
                     case EVENT_FURY_OF_CHOGALL:
+                    {
                         if (!isFirstFury)
                             isFirstFury = true;
 
@@ -460,13 +461,12 @@ public:
                         events.CancelEvent(EVENT_FLAMES_ORDERS);
                         events.ScheduleEvent(EVENT_FLAMES_ORDERS, 15000, 0, PHASE_ONE);
 
-                        me->StopMoving();
-                        me->SendMovementFlagUpdate(false);
                         if (Unit* target = me->getVictim())
                             DoCast(target, SPELL_FURY_OF_CHOGALL);
 
                         events.ScheduleEvent(EVENT_FURY_OF_CHOGALL, 47000, PHASE_ONE);
                         break;
+                    }
                     case EVENT_FESTER_BLOOD:
                         DoCast(me, SPELL_FESTER_BLOOD);
                         break;
@@ -493,6 +493,8 @@ public:
                             me->DespawnCreaturesInArea(NPC_SHADOW_LORD);
                             me->DespawnCreaturesInArea(NPC_FIRE_PORTAL);
                             me->DespawnCreaturesInArea(NPC_SHADOW_PORTAL);
+                            me->RemoveAurasDueToSpell(SPELL_EMPOWERED_SHADOWS);
+                            me->RemoveAurasDueToSpell(SPELL_FLAMING_DESTRUCTION);
                             events.ScheduleEvent(EVENT_DARKENED_CREATION, 5000);
                             events.CancelEvent(EVENT_CHECK_PHASE_TWO);
                             break;
@@ -832,15 +834,13 @@ public:
                 switch (eventId)
                 {
                     case EVENT_DEPRAVITY:
-                    {
                         DoCast(me, SPELL_DEPRAVITY);
                         events.ScheduleEvent(EVENT_DEPRAVITY, (Is25ManRaid() ? 6000 : 12000));
                         break;
-                    }
                     case EVENT_CORRUPTING_CRASH:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_CORRUPT_CRASH);
-                        events.ScheduleEvent(EVENT_CORRUPTING_CRASH, urand(9500, 16500));
+                        events.ScheduleEvent(EVENT_CORRUPTING_CRASH, 9000);
                         break;
                     default:
                         break;
@@ -1398,7 +1398,7 @@ public:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_MALFORMATION_SHADOWBOLT);
-                        events.ScheduleEvent(EVENT_MALFORMATION_SHADOWBOLT, urand(7000, 14000));
+                        events.ScheduleEvent(EVENT_MALFORMATION_SHADOWBOLT, 8000);
                         break;
                     }
                     case EVENT_CHECK_OWNER:

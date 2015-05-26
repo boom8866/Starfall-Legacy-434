@@ -170,7 +170,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
 {
     public:
         boss_halfus_wyrmbreaker() : CreatureScript("boss_halfus_wyrmbreaker") { }
-            
+
         struct boss_halfus_wyrmbreakerAI : public BossAI
         {
             boss_halfus_wyrmbreakerAI(Creature* creature) : BossAI(creature, DATA_HALFUS_WYRMBREAKER)
@@ -179,12 +179,14 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 _orphanKilled = 0;
                 _combinationPicked = 0;
                 _introDone = false;
+                _roarAnnounced = false;
             }
 
             uint8 _roarCasts;
             uint8 _combinationPicked;
             uint8 _orphanKilled;
             bool _introDone;
+            bool _roarAnnounced;
 
             void EnterCombat(Unit* /*who*/)
             {
@@ -427,20 +429,22 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                             events.ScheduleEvent(EVENT_SHADOW_NOVA, 16000);
                             break;
                         case EVENT_FURIOUS_ROAR:
-                            if (_roarCasts == 0)
+                            if (!_roarAnnounced)
                                 events.ScheduleEvent(EVENT_TALK_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR));
 
-                            if (_roarCasts != 2)
+                            if (_roarCasts <= 2)
                             {
                                 _roarCasts++;
                                 DoCastAOE(SPELL_FURIOUS_ROAR);
-                                events.ScheduleEvent(EVENT_FURIOUS_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR) + 100);
+                                events.ScheduleEvent(EVENT_FURIOUS_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR) + 50);
+                                _roarAnnounced = true;
                             }
                             else
                             {
-                                DoCastAOE(SPELL_FURIOUS_ROAR);
-                                events.ScheduleEvent(EVENT_TALK_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR));
                                 events.ScheduleEvent(EVENT_FURIOUS_ROAR, 33000);
+                                // Reset counter
+                                _roarCasts = 0;
+                                _roarAnnounced = false;
                             }
                             break;
                         case EVENT_TALK_ROAR:
@@ -462,6 +466,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 DoMeleeAttackIfReady();
             }
         };
+
         CreatureAI* GetAI(Creature* creature) const
         {
             return new boss_halfus_wyrmbreakerAI(creature);
@@ -722,7 +727,7 @@ public:
             }
         }
 
-        void EnterEvadeMode ()
+        void EnterEvadeMode()
         {
             Reset();
             me->RemoveAllAuras();
@@ -740,6 +745,7 @@ public:
             DoMeleeAttackIfReady();
         }
     };
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_orphaned_whelpAI(creature);
