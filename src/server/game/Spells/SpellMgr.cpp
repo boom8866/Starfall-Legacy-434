@@ -4689,6 +4689,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 84211:
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(565);
                 break;
+            case 72221: // Luck of the Draw
+                spellInfo->StackAmount = 1;
+                break;
             case 85218: // Summon Gidwin Goldbraids
                 spellInfo->Effects[EFFECT_0].MiscValue = 46173;
                 break;

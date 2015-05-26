@@ -809,7 +809,7 @@ public:
             {
                 me->RemoveAllAuras();
                 DoCast(me, SPELL_SPILLED_VISUAL, true);
-                DoCast(me, SPELL_SPILLED_POOL, true);
+                me->CastWithDelay(1000, me, SPELL_SPILLED_POOL, true);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetFlag(UNIT_NPC_EMOTESTATE, EMOTE_STATE_DEAD);
                 me->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_DEAD);
