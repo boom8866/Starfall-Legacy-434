@@ -1608,6 +1608,7 @@ public:
                         case CLASS_PRIEST:
                         case CLASS_WARLOCK:
                         case CLASS_MAGE:
+                        case CLASS_HUNTER:
                             it++;
                             break;
                         case CLASS_ROGUE:
