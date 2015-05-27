@@ -1602,10 +1602,39 @@ public:
                     continue;
 
                 if (unit->GetTypeId() == TYPEID_PLAYER)
-                    if (!(unit->ToPlayer()->getClassMask() & CLASSMASK_WAND_USERS))
-                        it = targets.erase(it);
-                    else
-                        it++;
+                {
+                    switch (unit->ToPlayer()->getClass())
+                    {
+                        case CLASS_PRIEST:
+                        case CLASS_WARLOCK:
+                        case CLASS_MAGE:
+                            it++;
+                            break;
+                        case CLASS_ROGUE:
+                        case CLASS_WARRIOR:
+                        case CLASS_DEATH_KNIGHT:
+                            it = targets.erase(it);
+                            break;
+                        case CLASS_DRUID:
+                            if (unit->ToPlayer()->HasAura(84735))
+                                it = targets.erase(it);
+                            else
+                                it++;
+                            break;
+                        case CLASS_SHAMAN:
+                            if (unit->ToPlayer()->HasAura(30814))
+                                it = targets.erase(it);
+                            else
+                                it++;
+                            break;
+                        case CLASS_PALADIN:
+                            if (unit->ToPlayer()->HasAura(85102))
+                                it = targets.erase(it);
+                            else
+                                it++;
+                            break;
+                    }
+                }
             }
 
             if (targets.empty())
