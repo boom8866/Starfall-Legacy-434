@@ -643,15 +643,18 @@ public:
             switch (selected)
             {
                 case 1:
-                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -757.414f, -767.221f, me->GetPositionZ(), false);   // PREPARA A SINISTRA LATO THERALION
+                    // Theralion Left
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -757.414f, -767.221f, me->GetPositionZ(), false);
                     _pathSelected = 6;
                     break;
                 case 2:
-                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -740.481f, -770.554f, me->GetPositionZ(), false);   // PREPARA A CENTRO LATO THERALION
+                    // Theralion Center
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -740.481f, -770.554f, me->GetPositionZ(), false);
                     _pathSelected = 5;
                     break;
                 case 3:
-                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -724.299f, -769.867f, me->GetPositionZ(), false);   // PREPARA A DESTRA LATO THERALION
+                    // Theralion Right
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -724.299f, -769.867f, me->GetPositionZ(), false);
                     _pathSelected = 4;
                     break;
                 default:
@@ -665,15 +668,18 @@ public:
             switch (selected)
             {
                 case 1:
-                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -725.369f, -600.206f, me->GetPositionZ(), false);   // PREPARA A SINISTRA LATO VALIONA
+                    // Valiona Left
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -725.369f, -600.206f, me->GetPositionZ(), false);
                     _pathSelected = 3;
                     break;
                 case 2:
-                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -740.937f, -601.679f, me->GetPositionZ(), false);   // PREPARA AL CENTRO LATO VALIONA
+                    // Valiona Center
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -740.937f, -601.679f, me->GetPositionZ(), false);
                     _pathSelected = 2;
                     break;
                 case 3:
-                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -759.226f, -603.424f, me->GetPositionZ(), false);   // PREPARA A DESTRA LATO VALIONA
+                    // Valiona Right
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -759.226f, -603.424f, me->GetPositionZ(), false);
                     _pathSelected = 1;
                     break;
                 default:
@@ -681,6 +687,7 @@ public:
             }
         }
 
+        // Path Selector (Final)
         void SelectPathForBreath(uint8 pathSelected)
         {
             if (pathSelected >= 4)
