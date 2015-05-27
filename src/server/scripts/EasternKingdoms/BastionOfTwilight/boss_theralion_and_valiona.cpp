@@ -89,6 +89,9 @@ enum Spells
     SPELL_TWILIGHT_SHIFT_6                  = 92892,
     SPELL_TWILIGHT_SHIFT_7                  = 92893,
     SPELL_TWILIGHT_SHIFT_8                  = 92894,
+
+    // Berserk
+    SPELL_BERSERK                           = 47008
 };
 
 enum Events
@@ -125,6 +128,7 @@ enum Events
     EVENT_MOVE_DEEP_BREATH,
     EVENT_PREPARE_NEXT_BREATH,
     EVENT_CHECK_VALIONA,
+    EVENT_BERSERK,
 
     // Generic
     EVENT_SUMMON_COLLAPSING_PORTAL,
@@ -162,7 +166,6 @@ enum Points
     POINT_TAKEOFF_2,
     POINT_DEEP_BREATH_PREPARE,
     POINT_DEEP_BREATH_MOVE,
-
 };
 
 Position const TwilFlamePos[90] = // 15 per row, 2 rows per side, 3 sides.
@@ -362,9 +365,12 @@ public:
 
             if (Creature* theralion = me->FindNearestCreature(BOSS_THERALION, 500.0f, true))
                 theralion->AI()->AttackStart(who);
+
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
             events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 30000);
             events.ScheduleEvent(EVENT_BLACKOUT, 6000);
             events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 1);
+            events.ScheduleEvent(EVENT_BERSERK, 600000);
         }
 
         void EnterEvadeMode()
@@ -540,6 +546,8 @@ public:
                     events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 40000);
                     break;
                 case EVENT_DEVOURING_FLAMES:
+                    me->StopMoving();
+                    me->SendMovementFlagUpdate(false);
                     DoCast(me, SPELL_DEVOURING_FLAMES_AURA);
                     events.ScheduleEvent(EVENT_CLEAR_DEVOURING_FLAMES, 7600);
                     break;
@@ -628,6 +636,9 @@ public:
                 case EVENT_PREPARE_NEXT_BREATH:
                     me->RemoveAurasDueToSpell(SPELL_SPEED_BURST);
                     _sideLeft ? SelectPreparationLeftToRight(urand(1, 3)) : SelectPreparationRightToLeft(urand(1, 3));
+                    break;
+                case EVENT_BERSERK:
+                    DoCast(SPELL_BERSERK);
                     break;
                 default:
                     break;
@@ -779,8 +790,10 @@ public:
         {
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
             events.ScheduleEvent(EVENT_TAKEOFF_AT_AGGRO, 100);
             events.ScheduleEvent(EVENT_SCHEDULE_DAZZLING_DESTRUCTION, 85000);
+            events.ScheduleEvent(EVENT_BERSERK, 600000);
             if (Creature* valiona = me->FindNearestCreature(BOSS_VALIONA, 500.0f, true))
                 valiona->AI()->AttackStart(who);
         }
@@ -1025,6 +1038,9 @@ public:
                     }
                     break;
                 }
+                case EVENT_BERSERK:
+                    DoCast(SPELL_BERSERK);
+                    break;
                 default:
                     break;
                 }
@@ -1061,6 +1077,7 @@ public:
                 valiona->SetReactState(REACT_PASSIVE);
                 valiona->AttackStop();
                 valiona->SetFacingToObject(me);
+                valiona->SetOrientation(me->GetOrientation() + M_PI);
                 valiona->AI()->DoAction(ACTION_CAST_DEVOURING_FLAMES);
             }
         }
