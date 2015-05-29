@@ -680,9 +680,22 @@ WorldSafeLocsEntry const* BattlegroundBFG::GetClosestGraveYard(Player* player)
         }
         nodes.clear();
     }
+
     // If not, place ghost on starting location
     if (!good_entry)
-        good_entry = sWorldSafeLocsStore.LookupEntry(BG_BFG_GraveyardIds[teamIndex+5]);
+    {
+        switch (player->GetTeamId())
+        {
+            case TEAM_HORDE:
+                player->NearTeleportTo(1404.45f, 977.12f, 7.44f, 3.13f);
+                break;
+            case TEAM_ALLIANCE:
+                player->NearTeleportTo(905.68f, 1339.20f, 27.46f, 6.03f);
+                break;
+            default:
+                break;
+        }
+    }
 
     return good_entry;
 }
