@@ -1408,12 +1408,14 @@ public:
                     {
                         health += feludius->GetHealth();
                         feludius->AI()->DoAction(ACTION_TELEPORT);
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, feludius);
                     }
 
                     if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
                     {
                         health += ignacious->GetHealth();
                         ignacious->AI()->DoAction(ACTION_TELEPORT);
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, ignacious);
                     }
 
                     if (Creature* arion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARION)))
@@ -1423,17 +1425,21 @@ public:
                         terrastra->AI()->DoAction(ACTION_TURN_IN);
                     break;
                 case ACTION_SWITCH_PHASE_2:
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GROUNDED);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SWIRLING_WINDS);
                     events.ScheduleEvent(EVENT_SUMMON_MONSTROSITY, 15000);
                     if (Creature* arion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARION)))
                     {
                         health += arion->GetHealth();
                         arion->AI()->DoAction(ACTION_PREPARE_FUSE);
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, arion);
                     }
 
                     if (Creature* terrastra = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TERRASTRA)))
                     {
                         health += terrastra->GetHealth();
                         terrastra->AI()->DoAction(ACTION_PREPARE_FUSE);
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, terrastra);
                     }
 
                     if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
@@ -1457,6 +1463,8 @@ public:
                     break;
                 case ACTION_ENCOUNTER_DONE:
                     instance->SetBossState(DATA_ASCENDANT_COUNCIL, DONE);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GROUNDED);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SWIRLING_WINDS);
                     break;
                 default:
                     break;
