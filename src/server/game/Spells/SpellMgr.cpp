@@ -5318,11 +5318,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92486:
             case 92487:
             case 92488:
-            case 91317: // Worshipping
-            case 93365:
-            case 93366:
-            case 93367:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_OTHER_CASTS;
+                break;
+            case 83087: // Disperse
+            case 83078:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
+                spellInfo->Effects[EFFECT_0].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
                 break;
             // * Cho'gall
             case 81566: // Absorb Shadow
@@ -5337,6 +5338,12 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 85412: // Pooled Blood
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_NONE;
+                break;
+            case 91317: // Worshipping
+            case 93365:
+            case 93366:
+            case 93367:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_OTHER_CASTS;
                 break;
             // Throne of the four Winds
             //  * Conclave of Wind

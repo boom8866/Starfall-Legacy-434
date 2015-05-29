@@ -2358,7 +2358,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
         case SPELLFAMILY_GENERIC:
         {
             // Food buffs cannot stack!
-            if (m_spellInfo->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)
+            if (m_spellInfo && m_caster && m_spellInfo->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)
                 m_caster->RemoveFoodBuffAurasWithExclusion(m_spellInfo->Id);
 
             switch (m_spellAura->GetId())
