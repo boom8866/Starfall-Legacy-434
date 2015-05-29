@@ -684,6 +684,7 @@ WorldSafeLocsEntry const* BattlegroundBFG::GetClosestGraveYard(Player* player)
     // If not, place ghost on starting location
     if (!good_entry)
     {
+        good_entry = sWorldSafeLocsStore.LookupEntry(BG_BFG_GraveyardIds[teamIndex + 5]);
         switch (player->GetTeamId())
         {
             case TEAM_HORDE:
