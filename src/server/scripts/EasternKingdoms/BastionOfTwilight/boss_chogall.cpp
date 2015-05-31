@@ -423,9 +423,10 @@ public:
                             Talk(SAY_CONVERSION_SPECIAL);
                             for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
                             {
-                                (*itr)->CastStop(SPELL_WORSHIPPING);
-                                (*itr)->RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
                                 (*itr)->StopMoving();
+                                (*itr)->SendMovementFlagUpdate(false);
+                                (*itr)->SetUnitMovementFlags(MOVEMENTFLAG_NONE);
+                                (*itr)->CastStop(SPELL_WORSHIPPING);
                                 (*itr)->SetControlled(true, UNIT_STATE_ROOT);
                                 (*itr)->CastSpell(me, SPELL_WORSHIPPING, true);
                             }
@@ -1456,10 +1457,7 @@ public:
                         session->SendNotification("You are not in control of your actions");
 
                 if (Creature* chogall = target->FindNearestCreature(BOSS_CHOGALL, 500.0f))
-                {
-                    target->SetFacingToObject(chogall);
                     target->SetCharmedBy(chogall, CHARM_TYPE_CHARM);
-                }
 
                 target->CastSpell(target, SPELL_WORSHIPPING_LINKED, true);
                 target->SetControlled(true, UNIT_STATE_ROOT);

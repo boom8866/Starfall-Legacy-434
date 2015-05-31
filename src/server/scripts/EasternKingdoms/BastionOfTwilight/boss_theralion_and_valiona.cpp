@@ -543,6 +543,8 @@ public:
                     break;
                 case EVENT_DEVOURING_FLAMES_TARGETING:
                     DoCastAOE(SPELL_DEVOURING_FLAMES_DUMMY_AOE);
+                    me->StopMoving();
+                    me->SendMovementFlagUpdate(false);
                     events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 40000);
                     break;
                 case EVENT_DEVOURING_FLAMES:
