@@ -495,7 +495,7 @@ public:
                             me->DespawnCreaturesInArea(NPC_SHADOW_PORTAL);
                             me->RemoveAurasDueToSpell(SPELL_EMPOWERED_SHADOWS);
                             me->RemoveAurasDueToSpell(SPELL_FLAMING_DESTRUCTION);
-                            events.ScheduleEvent(EVENT_DARKENED_CREATION, 5000);
+                            events.ScheduleEvent(EVENT_DARKENED_CREATION, 20000);
                             events.CancelEvent(EVENT_CHECK_PHASE_TWO);
                             break;
                         }
@@ -511,7 +511,7 @@ public:
                         DoCast(SPELL_DARKENED_CREATIONS);
 
                         for (int8 i = 0; i < int32(DARKENED_CREATIONS); i++)
-                            DoCast(me, SPELL_DARKENED_CREATIONS, true);
+                            DoCast(me, SPELL_DARKENED_CREATIONS);
 
                         events.RescheduleEvent(EVENT_DARKENED_CREATION, 30000, 0, PHASE_TWO);
                         break;
