@@ -307,7 +307,10 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 summons.DespawnAll();
                 if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL_HALFUS_INTRO)))
+                {
                     chogall->AI()->TalkToMap(SAY_HALFUS_DIED);
+                    chogall->DespawnOrUnsummon(10000);
+                }
                 if (_drakeKilledCount >= 2 && _unlockAchievement)
                     instance->DoCompleteAchievement(ACHIEVEMENT_THE_ONLY_ESCAPE);
             }
