@@ -5005,6 +5005,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 100752:// Using Steam Tonk Controller
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
+            case 93554: // Fury of the Twilight Flight
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(3);
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike
