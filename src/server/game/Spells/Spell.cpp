@@ -1261,7 +1261,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                     maxSize = 3;
                     power = POWER_MANA;
                 }
-                else if (m_spellInfo->Id == 81751) // Atonement
+                else if (m_spellInfo->Id == 81751 || m_spellInfo->Id == 94472) // Atonement
                 {
                    maxSize = 1;
                    power = POWER_HEALTH;
@@ -1272,7 +1272,8 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                 // Remove targets outside caster's raid
                 for (std::list<Unit*>::iterator itr = unitTargets.begin(); itr != unitTargets.end();)
                 {
-                    if (!(*itr)->IsInRaidWith(m_caster))
+                    // Exception for Atonement!
+                    if (!(*itr)->IsInRaidWith(m_caster) || ((m_spellInfo->Id == 81751 || m_spellInfo->Id == 94472) && (m_caster->getAttackerForHelper() && !m_caster->getAttackerForHelper()->IsWithinDistInMap((*itr), 20.0f) && (*itr) != m_caster)))
                         itr = unitTargets.erase(itr);
                     else
                         ++itr;
@@ -1289,6 +1290,11 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                 {
                     maxSize = 5;
                     power = POWER_HEALTH;
+                }
+                else if (m_spellInfo->Id == 81269) // Efflorescence
+                {
+                   maxSize = 3;
+                   power = POWER_HEALTH;
                 }
                 else
                     break;
@@ -2817,8 +2823,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         if (effectMask & (1 << effectNumber))
             HandleEffects(unit, NULL, NULL, effectNumber, SPELL_EFFECT_HANDLE_HIT_TARGET);
 
-    // Exception for Cloak of Shadows
-    if (m_spellInfo && unitTarget->HasAura(31224))
+    // Exception for Cloak of Shadows and Vanish
+    if (m_spellInfo && (unitTarget->HasAura(31224) || unitTarget->HasAura(11327)))
         if (!(m_spellInfo->Attributes & SPELL_ATTR3_IGNORE_HIT_RESULT))
             return SPELL_MISS_MISS;
 
@@ -4990,6 +4996,10 @@ void Spell::TakeRunePower(bool didHit)
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this);
     }
 
+    // Let's say we use a skill that requires a Frost rune. This is the order:
+    // - Frost rune
+    // - Death rune, originally a Frost rune
+    // - Death rune, any kind
     runeCost[RUNE_DEATH] = 0;                               // calculated later
 
     for (uint32 i = 0; i < MAX_RUNES; ++i)
@@ -5003,8 +5013,32 @@ void Spell::TakeRunePower(bool didHit)
         }
     }
 
+    // Find a Death rune where the base rune matches the one we need
     runeCost[RUNE_DEATH] = runeCost[RUNE_BLOOD] + runeCost[RUNE_UNHOLY] + runeCost[RUNE_FROST];
+    if (runeCost[RUNE_DEATH] > 0)
+    {
+        for (uint32 i = 0; i < MAX_RUNES; ++i)
+        {
+            RuneType rune = player->GetCurrentRune(i);
+            RuneType baseRune = player->GetBaseRune(i);
+            if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH && runeCost[baseRune] > 0)
+            {
+                player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
+                player->SetLastUsedRune(rune);
+                runeCost[baseRune]--;
+                runeCost[rune]--;
 
+                // keep Death Rune type if missed
+                if (didHit)
+                    player->RestoreBaseRune(i);
+
+                if (runeCost[RUNE_DEATH] == 0)
+                    break;
+            }
+        }
+    }
+
+    // Grab any Death rune
     if (runeCost[RUNE_DEATH] > 0)
     {
         for (uint32 i = 0; i < MAX_RUNES; ++i)
@@ -8190,9 +8224,13 @@ void Spell::TriggerGlobalCooldown()
         {
             case 35395: // Crusader Strike
                 m_caster->ToPlayer()->AddSpellCooldown(53385, 0, time(NULL) + 4);
+                m_caster->ToPlayer()->AddSpellCooldown(53595, 0, time(NULL) + 3);
                 break;
             case 53385: // Divine Storm
                 m_caster->ToPlayer()->AddSpellCooldown(35395, 0, time(NULL) + 4);
+                break;
+            case 53595: // Hammer of the Righteous
+                m_caster->ToPlayer()->AddSpellCooldown(35395, 0, time(NULL) + 3);
                 break;
             case 8056:  // Frost Shock
                 m_caster->ToPlayer()->AddSpellCooldown(8050, 0, time(NULL) + 3);

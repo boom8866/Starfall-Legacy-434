@@ -89,6 +89,9 @@ enum Spells
     SPELL_TWILIGHT_SHIFT_6                  = 92892,
     SPELL_TWILIGHT_SHIFT_7                  = 92893,
     SPELL_TWILIGHT_SHIFT_8                  = 92894,
+
+    // Berserk
+    SPELL_BERSERK                           = 47008
 };
 
 enum Events
@@ -125,6 +128,7 @@ enum Events
     EVENT_MOVE_DEEP_BREATH,
     EVENT_PREPARE_NEXT_BREATH,
     EVENT_CHECK_VALIONA,
+    EVENT_BERSERK,
 
     // Generic
     EVENT_SUMMON_COLLAPSING_PORTAL,
@@ -162,7 +166,6 @@ enum Points
     POINT_TAKEOFF_2,
     POINT_DEEP_BREATH_PREPARE,
     POINT_DEEP_BREATH_MOVE,
-
 };
 
 Position const TwilFlamePos[90] = // 15 per row, 2 rows per side, 3 sides.
@@ -338,11 +341,16 @@ public:
             _isOnGround = true;
             _introDone = false;
             _breathCounter = 0;
+            _preparationRandom = 0;
+            _pathSelected = 0;
+            _sideLeft = true;
         }
 
         bool _introDone;
         bool _isOnGround;
         uint8 _breathCounter;
+        bool _sideLeft;
+        uint8 _pathSelected, _preparationRandom;
 
         void Reset()
         {
@@ -357,9 +365,12 @@ public:
 
             if (Creature* theralion = me->FindNearestCreature(BOSS_THERALION, 500.0f, true))
                 theralion->AI()->AttackStart(who);
+
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
             events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 30000);
             events.ScheduleEvent(EVENT_BLACKOUT, 6000);
             events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 1);
+            events.ScheduleEvent(EVENT_BERSERK, 600000);
         }
 
         void EnterEvadeMode()
@@ -485,11 +496,7 @@ public:
                 events.ScheduleEvent(EVENT_LAND, 1);
                 break;
             case POINT_DEEP_BREATH_PREPARE:
-                if (_breathCounter == 0)
-                    events.ScheduleEvent(EVENT_MOVE_DEEP_BREATH, 2000);
-                if (_breathCounter == 1)
-                    events.ScheduleEvent(EVENT_MOVE_DEEP_BREATH, 2000);
-                if (_breathCounter)
+                if (_breathCounter < 3)
                     events.ScheduleEvent(EVENT_MOVE_DEEP_BREATH, 2000);
                 break;
             case POINT_DEEP_BREATH_MOVE:
@@ -536,9 +543,13 @@ public:
                     break;
                 case EVENT_DEVOURING_FLAMES_TARGETING:
                     DoCastAOE(SPELL_DEVOURING_FLAMES_DUMMY_AOE);
+                    me->StopMoving();
+                    me->SendMovementFlagUpdate(false);
                     events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 40000);
                     break;
                 case EVENT_DEVOURING_FLAMES:
+                    me->StopMoving();
+                    me->SendMovementFlagUpdate(false);
                     DoCast(me, SPELL_DEVOURING_FLAMES_AURA);
                     events.ScheduleEvent(EVENT_CLEAR_DEVOURING_FLAMES, 7600);
                     break;
@@ -598,29 +609,16 @@ public:
                     events.CancelEvent(EVENT_TWILIGHT_METEORITE);
                     TalkToMap(SAY_VALIONA_DEEP_BREATH);
                     TalkToMap(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
-                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -723.525f, -769.260f, me->GetPositionZ(), false);
+                    _preparationRandom = urand(0, 1);
+                    if (_preparationRandom == 1)
+                        SelectPreparationRightToLeft(urand(1, 3));
+                    else
+                        SelectPreparationLeftToRight(urand(1, 3));
                     break;
                 case EVENT_MOVE_DEEP_BREATH:
                     DoCast(me, SPELL_DEEP_BREATH_SCRIPT);
                     DoCast(me, SPELL_SPEED_BURST);
-                    if (_breathCounter == 0)
-                    {
-                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -725.077f, -613.762f, me->GetPositionZ(), false);
-                        for (uint16 i = 1; i < 31; i++)
-                            me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
-                    }
-                    else if (_breathCounter == 1)
-                    {
-                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -738.849f, -769.072f, me->GetPositionZ(), false);
-                        for (uint16 i = 31;  i < 61; i++)
-                            me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
-                    }
-                    else if (_breathCounter == 2)
-                    {
-                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -763.181f, -626.995f, me->GetPositionZ(), false);
-                        for (uint16 i = 61; i < 90; i++)
-                            me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
-                    }
+                    SelectPathForBreath(_pathSelected);
                     break;
                 case EVENT_PREPARE_TO_LAND:
                     me->RemoveAurasDueToSpell(SPELL_SPEED_BURST);
@@ -639,18 +637,128 @@ public:
                     break;
                 case EVENT_PREPARE_NEXT_BREATH:
                     me->RemoveAurasDueToSpell(SPELL_SPEED_BURST);
-                    if (_breathCounter == 1)
-                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -740.447f, -612.804f, me->GetPositionZ(), false);
-                    else if (_breathCounter == 2)
-                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -757.691f, -766.305f, me->GetPositionZ(), false);
+                    _sideLeft ? SelectPreparationLeftToRight(urand(1, 3)) : SelectPreparationRightToLeft(urand(1, 3));
+                    break;
+                case EVENT_BERSERK:
+                    DoCast(SPELL_BERSERK);
                     break;
                 default:
                     break;
                 }
             }
+
             DoMeleeAttackIfReady();
         }
+
+        // Theralion Side (Left)
+        void SelectPreparationLeftToRight(uint8 selected)
+        {
+            switch (selected)
+            {
+                case 1:
+                    // Theralion Left
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -757.414f, -767.221f, me->GetPositionZ(), false);
+                    _pathSelected = 6;
+                    break;
+                case 2:
+                    // Theralion Center
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -740.481f, -770.554f, me->GetPositionZ(), false);
+                    _pathSelected = 5;
+                    break;
+                case 3:
+                    // Theralion Right
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -724.299f, -769.867f, me->GetPositionZ(), false);
+                    _pathSelected = 4;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // Valiona Side (Right)
+        void SelectPreparationRightToLeft(uint8 selected)
+        {
+            switch (selected)
+            {
+                case 1:
+                    // Valiona Left
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -725.369f, -600.206f, me->GetPositionZ(), false);
+                    _pathSelected = 3;
+                    break;
+                case 2:
+                    // Valiona Center
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -740.937f, -601.679f, me->GetPositionZ(), false);
+                    _pathSelected = 2;
+                    break;
+                case 3:
+                    // Valiona Right
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -759.226f, -603.424f, me->GetPositionZ(), false);
+                    _pathSelected = 1;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // Path Selector (Final)
+        void SelectPathForBreath(uint8 pathSelected)
+        {
+            if (pathSelected >= 4)
+                _sideLeft = false;
+
+            if (pathSelected <= 3)
+                _sideLeft = true;
+
+            switch (pathSelected)
+            {
+                case 1:
+                {
+                    DoCast(SPELL_SPEED_BURST);
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -757.414f, -767.221f, me->GetPositionZ(), false);
+                    for (uint16 i = 61; i < 90; i++)
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    break;
+                }
+                case 2:
+                {
+                    DoCast(SPELL_SPEED_BURST);
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -740.481f, -770.554f, me->GetPositionZ(), false);
+                    for (uint16 i = 31; i < 61; i++)
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    break;
+                }
+                case 3:
+                {
+                    DoCast(SPELL_SPEED_BURST);
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -724.299f, -769.867f, me->GetPositionZ(), false);
+                    for (uint16 i = 1; i < 31; i++)
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    break;
+                }
+                case 4:
+                    DoCast(SPELL_SPEED_BURST);
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -725.369f, -600.206f, me->GetPositionZ(), false);
+                    for (uint16 i = 1; i < 31; i++)
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    break;
+                case 5:
+                    DoCast(SPELL_SPEED_BURST);
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -740.937f, -601.679f, me->GetPositionZ(), false);
+                    for (uint16 i = 31; i < 61; i++)
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    break;
+                case 6:
+                    DoCast(SPELL_SPEED_BURST);
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -759.226f, -603.424f, me->GetPositionZ(), false);
+                    for (uint16 i = 61; i < 90; i++)
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    break;
+                default:
+                    break;
+            }
+        }
     };
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new boss_valionaAI(creature);
@@ -684,8 +792,10 @@ public:
         {
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
             events.ScheduleEvent(EVENT_TAKEOFF_AT_AGGRO, 100);
             events.ScheduleEvent(EVENT_SCHEDULE_DAZZLING_DESTRUCTION, 85000);
+            events.ScheduleEvent(EVENT_BERSERK, 600000);
             if (Creature* valiona = me->FindNearestCreature(BOSS_VALIONA, 500.0f, true))
                 valiona->AI()->AttackStart(who);
         }
@@ -930,6 +1040,9 @@ public:
                     }
                     break;
                 }
+                case EVENT_BERSERK:
+                    DoCast(SPELL_BERSERK);
+                    break;
                 default:
                     break;
                 }
@@ -966,6 +1079,7 @@ public:
                 valiona->SetReactState(REACT_PASSIVE);
                 valiona->AttackStop();
                 valiona->SetFacingToObject(me);
+                valiona->SetOrientation(me->GetOrientation() + M_PI);
                 valiona->AI()->DoAction(ACTION_CAST_DEVOURING_FLAMES);
             }
         }
@@ -1330,7 +1444,7 @@ public:
     {
         PrepareAuraScript(spell_tav_blackout_aura_AuraScript);
 
-        void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* owner = GetOwner()->ToUnit())
                 owner->CastSpell(owner, SPELL_BLACKOUT_DAMAGE, true);
@@ -1338,7 +1452,7 @@ public:
 
         void Register()
         {
-            OnEffectRemove += AuraEffectRemoveFn(spell_tav_blackout_aura_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SCHOOL_HEAL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_tav_blackout_aura_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SCHOOL_HEAL_ABSORB, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
@@ -1507,10 +1621,40 @@ public:
                     continue;
 
                 if (unit->GetTypeId() == TYPEID_PLAYER)
-                    if (!(unit->ToPlayer()->getClassMask() & CLASSMASK_WAND_USERS))
-                        it = targets.erase(it);
-                    else
-                        it++;
+                {
+                    switch (unit->ToPlayer()->getClass())
+                    {
+                        case CLASS_PRIEST:
+                        case CLASS_WARLOCK:
+                        case CLASS_MAGE:
+                        case CLASS_HUNTER:
+                            it++;
+                            break;
+                        case CLASS_ROGUE:
+                        case CLASS_WARRIOR:
+                        case CLASS_DEATH_KNIGHT:
+                            it = targets.erase(it);
+                            break;
+                        case CLASS_DRUID:
+                            if (unit->ToPlayer()->HasAura(84735))
+                                it = targets.erase(it);
+                            else
+                                it++;
+                            break;
+                        case CLASS_SHAMAN:
+                            if (unit->ToPlayer()->HasAura(30814))
+                                it = targets.erase(it);
+                            else
+                                it++;
+                            break;
+                        case CLASS_PALADIN:
+                            if (unit->ToPlayer()->HasAura(85102))
+                                it = targets.erase(it);
+                            else
+                                it++;
+                            break;
+                    }
+                }
             }
 
             if (targets.empty())

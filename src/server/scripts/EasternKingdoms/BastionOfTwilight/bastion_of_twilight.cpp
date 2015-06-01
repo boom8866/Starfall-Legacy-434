@@ -3,7 +3,8 @@
 
 enum actionId
 {
-    ACTION_CHECK_CHANNELERS     = 1
+    ACTION_CHECK_CHANNELERS     = 1,
+    ACTION_WAVES
 };
 
 class npc_bot_twilight_phase_twister : public CreatureScript
@@ -315,9 +316,67 @@ public:
     }
 };
 
+class npc_chogall_wave_event : public CreatureScript
+{
+public:
+    npc_chogall_wave_event() : CreatureScript("npc_chogall_wave_event")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_ENABLE_WAVES  = 1
+    };
+
+    struct npc_chogall_wave_eventAI : public ScriptedAI
+    {
+        npc_chogall_wave_eventAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_WAVES:
+                    events.ScheduleEvent(EVENT_ENABLE_WAVES, 1500);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ENABLE_WAVES:
+                        // TODO: Use the selector
+                        events.RescheduleEvent(EVENT_ENABLE_WAVES, 60000);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_chogall_wave_eventAI(creature);
+    }
+};
+
 void AddSC_bastion_of_twilight()
 {
     new npc_bot_twilight_phase_twister();
     new npc_bot_twilight_orb();
     new spell_bot_phased_burn();
+    new npc_chogall_wave_event();
 }

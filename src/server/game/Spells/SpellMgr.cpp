@@ -2917,6 +2917,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 break;
+            case 73921: // Healing Rain
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_DIMINISH_HEAL;
+                break;
             case 18500: // Wing Buffet
             case 33086: // Wild Bite
             case 49749: // Piercing Blow
@@ -3379,7 +3382,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_CONFUSED | SPELL_ATTR5_USABLE_WHILE_FEARED | SPELL_ATTR5_USABLE_WHILE_STUNNED;
                 break;
             case 81751: // Atonement
-                spellInfo->Effects[EFFECT_0].BasePoints = 0;
+            case 94472: // Atonement (secondary)
+            case 22482: // Blade Flurry
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
+                spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
                 break;
             case 26022: // Pursuit of Justice
             case 26023:
@@ -4876,6 +4882,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 84211:
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(565);
                 break;
+            case 72221: // Luck of the Draw
+                spellInfo->StackAmount = 1;
+                break;
             case 85218: // Summon Gidwin Goldbraids
                 spellInfo->Effects[EFFECT_0].MiscValue = 46173;
                 break;
@@ -5189,6 +5198,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 100752:// Using Steam Tonk Controller
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
+            case 93554: // Fury of the Twilight Flight
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(3);
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike
@@ -5475,6 +5487,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92881:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 break;
+            case 86301: // Unstable Twilight
+                spellInfo->Effects[EFFECT_0].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_3_YARDS);
+                break;
             // * Ascendant Council
             case 82772: // Frozen
             case 92503:
@@ -5499,6 +5514,31 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92486:
             case 92487:
             case 92488:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_OTHER_CASTS;
+                break;
+            case 83087: // Disperse
+            case 83078:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
+                spellInfo->Effects[EFFECT_0].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
+                break;
+            // * Cho'gall
+            case 81566: // Absorb Shadow
+            case 81196: // Absorb Fire
+                spellInfo->InterruptFlags = 0;
+                break;
+            case 93103: // Corrupted Blood
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+                break;
+            case 82634: // Consume Blood
+                spellInfo->Effects[EFFECT_0].BasePoints = 0;
+                break;
+            case 85412: // Pooled Blood
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_NONE;
+                break;
+            case 91317: // Worshipping
+            case 93365:
+            case 93366:
+            case 93367:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_OTHER_CASTS;
                 break;
             // Throne of the four Winds

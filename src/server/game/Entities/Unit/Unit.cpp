@@ -3077,13 +3077,6 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     if (spell->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT)
         return SPELL_MISS_NONE;
 
-    // All non-damaging interrupts off the global cooldown will now always hit the target. This includes Pummel, Kick, Mind Freeze, Rebuke, Skull Bash, Counterspell, Wind Shear, Solar Beam, Silencing Shot, and related player pet abilities.
-    /*if (spell->Effects[EFFECT_0].Effect == SPELL_EFFECT_INTERRUPT_CAST || spell->Effects[EFFECT_1].Effect == SPELL_EFFECT_INTERRUPT_CAST)
-    {
-        if (spell->StartRecoveryCategory == 0 && spell->StartRecoveryTime == 0)
-            return SPELL_MISS_NONE;
-    }*/
-
     // Chance resist mechanic (select max value from every mechanic spell effect)
     int32 resist_chance = victim->GetMechanicResistChance(spell) * 100;
     tmp += resist_chance;
@@ -3134,6 +3127,13 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
     // For spells like Dark Command etc...
     if (spell->AttributesEx8 & SPELL_ATTR8_CANT_MISS)
         return SPELL_MISS_NONE;
+
+    // All non-damaging interrupts off the global cooldown will now always hit the target. This includes Pummel, Kick, Mind Freeze, Rebuke, Skull Bash, Counterspell, Wind Shear, Solar Beam, Silencing Shot, and related player pet abilities.
+    if (spell->Effects[EFFECT_0].Effect == SPELL_EFFECT_INTERRUPT_CAST || spell->Effects[EFFECT_1].Effect == SPELL_EFFECT_INTERRUPT_CAST)
+    {
+        if (!spell->StartRecoveryCategory && !spell->StartRecoveryTime)
+            return SPELL_MISS_NONE;
+    }
 
     // For all kind of player summons (Get hit chance from owner)
     if (GetTypeId() == TYPEID_UNIT && (ToCreature()->isSummon() || ToCreature()->isTotem()))
@@ -3553,7 +3553,22 @@ void Unit::InterruptSpellWithSource(CurrentSpellTypes spellType, Unit* source, b
         && (withInstant || spell->GetCastTime() > 0))
     {
         if (spell->GetSpellInfo()->AttributesCu & SPELL_ATTR0_CU_IGNORE_OTHER_CASTS)
-            return;
+        {
+            switch (spell->GetSpellInfo()->Id)
+            {
+                case 91317: // Worshipping (The Bastion of Twilight: Cho'gall)
+                case 93365:
+                case 93366:
+                case 93367:
+                {
+                    if (source == this)
+                        return;
+                    break;
+                }
+                default:
+                    return;
+            }
+        }
 
         // for example, do not let self-stun aura interrupt itself
         if (!spell->IsInterruptable())
@@ -6497,8 +6512,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 case 14523:
                 case 81749:
                 {
-                    basepoints0 = int32(ApplyPct(damage, triggerAmount));
-                    triggered_spell_id = 81751;
+                    basepoints0 = CalculatePct(int32(damage), triggerAmount);
+                    basepoints0 -= (1 + getLevel());
+
+                    if (procEx & PROC_EX_CRITICAL_HIT)
+                        triggered_spell_id = 94472;
+                    else
+                        triggered_spell_id = 81751;
                     break;
                 }
                 // Vampiric Embrace
@@ -8161,10 +8181,8 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 case 86172:
                 {
                     *handled = true;
-                    // Judgement, Exorcism, Templar's Verdict, Divine Storm, Inquisition, Holy Wrath, Hammer of Wrath
-                    if (procSpell->Id == 54158 || procSpell->Id == 879 || procSpell->Id == 85256
-                        || procSpell->Id == 53385 || procSpell->Id == 84963 || procSpell->Id == 2812
-                        || procSpell->Id == 24275)
+                    // Judgement, Exorcism, Templar's Verdict, Inquisition, Holy Wrath, Hammer of Wrath
+                    if (procSpell->Id == 54158 || procSpell->Id == 879 || procSpell->Id == 85256 || procSpell->Id == 84963 || procSpell->Id == 2812 || procSpell->Id == 24275)
                     {
                         // Selfless Healer (Effect)
                         if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 2170, 0))
@@ -9603,6 +9621,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             // Handled via spellscripts
             return false;
+            break;
+        }
+        case 81749: // Atonement
+        case 14523:
+        {
+            // Special exception for Holy Fire DoT effect
+            if (procSpell && procSpell->IsPeriodicDamage() && procSpell->Id != 17140)
+                return false;
             break;
         }
         // Battle Trance
@@ -12057,6 +12083,10 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
     if ((spellProto->AttributesEx2 & SPELL_ATTR2_CANT_CRIT))
         return false;
 
+    // Atonement (secondary, 100% crit)
+    if (spellProto->Id == 94472)
+        return true;
+
     float crit_chance = 0.0f;
 
     // Hunter Pets handling
@@ -12754,10 +12784,18 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
         TakenTotal += int32(TakenAdvertisedBenefit * coeff * factorMod);
     }
 
-    AuraEffectList const& mHealingGet= GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_RECEIVED);
+    AuraEffectList const& mHealingGet = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_RECEIVED);
     for (AuraEffectList::const_iterator i = mHealingGet.begin(); i != mHealingGet.end(); ++i)
+    {
         if (caster->GetGUID() == (*i)->GetCasterGUID() && (*i)->IsAffectingSpell(spellProto))
+        {
+            // Atonement and Grace shouldn't work
+            if (((*i)->GetId() == 77613 || (*i)->GetId() == 47930) && (spellProto->Id == 81751 || spellProto->Id == 94472))
+                continue;
+
             AddPct(TakenTotalMod, (*i)->GetAmount());
+        }
+    }
 
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
@@ -15817,6 +15855,55 @@ void Unit::SetPower(Powers power, int32 val)
         data << uint8(power);
         data << int32(val);
         SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER ? true : false);
+    }
+
+    if (power == POWER_ALTERNATE_POWER)
+    {
+        switch (GetMapId())
+        {
+            case 671:   // The Bastion of Twilight (Corrupted Blood - Cho'gall)
+            {
+                // Corruption: Accelerated
+                if (GetPower(POWER_ALTERNATE_POWER) >= 25 && GetPower(POWER_ALTERNATE_POWER) < 50)
+                {
+                    if (!HasAura(81836))
+                        CastSpell(this, 81836, true);
+                }
+                // Corruption: Sickness
+                if (GetPower(POWER_ALTERNATE_POWER) >= 50 && GetPower(POWER_ALTERNATE_POWER) < 75)
+                {
+                    if (!HasAura(81829))
+                    {
+                        RemoveAurasDueToSpell(81836);
+                        CastSpell(this, 81829, true);
+                    }
+                }
+                // Corruption: Malformation
+                if (GetPower(POWER_ALTERNATE_POWER) >= 75 && GetPower(POWER_ALTERNATE_POWER) < 100)
+                {
+                    if (!HasAura(82125))
+                    {
+                        RemoveAurasDueToSpell(81829);
+                        CastSpell(this, 82125, true);
+                        SummonCreature(43888, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                    }
+                }
+                // Corruption: Absolute
+                if (GetPower(POWER_ALTERNATE_POWER) >= 100)
+                {
+                    if (!HasAura(82170))
+                    {
+                        RemoveAurasDueToSpell(82125);
+                        CastSpell(this, 82170, true);
+                        CastSpell(this, 82193, true);
+                        CastSpell(this, 85414, true);
+                    }
+                }
+                break;
+            }
+            default:
+                break;
+        }
     }
 
     // group update
@@ -20670,8 +20757,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     vehicle->GetBase()->AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
                     break;
                 }
-                // Minecart (Kaja Cola)
-                case 39329:
+                case 39329: // Minecart (Kaja Cola)
                 case 46372: // Fusion Core
                 {
                     ToCreature()->DespawnOrUnsummon(1000);

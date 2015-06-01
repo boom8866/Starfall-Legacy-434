@@ -561,6 +561,11 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             damage += damage * (maxDuration - duration);
                         }
                         break;
+                    case 86825: // Blackout (Theralion & Valiona - The Bastion of Twilight)
+                        // Prevent damage if target is under Ice Block, Divine Shield or Cloak of Shadows
+                        if (unitTarget->HasAura(27619) || unitTarget->HasAura(642) || unitTarget->HasAura(31224))
+                            damage = 0;
+                        break;
                     default:
                         break;
                 }
@@ -2353,7 +2358,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
         case SPELLFAMILY_GENERIC:
         {
             // Food buffs cannot stack!
-            if (m_spellInfo->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)
+            if (m_spellInfo && m_caster && m_spellInfo->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)
                 m_caster->RemoveFoodBuffAurasWithExclusion(m_spellInfo->Id);
 
             switch (m_spellAura->GetId())
@@ -2689,6 +2694,13 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     // Item - Death Knight T11 DPS 4P Bonus
                     if (m_caster->HasAura(90459))
                         m_caster->CastSpell(m_caster, 90507, true);
+                    break;
+                }
+                case 59052: // Freezing Fog
+                {
+                    if (Player* player = m_caster->ToPlayer())
+                        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(45477))
+                            player->GetGlobalCooldownMgr().AddGlobalCooldown(spellInfo, 500);
                     break;
                 }
             }
@@ -3090,9 +3102,40 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
         if (unitTarget->HasAura(48920) && (unitTarget->GetHealth() + addhealth >= unitTarget->GetMaxHealth()))
             unitTarget->RemoveAura(48920);
 
+        // Healing Rain
+        if (m_spellInfo->AttributesCu & SPELL_ATTR0_CU_DIMINISH_HEAL)
+        {
+            uint32 count = 0;
+            for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                ++count;
+
+            if (count > 6)
+                addhealth *= (6.0f / count);
+        }
+
         // Init switch for special spell procs
         switch (m_spellInfo->Id)
         {
+            case 81751: // Atonement
+            {
+                if (unitTarget == m_caster)
+                    addhealth /= 2;
+
+                // Cap at 30% of caster max health
+                if (addhealth >= (int32(m_caster->GetMaxHealth() * 0.30f)))
+                    addhealth = int32(m_caster->GetMaxHealth() * 0.30f);
+                break;
+            }
+            case 94472: // Atonement (secondary)
+            {
+                if (unitTarget == m_caster)
+                    addhealth /= 2;
+
+                // Cap at 30% of caster max health
+                if (addhealth >= (int32(m_caster->GetMaxHealth() * 0.15f)))
+                    addhealth = int32(m_caster->GetMaxHealth() * 0.15f);
+                break;
+            }
             case 61295: // Riptide
             {
                 // Only Direct Heal

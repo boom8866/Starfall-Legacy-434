@@ -92,6 +92,7 @@ enum Creatures
 
     // Cho'Gall
     NPC_FIRE_PORTAL                 = 43393,
+    NPC_SHADOW_PORTAL               = 47019,
     NPC_FIRE_ELEMENTAL              = 43406,
     NPC_BLAZE                       = 43585,
 

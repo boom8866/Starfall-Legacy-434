@@ -10,7 +10,7 @@ enum Yells
 
    // Cho'Gall
    SAY_INTRO            = 0,
-   SAY_HALFUS_DIED      = 1,
+   SAY_HALFUS_DIED      = 1
 };
 
 enum Spells
@@ -50,13 +50,13 @@ enum Spells
     SPELL_FREE_DRAGON                        = 83590,
 
     // Spike
-    SPELL_CHAIN                              = 83487,
+    SPELL_CHAIN                              = 83487
 };
 
 enum Events
 {
     // Halfus
-    EVENT_SHADOW_NOVA = 1,
+    EVENT_SHADOW_NOVA           = 1,
     EVENT_FURIOUS_ROAR,
     EVENT_FURIOUS_ROAR_CAST,
     EVENT_BERSERK,
@@ -72,23 +72,33 @@ enum Events
 
     // Dragons
     EVENT_ATTACK,
+
+    // Achievement
+    EVENT_ACHIEVEMENT_FAILED
 };
 
 enum Phases
 {
     PHASE_1 = 1,
-    PHASE_2,
+    PHASE_2
 };
 
 enum Actions
 {
-    ACTION_INTRO = 1,
+    ACTION_INTRO                = 1,
     ACTION_ORPHAN_KILLED,
+    ACTION_ADD_ACHIEVEMENT,
+    ACTION_DENY_ACHIEVEMENT
 };
 
 enum Sounds
 {
     SOUND_FURIOUS_ROAR = 20189,
+};
+
+enum achievementId
+{
+    ACHIEVEMENT_THE_ONLY_ESCAPE     = 5300
 };
 
 Position const NetherScionSetup[] =
@@ -170,7 +180,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
 {
     public:
         boss_halfus_wyrmbreaker() : CreatureScript("boss_halfus_wyrmbreaker") { }
-            
+
         struct boss_halfus_wyrmbreakerAI : public BossAI
         {
             boss_halfus_wyrmbreakerAI(Creature* creature) : BossAI(creature, DATA_HALFUS_WYRMBREAKER)
@@ -178,13 +188,19 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 _roarCasts = 0;
                 _orphanKilled = 0;
                 _combinationPicked = 0;
+                _drakeKilledCount = 0;
                 _introDone = false;
+                _roarAnnounced = false;
+                _unlockAchievement = false;
             }
 
             uint8 _roarCasts;
             uint8 _combinationPicked;
             uint8 _orphanKilled;
+            uint8 _drakeKilledCount;
             bool _introDone;
+            bool _roarAnnounced;
+            bool _unlockAchievement;
 
             void EnterCombat(Unit* /*who*/)
             {
@@ -197,6 +213,9 @@ class boss_halfus_wyrmbreaker : public CreatureScript
 
                 if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
                     behemoth->SetInCombatWithZone();
+
+                _drakeKilledCount = 0;
+                _unlockAchievement = false;
             }
 
             void Reset()
@@ -269,6 +288,16 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                         if (_orphanKilled > 7)
                             me->AddAura(SPELL_DRAGONS_VENGEANCE, me);
                         break;
+                    case ACTION_DENY_ACHIEVEMENT:
+                        _unlockAchievement = false;
+                        break;
+                    case ACTION_ADD_ACHIEVEMENT:
+                        _drakeKilledCount++;
+                        if (_drakeKilledCount == 2)
+                            _unlockAchievement = true;
+                        break;
+                    default:
+                        break;
                 }
             }
 
@@ -278,7 +307,12 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 summons.DespawnAll();
                 if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL_HALFUS_INTRO)))
+                {
                     chogall->AI()->TalkToMap(SAY_HALFUS_DIED);
+                    chogall->AI()->DoAction(2); // Init Wave Event (ACTION_WAVES)
+                }
+                if (_drakeKilledCount >= 2 && _unlockAchievement)
+                    instance->DoCompleteAchievement(ACHIEVEMENT_THE_ONLY_ESCAPE);
             }
 
             void KilledUnit(Unit* killed)
@@ -427,20 +461,22 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                             events.ScheduleEvent(EVENT_SHADOW_NOVA, 16000);
                             break;
                         case EVENT_FURIOUS_ROAR:
-                            if (_roarCasts == 0)
+                            if (!_roarAnnounced)
                                 events.ScheduleEvent(EVENT_TALK_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR));
 
-                            if (_roarCasts != 2)
+                            if (_roarCasts <= 2)
                             {
                                 _roarCasts++;
                                 DoCastAOE(SPELL_FURIOUS_ROAR);
-                                events.ScheduleEvent(EVENT_FURIOUS_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR) + 100);
+                                events.ScheduleEvent(EVENT_FURIOUS_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR) + 50);
+                                _roarAnnounced = true;
                             }
                             else
                             {
-                                DoCastAOE(SPELL_FURIOUS_ROAR);
-                                events.ScheduleEvent(EVENT_TALK_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR));
                                 events.ScheduleEvent(EVENT_FURIOUS_ROAR, 33000);
+                                // Reset counter
+                                _roarCasts = 0;
+                                _roarAnnounced = false;
                             }
                             break;
                         case EVENT_TALK_ROAR:
@@ -462,6 +498,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 DoMeleeAttackIfReady();
             }
         };
+
         CreatureAI* GetAI(Creature* creature) const
         {
             return new boss_halfus_wyrmbreakerAI(creature);
@@ -554,12 +591,12 @@ class npc_proto_behemoth : public CreatureScript
         }
 };
 
-class npc_halfus_dragon: public CreatureScript
+class npc_halfus_dragon : public CreatureScript
 {
 public:
-    npc_halfus_dragon () : CreatureScript("npc_halfus_dragon") { }
+    npc_halfus_dragon() : CreatureScript("npc_halfus_dragon") { }
 
-    struct npc_halfus_dragonAI: public ScriptedAI
+    struct npc_halfus_dragonAI : public ScriptedAI
     {
         npc_halfus_dragonAI (Creature* creature) : ScriptedAI(creature)
         {
@@ -593,6 +630,7 @@ public:
             pos.m_positionZ += 10.0f;
             me->GetMotionMaster()->MoveTakeoff(1, pos);
             me->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 10.0f);
+            events.ScheduleEvent(EVENT_ACHIEVEMENT_FAILED, 10100);
             //me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
         }
 
@@ -640,6 +678,14 @@ public:
                 me->AddAura(SPELL_DRAGONS_VENGEANCE, halfus);
 
             me->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 0.0f);
+
+            if (!events.GetNextEventTime(EVENT_ACHIEVEMENT_FAILED))
+                events.CancelEvent(EVENT_ACHIEVEMENT_FAILED);
+            else
+            {
+                if (Creature* halfus = me->FindNearestCreature(BOSS_HALFUS_WYRMBREAKER, 500.0f))
+                    halfus->AI()->DoAction(ACTION_ADD_ACHIEVEMENT);
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -655,6 +701,10 @@ public:
                 {
                     case EVENT_ATTACK:
                         me->SetReactState(REACT_AGGRESSIVE);
+                        break;
+                    case EVENT_ACHIEVEMENT_FAILED:
+                        if (Creature* halfus = me->FindNearestCreature(BOSS_HALFUS_WYRMBREAKER, 500.0f))
+                            halfus->AI()->DoAction(ACTION_DENY_ACHIEVEMENT);
                         break;
                     default:
                         break;
@@ -700,6 +750,7 @@ public:
         }
 
         InstanceScript* instance;
+        EventMap events;
 
         void EnterCombat(Unit* who)
         {
@@ -720,9 +771,10 @@ public:
                     }
                 }
             }
+            events.ScheduleEvent(EVENT_ACHIEVEMENT_FAILED, 10100);
         }
 
-        void EnterEvadeMode ()
+        void EnterEvadeMode()
         {
             Reset();
             me->RemoveAllAuras();
@@ -733,13 +785,35 @@ public:
         {
             if (Creature* halfus = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALFUS_WYRMBREAKER)))
                 halfus->AI()->DoAction(ACTION_ORPHAN_KILLED);
+
+            if (!events.GetNextEventTime(EVENT_ACHIEVEMENT_FAILED))
+                events.CancelEvent(EVENT_ACHIEVEMENT_FAILED);
+            else
+            {
+                if (Creature* halfus = me->FindNearestCreature(BOSS_HALFUS_WYRMBREAKER, 500.0f))
+                    halfus->AI()->DoAction(ACTION_ADD_ACHIEVEMENT);
+            }
         }
 
         void UpdateAI(uint32 diff) 
         {
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ACHIEVEMENT_FAILED:
+                        if (Creature* halfus = me->FindNearestCreature(BOSS_HALFUS_WYRMBREAKER, 500.0f))
+                            halfus->AI()->DoAction(ACTION_DENY_ACHIEVEMENT);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             DoMeleeAttackIfReady();
         }
     };
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_orphaned_whelpAI(creature);
@@ -944,7 +1018,7 @@ class go_halfus_whelp_cage : public GameObjectScript
 
             if (creatures.empty())
                return false;
-            
+
             for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
                 (*iter)->AI()->AttackStart(player);
 
