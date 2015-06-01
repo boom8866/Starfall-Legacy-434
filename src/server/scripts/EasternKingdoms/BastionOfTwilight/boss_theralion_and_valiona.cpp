@@ -350,7 +350,8 @@ public:
         bool _isOnGround;
         uint8 _breathCounter;
         bool _sideLeft;
-        uint8 _pathSelected, _preparationRandom;
+        uint8 _pathSelected;
+        uint8 _preparationRandom;
 
         void Reset()
         {
