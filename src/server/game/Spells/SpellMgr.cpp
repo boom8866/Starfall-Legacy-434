@@ -5295,7 +5295,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 break;
             case 86301: // Unstable Twilight
-                spellInfo->Effects[EFFECT_0].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_3_YARDS);
+                spellInfo->Effects[EFFECT_0].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_2_YARDS);
                 break;
             // * Ascendant Council
             case 82772: // Frozen
