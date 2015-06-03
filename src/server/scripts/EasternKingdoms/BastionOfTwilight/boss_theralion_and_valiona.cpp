@@ -168,6 +168,14 @@ enum Points
     POINT_DEEP_BREATH_MOVE,
 };
 
+enum ClassAuras
+{
+    CLASS_PALADIN_PROTECTION    = 76671,
+    CLASS_PALADIN_RETRIBUTION   = 76672,
+    CLASS_SHAMAN_ENHANCEMENT    = 30814,
+    CLASS_DRUID_FERAL           = 84735
+};
+
 Position const TwilFlamePos[90] = // 15 per row, 2 rows per side, 3 sides.
 {
     // 1-30 for entrance, first breath.
@@ -337,8 +345,8 @@ public:
     bool operator()(WorldObject* object)
     {
         // Exclude Death Knights, Rogues, Warriors, Feral Druids. Enhanchement Shamans, Retribution and Protection Paladins
-        return (!object->ToPlayer() || object->ToPlayer()->getClass() == CLASS_ROGUE || object->ToPlayer()->getClass() == CLASS_WARRIOR || object->ToPlayer()->getClass() == CLASS_DEATH_KNIGHT
-                || object->ToPlayer()->HasAura(84735) || object->ToPlayer()->HasAura(30814) || object->ToPlayer()->HasAura(76671) || object->ToPlayer()->HasAura(76672));
+        return (object->ToUnit()->getClass() == CLASS_ROGUE || object->ToUnit()->getClass() == CLASS_WARRIOR || object->ToUnit()->getClass() == CLASS_DEATH_KNIGHT
+            || object->ToUnit()->HasAura(CLASS_DRUID_FERAL) || object->ToUnit()->HasAura(CLASS_SHAMAN_ENHANCEMENT) || object->ToUnit()->HasAura(CLASS_PALADIN_PROTECTION) || object->ToUnit()->HasAura(CLASS_PALADIN_RETRIBUTION));
     }
 };
 
