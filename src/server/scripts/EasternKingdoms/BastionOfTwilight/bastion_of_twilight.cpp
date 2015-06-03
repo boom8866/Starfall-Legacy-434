@@ -4,7 +4,14 @@
 enum actionId
 {
     ACTION_CHECK_CHANNELERS     = 1,
-    ACTION_WAVES
+    ACTION_WAVES,
+    ACTION_START_TIMER
+};
+
+enum npcId
+{
+    NPC_CHOSEN_SEER     = 46952,
+    NPC_CHOSEN_WARRIOR  = 46951
 };
 
 class npc_bot_twilight_phase_twister : public CreatureScript
@@ -325,23 +332,32 @@ public:
 
     enum eventId
     {
-        EVENT_ENABLE_WAVES  = 1
+        EVENT_ENABLE_WAVES          = 1,
+        EVENT_CHECK_SEER,
+        EVENT_MOVE_AWAY_AND_DESPAWN
     };
 
     struct npc_chogall_wave_eventAI : public ScriptedAI
     {
         npc_chogall_wave_eventAI(Creature* creature) : ScriptedAI(creature)
         {
+            alreadyTalked = false;
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
         }
 
         EventMap events;
+        bool alreadyTalked;
+        float x, y, z;
 
         void DoAction(int32 action)
         {
             switch (action)
             {
                 case ACTION_WAVES:
-                    events.ScheduleEvent(EVENT_ENABLE_WAVES, 1500);
+                    events.ScheduleEvent(EVENT_ENABLE_WAVES, 4500);
+                    break;
+                case ACTION_START_TIMER:
+                    events.ScheduleEvent(EVENT_CHECK_SEER, 2000);
                     break;
                 default:
                     break;
@@ -357,8 +373,51 @@ public:
                 switch (eventId)
                 {
                     case EVENT_ENABLE_WAVES:
-                        // TODO: Use the selector
-                        events.RescheduleEvent(EVENT_ENABLE_WAVES, 60000);
+                    {
+                        if (!alreadyTalked)
+                        {
+                            Talk(2);
+                            alreadyTalked = true;
+                        }
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 60.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(60.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isAlive() && (*itr)->ToCreature() && !(*itr)->isInCombat() &&
+                                (*itr)->ToCreature()->GetEntry() == NPC_CHOSEN_SEER || (*itr)->ToCreature()->GetEntry() == NPC_CHOSEN_WARRIOR)
+                            {
+                                (*itr)->SetWalk(false);
+                                (*itr)->GetClosePoint(x, y, z, me->GetObjectSize() / 3, 50.0f);
+                                (*itr)->GetMotionMaster()->MovePoint(0, x, y, z);
+                                (*itr)->ToCreature()->SetHomePosition(x, y, z, (*itr)->GetOrientation());
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_MOVE_AWAY_AND_DESPAWN, 20000);
+                        events.CancelEvent(EVENT_ENABLE_WAVES);
+                        break;
+                    }
+                    case EVENT_CHECK_SEER:
+                    {
+                        std::list<Creature*> targets;
+                        GetCreatureListWithEntryInGrid(targets, me, NPC_CHOSEN_SEER, 500.0f);
+                        for (std::list<Creature*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr)->isInCombat())
+                            {
+                                DoAction(ACTION_WAVES);
+                                events.CancelEvent(EVENT_CHECK_SEER);
+                                break;
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_SEER, 2000);
+                        break;
+                    }
+                    case EVENT_MOVE_AWAY_AND_DESPAWN:
+                        me->SetWalk(false);
+                        me->GetMotionMaster()->MovePoint(0, -695.72f, -684.51f, 834.68f, false);
+                        me->DespawnOrUnsummon(4000);
                         break;
                     default:
                         break;

@@ -1408,14 +1408,12 @@ public:
                     {
                         health += feludius->GetHealth();
                         feludius->AI()->DoAction(ACTION_TELEPORT);
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, feludius);
                     }
 
                     if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
                     {
                         health += ignacious->GetHealth();
                         ignacious->AI()->DoAction(ACTION_TELEPORT);
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, ignacious);
                     }
 
                     if (Creature* arion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARION)))
@@ -1432,14 +1430,12 @@ public:
                     {
                         health += arion->GetHealth();
                         arion->AI()->DoAction(ACTION_PREPARE_FUSE);
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, arion);
                     }
 
                     if (Creature* terrastra = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TERRASTRA)))
                     {
                         health += terrastra->GetHealth();
                         terrastra->AI()->DoAction(ACTION_PREPARE_FUSE);
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, terrastra);
                     }
 
                     if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))

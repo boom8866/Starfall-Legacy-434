@@ -168,6 +168,14 @@ enum Points
     POINT_DEEP_BREATH_MOVE,
 };
 
+enum ClassAuras
+{
+    CLASS_PALADIN_PROTECTION    = 76671,
+    CLASS_PALADIN_RETRIBUTION   = 76672,
+    CLASS_SHAMAN_ENHANCEMENT    = 30814,
+    CLASS_DRUID_FERAL           = 84735
+};
+
 Position const TwilFlamePos[90] = // 15 per row, 2 rows per side, 3 sides.
 {
     // 1-30 for entrance, first breath.
@@ -329,6 +337,19 @@ private:
     Unit* caster;
 };
 
+class PlayerClassCheck
+{
+public:
+    PlayerClassCheck() { }
+
+    bool operator()(WorldObject* object)
+    {
+        // Exclude Death Knights, Rogues, Warriors, Feral Druids. Enhanchement Shamans, Retribution and Protection Paladins
+        return (object->ToUnit()->getClass() == CLASS_ROGUE || object->ToUnit()->getClass() == CLASS_WARRIOR || object->ToUnit()->getClass() == CLASS_DEATH_KNIGHT
+            || object->ToUnit()->HasAura(CLASS_DRUID_FERAL) || object->ToUnit()->HasAura(CLASS_SHAMAN_ENHANCEMENT) || object->ToUnit()->HasAura(CLASS_PALADIN_PROTECTION) || object->ToUnit()->HasAura(CLASS_PALADIN_RETRIBUTION));
+    }
+};
+
 class boss_valiona : public CreatureScript
 {
 public:
@@ -350,7 +371,8 @@ public:
         bool _isOnGround;
         uint8 _breathCounter;
         bool _sideLeft;
-        uint8 _pathSelected, _preparationRandom;
+        uint8 _pathSelected;
+        uint8 _preparationRandom;
 
         void Reset()
         {
@@ -1608,62 +1630,8 @@ public:
             if (targets.empty())
                 return;
 
-            std::list<WorldObject*>::iterator it = targets.begin();
-
-            while (it != targets.end())
-            {
-                if (!GetCaster())
-                    return;
-
-                WorldObject* unit = *it;
-
-                if (!unit)
-                    continue;
-
-                if (unit->GetTypeId() == TYPEID_PLAYER)
-                {
-                    switch (unit->ToPlayer()->getClass())
-                    {
-                        case CLASS_PRIEST:
-                        case CLASS_WARLOCK:
-                        case CLASS_MAGE:
-                        case CLASS_HUNTER:
-                            it++;
-                            break;
-                        case CLASS_ROGUE:
-                        case CLASS_WARRIOR:
-                        case CLASS_DEATH_KNIGHT:
-                            it = targets.erase(it);
-                            break;
-                        case CLASS_DRUID:
-                            if (unit->ToPlayer()->HasAura(84735))
-                                it = targets.erase(it);
-                            else
-                                it++;
-                            break;
-                        case CLASS_SHAMAN:
-                            if (unit->ToPlayer()->HasAura(30814))
-                                it = targets.erase(it);
-                            else
-                                it++;
-                            break;
-                        case CLASS_PALADIN:
-                            if (unit->ToPlayer()->HasAura(85102))
-                                it = targets.erase(it);
-                            else
-                                it++;
-                            break;
-                    }
-                }
-            }
-
-            if (targets.empty())
-                return;
-
             targets.remove_if(TwilightShiftCheck());
-
-            if (targets.empty())
-                return;
+            targets.remove_if(PlayerClassCheck());
 
             if (!GetCaster()->GetMap()->Is25ManRaid())
                 Trinity::Containers::RandomResizeList(targets, 1);
