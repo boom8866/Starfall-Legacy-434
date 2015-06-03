@@ -329,6 +329,19 @@ private:
     Unit* caster;
 };
 
+class PlayerClassCheck
+{
+public:
+    PlayerClassCheck() { }
+
+    bool operator()(WorldObject* object)
+    {
+        // Exclude Death Knights, Rogues, Warriors, Feral Druids. Enhanchement Shamans, Retribution and Protection Paladins
+        return (!object->ToPlayer() || object->ToPlayer()->getClass() == CLASS_ROGUE || object->ToPlayer()->getClass() == CLASS_WARRIOR || object->ToPlayer()->getClass() == CLASS_DEATH_KNIGHT
+                || object->ToPlayer()->HasAura(84735) || object->ToPlayer()->HasAura(30814) || object->ToPlayer()->HasAura(76671) || object->ToPlayer()->HasAura(76672));
+    }
+};
+
 class boss_valiona : public CreatureScript
 {
 public:
@@ -1609,62 +1622,8 @@ public:
             if (targets.empty())
                 return;
 
-            std::list<WorldObject*>::iterator it = targets.begin();
-
-            while (it != targets.end())
-            {
-                if (!GetCaster())
-                    return;
-
-                WorldObject* unit = *it;
-
-                if (!unit)
-                    continue;
-
-                if (unit->GetTypeId() == TYPEID_PLAYER)
-                {
-                    switch (unit->ToPlayer()->getClass())
-                    {
-                        case CLASS_PRIEST:
-                        case CLASS_WARLOCK:
-                        case CLASS_MAGE:
-                        case CLASS_HUNTER:
-                            it++;
-                            break;
-                        case CLASS_ROGUE:
-                        case CLASS_WARRIOR:
-                        case CLASS_DEATH_KNIGHT:
-                            it = targets.erase(it);
-                            break;
-                        case CLASS_DRUID:
-                            if (unit->ToPlayer()->HasAura(84735))
-                                it = targets.erase(it);
-                            else
-                                it++;
-                            break;
-                        case CLASS_SHAMAN:
-                            if (unit->ToPlayer()->HasAura(30814))
-                                it = targets.erase(it);
-                            else
-                                it++;
-                            break;
-                        case CLASS_PALADIN:
-                            if (unit->ToPlayer()->HasAura(85102))
-                                it = targets.erase(it);
-                            else
-                                it++;
-                            break;
-                    }
-                }
-            }
-
-            if (targets.empty())
-                return;
-
             targets.remove_if(TwilightShiftCheck());
-
-            if (targets.empty())
-                return;
+            targets.remove_if(PlayerClassCheck());
 
             if (!GetCaster()->GetMap()->Is25ManRaid())
                 Trinity::Containers::RandomResizeList(targets, 1);
