@@ -9,7 +9,7 @@ DELETE FROM `creature_template_addon` WHERE `entry`= 43324;
 
 UPDATE `creature_template` SET `flags_extra`=128, `ScriptName`='npc_bot_shadow_portal' WHERE `entry`=47019;
 UPDATE `creature_template` SET `flags_extra`=128, `ScriptName`='npc_bot_fire_portal' WHERE `entry`=43393;
-UPDATE `creature_template` SET UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `faction`=16, `flags_extra`=128, `ScriptName`='npc_bot_blaze' WHERE `entry`=43585;
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `faction`=16, `flags_extra`=128, `ScriptName`='npc_bot_blaze' WHERE `entry`=43585;
 
 DELETE FROM `creature_text` WHERE `entry`=43324;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
