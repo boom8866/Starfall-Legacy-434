@@ -671,11 +671,14 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         /* FEAR THRESHOLD RULE */
         /* Damage >= 10% of victim current health will break any fear effects */
         /* Melee damage are excluded */
-        if (damagetype != DIRECT_DAMAGE && damage >= victim->CountPctFromCurHealth(10))
+        if (victim)
         {
-            // Exclude Death Coil
-            if (victim->HasAuraType(SPELL_AURA_MOD_FEAR) && !victim->HasAura(6789))
-                victim->RemoveAurasByType(SPELL_AURA_MOD_FEAR);
+            if (damagetype != DIRECT_DAMAGE && damage >= victim->CountPctFromCurHealth(10))
+            {
+                // Exclude Death Coil
+                if (victim->HasAuraType(SPELL_AURA_MOD_FEAR) && !victim->HasAura(6789))
+                    victim->RemoveAurasByType(SPELL_AURA_MOD_FEAR);
+            }
         }
 
         // Spells with SPELL_INTERRUPT_FLAG_ABORT_ON_DMG on damage absorbed (exclude DoT's)
