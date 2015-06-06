@@ -673,7 +673,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         /* Melee damage are excluded */
         if (victim)
         {
-            if (damagetype != DIRECT_DAMAGE && damage >= victim->CountPctFromCurHealth(10))
+            if (damage && (damagetype == SPELL_DIRECT_DAMAGE || damagetype == DOT) && damage >= victim->CountPctFromCurHealth(10))
             {
                 // Exclude Death Coil
                 if (victim->HasAuraType(SPELL_AURA_MOD_FEAR) && !victim->HasAura(6789))
