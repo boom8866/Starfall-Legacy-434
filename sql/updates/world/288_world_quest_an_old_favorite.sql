@@ -1,0 +1,1 @@
+UPDATE `fishing_loot_template` SET `entry`=702 WHERE `entry`=141 AND `item`=69987;

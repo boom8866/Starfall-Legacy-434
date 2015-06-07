@@ -103,18 +103,15 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Slow - limit duration to 8s in PvP
             else if (spellproto->Id == 31589)
                 return DIMINISHING_LIMITONLY;
+            // Deep Freeze
+            else if (spellproto->Id == 44572)
+                return DIMINISHING_CONTROLLED_STUN;
             // Frost Nova / Freeze (Water Elemental)
             else if (spellproto->Id == 122 || spellproto->Id == 33395)
                 return DIMINISHING_CONTROLLED_ROOT;
             // Dragon's Breath
             else if (spellproto->Id == 31661)
                 return DIMINISHING_DRAGONS_BREATH;
-            // Polymorph / Deep Freeze
-            else if (spellproto->Id == 118 || spellproto->Id == 28271 || spellproto->Id == 28272
-                || spellproto->Id == 59634 || spellproto->Id == 61025 || spellproto->Id == 61305
-                || spellproto->Id == 61721 || spellproto->Id == 61780 || spellproto->Id == 71379
-                || spellproto->Id == 82691 || spellproto->Id == 44572)
-                return DIMINISHING_CONTROLLED_STUN;
             // Improved Polymorph
             else if (spellproto->Id == 83046 || spellproto->Id == 83047)
                 return DIMINISHING_NONE;
@@ -220,9 +217,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Bash (Feral Spirit Ability)
             if (spellproto->Id == 58861)
                 return DIMINISHING_NONE;
-            // Hex
-            else if (spellproto->Id == 51514)
-                return DIMINISHING_CONTROLLED_STUN;
             break;
         }
         default:

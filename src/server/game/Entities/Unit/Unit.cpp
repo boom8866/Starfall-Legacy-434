@@ -671,11 +671,14 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         /* FEAR THRESHOLD RULE */
         /* Damage >= 10% of victim current health will break any fear effects */
         /* Melee damage are excluded */
-        if (damagetype != DIRECT_DAMAGE && damage >= victim->CountPctFromCurHealth(10))
+        if (victim)
         {
-            // Exclude Death Coil
-            if (victim->HasAuraType(SPELL_AURA_MOD_FEAR) && !victim->HasAura(6789))
-                victim->RemoveAurasByType(SPELL_AURA_MOD_FEAR);
+            if (damage && (damagetype == SPELL_DIRECT_DAMAGE || damagetype == DOT) && damage >= victim->CountPctFromCurHealth(10))
+            {
+                // Exclude Death Coil
+                if (victim->HasAuraType(SPELL_AURA_MOD_FEAR) && !victim->HasAura(6789))
+                    victim->RemoveAurasByType(SPELL_AURA_MOD_FEAR);
+            }
         }
 
         // Spells with SPELL_INTERRUPT_FLAG_ABORT_ON_DMG on damage absorbed (exclude DoT's)
@@ -12646,33 +12649,27 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     {
         case SPELLFAMILY_SHAMAN:
         {
-            if (GetTypeId() == TYPEID_PLAYER && HasAuraType(SPELL_AURA_MASTERY))
+            if (GetTypeId() == TYPEID_PLAYER && HasAura(86477) && victim)
             {
                 // Mastery: Deep Healing
                 if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_MOD_HEALING_FROM_TARGET_HEALTH, SPELLFAMILY_SHAMAN, 962, EFFECT_0))
                 {
                     float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    float healtPct = victim->GetHealthPct() / 100;
-                    DoneTotalMod *= 1.0f + ((1 - healtPct) * (3.0f * masteryPoints)) / 100;
+                    float healthPct = victim->GetHealthPct() / 100;
+                    DoneTotalMod *= 1.0f + ((1 - healthPct) * (3.0f * masteryPoints)) / 100;
                 }
             }
             break;
         }
         case SPELLFAMILY_DRUID:
         {
-            switch (spellProto->Id)
+            // Efflorescence
+            if (spellProto->Id == 81269 && victim)
             {
-                case 81269: // Efflorescence
-                {
-                    if (victim)
-                    {
-                        if (DynamicObject* dynObj = GetDynObject(81262))
-                            if (Aura* aur = dynObj->GetAura())
-                                if (AuraEffect* aurEff = aur->GetEffect(EFFECT_0))
-                                    DoneTotal += aurEff->GetAmount();
-                    }
-                    break;
-                }
+                if (DynamicObject* dynObj = GetDynObject(81262))
+                    if (Aura* aur = dynObj->GetAura())
+                        if (AuraEffect* aurEff = aur->GetEffect(EFFECT_0))
+                            DoneTotal += aurEff->GetAmount();
             }
             break;
         }

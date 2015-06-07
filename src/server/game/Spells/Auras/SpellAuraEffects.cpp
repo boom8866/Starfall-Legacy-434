@@ -7251,23 +7251,19 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     // This will handle proc spells from absorbed DoT damage
     if (!damage)
     {
-        switch (m_spellInfo->Id)
+        // Mind Flay
+        if (m_spellInfo->Id == 15407)
         {
-            case 15407: // Mind Flay
-            {
-                // Dark Evangelism Handling
-                if (caster->HasAura(81659))
-                    caster->CastSpell(caster, 87117, true);
-                else if (caster->HasAura(81662))
-                    caster->CastSpell(caster, 87118, true);
+            // Dark Evangelism Handling
+            if (caster->HasAura(81659))
+                caster->CastSpell(caster, 87117, true);
+            else if (caster->HasAura(81662))
+                caster->CastSpell(caster, 87118, true);
 
-                if (Aura* evangelism = caster->GetAura(87154))
-                    evangelism->RefreshDuration();
-                else
-                    caster->CastSpell(caster, 87154, true);
-            }
-            default:
-                break;
+            if (Aura* evangelism = caster->GetAura(87154))
+                evangelism->RefreshDuration();
+            else
+                caster->CastSpell(caster, 87154, true);
         }
 
         // Rage from absorbed damage

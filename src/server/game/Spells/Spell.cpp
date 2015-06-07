@@ -2535,8 +2535,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 caster->ToPlayer()->CastItemCombatSpell(unitTarget, m_attackType, procVictim, procEx);
         }
 
-
-
         m_damage = damageInfo.damage;
 
         // Anticheat Check: Damage Hack
