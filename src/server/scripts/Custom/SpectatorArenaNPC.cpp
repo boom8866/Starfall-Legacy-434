@@ -331,11 +331,11 @@ public:
     {
         static ChatCommand spectateCommandTable[] =
         {
-            { "player",     SEC_PLAYER, true, &HandleSpectateCommand, "", NULL },
-            { "view",       SEC_PLAYER, true, &HandleSpectateFromCommand, "", NULL },
-            { "reset",      SEC_PLAYER, true, &HandleSpectateResetCommand, "", NULL },
-            { "leave",      SEC_PLAYER, true, &HandleSpectateCancelCommand, "", NULL },
-            { NULL,         0,          false,      NULL, "", NULL }
+            { "player",     SEC_PLAYER,         true,   &HandleSpectateCommand,       "", NULL },
+            { "view",       SEC_ADMINISTRATOR,  true,   &HandleSpectateFromCommand,   "", NULL },
+            { "reset",      SEC_PLAYER,         true,   &HandleSpectateResetCommand,  "", NULL },
+            { "leave",      SEC_PLAYER,         true,   &HandleSpectateCancelCommand, "", NULL },
+            { NULL,         0,                  false,  NULL,                         "", NULL }
         };
 
         static ChatCommand commandTable[] =
@@ -343,6 +343,7 @@ public:
             { "spectate",   SEC_PLAYER, false, NULL, "", spectateCommandTable },
             { NULL, 0, false, NULL, "", NULL }
         };
+
         return commandTable;
     }
 };
@@ -366,9 +367,9 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "   |TInterface\\icons\\Achievement_Arena_2v2_7:35:40:-30:0|tSearch for 2v2", GOSSIP_SENDER_MAIN, NPC_SPECTATOR_ACTION_2V2_GAMES);
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "   |TInterface\\icons\\Achievement_Arena_3v3_7:35:35:-30:0|tSearch for 3v3", GOSSIP_SENDER_MAIN, NPC_SPECTATOR_ACTION_3V3_GAMES);
-        pPlayer->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_CHAT, "   |TInterface\\icons\\Spell_Holy_DevineAegis:35:35:-30:0|tSearch for specific Player.", GOSSIP_SENDER_MAIN, NPC_SPECTATOR_ACTION_SPECIFIC, "", 0, true);
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "   |TInterface\\icons\\Achievement_Arena_2v2_7:35:35:-30:0|t[Search for 2v2]", GOSSIP_SENDER_MAIN, NPC_SPECTATOR_ACTION_2V2_GAMES);
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "   |TInterface\\icons\\Achievement_Arena_3v3_7:35:35:-30:0|t[Search for 3v3]", GOSSIP_SENDER_MAIN, NPC_SPECTATOR_ACTION_3V3_GAMES);
+        pPlayer->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_CHAT, "   |TInterface\\icons\\Spell_Holy_DevineAegis:35:35:-30:0|t[Search for specific Player]", GOSSIP_SENDER_MAIN, NPC_SPECTATOR_ACTION_SPECIFIC, "", 0, true);
         pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
         return true;
     }
@@ -411,16 +412,16 @@ public:
         std::string sClass = "";
         switch (id)
         {
-            case CLASS_WARRIOR:         sClass = "Warr ";            break;
-            case CLASS_PALADIN:         sClass = "Pal ";             break;
-            case CLASS_HUNTER:          sClass = "Hun ";             break;
-            case CLASS_ROGUE:           sClass = "Rog ";             break;
-            case CLASS_PRIEST:          sClass = "Pri ";             break;
-            case CLASS_DEATH_KNIGHT:    sClass = "DK ";              break;
-            case CLASS_SHAMAN:          sClass = "Sha ";             break;
-            case CLASS_MAGE:            sClass = "Mag ";             break;
-            case CLASS_WARLOCK:         sClass = "Warl ";            break;
-            case CLASS_DRUID:           sClass = "Dru ";             break;
+            case CLASS_WARRIOR:         sClass = "Warrior ";            break;
+            case CLASS_PALADIN:         sClass = "Paladin ";            break;
+            case CLASS_HUNTER:          sClass = "Hunter ";             break;
+            case CLASS_ROGUE:           sClass = "Rogue ";              break;
+            case CLASS_PRIEST:          sClass = "Priest ";             break;
+            case CLASS_DEATH_KNIGHT:    sClass = "DK ";                 break;
+            case CLASS_SHAMAN:          sClass = "Shaman ";             break;
+            case CLASS_MAGE:            sClass = "Mage ";               break;
+            case CLASS_WARLOCK:         sClass = "Warlock ";            break;
+            case CLASS_DRUID:           sClass = "Dru ";                break;
         }
         return sClass;
     }
