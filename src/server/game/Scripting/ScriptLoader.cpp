@@ -1543,6 +1543,7 @@ void AddBattlegroundScripts()
 /* This is where custom scripts' loading functions should be declared. */
 void AddSC_Group_scripts();
 void AddSC_Player_scripts();
+void AddSC_arena_spectator_script();
 #endif
 
 void AddCustomScripts()
@@ -1551,5 +1552,6 @@ void AddCustomScripts()
     /* This is where custom scripts should be added. */
     AddSC_Group_scripts();
     AddSC_Player_scripts();
+    AddSC_arena_spectator_script();
 #endif
 }

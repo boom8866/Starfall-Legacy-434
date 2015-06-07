@@ -736,6 +736,9 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recvData)
     recvData >> emoteNum;
     recvData >> guid;
 
+    if (GetPlayer()->IsSpectator())
+        return;
+
     sScriptMgr->OnPlayerTextEmote(GetPlayer(), text_emote, emoteNum, guid);
 
     EmotesTextEntry const* em = sEmotesTextStore.LookupEntry(text_emote);

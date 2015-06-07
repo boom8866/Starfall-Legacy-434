@@ -342,11 +342,28 @@ Unit::~Unit()
 {
     // set current spells as deletable
     for (uint8 i = 0; i < CURRENT_MAX_SPELL; ++i)
+    {
         if (m_currentSpells[i])
         {
             m_currentSpells[i]->SetReferencedFromCurrent(false);
             m_currentSpells[i] = NULL;
         }
+    }
+
+    // remove view point for spectator
+    if (!m_sharedVision.empty())
+    {
+        for (SharedVisionList::iterator itr = m_sharedVision.begin(); itr != m_sharedVision.end(); ++itr)
+        {
+            if ((*itr)->IsSpectator() && (*itr)->getSpectateFrom())
+            {
+                (*itr)->SetViewpoint((*itr)->getSpectateFrom(), false);
+                if (m_sharedVision.empty())
+                    break;
+                --itr;
+            }
+        }
+    }
 
     _DeleteRemovedAuras();
 
@@ -575,6 +592,58 @@ void Unit::GetRandomContactPointBehind(const Unit* obj, float &x, float &y, floa
 
     GetNearPoint(obj, x, y, z, obj->GetCombatReach(), distance2dMin+(distance2dMax-distance2dMin) * (float)rand_norm()
         , GetOrientation() + static_cast<float>(M_PI*2/3) + (static_cast<float>(M_PI*2/3) * (float)rand_norm()));
+}
+
+void Unit::SetVisibleAura(uint8 slot, AuraApplication * aur)
+{
+    if (Aura* aura = aur->GetBase())
+    {
+        if (Player *player = ToPlayer())
+        {
+            if (player->HaveSpectators() && slot < MAX_AURAS)
+            {
+                SpectatorAddonMsg msg;
+                uint64 casterID = 0;
+                if (aura->GetCaster())
+                    casterID = (aura->GetCaster()->ToPlayer()) ? aura->GetCaster()->GetGUID() : 0;
+
+                msg.SetPlayer(player->GetName());
+                msg.CreateAura(casterID, aura->GetSpellInfo()->Id, aura->GetSpellInfo()->IsPositive(), aura->GetSpellInfo()->Dispel, aura->GetDuration(), aura->GetMaxDuration(), aura->GetStackAmount(), false);
+                player->SendSpectatorAddonMsgToBG(msg);
+            }
+        }
+    }
+
+    m_visibleAuras[slot] = aur;
+    UpdateAuraForGroup(slot);
+}
+
+void Unit::RemoveVisibleAura(uint8 slot)
+{
+    AuraApplication *aurApp = GetVisibleAura(slot);
+    if (aurApp && slot < MAX_AURAS)
+    {
+        if (Aura* aura = aurApp->GetBase())
+        {
+            if (Player *player = ToPlayer())
+            {
+                if (player->HaveSpectators())
+                {
+                    SpectatorAddonMsg msg;
+                    uint64 casterID = 0;
+                    if (aura->GetCaster())
+                        casterID = (aura->GetCaster()->ToPlayer()) ? aura->GetCaster()->GetGUID() : 0;
+
+                    msg.SetPlayer(player->GetName());
+                    msg.CreateAura(casterID, aura->GetSpellInfo()->Id, aurApp->IsPositive(), aura->GetSpellInfo()->Dispel, aura->GetDuration(), aura->GetMaxDuration(), aura->GetStackAmount(), true);
+                    player->SendSpectatorAddonMsgToBG(msg);
+                }
+            }
+        }
+    }
+
+    m_visibleAuras.erase(slot);
+    UpdateAuraForGroup(slot);
 }
 
 void Unit::UpdateInterruptMask()
@@ -15769,6 +15838,14 @@ void Unit::SetHealth(uint32 val)
     // group update
     if (Player* player = ToPlayer())
     {
+        if (player->HaveSpectators())
+        {
+            SpectatorAddonMsg msg;
+            msg.SetPlayer(player->GetName());
+            msg.SetCurrentHP(val);
+            player->SendSpectatorAddonMsgToBG(msg);
+        }
+
         if (player->GetGroup())
             player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_HP);
     }
@@ -15794,6 +15871,14 @@ void Unit::SetMaxHealth(uint32 val)
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
     {
+        if (ToPlayer()->HaveSpectators())
+        {
+            SpectatorAddonMsg msg;
+            msg.SetPlayer(ToPlayer()->GetName());
+            msg.SetMaxHP(val);
+            ToPlayer()->SendSpectatorAddonMsgToBG(msg);
+        }
+
         if (ToPlayer()->GetGroup())
             ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_HP);
     }
@@ -15906,6 +15991,15 @@ void Unit::SetPower(Powers power, int32 val)
     // group update
     if (Player* player = ToPlayer())
     {
+        if (player->HaveSpectators())
+        {
+            SpectatorAddonMsg msg;
+            msg.SetPlayer(player->GetName());
+            msg.SetCurrentPower(val);
+            msg.SetPowerType(power);
+            player->SendSpectatorAddonMsgToBG(msg);
+        }
+
         if (player->GetGroup())
             player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_POWER);
     }
@@ -15932,6 +16026,15 @@ void Unit::SetMaxPower(Powers power, int32 val)
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
     {
+        if (ToPlayer()->HaveSpectators())
+        {
+            SpectatorAddonMsg msg;
+            msg.SetPlayer(ToPlayer()->GetName());
+            msg.SetMaxPower(val);
+            msg.SetPowerType(power);
+            ToPlayer()->SendSpectatorAddonMsgToBG(msg);
+        }
+
         if (ToPlayer()->GetGroup())
             ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_POWER);
     }
@@ -21164,7 +21267,7 @@ void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool cas
         MOVEMENTFLAG_FALLING_SLOW);*/
 
     /*! Cannot fly if no fly auras present. Exception is being a GM.
-        Note that we check for account level instead of Player::IsGameMaster() because in some
+        Note that we check for account level instead of Player::isGameMaster() because in some
         situations it may be feasable to use .gm fly on as a GM without having .gm on,
         e.g. aerial combat.
     */

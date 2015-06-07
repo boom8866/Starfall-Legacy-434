@@ -1372,7 +1372,7 @@ void WorldSession::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, ExtraMo
         MOVEMENTFLAG_FALLING_SLOW);
 
     /*! Cannot fly if no fly auras present. Exception is being a GM.
-        Note that we check for account level instead of Player::IsGameMaster() because in some
+        Note that we check for account level instead of Player::isGameMaster() because in some
         situations it may be feasable to use .gm fly on as a GM without having .gm on,
         e.g. aerial combat.
     */
