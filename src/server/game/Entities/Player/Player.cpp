@@ -24703,7 +24703,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     data << uint32(sWorld->GetNextWeeklyQuestsResetTime() - WEEK);  // LastWeeklyReset (not instance reset)
     data << uint32(GetMap()->GetDifficulty());
-    GetSession()->SendPacket(&data); 
+    GetSession()->SendPacket(&data);
 
     SetMover(this);
 }
@@ -24745,6 +24745,9 @@ void Player::SendInitialPacketsAfterAddToMap()
     SendItemDurations();                                    // must be after add to map
 
     RestoreAllSpellMods();
+
+    phaseMgr.AddUpdateFlag(PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED);
+    phaseMgr.Update();
 
     // raid downscaling - send difficulty to player
     if (GetMap()->IsRaid())

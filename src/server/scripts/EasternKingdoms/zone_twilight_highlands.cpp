@@ -2715,6 +2715,10 @@ public:
             SPELL_TWILIGHT_CHANNEL  = 88113
         };
 
+        void EnterEvadeMode()
+        {
+        }
+
         void Reset()
         {
             me->SetControlled(true, UNIT_STATE_ROOT);
@@ -2742,22 +2746,22 @@ public:
         {
             events.Update(diff);
 
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CHECK_PLAYERS:
                     {
-                        if (Player* player = me->FindNearestPlayer(60.0f, true))
+                        if (!me->isInCombat())
                         {
-                            AttackStart(player);
-                            me->CastStop();
-                            me->RemoveAllAuras();
-                            events.CancelEvent(EVENT_CHECK_PLAYERS);
-                            break;
+                            if (Player* player = me->FindNearestPlayer(60.0f, true))
+                            {
+                                AttackStart(player);
+                                me->CastStop();
+                                me->RemoveAllAuras();
+                                events.CancelEvent(EVENT_CHECK_PLAYERS);
+                                break;
+                            }
                         }
                         events.RescheduleEvent(EVENT_CHECK_PLAYERS, 2000);
                         break;

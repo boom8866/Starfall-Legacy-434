@@ -262,6 +262,13 @@ class spell_rog_preparation : public SpellScriptLoader
     public:
         spell_rog_preparation() : SpellScriptLoader("spell_rog_preparation") { }
 
+        enum spellId
+        {
+            SPELL_ROGUE_SPRINT      = 2983,
+            SPELL_ROGUE_VANISH      = 1856,
+            SPELL_ROGUE_SHADOWSTEP  = 36554
+        };
+
         class spell_rog_preparation_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_rog_preparation_SpellScript);
@@ -292,10 +299,10 @@ class spell_rog_preparation : public SpellScriptLoader
                     {
                         if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
                         {
-                            if (spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_COLDB_SHADOWSTEP ||     // Cold Blood, Shadowstep
-                                spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_VAN_EVAS_SPRINT)         // Vanish, Evasion, Sprint
+                            if (spellInfo->Id == SPELL_ROGUE_SPRINT || spellInfo->Id == SPELL_ROGUE_VANISH || spellInfo->Id == SPELL_ROGUE_SHADOWSTEP)     // Sprint, Vanish, Shadowstep
                                 caster->RemoveSpellCooldown((itr++)->first, true);
-                            else if (caster->HasAura(SPELL_ROGUE_GLYPH_OF_PREPARATION))
+
+                            if (caster->HasAura(SPELL_ROGUE_GLYPH_OF_PREPARATION))
                             {
                                 if (spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_DISMANTLE ||        // Dismantle
                                     spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_KICK ||              // Kick
