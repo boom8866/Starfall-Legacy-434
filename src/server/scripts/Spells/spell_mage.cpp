@@ -980,7 +980,7 @@ class spell_mage_mage_ward : public SpellScriptLoader
            {
                if (Unit* target = GetTarget())
                {
-                   if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
+                   if ((GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL) && GetEffect(EFFECT_0)->GetAmount() <= 0)
                    {
                        if (target->HasAura(SPELL_MAGE_INCANTERS_ABSORBTION_R1) || target->HasAura(SPELL_MAGE_INCANTERS_ABSORBTION_R2))
                            target->CastSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_KNOCKBACK, true);
