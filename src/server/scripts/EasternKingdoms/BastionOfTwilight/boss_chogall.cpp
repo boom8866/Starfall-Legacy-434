@@ -459,7 +459,7 @@ public:
                         events.CancelEvent(EVENT_SHADOWS_ORDERS);
                         events.CancelEvent(EVENT_FLAMES_ORDERS);
                         events.ScheduleEvent(EVENT_FLAMES_ORDERS, 15000, 0, PHASE_ONE);
-                        events.ScheduleEvent(EVENT_SUMMON_ADHERENT, 3500, 0, PHASE_ONE);
+                        events.ScheduleEvent(EVENT_SUMMON_ADHERENT, 5500, 0, PHASE_ONE);
 
                         if (Unit* target = me->getVictim())
                             DoCast(target, SPELL_FURY_OF_CHOGALL);
