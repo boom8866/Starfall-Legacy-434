@@ -7487,52 +7487,53 @@ void Spell::EffectResurrect (SpellEffIndex effIndex)
         case 20484: // Rebirth
         case 61999: // Raise Ally
         {
-            // Players only!
-            if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                break;
-
-            Player* caster = m_caster->ToPlayer();
-            if (!caster)
-                break;
-
-            if (!caster->GetInstanceScript())
-                break;
-
-            if (caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
+            if (Player* caster = m_caster->ToPlayer())
             {
-                if (caster->m_bressCount > 0 && caster->GetInstanceScript()->IsEncounterInProgress())
+                if (caster->GetInstanceScript() && caster->GetMap()->IsRaid())
                 {
-                    caster->GetSession()->SendNotification("You can no longer resurrect during combat!");
-                    caster->RemoveSpellCooldown(m_spellInfo->Id, true);
 
-                    // Rebirth (Maple Seed)
-                    if (m_spellInfo->Id == 20484)
-                        caster->AddItem(17034, 1);
-                    return;
-                }
-                else
-                {
-                    if (caster->GetInstanceScript()->IsEncounterInProgress())
-                        caster->m_bressCount++;
-                }
-            }
+                    // 10 Normal / 10 Heroic
+                    if (!caster->GetMap()->Is25ManRaid())
+                    {
+                        if (caster->m_bressCount > 0 && caster->GetInstanceScript()->IsEncounterInProgress())
+                        {
+                            if (WorldSession* session = caster->GetSession())
+                                session->SendNotification("You can no longer resurrect during combat!");
 
-            if (caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-            {
-                if (caster->m_bressCount > 2 && caster->GetInstanceScript()->IsEncounterInProgress())
-                {
-                    caster->GetSession()->SendNotification("You can no longer resurrect during combat!");
-                    caster->RemoveSpellCooldown(m_spellInfo->Id, true);
+                            caster->RemoveSpellCooldown(m_spellInfo->Id, true);
 
-                    // Rebirth (Maple Seed)
-                    if (m_spellInfo->Id == 20484)
-                        caster->AddItem(17034, 1);
-                    return;
-                }
-                else
-                {
-                    if (caster->GetInstanceScript()->IsEncounterInProgress())
-                        caster->m_bressCount++;
+                            // Rebirth (Maple Seed)
+                            if (m_spellInfo->Id == 20484)
+                                caster->AddItem(17034, 1);
+                            return;
+                        }
+                        else
+                        {
+                            if (caster->GetInstanceScript()->IsEncounterInProgress())
+                                caster->m_bressCount++;
+                        }
+                    }
+                    // 25 Normal / 25 Heroic
+                    else
+                    {
+                        if (caster->m_bressCount > 2 && caster->GetInstanceScript()->IsEncounterInProgress())
+                        {
+                            if (WorldSession* session = caster->GetSession())
+                                session->SendNotification("You can no longer resurrect during combat!");
+
+                            caster->RemoveSpellCooldown(m_spellInfo->Id, true);
+
+                            // Rebirth (Maple Seed)
+                            if (m_spellInfo->Id == 20484)
+                                caster->AddItem(17034, 1);
+                            return;
+                        }
+                        else
+                        {
+                            if (caster->GetInstanceScript()->IsEncounterInProgress())
+                                caster->m_bressCount++;
+                        }
+                    }
                 }
             }
             break;
@@ -7662,10 +7663,53 @@ void Spell::EffectSelfResurrect (SpellEffIndex effIndex)
 
     if (!m_caster || m_caster->isAlive())
         return;
+
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
+
     if (!m_caster->IsInWorld())
         return;
+
+    // Battle Ress System (Soulstone exception)
+    if (m_spellInfo->Id == 3026)
+    {
+        if (Player* caster = m_caster->ToPlayer())
+        {
+            if (caster->GetInstanceScript() && caster->GetMap()->IsRaid())
+            {
+                // 10 Normal / 10 Heroic
+                if (!caster->GetMap()->Is25ManRaid())
+                {
+                    if (caster->m_bressCount > 0 && caster->GetInstanceScript()->IsEncounterInProgress())
+                    {
+                        if (WorldSession* session = caster->GetSession())
+                            session->SendNotification("You can no longer resurrect during combat!");
+                        return;
+                    }
+                    else
+                    {
+                        if (caster->GetInstanceScript()->IsEncounterInProgress())
+                            caster->m_bressCount++;
+                    }
+                }
+                // 25 Normal / 25 Heroic
+                else
+                {
+                    if (caster->m_bressCount > 2 && caster->GetInstanceScript()->IsEncounterInProgress())
+                    {
+                        if (WorldSession* session = caster->GetSession())
+                            session->SendNotification("You can no longer resurrect during combat!");
+                        return;
+                    }
+                    else
+                    {
+                        if (caster->GetInstanceScript()->IsEncounterInProgress())
+                            caster->m_bressCount++;
+                    }
+                }
+            }
+        }
+    }
 
     uint32 health = 0;
     uint32 mana = 0;
