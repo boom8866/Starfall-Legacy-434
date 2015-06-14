@@ -1593,7 +1593,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL && GetSpellInfo()->SpellFamilyFlags[0] & 0x00000001)
                 {
                     // Rapture
-                    if (AuraEffect const* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2894, 0))
+                    if (AuraEffect const* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2894, EFFECT_0))
                     {
                         // check cooldown
                         if (caster->GetTypeId() == TYPEID_PLAYER)
@@ -1612,21 +1612,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         float multiplier = float(aurEff->GetAmount());
                         int32 basepoints0 = int32(CalculatePct(caster->GetMaxPower(POWER_MANA), multiplier));
                         caster->CastCustomSpell(caster, 47755, &basepoints0, NULL, NULL, true);
-                    }
-                }
-                if ((GetSpellInfo()->SpellFamilyFlags[1] & 0x0400) && aurApp->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
-                {
-                    // Sin and Punishment
-                    if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 1869, 1))
-                    {
-                       int32 chance = 0;
-                       switch (aurEff->GetSpellInfo()->Id)
-                       {
-                           case 87099:{chance = 50;break;}
-                           case 87100:{chance = 100;break;}
-                       }
-                       if (roll_chance_i(chance))
-                           caster->AddAura(87204, target);
                     }
                 }
                 break;

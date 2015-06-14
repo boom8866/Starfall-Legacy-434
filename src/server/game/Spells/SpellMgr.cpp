@@ -219,6 +219,13 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
                 return DIMINISHING_NONE;
             break;
         }
+        case SPELLFAMILY_PRIEST:
+        {
+            // Sin and Punishment (Triggered)
+            if (spellproto->Id == 87204)
+                return DIMINISHING_NONE;
+            break;
+        }
         default:
             break;
     }
@@ -4155,6 +4162,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             // Hunter
             case 19263: // Deterrence
                 spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_MOD_PACIFY;
+                break;
+            // Warrior
+            case 34428: // Victory Rush
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
                 break;
             // SPELLS GENERIC
             case 73701: // Vashj'ir - Sea Legs (due to buggy liquid level calculation in vashjir)

@@ -125,7 +125,11 @@ enum PriestSpells
     SPELL_PRIEST_T11_HEALER_BONUS_4P                = 89911,
     SPELL_PRIEST_T11_HEALER_BONUS_4P_TRIGGER        = 89913,
 
-    SPELL_PRIEST_TWIN_DISCIPLINES                   = 47586
+    SPELL_PRIEST_TWIN_DISCIPLINES                   = 47586,
+
+    SPELL_PRIEST_SIN_AND_PUNISHMENT_TRIGGERED       = 87204,
+    SPELL_PRIEST_SIN_AND_PUNISHMENT_RANK_1          = 87099,
+    SPELL_PRIEST_SIN_AND_PUNISHMENT_RANK_2          = 87100
 };
 
 enum PriestSpellIcons
@@ -1935,6 +1939,60 @@ public:
     }
 };
 
+class spell_pri_vampiric_touch : public SpellScriptLoader
+{
+public:
+    spell_pri_vampiric_touch() : SpellScriptLoader("spell_pri_vampiric_touch") { }
+
+    class spell_pri_vampiric_touch_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pri_vampiric_touch_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_SIN_AND_PUNISHMENT_TRIGGERED))
+                return false;
+            return true;
+        }
+
+        void HandleDispel(DispelInfo* dispelInfo)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* dispeller = dispelInfo->GetDispeller())
+                {
+                    // Sin and Punishment
+                    if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 1869, EFFECT_1))
+                    {
+                        int32 chance = 0;
+                        switch (aurEff->GetSpellInfo()->Id)
+                        {
+                            case SPELL_PRIEST_SIN_AND_PUNISHMENT_RANK_1:
+                                chance = 50;
+                                break;
+                            case SPELL_PRIEST_SIN_AND_PUNISHMENT_RANK_2:
+                                chance = 100;
+                                break;
+                        }
+                        if (roll_chance_i(chance))
+                            dispeller->CastCustomSpell(dispeller, SPELL_PRIEST_SIN_AND_PUNISHMENT_TRIGGERED, NULL, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterDispel += AuraDispelFn(spell_pri_vampiric_touch_AuraScript::HandleDispel);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_pri_vampiric_touch_AuraScript();
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_divine_aegis();
@@ -1972,4 +2030,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_inner_fire();
     new spell_pri_inner_focus();
     new spell_pri_dispel_magic();
+    new spell_pri_vampiric_touch();
 }
