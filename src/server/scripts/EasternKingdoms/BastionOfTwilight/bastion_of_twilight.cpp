@@ -452,8 +452,8 @@ public:
                                     case NPC_EARTH_RAVAGER:
                                     {
                                         (*itr)->SetWalk(false);
-                                        (*itr)->GetMotionMaster()->MovePoint(0, -650.847f + urand(5, 6), -684.92f - (urand, 3, 5), z);
-                                        (*itr)->ToCreature()->SetHomePosition(-650.847f + urand(5, 6), -684.92f - (urand, 3, 5), z, (*itr)->GetOrientation());
+                                        (*itr)->GetMotionMaster()->MovePoint(0, -650.847f+urand(5, 6), -684.92f-urand(3, 5), z);
+                                        (*itr)->ToCreature()->SetHomePosition(-650.847f+urand(5, 6), -684.92f-urand(3, 5), z, (*itr)->GetOrientation());
                                         break;
                                     }
                                 }
