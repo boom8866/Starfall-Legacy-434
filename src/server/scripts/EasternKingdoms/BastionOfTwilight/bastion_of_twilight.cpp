@@ -11,7 +11,14 @@ enum actionId
 enum npcId
 {
     NPC_CHOSEN_SEER     = 46952,
-    NPC_CHOSEN_WARRIOR  = 46951
+    NPC_CHOSEN_WARRIOR  = 46951,
+    NPC_TWILIGHT_BRUTE  = 47161,
+    NPC_DESTROYER       = 47097,
+    NPC_FIRESTARTER     = 47086,
+    NPC_ELEMENTALIST    = 47152,
+    NPC_FIRELORD        = 47081,
+    NPC_EARTH_RAVAGER   = 47150,
+    NPC_WIND_BREAKER    = 47151
 };
 
 class npc_bot_twilight_phase_twister : public CreatureScript
@@ -357,7 +364,7 @@ public:
                     events.ScheduleEvent(EVENT_ENABLE_WAVES, 4500);
                     break;
                 case ACTION_START_TIMER:
-                    events.ScheduleEvent(EVENT_CHECK_SEER, 2000);
+                    events.ScheduleEvent(EVENT_CHECK_SEER, 1000);
                     break;
                 default:
                     break;
@@ -389,12 +396,10 @@ public:
                                 (*itr)->ToCreature()->GetEntry() == NPC_CHOSEN_SEER || (*itr)->ToCreature()->GetEntry() == NPC_CHOSEN_WARRIOR)
                             {
                                 (*itr)->SetWalk(false);
-                                (*itr)->GetClosePoint(x, y, z, me->GetObjectSize() / 3, 50.0f);
-                                (*itr)->GetMotionMaster()->MovePoint(0, x, y, z);
-                                (*itr)->ToCreature()->SetHomePosition(x, y, z, (*itr)->GetOrientation());
+                                (*itr)->ToCreature()->SetInCombatWithZone();
                             }
                         }
-                        events.ScheduleEvent(EVENT_MOVE_AWAY_AND_DESPAWN, 20000);
+                        events.ScheduleEvent(EVENT_MOVE_AWAY_AND_DESPAWN, 35000);
                         events.CancelEvent(EVENT_ENABLE_WAVES);
                         break;
                     }
@@ -411,14 +416,51 @@ public:
                                 break;
                             }
                         }
-                        events.RescheduleEvent(EVENT_CHECK_SEER, 2000);
+                        events.RescheduleEvent(EVENT_CHECK_SEER, 1000);
                         break;
                     }
                     case EVENT_MOVE_AWAY_AND_DESPAWN:
+                    {
                         me->SetWalk(false);
                         me->GetMotionMaster()->MovePoint(0, -695.72f, -684.51f, 834.68f, false);
                         me->DespawnOrUnsummon(4000);
+
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 200.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(200.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isAlive() && (*itr)->ToCreature() && !(*itr)->isInCombat())
+                            {
+                                switch ((*itr)->ToCreature()->GetEntry())
+                                {
+                                    case NPC_DESTROYER:
+                                    case NPC_FIRESTARTER:
+                                    case NPC_TWILIGHT_BRUTE:
+                                    {
+                                        if (roll_chance_i(50))
+                                        {
+                                            (*itr)->SetWalk(false);
+                                            (*itr)->ToCreature()->SetInCombatWithZone();
+                                        }
+                                        break;
+                                    }
+                                    case NPC_ELEMENTALIST:
+                                    case NPC_WIND_BREAKER:
+                                    case NPC_FIRELORD:
+                                    case NPC_EARTH_RAVAGER:
+                                    {
+                                        (*itr)->SetWalk(false);
+                                        (*itr)->GetMotionMaster()->MovePoint(0, -650.847f + urand(5, 6), -684.92f - (urand, 3, 5), z);
+                                        (*itr)->ToCreature()->SetHomePosition(-650.847f + urand(5, 6), -684.92f - (urand, 3, 5), z, (*itr)->GetOrientation());
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                         break;
+                    }
                     default:
                         break;
                 }

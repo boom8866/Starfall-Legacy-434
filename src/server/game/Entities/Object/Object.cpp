@@ -1865,6 +1865,10 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
     if (GetTransport())
         return;
 
+    if (GetTypeId() == TYPEID_UNIT)
+        if (ToCreature()->HasUnitState(UNIT_STATE_IGNORE_PATHFINDING))
+            return;
+
     switch (GetTypeId())
     {
         case TYPEID_UNIT:

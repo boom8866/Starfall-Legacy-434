@@ -214,6 +214,7 @@ public:
         {
             _Reset();
             DoCast(me, SPELL_SIT_THRONE, true);
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -559,6 +560,7 @@ public:
         npc_bot_fire_portalAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             DoCast(SPELL_FIRE_PORTAL_VISUAL);
         }
 
@@ -619,6 +621,7 @@ public:
         npc_bot_shadow_portalAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             DoCast(SPELL_SHADOW_PORTAL_VISUAL);
         }
 
@@ -680,6 +683,7 @@ public:
         npc_bot_blazeAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         InstanceScript* instance;
@@ -773,6 +777,7 @@ public:
             instance = creature->GetInstanceScript();
             deathVisual = false;
             finalPhase = false;
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         InstanceScript* instance;
@@ -868,6 +873,7 @@ public:
         npc_bot_darkened_creationAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             creature->CastSpell(creature, SPELL_TENTACLE_VISUAL, true);
         }
 
@@ -918,6 +924,7 @@ public:
         npc_bot_blood_old_godAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         InstanceScript* instance;
@@ -1373,6 +1380,7 @@ public:
         {
             instance = creature->GetInstanceScript();
             events.ScheduleEvent(EVENT_MALFORMATION_SHADOWBOLT, 3000);
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         InstanceScript* instance;

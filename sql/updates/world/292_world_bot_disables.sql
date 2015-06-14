@@ -1,0 +1,1 @@
+DELETE FROM `disables` WHERE `sourceType`=7 AND `entry`=671;
