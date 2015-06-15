@@ -1133,7 +1133,8 @@ public:
         {
             if (Creature* valiona = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALIONA)))
             {
-                valiona->GetMotionMaster()->MovementExpired();
+                valiona->StopMoving();
+                valiona->SendMovementFlagUpdate(false);
                 valiona->AddUnitState(UNIT_STATE_CANNOT_TURN);
                 valiona->SetReactState(REACT_PASSIVE);
                 valiona->AttackStop();
@@ -1423,8 +1424,11 @@ public:
         void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
+            {
                 if (Unit* target = GetTarget())
                 {
+                    caster->StopMoving();
+                    caster->SendMovementFlagUpdate(false);
                     if (target->GetEntry() == 46588)
                     {
                         float ori = caster->GetOrientation();
@@ -1434,8 +1438,10 @@ public:
                         float z = caster->GetPositionZ();
                         target->NearTeleportTo(x, y, z, ori);
                         caster->SetFacingToObject(target);
+                        caster->SetOrientation(target->GetOrientation() + M_PI);
                     }
                 }
+            }
         }
 
         void Register()
