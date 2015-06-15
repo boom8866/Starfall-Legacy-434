@@ -99,6 +99,10 @@ enum Creatures
     NPC_CHOGALL_HALFUS              = 46965,
     NPC_CHOGALL_DRAGONS             = 48142,
     NPC_CHOGALL_COUNCIL             = 46900,
+
+    // Achievement
+    NPC_TWILIGHT_FIEND              = 49864,
+    NPC_FIEND_TRIGGER               = 46364
 };
 
 enum Gameobjects
