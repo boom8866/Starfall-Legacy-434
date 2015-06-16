@@ -214,6 +214,7 @@ public:
         {
             _Reset();
             DoCast(me, SPELL_SIT_THRONE, true);
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -231,7 +232,6 @@ public:
             events.SetPhase(PHASE_ONE);
             events.ScheduleEvent(EVENT_FLAMES_ORDERS, 5000, 0, PHASE_ONE);
             events.ScheduleEvent(EVENT_CONVERSION, 10000, 0, PHASE_ONE);
-            events.ScheduleEvent(EVENT_SUMMON_ADHERENT, 68000, 0, PHASE_ONE);
             events.ScheduleEvent(EVENT_CHECK_FIRST_FURY, 2000);
             events.ScheduleEvent(EVENT_BERSERK, 600000);
             events.ScheduleEvent(EVENT_CHECK_PHASE_TWO, 5000, 0, PHASE_ONE);
@@ -443,7 +443,6 @@ public:
                         DoCast(SPELL_SUMMON_ADHERENT_T);
                         Talk(SAY_ADHERENT);
                         events.ScheduleEvent(EVENT_UNROOT_CHOGALL, 1800, 0, PHASE_ONE);
-                        events.RescheduleEvent(EVENT_SUMMON_ADHERENT, 90000, 0, PHASE_ONE);
                         events.ScheduleEvent(EVENT_FESTER_BLOOD, 36000, 0, PHASE_ONE);
                         break;
                     case EVENT_UNROOT_CHOGALL:
@@ -461,6 +460,7 @@ public:
                         events.CancelEvent(EVENT_SHADOWS_ORDERS);
                         events.CancelEvent(EVENT_FLAMES_ORDERS);
                         events.ScheduleEvent(EVENT_FLAMES_ORDERS, 15000, 0, PHASE_ONE);
+                        events.ScheduleEvent(EVENT_SUMMON_ADHERENT, 5500, 0, PHASE_ONE);
 
                         if (Unit* target = me->getVictim())
                             DoCast(target, SPELL_FURY_OF_CHOGALL);
@@ -557,9 +557,10 @@ public:
 
     struct npc_bot_fire_portalAI : public ScriptedAI
     {
-        npc_bot_fire_portalAI(Creature * creature) : ScriptedAI(creature)
+        npc_bot_fire_portalAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             DoCast(SPELL_FIRE_PORTAL_VISUAL);
         }
 
@@ -617,9 +618,10 @@ public:
 
     struct npc_bot_shadow_portalAI : public ScriptedAI
     {
-        npc_bot_shadow_portalAI(Creature * creature) : ScriptedAI(creature)
+        npc_bot_shadow_portalAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             DoCast(SPELL_SHADOW_PORTAL_VISUAL);
         }
 
@@ -678,9 +680,10 @@ public:
     struct npc_bot_blazeAI : public ScriptedAI
     {
 
-        npc_bot_blazeAI(Creature * creature) : ScriptedAI(creature)
+        npc_bot_blazeAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         InstanceScript* instance;
@@ -774,6 +777,7 @@ public:
             instance = creature->GetInstanceScript();
             deathVisual = false;
             finalPhase = false;
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         InstanceScript* instance;
@@ -869,6 +873,7 @@ public:
         npc_bot_darkened_creationAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             creature->CastSpell(creature, SPELL_TENTACLE_VISUAL, true);
         }
 
@@ -919,6 +924,7 @@ public:
         npc_bot_blood_old_godAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         InstanceScript* instance;
@@ -950,13 +956,18 @@ public:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                         {
-                            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-                            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
                             me->SetSpeed(MOVE_WALK, 0.55f, true);
                             me->SetSpeed(MOVE_RUN, 0.55f, true);
                             AttackStart(target);
                             me->AddThreat(target, 5000000.0f);
                         }
+
+                        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, false);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, false);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, false);
+                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, false);
                         break;
                     }
                     case EVENT_MELEE_INCREASE_CORRUPTION:
@@ -1369,6 +1380,7 @@ public:
         {
             instance = creature->GetInstanceScript();
             events.ScheduleEvent(EVENT_MALFORMATION_SHADOWBOLT, 3000);
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         InstanceScript* instance;

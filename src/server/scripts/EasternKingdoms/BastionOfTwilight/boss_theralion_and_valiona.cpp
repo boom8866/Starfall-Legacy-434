@@ -91,7 +91,10 @@ enum Spells
     SPELL_TWILIGHT_SHIFT_8                  = 92894,
 
     // Berserk
-    SPELL_BERSERK                           = 47008
+    SPELL_BERSERK                           = 47008,
+
+    // Achievement Spell
+    SPELL_FIENDS_TRIGGER                    = 94150
 };
 
 enum Events
@@ -135,6 +138,9 @@ enum Events
     EVENT_ACTIVATE_UNSTABLE_TWILIGHT,
     EVENT_CHECK_PLAYER,
     EVENT_MOVE_RANDOM,
+
+    // Achievement
+    EVENT_ENABLE_TWILIGHT_FIENDS
 };
 
 enum Phases
@@ -154,6 +160,8 @@ enum Actions
     ACTION_RESET_GROUND_EVENTS,
     ACTION_RESET_AIR_EVENTS,
     ACTION_TAKEOFF_2,
+    ACTION_ENABLE_TWILIGHT_FIENDS,
+    ACTION_FIEND_KILLED
 };
 
 enum Points
@@ -174,6 +182,11 @@ enum ClassAuras
     CLASS_PALADIN_RETRIBUTION   = 76672,
     CLASS_SHAMAN_ENHANCEMENT    = 30814,
     CLASS_DRUID_FERAL           = 84735
+};
+
+enum Achievement
+{
+    ACHIEVEMENT_DOUBLE_DRAGON   = 4852
 };
 
 Position const TwilFlamePos[90] = // 15 per row, 2 rows per side, 3 sides.
@@ -365,6 +378,7 @@ public:
             _preparationRandom = 0;
             _pathSelected = 0;
             _sideLeft = true;
+            _fiendKilled = 0;
         }
 
         bool _introDone;
@@ -373,6 +387,7 @@ public:
         bool _sideLeft;
         uint8 _pathSelected;
         uint8 _preparationRandom;
+        uint16 _fiendKilled;
 
         void Reset()
         {
@@ -393,6 +408,7 @@ public:
             events.ScheduleEvent(EVENT_BLACKOUT, 6000);
             events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 1);
             events.ScheduleEvent(EVENT_BERSERK, 600000);
+            _fiendKilled = 0;
         }
 
         void EnterEvadeMode()
@@ -408,6 +424,11 @@ public:
             summons.DespawnAll();
             _isOnGround = true;
             _breathCounter = 0;
+            _fiendKilled = 0;
+
+            if (Creature* fiendsTrigger = me->FindNearestCreature(NPC_FIEND_TRIGGER, 300.0f))
+                fiendsTrigger->RemoveAurasDueToSpell(SPELL_FIENDS_TRIGGER);
+
             _EnterEvadeMode();
             _DespawnAtEvade();
         }
@@ -425,6 +446,12 @@ public:
                 me->Kill(theralion);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoCastSpellOnPlayers(SPELL_TWILIGHT_SHIFT_SCRIPT);
+            if (_fiendKilled >= 6)
+                instance->DoCompleteAchievement(ACHIEVEMENT_DOUBLE_DRAGON);
+
+            if (Creature* fiendsTrigger = me->FindNearestCreature(NPC_FIEND_TRIGGER, 300.0f))
+                fiendsTrigger->RemoveAurasDueToSpell(SPELL_FIENDS_TRIGGER);
+
             summons.DespawnAll();
             _JustDied();
         }
@@ -489,6 +516,12 @@ public:
             case ACTION_RESET_GROUND_EVENTS:
                 events.CancelEvent(EVENT_DEVOURING_FLAMES_TARGETING);
                 events.CancelEvent(EVENT_BLACKOUT);
+                break;
+            case ACTION_ENABLE_TWILIGHT_FIENDS:
+                events.ScheduleEvent(EVENT_ENABLE_TWILIGHT_FIENDS, 20000);
+                break;
+            case ACTION_FIEND_KILLED:
+                _fiendKilled++;
                 break;
             default:
                 break;
@@ -663,6 +696,10 @@ public:
                     break;
                 case EVENT_BERSERK:
                     DoCast(SPELL_BERSERK);
+                    break;
+                case EVENT_ENABLE_TWILIGHT_FIENDS:
+                    if (Creature* fiendsTrigger = me->FindNearestCreature(NPC_FIEND_TRIGGER, 300.0f))
+                        fiendsTrigger->AddAura(SPELL_FIENDS_TRIGGER, fiendsTrigger);
                     break;
                 default:
                     break;
@@ -1096,7 +1133,8 @@ public:
         {
             if (Creature* valiona = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALIONA)))
             {
-                valiona->GetMotionMaster()->MovementExpired();
+                valiona->StopMoving();
+                valiona->SendMovementFlagUpdate(false);
                 valiona->AddUnitState(UNIT_STATE_CANNOT_TURN);
                 valiona->SetReactState(REACT_PASSIVE);
                 valiona->AttackStop();
@@ -1290,8 +1328,9 @@ public:
         void IsSummonedBy(Unit* /*summoner*/)
         {
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            if (Creature* valiona = me->FindNearestCreature(BOSS_VALIONA, 500.0f))
+                valiona->AI()->DoAction(ACTION_ENABLE_TWILIGHT_FIENDS);
         }
-
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -1385,8 +1424,11 @@ public:
         void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
+            {
                 if (Unit* target = GetTarget())
                 {
+                    caster->StopMoving();
+                    caster->SendMovementFlagUpdate(false);
                     if (target->GetEntry() == 46588)
                     {
                         float ori = caster->GetOrientation();
@@ -1396,8 +1438,10 @@ public:
                         float z = caster->GetPositionZ();
                         target->NearTeleportTo(x, y, z, ori);
                         caster->SetFacingToObject(target);
+                        caster->SetOrientation(target->GetOrientation() + M_PI);
                     }
                 }
+            }
         }
 
         void Register()
@@ -1978,6 +2022,82 @@ public:
     }
 };
 
+class npc_bot_twilight_fiend : public CreatureScript
+{
+public:
+    npc_bot_twilight_fiend() : CreatureScript("npc_bot_twilight_fiend") { }
+
+    enum eventId
+    {
+        EVENT_START_CHASING  = 1
+    };
+
+    struct npc_bot_twilight_fiendAI : public ScriptedAI
+    {
+        npc_bot_twilight_fiendAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            // Force Phasemask 2
+            me->SetPhaseMask(2, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+            me->SetWalk(true);
+            events.ScheduleEvent(EVENT_START_CHASING, 2500);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            if (Creature* valiona = me->FindNearestCreature(BOSS_VALIONA, 500.0f))
+                valiona->AI()->DoAction(ACTION_FIEND_KILLED);
+        }
+
+        void DamageDealt(Unit* victim, uint32& damage, DamageEffectType damageType)
+        {
+            if (victim && damage && damageType == DIRECT_DAMAGE)
+                me->DespawnOrUnsummon(1000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_START_CHASING:
+                        if (Player* target = me->FindNearestPlayer(500.0f))
+                        {
+                            me->GetMotionMaster()->MoveChase(target);
+                            events.CancelEvent(EVENT_START_CHASING);
+                        }
+                        else
+                            events.RescheduleEvent(EVENT_START_CHASING, 1500);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_bot_twilight_fiendAI(creature);
+    }
+};
+
 void AddSC_boss_theralion_and_valiona()
 {
     new at_theralion_and_valiona();
@@ -2008,4 +2128,5 @@ void AddSC_boss_theralion_and_valiona()
     new spell_tav_twilight_shift();
     new spell_tav_twilight_shift_1();
     new spell_tav_twilight_shift_2();
+    new npc_bot_twilight_fiend();
 }

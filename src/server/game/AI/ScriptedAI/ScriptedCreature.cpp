@@ -490,6 +490,10 @@ void BossAI::_EnterCombat()
             return;
         }
         instance->SetBossState(_bossId, IN_PROGRESS);
+
+        // For Battle Ress System
+        if (me->GetMap()->IsRaid())
+            instance->DoResetBressSystem();
     }
 }
 

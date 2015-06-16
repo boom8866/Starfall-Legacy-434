@@ -208,8 +208,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 Talk(SAY_AGGRO);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 events.ScheduleEvent(EVENT_BERSERK, 360000);
-                if (me->HasAura(SPELL_SHADOW_WRAPPED))
-                    events.ScheduleEvent(EVENT_SHADOW_NOVA, 12000);
+                events.ScheduleEvent(EVENT_SHADOW_NOVA, 10000);
 
                 if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
                     behemoth->SetInCombatWithZone();
@@ -458,9 +457,10 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                                 events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 500);
                             else
                                 events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 2500);
-                            events.ScheduleEvent(EVENT_SHADOW_NOVA, 16000);
+                            events.ScheduleEvent(EVENT_SHADOW_NOVA, 10000);
                             break;
                         case EVENT_FURIOUS_ROAR:
+                            events.CancelEvent(EVENT_SHADOW_NOVA);
                             if (!_roarAnnounced)
                                 events.ScheduleEvent(EVENT_TALK_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR));
 
@@ -468,11 +468,12 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                             {
                                 _roarCasts++;
                                 DoCastAOE(SPELL_FURIOUS_ROAR);
-                                events.ScheduleEvent(EVENT_FURIOUS_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR) + 50);
+                                events.ScheduleEvent(EVENT_FURIOUS_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR) + 100);
                                 _roarAnnounced = true;
                             }
                             else
                             {
+                                events.ScheduleEvent(EVENT_SHADOW_NOVA, 5000);
                                 events.ScheduleEvent(EVENT_FURIOUS_ROAR, 33000);
                                 // Reset counter
                                 _roarCasts = 0;
