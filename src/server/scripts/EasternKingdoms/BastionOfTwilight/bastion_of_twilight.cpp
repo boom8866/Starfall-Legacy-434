@@ -392,11 +392,13 @@ public:
                         me->VisitNearbyObject(60.0f, searcher);
                         for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
-                            if ((*itr) && (*itr)->isAlive() && (*itr)->ToCreature() && !(*itr)->isInCombat() &&
-                                (*itr)->ToCreature()->GetEntry() == NPC_CHOSEN_SEER || (*itr)->ToCreature()->GetEntry() == NPC_CHOSEN_WARRIOR)
+                            if ((*itr) && (*itr)->isAlive() && (*itr)->ToCreature() && !(*itr)->isInCombat())
                             {
-                                (*itr)->SetWalk(false);
-                                (*itr)->ToCreature()->SetInCombatWithZone();
+                                if ((*itr)->GetEntry() == NPC_CHOSEN_SEER || (*itr)->GetEntry() == NPC_CHOSEN_WARRIOR)
+                                {
+                                    (*itr)->SetWalk(false);
+                                    (*itr)->ToCreature()->SetInCombatWithZone();
+                                }
                             }
                         }
                         events.ScheduleEvent(EVENT_MOVE_AWAY_AND_DESPAWN, 35000);
