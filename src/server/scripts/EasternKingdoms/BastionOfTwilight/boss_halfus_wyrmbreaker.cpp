@@ -473,7 +473,9 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                             }
                             else
                             {
-                                events.ScheduleEvent(EVENT_SHADOW_NOVA, 5000);
+                                if (me->HasAura(SPELL_SHADOW_WRAPPED))
+                                    events.ScheduleEvent(EVENT_SHADOW_NOVA, 5000);
+
                                 events.ScheduleEvent(EVENT_FURIOUS_ROAR, 33000);
                                 // Reset counter
                                 _roarCasts = 0;
