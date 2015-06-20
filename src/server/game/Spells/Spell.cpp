@@ -3955,30 +3955,28 @@ void Spell::finish(bool ok)
         case 6785:  // Ravage
         case 81170: // Ravage!
         {
-            if (!unitTarget)
-                break;
+            if (unitTarget)
+            {
+                // Infected Wounds
+                if (m_caster->HasAura(48483))
+                    m_caster->CastSpell(unitTarget, 58179, true);
+                if (m_caster->HasAura(48484))
+                    m_caster->CastSpell(unitTarget, 58180, true);
 
-            // Infected Wounds
-            if (m_caster->HasAura(48483))
-                m_caster->CastSpell(unitTarget, 58179, true);
-            if (m_caster->HasAura(48484))
-                m_caster->CastSpell(unitTarget, 58180, true);
-
-            m_caster->RemoveAurasDueToSpell(109881);
-            m_caster->RemoveAurasDueToSpell(81022);
-            m_caster->RemoveAurasDueToSpell(81021);
+                m_caster->RemoveAurasDueToSpell(109881);
+                m_caster->RemoveAurasDueToSpell(81022);
+                m_caster->RemoveAurasDueToSpell(81021);
+            }
             break;
         }
         case 77575: // Outbreak
         {
-            if (!unitTarget)
-                break;
-
             // Ebon Plaguebringer
             if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
             {
                 int32 bp0 = aurEff->GetAmount();
-                m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                if (unitTarget)
+                    m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
             }
             break;
         }
@@ -4009,19 +4007,19 @@ void Spell::finish(bool ok)
         }
         case 8056:  // Frost Shock
         {
-            if (!unitTarget)
-                break;
-
-            // Check if distance is correct
-            if (m_caster->GetDistance(unitTarget) < 15.0f)
-                return;
-
-            // Frozen Power
-            if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 3780, EFFECT_1))
+            if (unitTarget)
             {
-                int32 chance = aurEff->GetAmount();
-                if (roll_chance_i(chance))
-                    m_caster->CastSpell(unitTarget, 63685, true);
+                // Check if distance is correct
+                if (m_caster->GetDistance(unitTarget) >= 15.0f)
+                {
+                    // Frozen Power
+                    if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 3780, EFFECT_1))
+                    {
+                        int32 chance = aurEff->GetAmount();
+                        if (roll_chance_i(chance))
+                            m_caster->CastSpell(unitTarget, 63685, true);
+                    }
+                }
             }
             break;
         }
@@ -4034,19 +4032,19 @@ void Spell::finish(bool ok)
         case 5570: // Insect Swarm
         {
             // Only for player caster
-            if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                break;
-
-            // Nature's Grace
-            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DRUID, 10, 0))
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
             {
-                int32 bp0 = aurEff->GetAmount();
-                // Check for cooldown!
-                if (!m_caster->ToPlayer()->GetSpellCooldownDelay(16886))
+                // Nature's Grace
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DRUID, 10, 0))
                 {
-                    m_caster->CastCustomSpell(m_caster, 16886, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                    // 60 seconds of cooldown
-                    m_caster->ToPlayer()->AddSpellCooldown(16886, 0, time(NULL) + 60);
+                    int32 bp0 = aurEff->GetAmount();
+                    // Check for cooldown!
+                    if (!m_caster->ToPlayer()->GetSpellCooldownDelay(16886))
+                    {
+                        m_caster->CastCustomSpell(m_caster, 16886, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                        // 60 seconds of cooldown
+                        m_caster->ToPlayer()->AddSpellCooldown(16886, 0, time(NULL) + 60);
+                    }
                 }
             }
             break;
@@ -4055,14 +4053,12 @@ void Spell::finish(bool ok)
         case 58984: // Shadowmeld
         case 5384:  // Feign Death
         {
-            if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                break;
-
-            if (!m_caster->isInCombat())
-                break;
-
-            if (m_caster->GetMap() && (!m_caster->GetMap()->GetInstanceId() || m_caster->GetMap()->IsBattlegroundOrArena()))
-                m_caster->ClearInCombat();
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (m_caster->isInCombat())
+                    if (m_caster->GetMap() && (!m_caster->GetMap()->GetInstanceId() || m_caster->GetMap()->IsBattlegroundOrArena()))
+                        m_caster->ClearInCombat();
+            }
             break;
         }
         case 7386:  // Sunder Armor
@@ -4079,33 +4075,33 @@ void Spell::finish(bool ok)
         case 35395: // Crusader Strike
         case 53385: // Divine Storm
         {
-            if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            // Sanctity of Battle
-            if (m_caster->HasAura(25956))
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
             {
-                float haste = (2 - m_caster->ToPlayer()->GetFloatValue(UNIT_MOD_CAST_HASTE));
-                int32 cooldown = 4500;
-                int32 difference = 0;
-                if (haste > 0)
+                // Sanctity of Battle
+                if (m_caster->HasAura(25956))
                 {
-                    cooldown /= haste;
-                    difference = 4500-cooldown;
+                    float haste = (2 - m_caster->ToPlayer()->GetFloatValue(UNIT_MOD_CAST_HASTE));
+                    int32 cooldown = 4500;
+                    int32 difference = 0;
+                    if (haste > 0)
+                    {
+                        cooldown /= haste;
+                        difference = 4500 - cooldown;
+                    }
+
+                    int32 newCooldownDelay = m_caster->ToPlayer()->GetSpellCooldownDelay(m_spellInfo->Id);
+                    if (newCooldownDelay <= difference / 1000)
+                        newCooldownDelay = 0;
+                    else
+                        newCooldownDelay -= difference / 1000;
+
+                    m_caster->ToPlayer()->AddSpellCooldown(m_spellInfo->Id, 0, uint32(time(NULL) + newCooldownDelay));
+                    WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+                    data << uint32(m_spellInfo->Id);
+                    data << uint64(m_caster->GetGUID());
+                    data << int32(-difference);
+                    m_caster->ToPlayer()->GetSession()->SendPacket(&data);
                 }
-
-                int32 newCooldownDelay = m_caster->ToPlayer()->GetSpellCooldownDelay(m_spellInfo->Id);
-                if (newCooldownDelay <= difference / 1000)
-                    newCooldownDelay = 0;
-                else
-                    newCooldownDelay -= difference / 1000;
-
-                m_caster->ToPlayer()->AddSpellCooldown(m_spellInfo->Id, 0, uint32(time(NULL) + newCooldownDelay));
-                WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
-                data << uint32(m_spellInfo->Id);
-                data << uint64(m_caster->GetGUID());
-                data << int32(-difference);
-                m_caster->ToPlayer()->GetSession()->SendPacket(&data);
             }
             break;
         }

@@ -995,6 +995,7 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
 
     Passenger->InterruptNonMeleeSpells(false);
     Passenger->RemoveAurasByType(SPELL_AURA_MOUNTED);
+    Passenger->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
 
     Player* player = Passenger->ToPlayer();
     if (player)
