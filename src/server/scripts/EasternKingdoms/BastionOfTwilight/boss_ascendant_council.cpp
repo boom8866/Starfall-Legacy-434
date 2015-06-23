@@ -331,10 +331,12 @@ public:
             _Reset();
             _switched = false;
             MakeInterruptable(false);
+            me->SetReactState(REACT_DEFENSIVE);
         }
 
         void EnterCombat(Unit* who)
         {
+            me->SetReactState(REACT_AGGRESSIVE);
             Talk(SAY_AGGRO);
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
@@ -357,7 +359,7 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
-            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetReactState(REACT_DEFENSIVE);
             me->GetMotionMaster()->MoveTargetedHome();
             summons.DespawnAll();
 
@@ -533,10 +535,12 @@ public:
             _Reset();
             _switched = false;
             MakeInterruptable(true);
+            me->SetReactState(REACT_DEFENSIVE);
         }
 
         void EnterCombat(Unit* who)
         {
+            me->SetReactState(REACT_AGGRESSIVE);
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             MakeInterruptable(true);
@@ -555,7 +559,7 @@ public:
             _EnterEvadeMode();
             events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
-            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetReactState(REACT_DEFENSIVE);
             leapTarget = NULL;
             _infernoCounter = 0;
             summons.DespawnAll();
@@ -1961,12 +1965,19 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            if (targets.empty())
-                return;
+            if (Unit* caster = GetCaster())
+            {
+                if (targets.empty())
+                    return;
 
-            uint32 size = GetCaster()->GetMap()->Is25ManRaid() ? 3 : 1;
+                targets.remove_if(VictimCheck(caster));
 
-            Trinity::Containers::RandomResizeList(targets, size);
+                if (targets.empty())
+                    return;
+
+                uint32 size = caster->GetMap()->Is25ManRaid() ? 3 : 1;
+                Trinity::Containers::RandomResizeList(targets, size);
+            }
         }
 
         void Register()
