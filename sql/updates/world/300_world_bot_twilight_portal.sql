@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `ScriptName`='npc_bot_twilight_portal' WHERE `entry`=51551;

@@ -476,10 +476,48 @@ public:
     }
 };
 
+class npc_bot_twilight_portal : public CreatureScript
+{
+public:
+    npc_bot_twilight_portal() : CreatureScript("npc_bot_twilight_portal")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_COSMETIC_TELEPORT = 52096
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        instance = creature->GetInstanceScript();
+        if (instance)
+        {
+            if (instance->GetBossState(DATA_THERALION_AND_VALIONA) == DONE && instance->GetBossState(DATA_ASCENDANT_COUNCIL) != DONE)
+            {
+                player->CastSpell(player, SPELL_COSMETIC_TELEPORT, true);
+                player->NearTeleportTo(-741.32f, -684.92f, 831.88f, 1.57f);
+                return true;
+            }
+            else if (instance->GetBossState(DATA_ASCENDANT_COUNCIL) == DONE)
+            {
+                player->CastSpell(player, SPELL_COSMETIC_TELEPORT, true);
+                player->NearTeleportTo(-1007.47f, -582.77f, 831.90f, 3.18f);
+                return true;
+            }
+        }
+        return true;
+    }
+
+protected:
+    InstanceScript* instance;
+};
+
 void AddSC_bastion_of_twilight()
 {
     new npc_bot_twilight_phase_twister();
     new npc_bot_twilight_orb();
     new spell_bot_phased_burn();
     new npc_chogall_wave_event();
+    new npc_bot_twilight_portal();
 }
