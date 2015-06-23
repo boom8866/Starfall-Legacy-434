@@ -7649,19 +7649,10 @@ public:
                                 me->VisitNearbyObject(60.0f, searcher);
                                 for (std::list<Unit*>::const_iterator itrs = targets.begin(); itrs != targets.end(); ++itrs)
                                 {
-                                    if ((*itrs) && (*itrs)->ToTempSummon() && (*itrs)->ToTempSummon()->GetSummoner() == playerOwner)
-                                    {
-                                        switch ((*itrs)->ToCreature()->GetEntry())
-                                        {
-                                            case NPC_KEG_VEHICLE:
-                                            {
+                                    if ((*itrs) && (*itr))
+                                        if ((*itrs)->ToTempSummon() && (*itrs)->ToTempSummon()->GetSummoner() == playerOwner)
+                                            if ((*itrs)->ToCreature()->GetEntry() == NPC_KEG_VEHICLE)
                                                 (*itr)->EnterVehicle((*itrs), 0);
-                                                break;
-                                            }
-                                            default:
-                                                break;
-                                        }
-                                    }
                                 }
                                 break;
                             }

@@ -6265,9 +6265,9 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
 
                             for (Unit::AuraEffectList::const_iterator itr = dotList.begin(); itr != dotList.end(); ++itr)
                             {
-                                if ((*itr) && (*itr)->GetCaster() && (*itr)->GetCaster()->IsInWorld())
+                                if ((*itr))
                                 {
-                                    if ((*itr)->GetCaster()->GetGUID() == m_caster->GetGUID())
+                                    if ((*itr)->GetCasterGUID() == m_caster->GetGUID())
                                     {
                                         uint32 duration = (*itr)->GetBase()->GetDuration();
                                         uint32 spellId = (*itr)->GetId();
