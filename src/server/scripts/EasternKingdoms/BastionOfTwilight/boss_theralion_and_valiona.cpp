@@ -1133,13 +1133,13 @@ public:
         {
             if (Creature* valiona = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALIONA)))
             {
-                valiona->StopMoving();
-                valiona->SendMovementFlagUpdate(false);
                 valiona->AddUnitState(UNIT_STATE_CANNOT_TURN);
                 valiona->SetReactState(REACT_PASSIVE);
                 valiona->AttackStop();
                 valiona->SetFacingToObject(me);
                 valiona->SetOrientation(me->GetOrientation() + M_PI);
+                valiona->StopMoving();
+                valiona->SendMovementFlagUpdate(false);
                 valiona->AI()->DoAction(ACTION_CAST_DEVOURING_FLAMES);
             }
         }
@@ -1427,8 +1427,6 @@ public:
             {
                 if (Unit* target = GetTarget())
                 {
-                    caster->StopMoving();
-                    caster->SendMovementFlagUpdate(false);
                     if (target->GetEntry() == 46588)
                     {
                         float ori = caster->GetOrientation();
@@ -1439,6 +1437,8 @@ public:
                         target->NearTeleportTo(x, y, z, ori);
                         caster->SetFacingToObject(target);
                         caster->SetOrientation(target->GetOrientation() + M_PI);
+                        caster->StopMoving();
+                        caster->SendMovementFlagUpdate(false);
                     }
                 }
             }
