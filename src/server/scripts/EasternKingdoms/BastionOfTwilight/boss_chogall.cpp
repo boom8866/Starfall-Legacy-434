@@ -214,7 +214,6 @@ public:
         {
             _Reset();
             DoCast(me, SPELL_SIT_THRONE, true);
-            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -560,7 +559,6 @@ public:
         npc_bot_fire_portalAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
-            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             DoCast(SPELL_FIRE_PORTAL_VISUAL);
         }
 
@@ -621,7 +619,6 @@ public:
         npc_bot_shadow_portalAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
-            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             DoCast(SPELL_SHADOW_PORTAL_VISUAL);
         }
 
@@ -683,7 +680,6 @@ public:
         npc_bot_blazeAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
-            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         InstanceScript* instance;
@@ -777,7 +773,6 @@ public:
             instance = creature->GetInstanceScript();
             deathVisual = false;
             finalPhase = false;
-            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         InstanceScript* instance;
@@ -873,7 +868,6 @@ public:
         npc_bot_darkened_creationAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
-            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             creature->CastSpell(creature, SPELL_TENTACLE_VISUAL, true);
         }
 
@@ -896,8 +890,16 @@ public:
                 {
                     case EVENT_DEBILITATING_BEAM:
                     {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                            DoCast(target, SPELL_DEBILITATING_BEAM);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 500.0f, true))
+                        {
+                            if (!target->HasAura(SPELL_DEBILITATING_BEAM))
+                                DoCast(target, SPELL_DEBILITATING_BEAM);
+                            else
+                            {
+                                events.ScheduleEvent(EVENT_DEBILITATING_BEAM, 1000);
+                                break;
+                            }
+                        }
                         events.ScheduleEvent(EVENT_DEBILITATING_BEAM, 10500);
                         break;
                     }
@@ -924,7 +926,6 @@ public:
         npc_bot_blood_old_godAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
-            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         InstanceScript* instance;
@@ -967,7 +968,7 @@ public:
                         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
                         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, false);
                         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, false);
-                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, false);
+                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, true);
                         break;
                     }
                     case EVENT_MELEE_INCREASE_CORRUPTION:
@@ -1380,7 +1381,6 @@ public:
         {
             instance = creature->GetInstanceScript();
             events.ScheduleEvent(EVENT_MALFORMATION_SHADOWBOLT, 3000);
-            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
         }
 
         InstanceScript* instance;

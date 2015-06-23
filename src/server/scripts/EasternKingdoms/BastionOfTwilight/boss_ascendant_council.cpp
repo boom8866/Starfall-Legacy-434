@@ -2365,7 +2365,7 @@ public:
 
         void Register()
         {
-            AfterEffectRemove += AuraEffectRemoveFn(spell_ac_aegis_of_flame_AuraScript::HandleAfterAegisRemove, EFFECT_0, SPELL_AURA_SCHOOL_HEAL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_ac_aegis_of_flame_AuraScript::HandleAfterAegisRemove, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
