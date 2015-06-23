@@ -1865,28 +1865,6 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
     if (GetTransport())
         return;
 
-    if (GetTypeId() == TYPEID_UNIT)
-    {
-        switch (ToCreature()->GetEntry())
-        {
-            case 43324: // Cho'gall
-            case 50131:
-            case 50132:
-            case 43393: // Fire Portal
-            case 47019: // Shadow Portal
-            case 43585: // Blaze
-            case 43622: // Corrupting Adherent
-            case 50184:
-            case 50185:
-            case 44085: // Darkened Creation
-            case 43888: // Malformation
-            case 43707: // Blood Old God
-                return;
-            default:
-                break;
-        }
-    }
-
     switch (GetTypeId())
     {
         case TYPEID_UNIT:
