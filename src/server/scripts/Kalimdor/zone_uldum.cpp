@@ -7619,7 +7619,7 @@ public:
                         {
                             case NPC_BRAZIER:
                             {
-                                if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner)
+                                if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                                 {
                                     std::list<Unit*> targets;
                                     Trinity::AnyUnitInObjectRangeCheck u_check(me, 60.0f);
@@ -7637,7 +7637,7 @@ public:
                             }
                             case NPC_POWDER_KEG:
                             {
-                                if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld() && playerOwner)
+                                if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                                 {
                                     std::list<Unit*> targets;
                                     Trinity::AnyUnitInObjectRangeCheck u_check(me, 60.0f);

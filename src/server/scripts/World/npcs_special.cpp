@@ -4169,7 +4169,7 @@ public:
                                     nearestPlayer->VisitNearbyObject(80.0f, searcher);
                                     for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                                     {
-                                        if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
+                                        if ((*itr) && (*itr)->isSummon() && (*itr)->ToTempSummon()->GetCharmerOrOwner() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
                                         {
                                             switch ((*itr)->ToTempSummon()->GetEntry())
                                             {
@@ -4223,7 +4223,7 @@ public:
                                 nearestPlayer->VisitNearbyObject(500.0f, searcher);
                                 for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                                 {
-                                    if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
+                                    if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() && (*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
                                     {
                                         switch ((*itr)->ToTempSummon()->GetEntry())
                                         {
@@ -4328,7 +4328,7 @@ public:
                                         nearestPlayer->VisitNearbyObject(500.0f, searcher);
                                         for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                                         {
-                                            if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
+                                            if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() && (*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
                                             {
                                                 switch ((*itr)->ToTempSummon()->GetEntry())
                                                 {
@@ -4803,7 +4803,7 @@ public:
                 player->VisitNearbyObject(300.0f, searcher);
                 for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                 {
-                    if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == player))
+                    if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() && (*itr)->ToTempSummon()->GetCharmerOrOwner() == player))
                     {
                         switch ((*itr)->GetEntry())
                         {
