@@ -182,6 +182,7 @@ enum Actions
     ACTION_DESPAWN,
     ACTION_ENCOUNTER_DONE,
     ACTION_ACHIEVEMENT_FAILED,
+    ACTION_RESTORE_INTERRUPTABLE
 };
 
 #define DATA_ELEMENTARY 1
@@ -330,10 +331,12 @@ public:
             _Reset();
             _switched = false;
             MakeInterruptable(false);
+            me->SetReactState(REACT_DEFENSIVE);
         }
 
         void EnterCombat(Unit* who)
         {
+            me->SetReactState(REACT_AGGRESSIVE);
             Talk(SAY_AGGRO);
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
@@ -356,7 +359,7 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
-            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetReactState(REACT_DEFENSIVE);
             me->GetMotionMaster()->MoveTargetedHome();
             summons.DespawnAll();
 
@@ -531,14 +534,16 @@ public:
         {
             _Reset();
             _switched = false;
-            MakeInterruptable(false);
+            MakeInterruptable(true);
+            me->SetReactState(REACT_DEFENSIVE);
         }
 
         void EnterCombat(Unit* who)
         {
+            me->SetReactState(REACT_AGGRESSIVE);
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-            MakeInterruptable(false);
+            MakeInterruptable(true);
             _switched = false;
             events.ScheduleEvent(EVENT_TALK_INTRO, 5000);
             events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, 31000);
@@ -554,11 +559,11 @@ public:
             _EnterEvadeMode();
             events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
-            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetReactState(REACT_DEFENSIVE);
             leapTarget = NULL;
             _infernoCounter = 0;
             summons.DespawnAll();
-            MakeInterruptable(false);
+            MakeInterruptable(true);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -629,6 +634,9 @@ public:
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     _DespawnAtEvade();
                     break;
+                case ACTION_RESTORE_INTERRUPTABLE:
+                    MakeInterruptable(true);
+                    break;
                 default:
                     break;
             }
@@ -650,6 +658,7 @@ public:
                         break;
                     case EVENT_AEGIS_OF_FLAME:
                         me->StopMoving();
+                        MakeInterruptable(false);
                         DoCast(me, SPELL_AEGIS_OF_FLAME);
                         events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, urand(63000, 65000));
                         events.ScheduleEvent(EVENT_RISING_FLAMES, 2000);
@@ -1956,12 +1965,19 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            if (targets.empty())
-                return;
+            if (Unit* caster = GetCaster())
+            {
+                if (targets.empty())
+                    return;
 
-            uint32 size = GetCaster()->GetMap()->Is25ManRaid() ? 3 : 1;
+                targets.remove_if(VictimCheck(caster));
 
-            Trinity::Containers::RandomResizeList(targets, size);
+                if (targets.empty())
+                    return;
+
+                uint32 size = caster->GetMap()->Is25ManRaid() ? 3 : 1;
+                Trinity::Containers::RandomResizeList(targets, size);
+            }
         }
 
         void Register()
@@ -2342,6 +2358,34 @@ public:
     }
 };
 
+class spell_ac_aegis_of_flame : public SpellScriptLoader
+{
+public:
+    spell_ac_aegis_of_flame() : SpellScriptLoader("spell_ac_aegis_of_flame") { }
+
+    class spell_ac_aegis_of_flame_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_ac_aegis_of_flame_AuraScript);
+
+        void HandleAfterAegisRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (caster->GetTypeId() == TYPEID_UNIT)
+                    caster->ToCreature()->AI()->DoAction(ACTION_RESTORE_INTERRUPTABLE);
+        }
+
+        void Register()
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_ac_aegis_of_flame_AuraScript::HandleAfterAegisRemove, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_ac_aegis_of_flame_AuraScript();
+    }
+};
+
 class achievement_elementary : public AchievementCriteriaScript
 {
 public:
@@ -2388,5 +2432,6 @@ void AddSC_boss_ascendant_council()
     new spell_ac_eruption();
     new spell_ac_electrical_instability();
     new spell_ac_gravity_crush();
+    new spell_ac_aegis_of_flame();
     new achievement_elementary();
 }
