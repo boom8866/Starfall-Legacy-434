@@ -3232,6 +3232,11 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 }
                 break;
             }
+            case 85673: // Word of Glory
+            {
+                addhealth += urand(1008, 1124);
+                break;
+            }
         }
 
         // Nature's Blessing (Only for direct heal spells)
