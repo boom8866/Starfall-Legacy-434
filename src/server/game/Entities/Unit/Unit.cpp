@@ -13168,6 +13168,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                 switch (spellProto->Id)
                 {
                     case 49143: // Frost Strike
+                    case 66196: // Frost Strike (Off-hand)
                     {
                         if (GetTypeId() == TYPEID_PLAYER)
                         {
