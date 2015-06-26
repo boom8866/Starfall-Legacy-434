@@ -978,13 +978,14 @@ class spell_warr_sweeping_strikes : public SpellScriptLoader
             {
                 PreventDefaultAction();
                 if (Unit* caster = GetCaster())
-                {
                     if (Unit* target = GetTarget())
-                    {
                         if (_procTarget && _procTarget->IsInWorld())
-                            target->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, true, NULL, aurEff);
-                    }
-                }
+                            if (target->GetTypeId() == TYPEID_PLAYER)
+                                if (!target->ToPlayer()->HasSpellCooldown(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK))
+                                {
+                                    target->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, true, NULL, aurEff);
+                                    target->ToPlayer()->AddSpellCooldown(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, 0, time(NULL) + 1);
+                                }
             }
 
             void Register()
@@ -1209,11 +1210,17 @@ class spell_warr_strikes_of_opportunity : public SpellScriptLoader
                Unit *target = procInfo.GetActionTarget();
 
                // Cast only for Warriors that have Strikes of Opportunity mastery active
-               if (!caster->HasAura(76838))
+               if (!caster->HasAura(76838) || caster->GetTypeId() != TYPEID_PLAYER)
+                   return;
+
+               if (caster->ToPlayer()->HasSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED))
                    return;
 
                if (caster && target)
+               {
                    caster->CastSpell(target, SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, true, NULL, aurEff);
+                   caster->ToPlayer()->AddSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, 0, time(NULL) + 1);
+               }
            }
 
            void Register()
