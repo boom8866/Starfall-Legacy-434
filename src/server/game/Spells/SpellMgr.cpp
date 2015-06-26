@@ -5384,7 +5384,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(23);
                 break;
             case 101423: // Seal of Righteousness
-                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);   // 8yd
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);   // 8yd
                 break;
             // * Al'Akir
             case 88427: // Electrocute
@@ -5399,20 +5399,20 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Gilneas
             case 67350: // Summon Josiah
-                spellInfo->Effects[0].MiscValue = 0;
-                spellInfo->Effects[0].MiscValueB = 0;
-                spellInfo->Effects[2].MiscValue = 0;
-                spellInfo->Effects[2].MiscValueB = 0;
+                spellInfo->Effects[EFFECT_0].MiscValue = 0;
+                spellInfo->Effects[EFFECT_0].MiscValueB = 0;
+                spellInfo->Effects[EFFECT_2].MiscValue = 0;
+                spellInfo->Effects[EFFECT_2].MiscValueB = 0;
                 break;
             case 67805: // Attack Lurker, remove jumping effect
                 spellInfo->Effects[EFFECT_0].Effect = 0;
                 break;
             case 67063: // Throw Torch
-                spellInfo->Effects[1].BasePoints = 68;
-                spellInfo->Effects[2].BasePoints = 18;
+                spellInfo->Effects[EFFECT_1].BasePoints = 68;
+                spellInfo->Effects[EFFECT_2].BasePoints = 18;
                 break;
             case 69123: // Curse of the Worgen
-                spellInfo->Effects[0].Effect = 0; // Ignore summon effect its done on 68630 spell
+                spellInfo->Effects[EFFECT_0].Effect = 0; // Ignore summon effect its done on 68630 spell
                 break;
             /*This is because SPELL_EFFECT_TRIGGER_SPELL is now processed before SPELL_EFFECT_INTERRUPT_CAST,
             so spell is silenced before the interruption. */

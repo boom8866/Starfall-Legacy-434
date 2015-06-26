@@ -7059,14 +7059,14 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (procSpell && (procSpell->Id == 20187 || procSpell->Id == 24275 || procSpell->Id == 85126 || procSpell->Id == 101423 || procSpell->Id == 20424 || procSpell->Id == 53385))
                     return false;
 
-                if (HasAura(85126))
-                    triggered_spell_id = 101423;
-                else
-                    triggered_spell_id = 25742;
+                if (!victim)
+                    return false;
 
                 float ap = GetTotalAttackPowerValue(BASE_ATTACK);
                 int32 holy = SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) + victim->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
                 basepoints0 = (int32)GetBaseAttackTime(BASE_ATTACK) * int32(ap * 0.022f + 0.044f * holy) / 1000;
+
+                triggered_spell_id = 101423;
                 break;
             }
             switch (dummySpell->Id)
