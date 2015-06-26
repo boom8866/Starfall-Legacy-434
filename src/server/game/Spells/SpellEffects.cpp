@@ -4451,7 +4451,7 @@ void Spell::EffectDispel (SpellEffIndex effIndex)
         }
     }
 
-    if (failCount)
+    if (failCount && m_caster->getClass() != CLASS_PRIEST)
         m_caster->SendMessageToSet(&dataFail, true);
 
     if (success_list.empty())
