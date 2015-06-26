@@ -4185,9 +4185,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 16544: // Seasoned Winds (Rank 2)
                 spellInfo->Effects[EFFECT_0].BasePoints = 195;
                 break;
-            case 90174: // Divine Purpose
-                spellInfo->ProcCharges = 1;
-                break;
             case 53709: // Sacred Duty r1
                 spellInfo->Effects[EFFECT_0].BasePoints = 25;
                 break;

@@ -1919,60 +1919,51 @@ public:
 class spell_pal_lights_beacon : public SpellScriptLoader
 {
 public:
-    spell_pal_lights_beacon() : SpellScriptLoader("spell_pal_lights_beacon")
-    {
-    }
+    spell_pal_lights_beacon() : SpellScriptLoader("spell_pal_lights_beacon") { }
 
     class spell_pal_lights_beacon_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_pal_lights_beacon_AuraScript);
 
-        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
         {
             PreventDefaultAction();
-
-            Unit* beaconOwner = GetCaster();
-            Unit* healTarget = GetTarget();
-            Unit* owner = eventInfo.GetProcTarget();
-
-            if (!beaconOwner || !healTarget || !owner)
-                return;
-
-            // Check if it was heal by paladin which casted this beacon of light
-            if (beaconOwner->GetAura(53563, owner->GetGUID()))
+            if (Unit* beaconOwner = GetCaster())
             {
-                if (beaconOwner->IsWithinLOSInMap(owner))
+                if (Unit* healTarget = GetTarget())
                 {
-                    int32 mod = 0;
-
-                    switch (eventInfo.GetDamageInfo()->GetSpellInfo()->Id)
+                    if (Unit* owner = eventInfo.GetProcTarget())
                     {
-                        case 19750: // Flash of Light
-                        case 82326: // Divine Light
-                        case 85673: // Word of Glory
-                        case 25914: // Holy Shock
-                        case 85222: // Light of Dawn
-                        case 87188: // Enlightened Judgements
-                        case 87189: // Enlightened Judgements
-                            mod = 50; // 50% heal from these spells
-                            break;
-                        case 635:   // Holy Light
-                            mod = 100; // 100% heal from Holy Light
-                            break;
-                        case 82327: // Holy Radiance
-                        case 86452:
-                            mod = 0;
-                            break;
-                        default:
-                            return;
+                        // Check if it was heal by paladin which casted this beacon of light
+                        if (beaconOwner->GetAura(53563, owner->GetGUID()))
+                        {
+                            if (beaconOwner->IsWithinLOSInMap(owner))
+                            {
+                                int32 mod = 0;
+                                switch (eventInfo.GetDamageInfo()->GetSpellInfo()->Id)
+                                {
+                                    case 19750: // Flash of Light
+                                    case 82326: // Divine Light
+                                    case 85673: // Word of Glory
+                                    case 25914: // Holy Shock
+                                    case 85222: // Light of Dawn
+                                    case 87188: // Enlightened Judgements
+                                    case 87189: // Enlightened Judgements
+                                        mod = 50; // 50% heal from these spells
+                                        break;
+                                    case 635:   // Holy Light
+                                        mod = 100; // 100% heal from Holy Light
+                                        break;
+                                    default:
+                                        break;
+                                }
+
+                                int32 basepoints0 = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), mod);
+                                if (beaconOwner != healTarget)
+                                    owner->CastCustomSpell(beaconOwner, 53652, &basepoints0, NULL, NULL, true);
+                            }
+                        }
                     }
-
-                    // False when target of heal is beaconed
-                    if (beaconOwner == healTarget || mod == 0)
-                        return;
-
-                    int32 basepoints0 = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), mod);
-                    owner->CastCustomSpell(beaconOwner, 53652, &basepoints0, NULL, NULL, true);
                 }
             }
         }
