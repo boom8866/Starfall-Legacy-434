@@ -22242,6 +22242,13 @@ void Unit::SetHastePct(float hastePct, CombatType cmbt)
         SetFloatValue(UNIT_MOD_CAST_HASTE, m_hasteMod[CTYPE_CAST]);
 
     UpdateCombatSpeedMod(cmbt);
+
+    // Sanctity of Battle
+    if (HasAura(25956))
+    {
+        RemoveAurasDueToSpell(25956);
+        CastSpell(this, 25956, true);
+    }
 }
 
 void Unit::ApplyCombatSpeedPctMod(CombatType cmbt, float val, bool apply)

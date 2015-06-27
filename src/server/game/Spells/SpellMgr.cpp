@@ -4285,6 +4285,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_COOLDOWN;
                 spellInfo->Effects[EFFECT_0].SpellClassMask = flag96(0x00000000, 0x00000000, 0x01000000);
                 break;
+            case 25956: // Sanctity of Battle
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+                spellInfo->Effects[EFFECT_0].BasePoints = 4500;
+                spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_COOLDOWN;
+                break;
             case 81291: // Fungal Growth
             case 81283:
                 spellInfo->RecoveryTime = 0;
