@@ -5325,6 +5325,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 83578: // Gravity Well
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_7_YARDS);
                 break;
+            case 83583: // Magnetic Pull (Grab)
+                spellInfo->Effects[EFFECT_0].MiscValue = 120;
+                spellInfo->Effects[EFFECT_0].BasePoints = 120;
+                break;
             case 84948: // Gravity Crush
             case 92486:
             case 92487:

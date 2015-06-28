@@ -1875,18 +1875,22 @@ public:
     {
         PrepareSpellScript(spell_ac_grounded_SpellScript);
 
-        void HandleHit(SpellEffIndex /*effIndex*/)
+        void HandleHit()
         {
             if (Unit* target = GetHitUnit())
             {
                 if (target->HasAura(SPELL_SWIRLING_WINDS))
                     target->RemoveAurasDueToSpell(SPELL_SWIRLING_WINDS);
+
+                if (Unit* caster = GetCaster())
+                    if (!target->HasAura(SPELL_GROUNDED))
+                        caster->CastSpell(target, SPELL_MAGNETIC_PULL_GRAB, true);
             }
         }
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_ac_grounded_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            BeforeHit += SpellHitFn(spell_ac_grounded_SpellScript::HandleHit);
         }
     };
 
