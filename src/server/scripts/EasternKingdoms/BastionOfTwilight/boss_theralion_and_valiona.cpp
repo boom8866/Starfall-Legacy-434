@@ -597,14 +597,10 @@ public:
                     events.SetPhase(PHASE_BATTLE);
                     break;
                 case EVENT_DEVOURING_FLAMES_TARGETING:
-                    DoCastAOE(SPELL_DEVOURING_FLAMES_DUMMY_AOE);
-                    me->StopMoving();
-                    me->SendMovementFlagUpdate(false);
+                    DoCast(SPELL_DEVOURING_FLAMES_DUMMY_AOE);
                     events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 40000);
                     break;
                 case EVENT_DEVOURING_FLAMES:
-                    me->StopMoving();
-                    me->SendMovementFlagUpdate(false);
                     DoCast(me, SPELL_DEVOURING_FLAMES_AURA);
                     events.ScheduleEvent(EVENT_CLEAR_DEVOURING_FLAMES, 7600);
                     break;
@@ -1137,9 +1133,6 @@ public:
                 valiona->SetReactState(REACT_PASSIVE);
                 valiona->AttackStop();
                 valiona->SetFacingToObject(me);
-                valiona->SetOrientation(me->GetOrientation() + M_PI);
-                valiona->StopMoving();
-                valiona->SendMovementFlagUpdate(false);
                 valiona->AI()->DoAction(ACTION_CAST_DEVOURING_FLAMES);
             }
         }
@@ -1436,9 +1429,6 @@ public:
                         float z = caster->GetPositionZ();
                         target->NearTeleportTo(x, y, z, ori);
                         caster->SetFacingToObject(target);
-                        caster->SetOrientation(target->GetOrientation() + M_PI);
-                        caster->StopMoving();
-                        caster->SendMovementFlagUpdate(false);
                     }
                 }
             }

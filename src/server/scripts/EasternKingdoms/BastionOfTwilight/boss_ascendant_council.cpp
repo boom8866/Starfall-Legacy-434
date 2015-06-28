@@ -1643,7 +1643,7 @@ public:
                                     if ((*itr)->HasAura(SPELL_GROUNDED))
                                         continue;
 
-                                    DoCastAOE(SPELL_MAGNETIC_PULL_GRAB);
+                                    DoCast((*itr), SPELL_MAGNETIC_PULL_GRAB);
                                 }
                             }
                         }
