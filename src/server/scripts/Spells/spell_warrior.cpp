@@ -1201,7 +1201,7 @@ class spell_warr_strikes_of_opportunity : public SpellScriptLoader
                    if (Unit* target = procInfo.GetActionTarget())
                    {
                        // Cast only for Warriors that have Strikes of Opportunity mastery active
-                       if (caster->HasAura(76838) && caster->GetTypeId() != TYPEID_PLAYER)
+                       if (caster->HasAura(76838) && caster->GetTypeId() == TYPEID_PLAYER)
                        {
                            if (!caster->ToPlayer()->HasSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED))
                            {
