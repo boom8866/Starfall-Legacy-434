@@ -559,20 +559,7 @@ class spell_mage_focus_magic : public SpellScriptLoader
             bool CheckProc(ProcEventInfo& /*eventInfo*/)
             {
                 _procTarget = GetCaster();
-
-                if (Player * caster = _procTarget->ToPlayer())
-                {
-                    uint8 activeSpec = caster->GetActiveSpec();
-                    if (caster->HasTalent(SPELL_FOCUS_MAGIC_TALENT, activeSpec))
-                        return _procTarget && _procTarget->isAlive();
-                    else
-                    {
-                        if (Unit* target = GetTarget())
-                            target->RemoveAura(SPELL_FOCUS_MAGIC_TALENT);
-                    }
-                }
-
-                return false;
+                return _procTarget && _procTarget->isAlive();
             }
 
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)

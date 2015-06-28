@@ -1100,20 +1100,7 @@ class spell_warr_vigilance : public SpellScriptLoader
             bool CheckProc(ProcEventInfo& eventInfo)
             {
                 _procTarget = GetCaster();
-
-                if (Player * caster = _procTarget->ToPlayer())
-                {
-                    uint8 activeSpec = caster->GetActiveSpec();
-                    if (caster->HasTalent(SPELL_WARRIOR_VIGILANCE_TALENT, activeSpec))
-                        return _procTarget && eventInfo.GetDamageInfo();
-                    else
-                    {
-                        if (Unit* target = GetTarget())
-                            target->RemoveAura(SPELL_WARRIOR_VIGILANCE_TALENT);
-                    }
-                }
-
-                return false;
+                return _procTarget && eventInfo.GetDamageInfo();
             }
 
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
@@ -1123,8 +1110,11 @@ class spell_warr_vigilance : public SpellScriptLoader
 
                 if (Unit* owner = GetTarget())
                 {
-                    owner->CastSpell(_procTarget, SPELL_WARRIOR_VIGILANCE_PROC, true, NULL, aurEff);
-                    _procTarget->CastCustomSpell(_procTarget, SPELL_WARRIOR_VENGEANCE, &damage, &damage, &damage, true, NULL, aurEff);
+                    if (_procTarget)
+                    {
+                        owner->CastSpell(_procTarget, SPELL_WARRIOR_VIGILANCE_PROC, true, NULL, aurEff);
+                        _procTarget->CastCustomSpell(_procTarget, SPELL_WARRIOR_VENGEANCE, &damage, &damage, &damage, true, NULL, aurEff);
+                    }
                 }
             }
 
@@ -1203,23 +1193,23 @@ class spell_warr_strikes_of_opportunity : public SpellScriptLoader
            void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
            {
                // aurEff->GetAmount() % Chance to proc the event ...
-               if (urand(0,99) >= uint32(aurEff->GetAmount()))
+               if (urand(0, 99) >= uint32(aurEff->GetAmount()))
                    return;
 
-               Unit *caster = GetCaster();
-               Unit *target = procInfo.GetActionTarget();
-
-               // Cast only for Warriors that have Strikes of Opportunity mastery active
-               if (!caster->HasAura(76838) || caster->GetTypeId() != TYPEID_PLAYER)
-                   return;
-
-               if (caster->ToPlayer()->HasSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED))
-                   return;
-
-               if (caster && target)
+               if (Unit* caster = GetCaster())
                {
-                   caster->CastSpell(target, SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, true, NULL, aurEff);
-                   caster->ToPlayer()->AddSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, 0, time(NULL) + 1);
+                   if (Unit* target = procInfo.GetActionTarget())
+                   {
+                       // Cast only for Warriors that have Strikes of Opportunity mastery active
+                       if (caster->HasAura(76838) && caster->GetTypeId() != TYPEID_PLAYER)
+                       {
+                           if (!caster->ToPlayer()->HasSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED))
+                           {
+                               caster->CastSpell(target, SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, true, NULL, aurEff);
+                               caster->ToPlayer()->AddSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, 0, time(NULL) + 1);
+                           }
+                       }
+                   }
                }
            }
 

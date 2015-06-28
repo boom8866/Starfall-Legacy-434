@@ -7062,11 +7062,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (!victim)
                     return false;
 
-                float ap = GetTotalAttackPowerValue(BASE_ATTACK);
-                int32 holy = SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) + victim->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
-                basepoints0 = (int32)GetBaseAttackTime(BASE_ATTACK) * int32(ap * 0.022f + 0.044f * holy) / 1000;
-
-                triggered_spell_id = 101423;
+                if (HasAura(85126))
+                    triggered_spell_id = 101423;
+                else
+                    triggered_spell_id = 25742;
                 break;
             }
             switch (dummySpell->Id)
