@@ -70,6 +70,7 @@ enum WarriorSpells
     SPELL_WARRIOR_UNRELENTING_ASSAULT_TRIGGER_2     = 64850,
     SPELL_WARRIOR_VIGILANCE_PROC                    = 50725,
     SPELL_WARRIOR_VIGILANCE_REDIRECT_THREAT         = 59665,
+    SPELL_WARRIOR_VIGILANCE_TALENT                  = 50720,
     SPELL_WARRIOR_VENGEANCE                         = 76691,
     SPELL_WARRIOR_HEROIC_LEAP                       = 6544,
     SPELL_WARRIOR_IMPROVED_HAMSTRING                = 23694,
@@ -977,13 +978,14 @@ class spell_warr_sweeping_strikes : public SpellScriptLoader
             {
                 PreventDefaultAction();
                 if (Unit* caster = GetCaster())
-                {
                     if (Unit* target = GetTarget())
-                    {
                         if (_procTarget && _procTarget->IsInWorld())
-                            target->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, true, NULL, aurEff);
-                    }
-                }
+                            if (target->GetTypeId() == TYPEID_PLAYER)
+                                if (!target->ToPlayer()->HasSpellCooldown(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK))
+                                {
+                                    target->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, true, NULL, aurEff);
+                                    target->ToPlayer()->AddSpellCooldown(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, 0, time(NULL) + 1);
+                                }
             }
 
             void Register()
@@ -1098,7 +1100,20 @@ class spell_warr_vigilance : public SpellScriptLoader
             bool CheckProc(ProcEventInfo& eventInfo)
             {
                 _procTarget = GetCaster();
-                return _procTarget && eventInfo.GetDamageInfo();
+
+                if (Player * caster = _procTarget->ToPlayer())
+                {
+                    uint8 activeSpec = caster->GetActiveSpec();
+                    if (caster->HasTalent(SPELL_WARRIOR_VIGILANCE_TALENT, activeSpec))
+                        return _procTarget && eventInfo.GetDamageInfo();
+                    else
+                    {
+                        if (Unit* target = GetTarget())
+                            target->RemoveAura(SPELL_WARRIOR_VIGILANCE_TALENT);
+                    }
+                }
+
+                return false;
             }
 
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
@@ -1106,8 +1121,11 @@ class spell_warr_vigilance : public SpellScriptLoader
                 PreventDefaultAction();
                 int32 damage = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue()));
 
-                GetTarget()->CastSpell(_procTarget, SPELL_WARRIOR_VIGILANCE_PROC, true, NULL, aurEff);
-                _procTarget->CastCustomSpell(_procTarget, SPELL_WARRIOR_VENGEANCE, &damage, &damage, &damage, true, NULL, aurEff);
+                if (Unit* owner = GetTarget())
+                {
+                    owner->CastSpell(_procTarget, SPELL_WARRIOR_VIGILANCE_PROC, true, NULL, aurEff);
+                    _procTarget->CastCustomSpell(_procTarget, SPELL_WARRIOR_VENGEANCE, &damage, &damage, &damage, true, NULL, aurEff);
+                }
             }
 
             void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -1192,11 +1210,17 @@ class spell_warr_strikes_of_opportunity : public SpellScriptLoader
                Unit *target = procInfo.GetActionTarget();
 
                // Cast only for Warriors that have Strikes of Opportunity mastery active
-               if (!caster->HasAura(76838))
+               if (!caster->HasAura(76838) || caster->GetTypeId() != TYPEID_PLAYER)
+                   return;
+
+               if (caster->ToPlayer()->HasSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED))
                    return;
 
                if (caster && target)
+               {
                    caster->CastSpell(target, SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, true, NULL, aurEff);
+                   caster->ToPlayer()->AddSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, 0, time(NULL) + 1);
+               }
            }
 
            void Register()

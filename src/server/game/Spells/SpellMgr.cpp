@@ -4378,9 +4378,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 16544: // Seasoned Winds (Rank 2)
                 spellInfo->Effects[EFFECT_0].BasePoints = 195;
                 break;
-            case 90174: // Divine Purpose
-                spellInfo->ProcCharges = 1;
-                break;
             case 53709: // Sacred Duty r1
                 spellInfo->Effects[EFFECT_0].BasePoints = 25;
                 break;
@@ -4481,6 +4478,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_COOLDOWN;
                 spellInfo->Effects[EFFECT_0].SpellClassMask = flag96(0x00000000, 0x00000000, 0x01000000);
                 break;
+            case 25956: // Sanctity of Battle
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+                spellInfo->Effects[EFFECT_0].BasePoints = 4500;
+                spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_COOLDOWN;
+                break;
             case 81291: // Fungal Growth
             case 81283:
                 spellInfo->RecoveryTime = 0;
@@ -4540,6 +4542,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 31803: // Censure
                 spellInfo->AttributesEx4 |= SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS;
+                spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 break;
             case 82691: // Ring of Frost
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(8);   // 5 yd
@@ -5577,7 +5580,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(23);
                 break;
             case 101423: // Seal of Righteousness
-                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);   // 8yd
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);   // 8yd
                 break;
             // * Al'Akir
             case 88427: // Electrocute
@@ -5592,20 +5595,20 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Gilneas
             case 67350: // Summon Josiah
-                spellInfo->Effects[0].MiscValue = 0;
-                spellInfo->Effects[0].MiscValueB = 0;
-                spellInfo->Effects[2].MiscValue = 0;
-                spellInfo->Effects[2].MiscValueB = 0;
+                spellInfo->Effects[EFFECT_0].MiscValue = 0;
+                spellInfo->Effects[EFFECT_0].MiscValueB = 0;
+                spellInfo->Effects[EFFECT_2].MiscValue = 0;
+                spellInfo->Effects[EFFECT_2].MiscValueB = 0;
                 break;
             case 67805: // Attack Lurker, remove jumping effect
                 spellInfo->Effects[EFFECT_0].Effect = 0;
                 break;
             case 67063: // Throw Torch
-                spellInfo->Effects[1].BasePoints = 68;
-                spellInfo->Effects[2].BasePoints = 18;
+                spellInfo->Effects[EFFECT_1].BasePoints = 68;
+                spellInfo->Effects[EFFECT_2].BasePoints = 18;
                 break;
             case 69123: // Curse of the Worgen
-                spellInfo->Effects[0].Effect = 0; // Ignore summon effect its done on 68630 spell
+                spellInfo->Effects[EFFECT_0].Effect = 0; // Ignore summon effect its done on 68630 spell
                 break;
             /*This is because SPELL_EFFECT_TRIGGER_SPELL is now processed before SPELL_EFFECT_INTERRUPT_CAST,
             so spell is silenced before the interruption. */

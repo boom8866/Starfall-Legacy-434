@@ -13410,6 +13410,13 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, pItem->GetEntry(), slot);
     UpdateArmorSpecialization();
 
+    // Sanctity of Battle
+    if (HasAura(25956))
+    {
+        RemoveAurasDueToSpell(25956);
+        CastSpell(this, 25956, true);
+    }
+
     // Update Pet Scaling Auras
     if (Pet* pet = GetPet())
     {
@@ -13455,6 +13462,13 @@ void Player::QuickEquipItem(uint16 pos, Item* pItem)
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM, pItem->GetEntry());
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, pItem->GetEntry(), slot);
         UpdateArmorSpecialization();
+
+        // Sanctity of Battle
+        if (HasAura(25956))
+        {
+            RemoveAurasDueToSpell(25956);
+            CastSpell(this, 25956, true);
+        }
 
         // Update Pet Scaling Auras
         if (Pet* pet = GetPet())
@@ -13598,7 +13612,16 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
         pItem->SetSlot(NULL_SLOT);
         if (IsInWorld() && update)
         {
+            // Armor Specialization
             UpdateArmorSpecialization();
+
+            // Sanctity of Battle
+            if (HasAura(25956))
+            {
+                RemoveAurasDueToSpell(25956);
+                CastSpell(this, 25956, true);
+            }
+
             // Update Pet Scaling Auras
             if (Pet* pet = GetPet())
             {
@@ -22534,7 +22557,7 @@ void Player::SendRemoveControlBar()
 
 bool Player::IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod, Spell* spell)
 {
-    if (!mod || !spellInfo)
+    if (!spellInfo || !mod)
         return false;
 
     // Mod out of charges

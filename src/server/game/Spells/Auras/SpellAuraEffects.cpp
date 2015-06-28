@@ -754,6 +754,23 @@ void AuraEffect::CalculateSpellMod()
                 m_spellmod->charges = GetBase()->GetCharges();
             }
 
+            // Sanctity of Battle
+            if (Player* caster = GetCaster()->ToPlayer())
+            {
+                if (GetSpellInfo()->Id == 25956)
+                {
+                    float haste = caster->GetFloatValue(UNIT_MOD_CAST_HASTE);
+                    int32 cooldown = 4500;
+                    int32 difference = 0;
+                    if (haste > 0)
+                    {
+                        cooldown /= haste;
+                        difference = 4500 - cooldown;
+                        m_spellmod->value = difference;
+                    }
+                    break;
+                }
+            }
             m_spellmod->value = GetAmount();
             break;
         }
@@ -4104,11 +4121,10 @@ void AuraEffect::HandleAuraModSpellCooldownByHaste(AuraApplication const* aurApp
         return;
 
     Unit* target = aurApp->GetTarget();
-
     if (target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    // Temporarily implemented in Spell::Finish
+    return;
 }
 
 void AuraEffect::HandleModSpellDamagePercentFromStat(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const

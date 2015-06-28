@@ -3232,6 +3232,11 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 }
                 break;
             }
+            case 85673: // Word of Glory
+            {
+                addhealth += urand(1008, 1124);
+                break;
+            }
         }
 
         // Nature's Blessing (Only for direct heal spells)
@@ -4451,7 +4456,7 @@ void Spell::EffectDispel (SpellEffIndex effIndex)
         }
     }
 
-    if (failCount)
+    if (failCount && m_caster->getClass() != CLASS_PRIEST)
         m_caster->SendMessageToSet(&dataFail, true);
 
     if (success_list.empty())

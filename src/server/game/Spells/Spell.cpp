@@ -4072,39 +4072,6 @@ void Spell::finish(bool ok)
             }
             break;
         }
-        case 35395: // Crusader Strike
-        case 53385: // Divine Storm
-        {
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                // Sanctity of Battle
-                if (m_caster->HasAura(25956))
-                {
-                    float haste = (2 - m_caster->ToPlayer()->GetFloatValue(UNIT_MOD_CAST_HASTE));
-                    int32 cooldown = 4500;
-                    int32 difference = 0;
-                    if (haste > 0)
-                    {
-                        cooldown /= haste;
-                        difference = 4500 - cooldown;
-                    }
-
-                    int32 newCooldownDelay = m_caster->ToPlayer()->GetSpellCooldownDelay(m_spellInfo->Id);
-                    if (newCooldownDelay <= difference / 1000)
-                        newCooldownDelay = 0;
-                    else
-                        newCooldownDelay -= difference / 1000;
-
-                    m_caster->ToPlayer()->AddSpellCooldown(m_spellInfo->Id, 0, uint32(time(NULL) + newCooldownDelay));
-                    WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
-                    data << uint32(m_spellInfo->Id);
-                    data << uint64(m_caster->GetGUID());
-                    data << int32(-difference);
-                    m_caster->ToPlayer()->GetSession()->SendPacket(&data);
-                }
-            }
-            break;
-        }
     }
 }
 
@@ -8235,11 +8202,11 @@ void Spell::TriggerGlobalCooldown()
         switch (m_spellInfo->Id)
         {
             case 35395: // Crusader Strike
-                m_caster->ToPlayer()->AddSpellCooldown(53385, 0, time(NULL) + 4);
-                m_caster->ToPlayer()->AddSpellCooldown(53595, 0, time(NULL) + 3);
+                m_caster->ToPlayer()->AddSpellCooldown(53385, 0, time(NULL) + 2);
+                m_caster->ToPlayer()->AddSpellCooldown(53595, 0, time(NULL) + 2);
                 break;
             case 53385: // Divine Storm
-                m_caster->ToPlayer()->AddSpellCooldown(35395, 0, time(NULL) + 4);
+                m_caster->ToPlayer()->AddSpellCooldown(35395, 0, time(NULL) + 2);
                 break;
             case 53595: // Hammer of the Righteous
                 m_caster->ToPlayer()->AddSpellCooldown(35395, 0, time(NULL) + 3);

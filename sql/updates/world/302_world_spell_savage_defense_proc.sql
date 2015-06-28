@@ -1,0 +1,1 @@
+UPDATE `spell_proc_event` SET `CustomChance`=50 WHERE `entry`=62600;
