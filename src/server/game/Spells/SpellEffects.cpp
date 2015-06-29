@@ -3259,6 +3259,9 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                     uint32 casterAP = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.198f;
                     uint32 casterSP = m_caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.209f;
                     addhealth += (casterAP + casterSP);
+                    // Walk in the Light
+                    if (m_caster->HasAura(85102))
+                        addhealth += addhealth * 0.20f;
                 }
                 break;
             }
