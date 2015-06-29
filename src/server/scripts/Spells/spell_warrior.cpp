@@ -1200,13 +1200,26 @@ class spell_warr_strikes_of_opportunity : public SpellScriptLoader
                {
                    if (Unit* target = procInfo.GetActionTarget())
                    {
-                       // Cast only for Warriors that have Strikes of Opportunity mastery active
-                       if (caster->HasAura(76838) && caster->GetTypeId() == TYPEID_PLAYER)
+                       if (caster->GetTypeId() == TYPEID_PLAYER)
                        {
-                           if (!caster->ToPlayer()->HasSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED))
+                           // If no weapon found in main hand, avoid to proc
+                           Item* mainHand = caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                           Item* offHand = caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+
+                           if (procInfo.GetTypeMask() & PROC_FLAG_DONE_MAINHAND_ATTACK && !mainHand)
+                               return;
+
+                           if (procInfo.GetTypeMask() & PROC_FLAG_DONE_OFFHAND_ATTACK && !offHand)
+                               return;
+
+                           // Cast only for Warriors that have Strikes of Opportunity mastery active
+                           if (caster->HasAura(76838))
                            {
-                               caster->CastSpell(target, SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, true, NULL, aurEff);
-                               caster->ToPlayer()->AddSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, 0, time(NULL) + 1);
+                               if (!caster->ToPlayer()->HasSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED))
+                               {
+                                   caster->CastSpell(target, SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, true, NULL, aurEff);
+                                   caster->ToPlayer()->AddSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, 0, time(NULL) + 2);
+                               }
                            }
                        }
                    }
