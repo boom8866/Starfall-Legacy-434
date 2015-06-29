@@ -238,6 +238,9 @@ public:
 
             if (Player* player = caster->ToPlayer())
             {
+                if (player->GetMap()->IsBattlegroundOrArena() || player->GetMap()->IsRaid() || player->GetMap()->IsDungeon() || player->GetMap()->IsRaidOrHeroicDungeon())
+                    return;
+
                 if (Group* group = player->GetGroup())
                 {
                     // Initialize group/raid check

@@ -612,23 +612,43 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 switch (m_spellInfo->Id)
                 {
                     case 879: // Exorcism
-                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                            if (m_caster->GetTotalAttackPowerValue(BASE_ATTACK) > m_caster->ToPlayer()->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()))
-                                damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.344f;
-                            else
-                                damage += m_caster->ToPlayer()->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()) * 0.344f;
+                    {
+                        if (m_caster)
+                        {
+                            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if (m_caster->GetTotalAttackPowerValue(BASE_ATTACK) > m_caster->ToPlayer()->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()))
+                                    damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.344f;
+                                else
+                                    damage += m_caster->ToPlayer()->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()) * 0.344f;
+                            }
+                        }
                         break;
+                    }
                     case 81297: // Consecration
                     {
-                        float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                        int32 holy = m_caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
-                        int8 divideCoeff = 10;
+                        if (m_caster && unitTarget)
+                        {
+                            float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                            int32 holy = m_caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
+                            int8 divideCoeff = 10;
 
-                        // Glyph of Consecration
-                        if (m_caster->HasAura(54928))
-                            divideCoeff += 2;
+                            // Glyph of Consecration
+                            if (m_caster->HasAura(54928))
+                                divideCoeff += 2;
 
-                        damage += (8 * (0.04f * holy + 0.04f * ap) / divideCoeff);
+                            damage += (8 * (0.04f * holy + 0.04f * ap) / divideCoeff);
+                        }
+                        break;
+                    }
+                    case 20170: // Seal of Justice
+                    {
+                        if (m_caster)
+                        {
+                            uint32 casterAP = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.16f;
+                            uint32 casterSP = m_caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.25f;
+                            damage += (casterAP + casterSP);
+                        }
                         break;
                     }
                     default:
@@ -3239,16 +3259,9 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                     uint32 casterAP = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.198f;
                     uint32 casterSP = m_caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.209f;
                     addhealth += (casterAP + casterSP);
-                }
-                break;
-            }
-            case 20170: // Seal of Justice
-            {
-                if (m_caster)
-                {
-                    uint32 casterAP = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.16f;
-                    uint32 casterSP = m_caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.25f;
-                    addhealth += (casterAP + casterSP);
+                    // Walk in the Light
+                    if (m_caster->HasAura(85102))
+                        addhealth += addhealth * 0.20f;
                 }
                 break;
             }
