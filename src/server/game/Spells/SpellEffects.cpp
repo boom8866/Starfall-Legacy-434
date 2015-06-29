@@ -3234,7 +3234,22 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
             }
             case 85673: // Word of Glory
             {
-                addhealth += urand(1008, 1124);
+                if (m_caster)
+                {
+                    uint32 casterAP = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.198f;
+                    uint32 casterSP = m_caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.209f;
+                    addhealth += (casterAP + casterSP);
+                }
+                break;
+            }
+            case 20170: // Seal of Justice
+            {
+                if (m_caster)
+                {
+                    uint32 casterAP = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.16f;
+                    uint32 casterSP = m_caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.25f;
+                    addhealth += (casterAP + casterSP);
+                }
                 break;
             }
         }
