@@ -631,6 +631,16 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         damage += (8 * (0.04f * holy + 0.04f * ap) / divideCoeff);
                         break;
                     }
+                    case 20170: // Seal of Justice
+                    {
+                        if (m_caster)
+                        {
+                            uint32 casterAP = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.16f;
+                            uint32 casterSP = m_caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.25f;
+                            damage += (casterAP + casterSP);
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -3238,16 +3248,6 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 {
                     uint32 casterAP = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.198f;
                     uint32 casterSP = m_caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.209f;
-                    addhealth += (casterAP + casterSP);
-                }
-                break;
-            }
-            case 20170: // Seal of Justice
-            {
-                if (m_caster)
-                {
-                    uint32 casterAP = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.16f;
-                    uint32 casterSP = m_caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.25f;
                     addhealth += (casterAP + casterSP);
                 }
                 break;
