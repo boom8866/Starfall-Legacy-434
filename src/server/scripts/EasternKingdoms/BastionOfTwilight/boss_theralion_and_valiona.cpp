@@ -1129,10 +1129,10 @@ public:
         {
             if (Creature* valiona = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALIONA)))
             {
-                valiona->AddUnitState(UNIT_STATE_CANNOT_TURN);
                 valiona->SetReactState(REACT_PASSIVE);
                 valiona->AttackStop();
                 valiona->SetFacingToObject(me);
+                valiona->AddUnitState(UNIT_STATE_CANNOT_TURN);
                 valiona->AI()->DoAction(ACTION_CAST_DEVOURING_FLAMES);
             }
         }
