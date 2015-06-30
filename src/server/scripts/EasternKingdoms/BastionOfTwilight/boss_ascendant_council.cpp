@@ -676,7 +676,14 @@ public:
                         {
                             leapTarget = me->getVictim();
                             targets.remove_if(RandomDistancePlayerCheck(me));
-                            if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 0, true))
+                            targets.remove_if(VictimCheck(me));
+                            if (targets.empty())
+                            {
+                                events.ScheduleEvent(EVENT_INFERNO_LEAP, 30000);
+                                break;
+                            }
+
+                            if (Unit* target = Trinity::Containers::SelectRandomContainerElement(targets))
                             {
                                 me->AttackStop();
                                 me->SetReactState(REACT_PASSIVE);
@@ -688,41 +695,36 @@ public:
                         break;
                     }
                     case EVENT_INFERNO_RUSH:
-                        if (leapTarget && leapTarget->isAlive() && leapTarget->IsInWorld())
-                        {
-                            _infernoCounter;
+                        if (leapTarget)
                             DoCast(leapTarget, SPELL_INFERNO_RUSH_CHARGE);
-                        }
                         events.ScheduleEvent(EVENT_SUMMON_INFERNO_RUSH, 1);
                         break;
                     case EVENT_SUMMON_INFERNO_RUSH:
-                        if (me->GetDistance2d(rushPos.GetPositionX(), rushPos.GetPositionY()) > me->GetFloatValue(UNIT_FIELD_COMBATREACH))
+                    {
+                        if (_infernoCounter == 0)
                         {
-                            if (_infernoCounter == 0)
-                            {
-                                ignaciousPos.Relocate(me);
-                                rushPos.Relocate(leapTarget);
-                            }
-
-                            float ori = me->GetAngle(&rushPos);
-                            float dist = _infernoCounter * 5.0f;
-
-                            float x = ignaciousPos.GetPositionX() + cos(ori) * dist;
-                            float y = ignaciousPos.GetPositionY() + sin(ori) * dist;
-                            float z = ignaciousPos.GetPositionZ();
-
-                            _infernoCounter++;
-
-                            me->SummonCreature(NPC_INFERNO_RUSH, x, y, z, ori, TEMPSUMMON_MANUAL_DESPAWN);
-                            events.ScheduleEvent(EVENT_SUMMON_INFERNO_RUSH, 250);
+                            ignaciousPos.Relocate(me);
+                            rushPos.Relocate(leapTarget);
                         }
-                        else
+
+                        float ori = me->GetAngle(&rushPos);
+                        float dist = _infernoCounter * 5.0f;
+
+                        float x = ignaciousPos.GetPositionX() + cos(ori) * dist;
+                        float y = ignaciousPos.GetPositionY() + sin(ori) * dist;
+                        float z = ignaciousPos.GetPositionZ();
+
+                        _infernoCounter++;
+
+                        me->SummonCreature(NPC_INFERNO_RUSH, x, y, z, ori, TEMPSUMMON_MANUAL_DESPAWN);
+                        events.ScheduleEvent(EVENT_SUMMON_INFERNO_RUSH, 1000);
+                        if (_infernoCounter > 7)
                         {
-                            leapTarget = NULL;
-                            me->SetReactState(REACT_AGGRESSIVE);
-                            events.ScheduleEvent(EVENT_ACTIVATE_FLAMES, 1000);
+                            events.ScheduleEvent(EVENT_ACTIVATE_FLAMES, 250);
+                            _infernoCounter = 0;
                         }
                         break;
+                    }
                     case EVENT_ACTIVATE_FLAMES:
                     {
                         std::list<Creature*> units;
@@ -732,9 +734,13 @@ public:
 
                         for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                         {
-                            (*itr)->AI()->DoCast(SPELL_INFERNO_RUSH_AURA);
+                            (*itr)->AI()->DoCast((*itr), SPELL_INFERNO_RUSH_AURA, true);
                             (*itr)->DespawnOrUnsummon(31000);
                         }
+                        leapTarget = NULL;
+                        _infernoCounter = 0;
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        events.CancelEvent(EVENT_SUMMON_INFERNO_RUSH);
                         break;
                     }
                     case EVENT_BURNING_BLOOD:
