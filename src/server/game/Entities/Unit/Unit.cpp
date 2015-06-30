@@ -2947,13 +2947,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
     // Roll miss
     uint32 tmp = missChance;
     if (roll < tmp)
-    {
-        // Bosses cannot miss
-        if (ToCreature() && (GetMap()->IsDungeon() || GetMap()->IsRaid()))
-            if (victim->ToPlayer())
-                return SPELL_MISS_NONE;
         return SPELL_MISS_MISS;
-    }
 
     // Chance resist mechanic (select max value from every mechanic spell effect)
     int32 resist_mech = 0;
@@ -3150,13 +3144,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     int32 rand = irand(0, 10000);
 
     if (rand < tmp)
-    {
-        // Bosses cannot miss
-        if (ToCreature() && (GetMap()->IsDungeon() || GetMap()->IsRaid()))
-            if (victim->ToPlayer())
-                return SPELL_MISS_NONE;
         return SPELL_MISS_MISS;
-    }
 
     // Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will additionally fully ignore
     // resist and deflect chances

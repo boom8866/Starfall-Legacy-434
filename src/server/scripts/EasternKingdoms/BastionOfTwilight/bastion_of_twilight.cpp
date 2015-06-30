@@ -386,7 +386,7 @@ public:
                             Talk(2);
                             alreadyTalked = true;
                         }
-                        std::list<Unit*> targets;
+                        /*std::list<Unit*> targets;
                         Trinity::AnyUnitInObjectRangeCheck u_check(me, 60.0f);
                         Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
                         me->VisitNearbyObject(60.0f, searcher);
@@ -400,7 +400,7 @@ public:
                                     (*itr)->ToCreature()->SetInCombatWithZone();
                                 }
                             }
-                        }
+                        }*/
                         events.ScheduleEvent(EVENT_MOVE_AWAY_AND_DESPAWN, 35000);
                         events.CancelEvent(EVENT_ENABLE_WAVES);
                         break;
@@ -427,7 +427,7 @@ public:
                         me->GetMotionMaster()->MovePoint(0, -695.72f, -684.51f, 834.68f, false);
                         me->DespawnOrUnsummon(4000);
 
-                        std::list<Unit*> targets;
+                        /*std::list<Unit*> targets;
                         Trinity::AnyUnitInObjectRangeCheck u_check(me, 200.0f);
                         Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
                         me->VisitNearbyObject(200.0f, searcher);
@@ -460,7 +460,7 @@ public:
                                     }
                                 }
                             }
-                        }
+                        }*/
                         break;
                     }
                     default:

@@ -208,7 +208,6 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 Talk(SAY_AGGRO);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 events.ScheduleEvent(EVENT_BERSERK, 360000);
-                events.ScheduleEvent(EVENT_SHADOW_NOVA, 10000);
 
                 if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
                     behemoth->SetInCombatWithZone();
@@ -368,6 +367,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                                 break;
                             default:
                                 me->AddAura(SPELL_SHADOW_WRAPPED, me);
+                                events.ScheduleEvent(EVENT_SHADOW_NOVA, 10000);
                                 summon->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                                 break;
                         }
