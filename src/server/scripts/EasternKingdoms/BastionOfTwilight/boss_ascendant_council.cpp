@@ -661,7 +661,8 @@ public:
                         MakeInterruptable(false);
                         DoCast(me, SPELL_AEGIS_OF_FLAME);
                         events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, urand(63000, 65000));
-                        events.ScheduleEvent(EVENT_RISING_FLAMES, 2000);
+                        events.ScheduleEvent(EVENT_RISING_FLAMES, 2250);
+                        events.RescheduleEvent(EVENT_INFERNO_LEAP, 22500);
                         break;
                     case EVENT_RISING_FLAMES:
                         me->StopMoving();
@@ -676,7 +677,6 @@ public:
                         {
                             leapTarget = me->getVictim();
                             targets.remove_if(RandomDistancePlayerCheck(me));
-                            targets.remove_if(VictimCheck(me));
                             if (targets.empty())
                             {
                                 events.ScheduleEvent(EVENT_INFERNO_LEAP, 30000);

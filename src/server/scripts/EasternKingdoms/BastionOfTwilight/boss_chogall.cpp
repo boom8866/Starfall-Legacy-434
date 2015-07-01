@@ -509,10 +509,6 @@ public:
                             DoCast(me, SPELL_CORRUPTED_CHOGALL, true);
 
                         DoCast(SPELL_DARKENED_CREATIONS);
-
-                        for (int8 i = 0; i < int32(DARKENED_CREATIONS); i++)
-                            DoCast(me, SPELL_DARKENED_CREATIONS);
-
                         events.RescheduleEvent(EVENT_DARKENED_CREATION, 30000, 0, PHASE_TWO);
                         break;
                     }
@@ -878,6 +874,16 @@ public:
         {
             events.ScheduleEvent(EVENT_DEBILITATING_BEAM, 1000);
             me->SetControlled(true, UNIT_STATE_ROOT);
+            me->SetInCombatWithZone();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_DEBILITATING_BEAM, 1);
+        }
+
+        void EnterEvadeMode()
+        {
         }
 
         void UpdateAI(uint32 diff)
@@ -933,6 +939,12 @@ public:
 
         void IsSummonedBy(Unit* /*owner*/)
         {
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, false);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, false);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, false);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, true);
             me->SetInCombatWithZone();
             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true))
                 AttackStart(target);
@@ -962,13 +974,6 @@ public:
                             AttackStart(target);
                             me->AddThreat(target, 5000000.0f);
                         }
-
-                        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-                        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, false);
-                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
-                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, false);
-                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, false);
-                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, true);
                         break;
                     }
                     case EVENT_MELEE_INCREASE_CORRUPTION:
@@ -1579,6 +1584,34 @@ public:
     }
 };
 
+class spell_bot_corrupted_blood : public SpellScriptLoader
+{
+public:
+    spell_bot_corrupted_blood() : SpellScriptLoader("spell_bot_corrupted_blood") { }
+
+    class spell_bot_corrupted_blood_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_bot_corrupted_blood_AuraScript);
+
+        void CheckRemoval(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                    caster->ToPlayer()->RemoveSpellCooldown(SPELL_CORRUPTION_ACCELERATED);
+        }
+
+        void Register()
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_bot_corrupted_blood_AuraScript::CheckRemoval, EFFECT_0, SPELL_EFFECT_APPLY_AURA, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_bot_corrupted_blood_AuraScript();
+    }
+};
+
 void AddSC_boss_chogall()
 {
     new at_chogall_intro();
@@ -1603,4 +1636,5 @@ void AddSC_boss_chogall()
     new spell_bot_twisted_devotion();
     new spell_bot_worshipping();
     new spell_bot_consume_blood();
+    new spell_bot_corrupted_blood();
 }

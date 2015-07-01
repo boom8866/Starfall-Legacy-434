@@ -15850,8 +15850,14 @@ void Unit::SetPower(Powers power, int32 val)
                 // Corruption: Accelerated
                 if (GetPower(POWER_ALTERNATE_POWER) >= 25 && GetPower(POWER_ALTERNATE_POWER) < 50)
                 {
-                    if (!HasAura(81836))
-                        CastSpell(this, 81836, true);
+                    if (GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (!ToPlayer()->HasSpellCooldown(81836))
+                        {
+                            CastSpell(this, 81836, true);
+                            ToPlayer()->AddSpellCooldown(81836, 0, time(NULL) + 300);
+                        }
+                    }
                 }
                 // Corruption: Sickness
                 if (GetPower(POWER_ALTERNATE_POWER) >= 50 && GetPower(POWER_ALTERNATE_POWER) < 75)
