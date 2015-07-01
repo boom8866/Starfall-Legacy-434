@@ -1126,6 +1126,8 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                 continue;
             /* Bastion of Twilight */
             case 5300:  // The Only Escape
+            case 5312:  // The Abyss Will Gaze Back Into You
+            case 4852:  // Double Dragon
                 continue;
             default:
                 break;
