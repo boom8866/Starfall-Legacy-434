@@ -1496,7 +1496,7 @@ public:
                 switch (eventId)
                 {
                     case EVENT_SUMMON_MONSTROSITY:
-                        if (Creature* monstrosity = me->SummonCreature(BOSS_ELEMENTIUM_MONSTROSITY, ElementiumMonstrosityPos, TEMPSUMMON_MANUAL_DESPAWN, 600000, 0, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67))))
+                        if (Creature* monstrosity = me->SummonCreature(BOSS_ELEMENTIUM_MONSTROSITY, ElementiumMonstrosityPos, TEMPSUMMON_MANUAL_DESPAWN, 600000, 0, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64))))
                             monstrosity->SetHealth(health);
                         if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
                         {
