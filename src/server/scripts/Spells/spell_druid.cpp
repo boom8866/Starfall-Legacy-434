@@ -726,6 +726,9 @@ class spell_dru_starfall_aoe : public SpellScriptLoader
                     return;
 
                 targets.remove(GetExplTargetUnit());
+
+                if (targets.empty())
+                    return;
             }
 
             void Register()
@@ -756,6 +759,9 @@ class spell_dru_starfall_dummy : public SpellScriptLoader
                     return;
 
                 Trinity::Containers::RandomResizeList(targets, 2);
+
+                if (targets.empty())
+                    return;
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -990,6 +996,9 @@ class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
                     targets.clear();
                     targets.push_back(target);
                 }
+
+                if (targets.empty())
+                    return;
             }
 
             void Register()
@@ -1028,7 +1037,6 @@ public:
                 {
                     Position pos;
                     std::list<Creature*> list;
-
                     Trinity::AnyUnfriendlyCreatureInUnitRangeCheck check(player, DRUID_NPC_WILD_MUSHROOM, 100.0f);
                     Trinity::CreatureListSearcher<Trinity::AnyUnfriendlyCreatureInUnitRangeCheck> searcher(player, list, check);
                     player->VisitNearbyGridObject(100.0f, searcher);
@@ -1096,11 +1104,9 @@ public:
                 if (Player* player = caster->ToPlayer())
                 {
                     std::list<Creature*> list;
-
                     Trinity::AnyUnfriendlyCreatureInUnitRangeCheck check(player, DRUID_NPC_WILD_MUSHROOM, 100.0f);
                     Trinity::CreatureListSearcher<Trinity::AnyUnfriendlyCreatureInUnitRangeCheck> searcher(player, mushroomList, check);
                     player->VisitNearbyGridObject(100.0f, searcher);
-
                     return true;
                 }
             }
