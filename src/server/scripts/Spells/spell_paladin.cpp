@@ -323,6 +323,9 @@ class spell_pal_divine_storm : public SpellScriptLoader
                     if (targetCount >= 4)
                         HandleEnergize();
                 }
+
+                if (targets.empty())
+                    return;
             }
 
             void CalculateDamage(SpellEffIndex /*effIndex*/)
@@ -410,6 +413,9 @@ class spell_pal_divine_storm_dummy : public SpellScriptLoader
                     return;
 
                 _targetCount = targetList.size();
+
+                if (targetList.empty())
+                    return;
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -934,6 +940,9 @@ class spell_pal_holy_wrath : public SpellScriptLoader
                     targets.push_back((*iter));
                     targetCount++;
                 }
+
+                if (targets.empty())
+                    return;
             }
 
             void DivideDamage(SpellEffIndex effIndex)

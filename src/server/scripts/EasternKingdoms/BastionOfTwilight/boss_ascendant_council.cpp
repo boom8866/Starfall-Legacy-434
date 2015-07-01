@@ -234,7 +234,7 @@ public:
 
     bool operator()(WorldObject* object)
     {
-        return (object->GetDistance2d(caster) <= 20.0f);
+        return (object->GetDistance2d(caster) <= 20);
     }
 private:
     Unit* caster;
@@ -661,7 +661,8 @@ public:
                         MakeInterruptable(false);
                         DoCast(me, SPELL_AEGIS_OF_FLAME);
                         events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, urand(63000, 65000));
-                        events.ScheduleEvent(EVENT_RISING_FLAMES, 2000);
+                        events.ScheduleEvent(EVENT_RISING_FLAMES, 2250);
+                        events.RescheduleEvent(EVENT_INFERNO_LEAP, 22500);
                         break;
                     case EVENT_RISING_FLAMES:
                         me->StopMoving();
@@ -676,7 +677,6 @@ public:
                         {
                             leapTarget = me->getVictim();
                             targets.remove_if(RandomDistancePlayerCheck(me));
-                            targets.remove_if(VictimCheck(me));
                             if (targets.empty())
                             {
                                 events.ScheduleEvent(EVENT_INFERNO_LEAP, 30000);
@@ -696,7 +696,11 @@ public:
                     }
                     case EVENT_INFERNO_RUSH:
                         if (leapTarget)
+                        {
+                            me->StopMoving();
+                            me->SendMovementFlagUpdate(false);
                             DoCast(leapTarget, SPELL_INFERNO_RUSH_CHARGE);
+                        }
                         events.ScheduleEvent(EVENT_SUMMON_INFERNO_RUSH, 1);
                         break;
                     case EVENT_SUMMON_INFERNO_RUSH:
@@ -717,7 +721,7 @@ public:
                         _infernoCounter++;
 
                         me->SummonCreature(NPC_INFERNO_RUSH, x, y, z, ori, TEMPSUMMON_MANUAL_DESPAWN);
-                        events.ScheduleEvent(EVENT_SUMMON_INFERNO_RUSH, 1000);
+                        events.ScheduleEvent(EVENT_SUMMON_INFERNO_RUSH, 250);
                         if (_infernoCounter > 7)
                         {
                             events.ScheduleEvent(EVENT_ACTIVATE_FLAMES, 250);
@@ -1492,7 +1496,7 @@ public:
                 switch (eventId)
                 {
                     case EVENT_SUMMON_MONSTROSITY:
-                        if (Creature* monstrosity = me->SummonCreature(BOSS_ELEMENTIUM_MONSTROSITY, ElementiumMonstrosityPos, TEMPSUMMON_MANUAL_DESPAWN))
+                        if (Creature* monstrosity = me->SummonCreature(BOSS_ELEMENTIUM_MONSTROSITY, ElementiumMonstrosityPos, TEMPSUMMON_MANUAL_DESPAWN, 600000, 0, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67))))
                             monstrosity->SetHealth(health);
                         if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
                         {
@@ -1710,8 +1714,8 @@ public:
                 if (Unit* target = GetHitUnit())
                 {
                     float distance = caster->GetDistance2d(target);
-                    if (distance > 1.0f)
-                        SetHitDamage(int32(GetHitDamage() - ((caster->GetMap()->Is25ManRaid() ? 10000 : 4000) * distance)));
+                    if (distance > 1)
+                        SetHitDamage(int32(GetHitDamage() - ((caster->GetMap()->Is25ManRaid() ? 10000 : 11000) * distance)));
 
                     if (GetHitDamage() < 10000)
                         SetHitDamage(10000);
