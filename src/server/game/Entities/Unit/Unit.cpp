@@ -17680,6 +17680,14 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
     if (!victim->GetHealth())
         return;
 
+    // Guardian Spirit
+    if (victim->HasAura(47788))
+    {
+        victim->CastSpell(victim, 48153, true);
+        victim->RemoveAurasDueToSpell(47788);
+        return;
+    }
+
     // find player: owner of controlled `this` or `this` itself maybe
     Player* player = GetCharmerOrOwnerPlayerOrPlayerItself();
     Creature* creature = victim->ToCreature();
