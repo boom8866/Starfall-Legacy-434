@@ -13131,6 +13131,10 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                             }
                             int32 weaponDmg = CalculateDamage(BASE_ATTACK, true, false) * (1.9f * mod);
                             pdamage = uint32(weaponDmg + add);
+
+                            // Master of Subtlety
+                            if (player->HasAura(31223))
+                                pdamage += uint32(pdamage * 0.10f);
                         }
                         break;
                     }

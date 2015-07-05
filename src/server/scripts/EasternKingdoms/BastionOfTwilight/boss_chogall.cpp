@@ -1408,7 +1408,7 @@ public:
         void IsSummonedBy(Unit* owner)
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            if (owner)
+            if (owner && owner->IsInWorld())
             {
                 me->EnterVehicle(owner, 0);
                 events.ScheduleEvent(EVENT_CHECK_OWNER, 1);
@@ -1437,7 +1437,7 @@ public:
                     {
                         if (Unit* owner = me->ToTempSummon()->GetSummoner())
                             if (!owner->isAlive() || !owner->HasAura(SPELL_CORRUPTION_MALFORMATION))
-                                me->DisappearAndDie();
+                                me->DespawnOrUnsummon(1);
 
                         events.RescheduleEvent(EVENT_CHECK_OWNER, 2000);
                         break;
