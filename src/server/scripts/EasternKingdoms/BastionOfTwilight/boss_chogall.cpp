@@ -209,6 +209,7 @@ public:
         bool _introDone;
         bool isFirstFury;
         bool achievementUnlock;
+        uint8 furyDone;
 
         void Reset()
         {
@@ -223,6 +224,7 @@ public:
             _EnterCombat();
             achievementUnlock = true;
             isFirstFury = false;
+            furyDone = 0;
             me->setActive(true);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             me->RemoveAurasDueToSpell(SPELL_SIT_THRONE);
@@ -258,6 +260,7 @@ public:
             DespawnAllSummonsInArea();
 
             isFirstFury = false;
+            furyDone = 0;
 
             if (GameObject* leftPortal = me->FindNearestGameObject(GO_PORTAL_LEFT, 500.0f))
                 leftPortal->SetGoState(GO_STATE_READY);
@@ -278,6 +281,7 @@ public:
         {
             Talk(SAY_DEATH);
             isFirstFury = false;
+            furyDone = 0;
             _JustDied();
             DespawnAllSummonsInArea();
             RemoveCharmedPlayers();
@@ -459,12 +463,21 @@ public:
                         events.CancelEvent(EVENT_SHADOWS_ORDERS);
                         events.CancelEvent(EVENT_FLAMES_ORDERS);
                         events.ScheduleEvent(EVENT_FLAMES_ORDERS, 15000, 0, PHASE_ONE);
-                        events.ScheduleEvent(EVENT_SUMMON_ADHERENT, 5500, 0, PHASE_ONE);
+                        events.ScheduleEvent(EVENT_CONVERSION, 6000, 0, PHASE_ONE);
 
                         if (Unit* target = me->getVictim())
                             DoCast(target, SPELL_FURY_OF_CHOGALL);
 
                         events.ScheduleEvent(EVENT_FURY_OF_CHOGALL, 47000, PHASE_ONE);
+                        if (furyDone == 0 || furyDone == 2)
+                        {
+                            events.ScheduleEvent(EVENT_SUMMON_ADHERENT, 5500, 0, PHASE_ONE);
+                            furyDone++;
+                        }
+                        else if (furyDone == 1)
+                            furyDone++;
+                        else if (furyDone > 2)
+                            furyDone = 0;
                         break;
                     }
                     case EVENT_FESTER_BLOOD:
@@ -1395,7 +1408,7 @@ public:
         void IsSummonedBy(Unit* owner)
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            if (owner)
+            if (owner && owner->IsInWorld())
             {
                 me->EnterVehicle(owner, 0);
                 events.ScheduleEvent(EVENT_CHECK_OWNER, 1);
@@ -1424,7 +1437,7 @@ public:
                     {
                         if (Unit* owner = me->ToTempSummon()->GetSummoner())
                             if (!owner->isAlive() || !owner->HasAura(SPELL_CORRUPTION_MALFORMATION))
-                                me->DisappearAndDie();
+                                me->DespawnOrUnsummon(1);
 
                         events.RescheduleEvent(EVENT_CHECK_OWNER, 2000);
                         break;

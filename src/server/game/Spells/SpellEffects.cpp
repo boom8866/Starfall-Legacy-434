@@ -3265,6 +3265,12 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 }
                 break;
             }
+            case 48153: // Guardian Spirit
+            {
+                if (m_caster)
+                    addhealth = m_caster->GetMaxHealth() * 0.50f;
+                break;
+            }
         }
 
         // Nature's Blessing (Only for direct heal spells)
@@ -3278,6 +3284,27 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                     int32 healAmount = aurEff->GetAmount();
                     addhealth += (addhealth * healAmount) / 100;
                 }
+            }
+        }
+
+        // For debuffs that reduce healing received
+        if (unitTarget)
+        {
+            Unit::AuraEffectList const &aurEff = unitTarget->GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_PCT);
+            for (Unit::AuraEffectList::const_iterator i = aurEff.begin(); i != aurEff.end(); ++i)
+            {
+                if (aurEff.empty())
+                    continue;
+
+                // Only for hostile buffs
+                if (aurEff.front()->GetCaster() && !aurEff.front()->GetCaster()->IsHostileTo(unitTarget) && aurEff.front()->GetSpellInfo()->IsPositive())
+                    continue;
+
+                int32 healingReduction = int32(-aurEff.front()->GetAmount());
+                addhealth -= uint32(addhealth * healingReduction / 100);
+
+                if (addhealth < 0)
+                    addhealth = 0;
             }
         }
 
@@ -5625,11 +5652,14 @@ void Spell::EffectHealMaxHealth (SpellEffIndex /*effIndex*/)
             continue;
 
         // Only for hostile buffs
-        if (aurEff.front()->GetCaster() && !aurEff.front()->GetCaster()->IsHostileTo(unitTarget))
+        if (aurEff.front()->GetCaster() && !aurEff.front()->GetCaster()->IsHostileTo(unitTarget) && aurEff.front()->GetSpellInfo()->IsPositive())
             continue;
 
         int32 healingReduction = int32(-aurEff.front()->GetAmount());
-        m_healing -= m_healing * healingReduction / 100;
+        m_healing -= uint32(m_healing * healingReduction / 100);
+
+        if (m_healing < 0)
+            m_healing = 0;
         return;
     }
 }

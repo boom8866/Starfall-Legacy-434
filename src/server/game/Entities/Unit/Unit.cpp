@@ -13200,6 +13200,10 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                             }
                             int32 weaponDmg = CalculateDamage(BASE_ATTACK, true, false) * (1.9f * mod);
                             pdamage = uint32(weaponDmg + add);
+
+                            // Master of Subtlety
+                            if (player->HasAura(31223))
+                                pdamage += uint32(pdamage * 0.10f);
                         }
                         break;
                     }
@@ -17793,6 +17797,14 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
     // Prevent killing unit twice (and giving reward from kill twice)
     if (!victim->GetHealth())
         return;
+
+    // Guardian Spirit
+    if (victim->HasAura(47788))
+    {
+        victim->CastSpell(victim, 48153, true);
+        victim->RemoveAurasDueToSpell(47788);
+        return;
+    }
 
     // find player: owner of controlled `this` or `this` itself maybe
     Player* player = GetCharmerOrOwnerPlayerOrPlayerItself();
