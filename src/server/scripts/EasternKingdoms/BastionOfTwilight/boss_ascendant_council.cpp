@@ -541,7 +541,6 @@ public:
         void EnterCombat(Unit* who)
         {
             me->SetReactState(REACT_AGGRESSIVE);
-            _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             MakeInterruptable(true);
             _switched = false;
@@ -552,6 +551,7 @@ public:
             events.ScheduleEvent(EVENT_BURNING_BLOOD, 28000);
             if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
                 feludius->AI()->AttackStart(who);
+            _EnterCombat();
         }
 
         void EnterEvadeMode()

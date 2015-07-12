@@ -440,7 +440,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
 
             void UpdateAI(uint32 diff)
             {
-                if (!UpdateVictim())
+                if (!UpdateVictim() || me->GetDistance2d(-290.96f, -713.48f) > 120)
                     return;
 
                 events.Update(diff);

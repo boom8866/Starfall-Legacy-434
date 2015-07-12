@@ -372,7 +372,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() || me->GetDistance2d(-1162.31f, -861.49f) > 120)
                 return;
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
