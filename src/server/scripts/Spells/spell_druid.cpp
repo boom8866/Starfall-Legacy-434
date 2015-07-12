@@ -1418,6 +1418,9 @@ public:
                 if (caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
+                if (caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE) || caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE))
+                    return;
+
                 if (caster->HasAura(SPELL_DRUID_PVP_SET_4P_BALANCE))
                 {
                     if (caster->ToPlayer()->HasSpellCooldown(SPELL_DRUID_PVP_SET_4P_TRIGGER))
