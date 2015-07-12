@@ -3262,6 +3262,9 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                     // Walk in the Light
                     if (m_caster->HasAura(85102))
                         addhealth += addhealth * 0.20f;
+                    // Glyph of Word of Glory
+                    if (m_caster->HasAura(54936))
+                        addhealth += addhealth * 0.10f;
                 }
                 break;
             }

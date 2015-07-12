@@ -7464,10 +7464,13 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
             }
             case 136: // Mend Pet, Improved Mend Pet talent
             {
-                if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 267, 0))
+                if (caster && target)
                 {
-                    if (roll_chance_i(aurEff->GetAmount()))
-                        caster->CastSpell(target, 24406, true);
+                    if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 267, EFFECT_0))
+                    {
+                        if (roll_chance_i(aurEff->GetAmount()))
+                            caster->CastSpell(target, 24406, true);
+                    }
                 }
                 break;
             }

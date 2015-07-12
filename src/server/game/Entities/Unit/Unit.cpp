@@ -9168,7 +9168,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         {
                             if (SpellInfo const* efflorescence = sSpellMgr->GetSpellInfo(81262))
                             {
-                                int32 heal = damage * triggerAmount / 100;
+                                int32 heal = (damage / 2) * triggerAmount / 100;
                                 CastCustomSpell(victim, 81262, &heal, NULL, NULL, true);
                             }
                         }
