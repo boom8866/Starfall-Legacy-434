@@ -5147,10 +5147,11 @@ void Spell::HandleThreatSpells()
         // for negative spells threat gets distributed among affected targets
         else
         {
-            if (!target->CanHaveThreatList())
+            if (target && !target->CanHaveThreatList())
                 continue;
 
-            target->AddThreat(m_caster, threatToAdd, m_spellInfo->GetSchoolMask(), m_spellInfo);
+            if (target && m_caster)
+                target->AddThreat(m_caster, threatToAdd, m_spellInfo->GetSchoolMask(), m_spellInfo);
         }
     }
     sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell %u, added an additional %f threat for %s %u target(s)", m_spellInfo->Id, threat, m_spellInfo->_IsPositiveSpell() ? "assisting" : "harming", uint32(m_UniqueTargetInfo.size()));
