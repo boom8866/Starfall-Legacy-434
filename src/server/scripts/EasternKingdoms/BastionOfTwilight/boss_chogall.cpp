@@ -179,8 +179,6 @@ enum achievementId
     ACHIEVEMENT_THE_ABYSS_WILL_GAZE_BACK_INTO_YOU   = 5312
 };
 
-#define DARKENED_CREATIONS   RAID_MODE<uint32>(3, 9, 3, 9)
-
 class at_chogall_intro : public AreaTriggerScript
 {
 public:
@@ -528,6 +526,7 @@ public:
                             DoCast(me, SPELL_CORRUPTED_CHOGALL, true);
 
                         DoCast(SPELL_DARKENED_CREATIONS);
+
                         events.RescheduleEvent(EVENT_DARKENED_CREATION, 30000, 0, PHASE_TWO);
                         break;
                     }
@@ -1632,6 +1631,40 @@ public:
     }
 };
 
+class spell_bot_darkened_creation : public SpellScriptLoader
+{
+public:
+    spell_bot_darkened_creation() : SpellScriptLoader("spell_bot_darkened_creation")
+    {
+    }
+
+    class spell_bot_darkened_creation_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_bot_darkened_creation_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            if (GetCaster()->GetMap()->Is25ManRaid())
+                Trinity::Containers::RandomResizeList(targets, 10);
+            else
+                Trinity::Containers::RandomResizeList(targets, 4);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_bot_darkened_creation_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_bot_darkened_creation_SpellScript();
+    }
+};
+
 void AddSC_boss_chogall()
 {
     new at_chogall_intro();
@@ -1657,4 +1690,5 @@ void AddSC_boss_chogall()
     new spell_bot_worshipping();
     new spell_bot_consume_blood();
     new spell_bot_corrupted_blood();
+    new spell_bot_darkened_creation();
 }
