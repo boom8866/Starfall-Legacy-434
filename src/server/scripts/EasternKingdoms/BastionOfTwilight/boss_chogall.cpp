@@ -372,11 +372,17 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() || me->GetDistance2d(-1162.31f, -861.49f) > 120)
+            if (!UpdateVictim())
                 return;
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
+
+            if (me->GetDistance2d(-1162.31f, -861.49f) > 120)
+            {
+                EnterEvadeMode();
+                return;
+            }
 
             events.Update(diff);
 
