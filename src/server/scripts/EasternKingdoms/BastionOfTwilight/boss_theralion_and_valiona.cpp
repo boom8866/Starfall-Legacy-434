@@ -582,13 +582,8 @@ public:
             {
                 if (!UpdateVictim())
                     return;
-
-                if (me->GetDistance2d(-742.61f, -627.39f) > 120)
-                {
-                    EnterEvadeMode();
-                    return;
-                }
             }
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -1003,12 +998,6 @@ public:
             {
                 if (!UpdateVictim())
                     return;
-
-                if (me->GetDistance2d(-743.14f, -742.31f) > 120)
-                {
-                    EnterEvadeMode();
-                    return;
-                }
             }
 
             events.Update(diff);
