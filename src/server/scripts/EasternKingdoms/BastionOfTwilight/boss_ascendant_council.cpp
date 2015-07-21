@@ -1271,6 +1271,8 @@ public:
                 controller->AI()->DoAction(ACTION_ENCOUNTER_DONE);
             Talk(SAY_DEATH);
             summons.DespawnAll();
+
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
         }
 
         void JustSummoned(Creature* summon)
