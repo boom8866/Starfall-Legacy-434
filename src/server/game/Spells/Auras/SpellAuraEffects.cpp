@@ -5122,12 +5122,15 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
                 case 14202:
                 {
                     // Mastery: Unshackled Fury
-                    float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
-                    if (target->HasAura(76856))
-                        GetBase()->GetEffect(EFFECT_0)->SetAmount(amount * (0.11f + (0.056f * masteryPoints)) + amount);
-                    else
-                        GetBase()->GetEffect(EFFECT_0)->SetAmount(amount);
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
+                        if (target->HasAura(76856))
+                            GetBase()->GetEffect(EFFECT_0)->SetAmount(amount * (0.11f + (0.056f * masteryPoints)) + amount);
+                        else
+                            GetBase()->GetEffect(EFFECT_0)->SetAmount(amount);
+                    }
                     break;
                 }
                 // Eclipse (Lunar) & Eclipse (Solar)
@@ -5135,12 +5138,20 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
                 case 48518:
                 {
                     // Mastery: Total Eclipse
-                    float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    if (target->HasAura(77492))
+                    if (target->GetTypeId() == TYPEID_PLAYER)
                     {
-                        int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
-                        amount += amount * (masteryPoints * 0.020f);
-                        GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetAmount() * (0.16f + (0.020f * masteryPoints)) + amount);
+                        float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        if (AuraEffect* aurEff = GetBase()->GetEffect(EFFECT_0))
+                        {
+                            if (target->HasAura(77492))
+                            {
+                                int32 amount = aurEff->GetAmount();
+                                int32 mastery = amount * (0.160f + (0.0200f * masteryPoints));
+                                amount += mastery;
+
+                                aurEff->SetAmount(amount);
+                            }
+                        }
                     }
                     break;
                 }
@@ -5148,11 +5159,14 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
                 case 47241:
                 {
                     // Mastery: Master Demonologist
-                    float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    if (target->HasAura(77219))
+                    if (target->GetTypeId() == TYPEID_PLAYER)
                     {
-                        uint32 amount = GetBase()->GetEffect(EFFECT_2)->GetAmount();
-                        GetBase()->GetEffect(EFFECT_2)->SetAmount(amount + (amount * 0.18f + (0.023f * masteryPoints)) + (amount * 2));
+                        float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        if (target->HasAura(77219))
+                        {
+                            uint32 amount = GetBase()->GetEffect(EFFECT_2)->GetAmount();
+                            GetBase()->GetEffect(EFFECT_2)->SetAmount(amount + (amount * 0.18f + (0.023f * masteryPoints)) + (amount * 2));
+                        }
                     }
                     break;
                 }

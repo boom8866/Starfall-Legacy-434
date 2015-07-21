@@ -7268,7 +7268,12 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                     // Only Judgement can enable the proc
                     if (procSpell && procSpell->Id == 54158)
-                        triggered_spell_id = 87173;
+                    {
+                        if (procEx & PROC_EX_ABSORB)
+                            CastSpell(this, 87173, true);
+                        else
+                            triggered_spell_id = 87173;
+                    }
                     break;
                 }
                 // Ancient Healer

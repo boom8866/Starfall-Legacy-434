@@ -1441,9 +1441,14 @@ public:
                     case EVENT_CHECK_OWNER:
                     {
                         if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                        {
                             if (!owner->isAlive() || !owner->HasAura(SPELL_CORRUPTION_MALFORMATION))
-                                me->DespawnOrUnsummon(1);
-
+                            {
+                                me->Kill(me, false);
+                                events.CancelEvent(EVENT_CHECK_OWNER);
+                                break;
+                            }
+                        }
                         events.RescheduleEvent(EVENT_CHECK_OWNER, 2000);
                         break;
                     }

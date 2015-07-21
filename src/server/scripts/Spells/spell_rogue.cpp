@@ -302,7 +302,7 @@ class spell_rog_preparation : public SpellScriptLoader
                             if (spellInfo->Id == SPELL_ROGUE_SPRINT || spellInfo->Id == SPELL_ROGUE_VANISH || spellInfo->Id == SPELL_ROGUE_SHADOWSTEP)     // Sprint, Vanish, Shadowstep
                             {
                                 for (int i = 0; i < 2; i++)
-                                    caster->RemoveSpellCooldown((itr++)->first, true);
+                                    caster->SendClearCooldown((itr++)->first, caster);
                             }
 
                             if (caster->HasAura(SPELL_ROGUE_GLYPH_OF_PREPARATION))
@@ -313,7 +313,7 @@ class spell_rog_preparation : public SpellScriptLoader
                                     (spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_BLADE_FLURRY &&     // Blade Flurry
                                     spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_BLADE_FLURRY))
                                     for (int i = 0; i < 2; i++)
-                                        caster->RemoveSpellCooldown((itr++)->first, true);
+                                        caster->SendClearCooldown((itr++)->first, caster);
                                 else
                                     ++itr;
                             }

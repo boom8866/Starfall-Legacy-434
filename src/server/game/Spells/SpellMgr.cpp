@@ -4207,6 +4207,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 48518: // Eclipse (Solar)
                 spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL;
                 break;
+            case 77492: // Mastery: Total Eclipse
+                spellInfo->Effects[EFFECT_0].BasePoints = 16;
+                break;
             case 94338: // Eclipse (Solar)
                 spellInfo->Effects[EFFECT_0].BasePoints = 93402;
                 break;

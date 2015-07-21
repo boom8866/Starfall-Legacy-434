@@ -7576,7 +7576,13 @@ void Spell::EffectResurrect (SpellEffIndex effIndex)
                         else
                         {
                             if (caster->GetInstanceScript()->IsEncounterInProgress())
-                                caster->m_bressCount++;
+                            {
+                                Map::PlayerList const &PlayerList = caster->GetInstanceScript()->instance->GetPlayers();
+                                if (!PlayerList.isEmpty())
+                                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                                        if (Player* player = i->getSource())
+                                            player->m_bressCount++;
+                            }
                         }
                     }
                     // 25 Normal / 25 Heroic
@@ -7597,7 +7603,13 @@ void Spell::EffectResurrect (SpellEffIndex effIndex)
                         else
                         {
                             if (caster->GetInstanceScript()->IsEncounterInProgress())
-                                caster->m_bressCount++;
+                            {
+                                Map::PlayerList const &PlayerList = caster->GetInstanceScript()->instance->GetPlayers();
+                                if (!PlayerList.isEmpty())
+                                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                                        if (Player* player = i->getSource())
+                                            player->m_bressCount++;
+                            }
                         }
                     }
                 }
@@ -7755,7 +7767,13 @@ void Spell::EffectSelfResurrect (SpellEffIndex effIndex)
                     else
                     {
                         if (caster->GetInstanceScript()->IsEncounterInProgress())
-                            caster->m_bressCount++;
+                        {
+                            Map::PlayerList const &PlayerList = caster->GetInstanceScript()->instance->GetPlayers();
+                            if (!PlayerList.isEmpty())
+                                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                                    if (Player* player = i->getSource())
+                                        player->m_bressCount++;
+                        }
                     }
                 }
                 // 25 Normal / 25 Heroic
@@ -7770,7 +7788,13 @@ void Spell::EffectSelfResurrect (SpellEffIndex effIndex)
                     else
                     {
                         if (caster->GetInstanceScript()->IsEncounterInProgress())
-                            caster->m_bressCount++;
+                        {
+                            Map::PlayerList const &PlayerList = caster->GetInstanceScript()->instance->GetPlayers();
+                            if (!PlayerList.isEmpty())
+                                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                                    if (Player* player = i->getSource())
+                                        player->m_bressCount++;
+                        }
                     }
                 }
             }
