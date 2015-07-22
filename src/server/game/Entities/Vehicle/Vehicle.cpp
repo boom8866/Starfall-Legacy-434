@@ -1108,6 +1108,7 @@ void VehicleJoinEvent::Abort(uint64)
             Target->GetBase()->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE, Passenger->GetGUID());
     }
 
-    if (Passenger->IsInWorld() && Passenger->HasUnitTypeMask(UNIT_MASK_ACCESSORY))
-        Passenger->ToCreature()->DespawnOrUnsummon();
+    if (Passenger)
+        if (Passenger->IsInWorld() && Passenger->HasUnitTypeMask(UNIT_MASK_ACCESSORY) && Passenger->ToCreature())
+            Passenger->ToCreature()->DespawnOrUnsummon();
 }

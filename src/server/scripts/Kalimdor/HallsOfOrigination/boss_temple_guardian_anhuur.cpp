@@ -270,8 +270,10 @@ public:
                         stalkers.sort(Trinity::ObjectDistanceOrderPred(eye1)); // Find the second eye.
                         Creature* eye2 = stalkers.front();
 
-                        eye1->CastSpell(eye1, SPELL_SEARING_LIGHT, true);
-                        eye2->CastSpell(eye2, SPELL_SEARING_LIGHT, true);
+                        if (eye1)
+                            eye1->CastSpell(eye1, SPELL_SEARING_LIGHT, true);
+                        if (eye2)
+                            eye2->CastSpell(eye2, SPELL_SEARING_LIGHT, true);
                         break;
                     }
                     case EVENT_SHIELD_OF_LIGHT:
