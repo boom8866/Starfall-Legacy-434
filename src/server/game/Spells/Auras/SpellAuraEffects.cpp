@@ -700,7 +700,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
                 caster->ModSpellCastTime(m_spellInfo, m_amplitude);
             else
             {
-                m_amplitude = int32(m_amplitude * caster->GetHasteMod(CTYPE_CAST));
+                m_amplitude = int32(m_amplitude * caster->GetTotalCombatSpeedMod(CTYPE_CAST));
                 if (GetBase())
                     if (int32 count = int32(0.5f + float(GetBase()->GetMaxDuration()) / m_amplitude))
                         m_amplitude = GetBase()->GetMaxDuration() / count;
