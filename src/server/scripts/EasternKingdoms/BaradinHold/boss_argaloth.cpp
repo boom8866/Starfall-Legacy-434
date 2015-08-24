@@ -53,6 +53,7 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
+            FirestormCount = 0;
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_BERSERK, 300000);
             events.ScheduleEvent(EVENT_CONSUMING_DARKNESS, 14000);
