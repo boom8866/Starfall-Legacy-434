@@ -3,7 +3,22 @@
 
 enum actionId
 {
-    ACTION_CHECK_CHANNELERS     = 1
+    ACTION_CHECK_CHANNELERS     = 1,
+    ACTION_WAVES,
+    ACTION_START_TIMER
+};
+
+enum npcId
+{
+    NPC_CHOSEN_SEER     = 46952,
+    NPC_CHOSEN_WARRIOR  = 46951,
+    NPC_TWILIGHT_BRUTE  = 47161,
+    NPC_DESTROYER       = 47097,
+    NPC_FIRESTARTER     = 47086,
+    NPC_ELEMENTALIST    = 47152,
+    NPC_FIRELORD        = 47081,
+    NPC_EARTH_RAVAGER   = 47150,
+    NPC_WIND_BREAKER    = 47151
 };
 
 class npc_bot_twilight_phase_twister : public CreatureScript
@@ -315,9 +330,194 @@ public:
     }
 };
 
+class npc_chogall_wave_event : public CreatureScript
+{
+public:
+    npc_chogall_wave_event() : CreatureScript("npc_chogall_wave_event")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_ENABLE_WAVES          = 1,
+        EVENT_CHECK_SEER,
+        EVENT_MOVE_AWAY_AND_DESPAWN
+    };
+
+    struct npc_chogall_wave_eventAI : public ScriptedAI
+    {
+        npc_chogall_wave_eventAI(Creature* creature) : ScriptedAI(creature)
+        {
+            alreadyTalked = false;
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        EventMap events;
+        bool alreadyTalked;
+        float x, y, z;
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_WAVES:
+                    events.ScheduleEvent(EVENT_ENABLE_WAVES, 4500);
+                    break;
+                case ACTION_START_TIMER:
+                    events.ScheduleEvent(EVENT_CHECK_SEER, 1000);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ENABLE_WAVES:
+                    {
+                        if (!alreadyTalked)
+                        {
+                            Talk(2);
+                            alreadyTalked = true;
+                        }
+                        /*std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 60.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(60.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isAlive() && (*itr)->ToCreature() && !(*itr)->isInCombat())
+                            {
+                                if ((*itr)->GetEntry() == NPC_CHOSEN_SEER || (*itr)->GetEntry() == NPC_CHOSEN_WARRIOR)
+                                {
+                                    (*itr)->SetWalk(false);
+                                    (*itr)->ToCreature()->SetInCombatWithZone();
+                                }
+                            }
+                        }*/
+                        events.ScheduleEvent(EVENT_MOVE_AWAY_AND_DESPAWN, 35000);
+                        events.CancelEvent(EVENT_ENABLE_WAVES);
+                        break;
+                    }
+                    case EVENT_CHECK_SEER:
+                    {
+                        std::list<Creature*> targets;
+                        GetCreatureListWithEntryInGrid(targets, me, NPC_CHOSEN_SEER, 500.0f);
+                        for (std::list<Creature*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr)->isInCombat())
+                            {
+                                DoAction(ACTION_WAVES);
+                                events.CancelEvent(EVENT_CHECK_SEER);
+                                break;
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_SEER, 1000);
+                        break;
+                    }
+                    case EVENT_MOVE_AWAY_AND_DESPAWN:
+                    {
+                        me->SetWalk(false);
+                        me->GetMotionMaster()->MovePoint(0, -695.72f, -684.51f, 834.68f, false);
+                        me->DespawnOrUnsummon(4000);
+
+                        /*std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 200.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(200.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isAlive() && (*itr)->ToCreature() && !(*itr)->isInCombat())
+                            {
+                                switch ((*itr)->ToCreature()->GetEntry())
+                                {
+                                    case NPC_DESTROYER:
+                                    case NPC_FIRESTARTER:
+                                    case NPC_TWILIGHT_BRUTE:
+                                    {
+                                        if (roll_chance_i(50))
+                                        {
+                                            (*itr)->SetWalk(false);
+                                            (*itr)->ToCreature()->SetInCombatWithZone();
+                                        }
+                                        break;
+                                    }
+                                    case NPC_ELEMENTALIST:
+                                    case NPC_WIND_BREAKER:
+                                    case NPC_FIRELORD:
+                                    case NPC_EARTH_RAVAGER:
+                                    {
+                                        (*itr)->SetWalk(false);
+                                        (*itr)->GetMotionMaster()->MovePoint(0, -650.847f+urand(5, 6), -684.92f-urand(3, 5), z);
+                                        (*itr)->ToCreature()->SetHomePosition(-650.847f+urand(5, 6), -684.92f-urand(3, 5), z, (*itr)->GetOrientation());
+                                        break;
+                                    }
+                                }
+                            }
+                        }*/
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_chogall_wave_eventAI(creature);
+    }
+};
+
+class npc_bot_twilight_portal : public CreatureScript
+{
+public:
+    npc_bot_twilight_portal() : CreatureScript("npc_bot_twilight_portal")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_COSMETIC_TELEPORT = 52096
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        instance = creature->GetInstanceScript();
+        if (instance)
+        {
+            if (instance->GetBossState(DATA_THERALION_AND_VALIONA) == DONE && instance->GetBossState(DATA_ASCENDANT_COUNCIL) != DONE)
+            {
+                player->CastSpell(player, SPELL_COSMETIC_TELEPORT, true);
+                player->NearTeleportTo(-741.32f, -684.92f, 831.88f, 1.57f);
+                return true;
+            }
+            else if (instance->GetBossState(DATA_ASCENDANT_COUNCIL) == DONE)
+            {
+                player->CastSpell(player, SPELL_COSMETIC_TELEPORT, true);
+                player->NearTeleportTo(-1007.47f, -582.77f, 831.90f, 3.18f);
+                return true;
+            }
+        }
+        return true;
+    }
+
+protected:
+    InstanceScript* instance;
+};
+
 void AddSC_bastion_of_twilight()
 {
     new npc_bot_twilight_phase_twister();
     new npc_bot_twilight_orb();
     new spell_bot_phased_burn();
+    new npc_chogall_wave_event();
+    new npc_bot_twilight_portal();
 }

@@ -41,7 +41,7 @@ enum isisetSpells
 
 enum isisetEvents
 {
-    EVENT_ASTRAL_RAIN_PHASE_ONE         = 1,
+    EVENT_ASTRAL_RAIN_PHASE_ONE = 1,
     EVENT_ASTRAL_RAIN_PHASE_TWO,
     EVENT_ASTRAL_RAIN_PHASE_THREE,
     EVENT_CELESTIAL_CALL_PHASE_ONE,
@@ -50,7 +50,8 @@ enum isisetEvents
     EVENT_VEIL_SKY_PHASE_ONE,
     EVENT_VEIL_SKY_PHASE_TWO,
     EVENT_VEIL_SKY_PHASE_THREE,
-    EVENT_SUPERNOVA
+    EVENT_SUPERNOVA,
+    EVENT_CHECK_PHASING_HEALTH
 };
 
 enum spellVisuals
@@ -59,6 +60,25 @@ enum spellVisuals
     SPELL_ASTRAL_SHIFT_VISUAL       = 74333,
     SPELL_STARRY_SKY_VISUAL         = 74149,
     SPELL_FAMILIAR_VISUAL           = 74356,
+};
+
+enum actionId
+{
+    ACTION_HIDE_MIRROR  = 1,
+    ACTION_CALL_MIRROR
+};
+
+enum phaseId
+{
+    PHASE_ONE   = 1,
+    PHASE_TWO,
+    PHASE_THREE
+};
+
+enum imagePhase
+{
+    MIRROR_ENABLED  = 1,
+    MIRROR_DISABLED
 };
 
 class boss_isiset : public CreatureScript
@@ -80,25 +100,26 @@ public:
         EventMap events;
         std::list<uint64> SummonList;
 
-        uint8 Phase;
-        bool isPhased, astralRain, veilSky, celestialCall;
+        bool astralRain, veilSky, celestialCall;
 
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
-            isPhased = false;
+            events.SetPhase(PHASE_ONE);
             astralRain = false;
             veilSky = false;
             celestialCall = false;
             me->SetVisible(true);
-            Phase = 0;
             Talk(SAY_AGGRO);
 
             // Init events for phase one
-            events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_ONE, 3000);
-            events.ScheduleEvent(EVENT_CELESTIAL_CALL_PHASE_ONE, 5000);
-            events.ScheduleEvent(EVENT_VEIL_SKY_PHASE_ONE, 8000);
+            events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_ONE, 3000, 0, PHASE_ONE);
+            events.ScheduleEvent(EVENT_CELESTIAL_CALL_PHASE_ONE, 5000, 0, PHASE_ONE);
+            events.ScheduleEvent(EVENT_VEIL_SKY_PHASE_ONE, 8000, 0, PHASE_ONE);
             events.ScheduleEvent(EVENT_SUPERNOVA, 18000);
+            events.ScheduleEvent(EVENT_CHECK_PHASING_HEALTH, 1);
+
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
 
             // Sniffs revealed this spell casted on enter combat
             DoCast(me, SPELL_CALL_OF_SKY);
@@ -115,44 +136,45 @@ public:
             _JustDied();
             Talk(SAY_DEATH);
             RemoveSummons();
+            me->SetVisible(true);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
         void EnterEvadeMode()
         {
+            _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SetBossState(DATA_ISISET, FAIL);
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->SetVisible(true);
+            events.Reset();
+            _DespawnAtEvade();
+        }
+
+        void Reset()
+        {
+            me->SetPhaseMask(3, true);
             RemoveSummons();
-            isPhased = false;
+            me->SetVisible(true);
             astralRain = false;
             veilSky = false;
             celestialCall = false;
-            Phase = 0;
-            _EnterEvadeMode();
-            _DespawnAtEvade();
-            me->SetVisible(true);
-            events.Reset();
+            _Reset();
         }
 
         void SummonedCreatureDespawn(Creature* summon)
         {
             switch (summon->GetEntry())
             {
-                case 39720: // Mirror: Astral Rain
-                {
+                case NPC_ASTRAL_RAIN:
                     astralRain = false;
                     break;
-                }
-                case 39721: // Mirror: Celestial Call
-                {
+                case NPC_CELESTIAL_CALL:
                     celestialCall = false;
                     break;
-                }
-                case 39722: // Mirror: Veil of Sky
-                {
+                case NPC_VEIL_OF_SKY:
                     veilSky = false;
                     break;
-                }
                 default:
                     break;
             }
@@ -164,16 +186,12 @@ public:
                 return;
 
             for (std::list<uint64>::const_iterator itr = SummonList.begin(); itr != SummonList.end(); ++itr)
-            {
                 if (Creature* tempSummon = Unit::GetCreature(*me, *itr))
-                {
                     if (tempSummon)
                     {
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, tempSummon);
                         tempSummon->DisappearAndDie();
                     }
-                }
-            }
 
             SummonList.clear();
         }
@@ -183,6 +201,115 @@ public:
             SummonList.push_back(summon->GetGUID());
             summon->AI()->DoZoneInCombat();
         }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_HIDE_MIRROR:
+                {
+                    SwitchImagePhase(MIRROR_DISABLED);
+                    me->SetVisible(true);
+                    me->RemoveAllAuras();
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                    break;
+                }
+                case ACTION_CALL_MIRROR:
+                {
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                    events.CancelEventGroup(0);
+
+                    me->StopMoving();
+                    me->SendMovementFlagUpdate(false);
+                    me->RemoveAllAuras();
+                    me->SetPower(POWER_MANA, me->GetMaxPower(POWER_MANA));
+
+                    Position pos;
+                    me->GetPosition(&pos);
+
+                    if (events.IsInPhase(PHASE_TWO))
+                    {
+                        me->SummonCreature(NPC_ASTRAL_RAIN, pos, TEMPSUMMON_CORPSE_DESPAWN, 1);
+                        me->SummonCreature(NPC_CELESTIAL_CALL, pos, TEMPSUMMON_CORPSE_DESPAWN, 1);
+                        me->SummonCreature(NPC_VEIL_OF_SKY, pos, TEMPSUMMON_CORPSE_DESPAWN, 1);
+
+                        DoCast(me, SPELL_ASTRAL_SHIFT_VISUAL, true);
+
+                        SwitchImagePhase(MIRROR_ENABLED);
+
+                        astralRain = true;
+                        veilSky = true;
+                        celestialCall = true;
+
+                        // Init events for phase two
+                        events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_TWO, 3000, 0, PHASE_TWO);
+                        events.ScheduleEvent(EVENT_CELESTIAL_CALL_PHASE_TWO, 5000, 0, PHASE_TWO);
+                        events.ScheduleEvent(EVENT_VEIL_SKY_PHASE_TWO, 8000, 0, PHASE_TWO);
+                        events.ScheduleEvent(EVENT_SUPERNOVA, 18000);
+                        events.ScheduleEvent(EVENT_CHECK_PHASING_HEALTH, 1);
+                    }
+
+                    if (events.IsInPhase(PHASE_THREE))
+                    {
+                        DoCast(me, SPELL_ASTRAL_SHIFT_VISUAL, true);
+
+                        SwitchImagePhase(MIRROR_ENABLED);
+
+                        // Init events for phase three
+                        events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_THREE, 3000, 0, PHASE_THREE);
+                        events.ScheduleEvent(EVENT_CELESTIAL_CALL_PHASE_THREE, 5000, 0, PHASE_THREE);
+                        events.ScheduleEvent(EVENT_VEIL_SKY_PHASE_THREE, 8000, 0, PHASE_THREE);
+                        events.ScheduleEvent(EVENT_SUPERNOVA, 18000);
+                    }
+
+                    me->SetVisible(false);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void SwitchImagePhase(uint32 phase)
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(me, me, 150.0f);
+            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(150.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if (!(*itr)->ToCreature())
+                    continue;
+
+                switch ((*itr)->ToCreature()->GetEntry())
+                {
+                    case NPC_VEIL_OF_SKY:
+                    case NPC_CELESTIAL_CALL:
+                    case NPC_ASTRAL_RAIN:
+                    {
+                        (*itr)->SetPhaseMask(phase, true);
+
+                        if (phase == 2)
+                            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, (*itr));
+                        else
+                        {
+                            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, (*itr));
+                            if (Creature* isiset = (*itr)->FindNearestCreature(BOSS_ISISET, 500.0f))
+                            {
+                                Position pos;
+                                isiset->GetPosition(&pos);
+                                (*itr)->NearTeleportTo(pos, true);
+                                (*itr)->SetHealth((*itr)->GetMaxHealth());
+                                (*itr)->SetPower((*itr)->getPowerType(), (*itr)->GetMaxPower((*itr)->getPowerType()));
+                                (*itr)->RemoveAllAurasExceptType(SPELL_AURA_MANA_SHIELD);
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        continue;
+                }
+            }        }
 
         void UpdateAI(uint32 diff)
         {
@@ -194,447 +321,125 @@ public:
 
             events.Update(diff);
 
-            if (me->GetPower(POWER_MANA) <= 100)
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                me->RemoveAurasDueToSpell(SPELL_VEIL_OF_SKY_FIRST);
-                me->RemoveAurasDueToSpell(SPELL_VEIL_OF_SKY_SECOND);
-                me->RemoveAurasDueToSpell(SPELL_VEIL_OF_SKY_THIRD);
-            }
-
-            if (isPhased == true)
-                me->SetVisible(false);
-
-            if (isPhased == false)
-            {
-                me->SetVisible(true);
-                if (me->isInCombat())
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-            }
-
-            if ((me->GetHealth() * 100 / me->GetMaxHealth() <= 66) && Phase == 0 && me->isInCombat())
-            {
-                me->SetPhaseMask(3, true);
-                Phase = 1;
-                me->SetReactState(REACT_PASSIVE);
-                isPhased = true;
-                astralRain = true;
-                veilSky = true;
-                celestialCall = true;
-                Position pos;
-                me->GetPosition(&pos);
-                me->SummonCreature(39720, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
-                me->SummonCreature(39721, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
-                me->SummonCreature(39722, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
-
-                DoCast(me, SPELL_ASTRAL_SHIFT_VISUAL, true);
-
-                // Init events for phase two
-                events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_TWO, 3000);
-                events.ScheduleEvent(EVENT_CELESTIAL_CALL_PHASE_TWO, 5000);
-                events.ScheduleEvent(EVENT_VEIL_SKY_PHASE_TWO, 8000);
-                events.ScheduleEvent(EVENT_SUPERNOVA, 18000);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            }
-
-            if ((me->GetHealth() * 100 / me->GetMaxHealth() <= 33) && Phase == 1)
-            {
-                Phase = 2;
-                me->SetReactState(REACT_PASSIVE);
-                isPhased = true;
-                Position pos;
-                me->GetPosition(&pos);
-                if (astralRain == false)
+                switch (eventId)
                 {
-                    me->SummonCreature(39721, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
-                    me->SummonCreature(39722, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
-                }
-                if (celestialCall == false)
-                {
-                    me->SummonCreature(39722, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
-                    me->SummonCreature(39720, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
-                }
-                if (veilSky == false)
-                {
-                    me->SummonCreature(39720, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
-                    me->SummonCreature(39722, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
-                }
-
-                DoCast(me, SPELL_ASTRAL_SHIFT_VISUAL, true);
-
-                // Init events for phase three
-                events.ScheduleEvent(EVENT_ASTRAL_RAIN_PHASE_THREE, 3000);
-                events.ScheduleEvent(EVENT_CELESTIAL_CALL_PHASE_THREE, 5000);
-                events.ScheduleEvent(EVENT_VEIL_SKY_PHASE_THREE, 8000);
-                events.ScheduleEvent(EVENT_SUPERNOVA, 18000);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            }
-
-            if (Phase == 0)
-            {
-                isPhased = false;
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
+                    case EVENT_CHECK_PHASING_HEALTH:
                     {
-                        case EVENT_CELESTIAL_CALL_PHASE_ONE:
+                        if (me->GetHealthPct() < 66 && me->isInCombat() && events.IsInPhase(PHASE_ONE))
                         {
-                            DoCast(me, SPELL_CELESTIAL_CALL_FIRST);
-                            events.CancelEvent(EVENT_CELESTIAL_CALL_PHASE_ONE);
+                            events.SetPhase(PHASE_TWO);
+                            events.CancelEvent(EVENT_CHECK_PHASING_HEALTH);
+                            DoAction(ACTION_CALL_MIRROR);
                             break;
                         }
-                        case EVENT_VEIL_SKY_PHASE_ONE:
+                        if (me->GetHealthPct() < 33 && me->isInCombat() && events.IsInPhase(PHASE_TWO))
                         {
-                            DoCast(me, SPELL_VEIL_OF_SKY_FIRST);
-                            events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_ONE, 40000);
+                            events.SetPhase(PHASE_THREE);
+                            events.CancelEvent(EVENT_CHECK_PHASING_HEALTH);
+                            DoAction(ACTION_CALL_MIRROR);
                             break;
                         }
-                        case EVENT_ASTRAL_RAIN_PHASE_ONE:
-                        {
-                            DoCast(SPELL_ASTRAL_RAIN_FIRST);
-                            events.RescheduleEvent(EVENT_ASTRAL_RAIN_PHASE_ONE, 35000);
+                        events.RescheduleEvent(EVENT_CHECK_PHASING_HEALTH, 2000);
+                        break;
+                    }
+                    case EVENT_CELESTIAL_CALL_PHASE_ONE:
+                    {
+                        DoCast(me, SPELL_CELESTIAL_CALL_FIRST);
+                        events.RescheduleEvent(EVENT_CELESTIAL_CALL_PHASE_ONE, urand(15000, 20000), 0, PHASE_ONE);
+                        break;
+                    }
+                    case EVENT_VEIL_SKY_PHASE_ONE:
+                    {
+                        DoCast(me, SPELL_VEIL_OF_SKY_FIRST);
+                        events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_ONE, 40000, 0, PHASE_ONE);
+                        break;
+                    }
+                    case EVENT_ASTRAL_RAIN_PHASE_ONE:
+                    {
+                        DoCast(SPELL_ASTRAL_RAIN_FIRST);
+                        events.RescheduleEvent(EVENT_ASTRAL_RAIN_PHASE_ONE, 35000, 0, PHASE_ONE);
+                        break;
+                    }
+                    case EVENT_VEIL_SKY_PHASE_TWO:
+                    {
+                        if (!veilSky)
                             break;
-                        }
-                        case EVENT_SUPERNOVA:
+
+                        DoCast(me, SPELL_VEIL_OF_SKY_SECOND);
+                        events.CancelEvent(EVENT_VEIL_SKY_PHASE_ONE);
+                        events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_TWO, 40000, 0, PHASE_TWO);
+                        break;
+                    }
+                    case EVENT_ASTRAL_RAIN_PHASE_TWO:
+                    {
+                        if (!astralRain)
+                            break;
+
+                        DoCast(SPELL_ASTRAL_RAIN_SECOND);
+                        events.RescheduleEvent(EVENT_ASTRAL_RAIN_PHASE_TWO, 35000, 0, PHASE_TWO);
+                        break;
+                    }
+                    case EVENT_CELESTIAL_CALL_PHASE_TWO:
+                    {
+                        if (!celestialCall)
+                            break;
+
+                        DoCast(me, SPELL_CELESTIAL_CALL_SECOND);
+                        events.RescheduleEvent(EVENT_CELESTIAL_CALL_PHASE_TWO, urand(15000, 20000), 0, PHASE_TWO);
+                        break;
+                    }
+                    case EVENT_VEIL_SKY_PHASE_THREE:
+                    {
+                        if (!veilSky)
+                            break;
+
+                        DoCast(me, SPELL_VEIL_OF_SKY_THIRD);
+                        events.CancelEvent(EVENT_VEIL_SKY_PHASE_ONE);
+                        events.CancelEvent(EVENT_VEIL_SKY_PHASE_TWO);
+                        events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_THREE, 40000, 0, PHASE_THREE);
+                        break;
+                    }
+                    case EVENT_ASTRAL_RAIN_PHASE_THREE:
+                    {
+                        if (!astralRain)
+                            break;
+
+                        DoCast(SPELL_ASTRAL_RAIN_THIRD);
+                        events.RescheduleEvent(EVENT_ASTRAL_RAIN_PHASE_THREE, 35000, 0, PHASE_THREE);
+                        break;
+                    }
+                    case EVENT_CELESTIAL_CALL_PHASE_THREE:
+                    {
+                        if (!celestialCall)
+                            break;
+
+                        DoCast(me, SPELL_CELESTIAL_CALL_THIRD);
+                        events.RescheduleEvent(EVENT_CELESTIAL_CALL_PHASE_THREE, urand(15000, 20000), 0, PHASE_THREE);
+                        break;
+                    }
+                    case EVENT_SUPERNOVA:
+                    {
+                        if (me->IsVisible())
                         {
-                            if (isPhased == false)
-                            {
-                                Talk(SAY_SUPERNOVA);
-                                Talk(SAY_SUPERNOVA_WARNING);
-                            }
+                            Talk(SAY_SUPERNOVA);
+                            Talk(SAY_SUPERNOVA_WARNING);
                             if (Unit* victim = me->getVictim())
                                 DoCast(victim, SPELL_SUPERNOVA);
+
                             events.RescheduleEvent(EVENT_SUPERNOVA, 42000);
                             break;
                         }
-                        default:
-                            break;
+                        events.RescheduleEvent(EVENT_SUPERNOVA, 2000);
+                        break;
                     }
+                    default:
+                        break;
                 }
             }
 
-            if (Phase == 1)
-            {
-                if (celestialCall == false)
-                {
-                    if (Creature* veil = me->FindNearestCreature(39722, 300, true))
-                    {
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, veil);
-                        veil->SetPhaseMask(2, true);
-                    }
-
-                    if (Creature* astral = me->FindNearestCreature(39720, 300, true))
-                    {
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, astral);
-                        astral->SetPhaseMask(2, true);
-                    }
-
-                    me->SetReactState(REACT_AGGRESSIVE);
-
-                    isPhased = false;
-
-                    while (uint32 eventId = events.ExecuteEvent())
-                    {
-                        switch (eventId)
-                        {
-                            case EVENT_VEIL_SKY_PHASE_TWO:
-                            {
-                                DoCast(me, SPELL_VEIL_OF_SKY_SECOND);
-                                events.CancelEvent(EVENT_VEIL_SKY_PHASE_ONE);
-                                events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_TWO, 40000);
-                                break;
-                            }
-                            case EVENT_ASTRAL_RAIN_PHASE_TWO:
-                            {
-                                DoCast(SPELL_ASTRAL_RAIN_SECOND);
-                                events.RescheduleEvent(EVENT_ASTRAL_RAIN_PHASE_TWO, 35000);
-                                break;
-                            }
-                            case EVENT_SUPERNOVA:
-                            {
-                                if (isPhased == false)
-                                {
-                                    Talk(SAY_SUPERNOVA);
-                                    Talk(SAY_SUPERNOVA_WARNING);
-                                }
-                                if (Unit* victim = me->getVictim())
-                                    DoCast(victim, SPELL_SUPERNOVA);
-                                events.RescheduleEvent(EVENT_SUPERNOVA, 42000);
-                                break;
-                            }
-                            default:
-                                break;
-                        }
-                    }
-                }
-
-                if (veilSky == false)
-                {
-                    if (Creature* celestial = me->FindNearestCreature(39721, 500.0f, true))
-                    {
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, celestial);
-                        celestial->SetPhaseMask(2, true);
-                    }
-
-                    if (Creature* astral = me->FindNearestCreature(39720, 500.0f, true))
-                    {
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, astral);
-                        astral->SetPhaseMask(2, true);
-                    }
-
-                    me->SetReactState(REACT_AGGRESSIVE);
-
-                    isPhased = false;
-
-                    while (uint32 eventId = events.ExecuteEvent())
-                    {
-                        switch (eventId)
-                        {
-                            case EVENT_CELESTIAL_CALL_PHASE_TWO:
-                            {
-                                DoCast(me, SPELL_CELESTIAL_CALL_SECOND);
-                                events.CancelEvent(EVENT_CELESTIAL_CALL_PHASE_TWO);
-                                break;
-                            }
-                            case EVENT_ASTRAL_RAIN_PHASE_TWO:
-                            {
-                                DoCast(SPELL_ASTRAL_RAIN_SECOND);
-                                events.RescheduleEvent(EVENT_ASTRAL_RAIN_PHASE_TWO, 35000);
-                                break;
-                            }
-                            case EVENT_SUPERNOVA:
-                            {
-                                if (isPhased == false)
-                                {
-                                    Talk(SAY_SUPERNOVA);
-                                    Talk(SAY_SUPERNOVA_WARNING);
-                                }
-                                if (Unit* victim = me->getVictim())
-                                    DoCast(victim, SPELL_SUPERNOVA);
-                                events.RescheduleEvent(EVENT_SUPERNOVA, 42000);
-                                break;
-                            }
-                            default:
-                                break;
-                        }
-                    }
-                }
-
-                if (astralRain == false)
-                {
-                    if (Creature* celestial = me->FindNearestCreature(39721, 500.0f, true))
-                    {
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, celestial);
-                        celestial->SetPhaseMask(2, true);
-                    }
-
-                    if (Creature* veil = me->FindNearestCreature(39722, 500.0f, true))
-                    {
-                        veil->SetPhaseMask(2, true);
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, veil);
-                    }
-
-                    me->SetReactState(REACT_AGGRESSIVE);
-
-                    isPhased = false;
-
-                    while (uint32 eventId = events.ExecuteEvent())
-                    {
-                        switch (eventId)
-                        {
-                            case EVENT_CELESTIAL_CALL_PHASE_TWO:
-                            {
-                                DoCast(me, SPELL_CELESTIAL_CALL_SECOND);
-                                events.CancelEvent(EVENT_CELESTIAL_CALL_PHASE_TWO);
-                                break;
-                            }
-                            case EVENT_VEIL_SKY_PHASE_TWO:
-                            {
-                                DoCast(SPELL_VEIL_OF_SKY_SECOND);
-                                events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_TWO, 40000);
-                                break;
-                            }
-                            case EVENT_SUPERNOVA:
-                            {
-                                if (isPhased == false)
-                                {
-                                    Talk(SAY_SUPERNOVA);
-                                    Talk(SAY_SUPERNOVA_WARNING);
-                                }
-                                if (Unit* victim = me->getVictim())
-                                    DoCast(victim, SPELL_SUPERNOVA);
-                                events.RescheduleEvent(EVENT_SUPERNOVA, 42000);
-                                break;
-                            }
-                            default:
-                                break;
-                        }
-                    }
-                }
-            }
-
-            if (Phase == 2)
-            {
-                if (celestialCall == false)
-                {
-                    if (Creature* veil = me->FindNearestCreature(39722, 300, true))
-                    {
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, veil);
-                        veil->SetPhaseMask(2, true);
-                    }
-
-                    if (Creature* astral = me->FindNearestCreature(39720, 300, true))
-                    {
-                        astral->SetPhaseMask(2, true);
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, astral);
-                    }
-
-                    me->SetReactState(REACT_AGGRESSIVE);
-
-                    isPhased = false;
-
-                    while (uint32 eventId = events.ExecuteEvent())
-                    {
-                        switch (eventId)
-                        {
-                            case EVENT_VEIL_SKY_PHASE_THREE:
-                            {
-                                DoCast(me, SPELL_VEIL_OF_SKY_THIRD);
-                                events.CancelEvent(EVENT_VEIL_SKY_PHASE_ONE);
-                                events.CancelEvent(EVENT_VEIL_SKY_PHASE_TWO);
-                                events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_THREE, 40000);
-                                break;
-                            }
-                            case EVENT_ASTRAL_RAIN_PHASE_THREE:
-                            {
-                                DoCast(SPELL_ASTRAL_RAIN_THIRD);
-                                events.RescheduleEvent(EVENT_ASTRAL_RAIN_PHASE_THREE, 35000);
-                                break;
-                            }
-                            case EVENT_SUPERNOVA:
-                            {
-                                if (isPhased == false)
-                                {
-                                    Talk(SAY_SUPERNOVA);
-                                    Talk(SAY_SUPERNOVA_WARNING);
-                                }
-                                if (Unit* victim = me->getVictim())
-                                    DoCast(victim, SPELL_SUPERNOVA);
-                                events.RescheduleEvent(EVENT_SUPERNOVA, 42000);
-                                break;
-                            }
-                            default:
-                                break;
-                        }
-                    }
-                }
-
-                if (veilSky == false)
-                {
-                    if (Creature* celestial = me->FindNearestCreature(39721, 300, true))
-                    {
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, celestial);
-                        celestial->SetPhaseMask(2, true);
-                    }
-
-                    if (Creature* astral = me->FindNearestCreature(39720, 300, true))
-                    {
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, astral);
-                        astral->SetPhaseMask(2, true);
-                    }
-
-                    me->SetReactState(REACT_AGGRESSIVE);
-
-                    isPhased = false;
-
-                    while (uint32 eventId = events.ExecuteEvent())
-                    {
-                        switch (eventId)
-                        {
-                            case EVENT_CELESTIAL_CALL_PHASE_THREE:
-                            {
-                                DoCast(me, SPELL_CELESTIAL_CALL_THIRD);
-                                events.CancelEvent(EVENT_CELESTIAL_CALL_PHASE_THREE);
-                                break;
-                            }
-                            case EVENT_ASTRAL_RAIN_PHASE_THREE:
-                            {
-                                DoCast(SPELL_ASTRAL_RAIN_THIRD);
-                                events.RescheduleEvent(EVENT_ASTRAL_RAIN_PHASE_THREE, 35000);
-                                break;
-                            }
-                            case EVENT_SUPERNOVA:
-                            {
-                                if (isPhased == false)
-                                {
-                                    Talk(SAY_SUPERNOVA);
-                                    Talk(SAY_SUPERNOVA_WARNING);
-                                }
-                                if (Unit* victim = me->getVictim())
-                                    DoCast(victim, SPELL_SUPERNOVA);
-                                events.RescheduleEvent(EVENT_SUPERNOVA, 42000);
-                                break;
-                            }
-                            default:
-                                break;
-                        }
-                    }
-                }
-
-                if (astralRain == false)
-                {
-                    if (Creature* celestial = me->FindNearestCreature(39721, 300, true))
-                    {
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, celestial);
-                        celestial->SetPhaseMask(2, true);
-                    }
-
-                    if (Creature* veil = me->FindNearestCreature(39722, 300, true))
-                    {
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, veil);
-                        veil->SetPhaseMask(2, true);
-                    }
-
-                    me->SetReactState(REACT_AGGRESSIVE);
-
-                    isPhased = false;
-
-                    while (uint32 eventId = events.ExecuteEvent())
-                    {
-                        switch (eventId)
-                        {
-                            case EVENT_CELESTIAL_CALL_PHASE_THREE:
-                            {
-                                DoCast(me, SPELL_CELESTIAL_CALL_THIRD);
-                                events.CancelEvent(EVENT_CELESTIAL_CALL_PHASE_THREE);
-                                break;
-                            }
-                            case EVENT_VEIL_SKY_PHASE_THREE:
-                            {
-                                DoCast(me, SPELL_VEIL_OF_SKY_THIRD);
-                                events.RescheduleEvent(EVENT_VEIL_SKY_PHASE_THREE, 40000);
-                                break;
-                            }
-                            case EVENT_SUPERNOVA:
-                            {
-                                if (isPhased == false)
-                                {
-                                    Talk(SAY_SUPERNOVA);
-                                    Talk(SAY_SUPERNOVA_WARNING);
-                                }
-                                if (Unit* victim = me->getVictim())
-                                    DoCast(victim, SPELL_SUPERNOVA);
-                                events.RescheduleEvent(EVENT_SUPERNOVA, 42000);
-                                break;
-                            }
-                            default:
-                                break;
-                        }
-                    }
-                }
-            }
-
-            if (isPhased == false)
+            if (me->IsVisible())
                 DoMeleeAttackIfReady();
         }
     };
@@ -817,19 +622,26 @@ public:
 
         void Reset()
         {
-            me->SetMaxPower(POWER_ENERGY, 100);
-            me->SetPower(POWER_ENERGY, 100);
+            if (Unit* owner = me->GetCharmerOrOwner())
+                me->setPowerType(POWER_MANA);
+            me->SetMaxPower(POWER_MANA, 140000);
+            me->SetPower(POWER_MANA, 140000);
             events.Reset();
+        }
+
+        void EnterEvadeMode()
+        {
         }
 
         void JustDied(Unit* /*killer*/)
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            if (Creature* isiset = me->FindNearestCreature(BOSS_ISISET, 500.0f))
+                isiset->AI()->DoAction(ACTION_HIDE_MIRROR);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_VEIL_SKY, 2000);
         }
 
@@ -892,19 +704,26 @@ public:
 
         void Reset()
         {
-            me->SetMaxPower(POWER_ENERGY, 100);
-            me->SetPower(POWER_ENERGY, 100);
+            if (Unit* owner = me->GetCharmerOrOwner())
+                me->setPowerType(POWER_MANA);
+            me->SetMaxPower(POWER_MANA, 140000);
+            me->SetPower(POWER_MANA, 140000);
             events.Reset();
+        }
+
+        void EnterEvadeMode()
+        {
         }
 
         void JustDied(Unit* /*killer*/)
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            if (Creature* isiset = me->FindNearestCreature(BOSS_ISISET, 500.0f))
+                isiset->AI()->DoAction(ACTION_HIDE_MIRROR);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_BARRAGE, 1000);
         }
 
@@ -968,19 +787,26 @@ public:
 
         void Reset()
         {
-            me->SetMaxPower(POWER_ENERGY, 100);
-            me->SetPower(POWER_ENERGY, 100);
+            if (Unit* owner = me->GetCharmerOrOwner())
+                me->setPowerType(POWER_MANA);
+            me->SetMaxPower(POWER_MANA, 140000);
+            me->SetPower(POWER_MANA, 140000);
             events.Reset();
+        }
+
+        void EnterEvadeMode()
+        {
         }
 
         void JustDied(Unit* /*killer*/)
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            if (Creature* isiset = me->FindNearestCreature(BOSS_ISISET, 500.0f))
+                isiset->AI()->DoAction(ACTION_HIDE_MIRROR);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_ASTRAL_RAIN, 2000);
         }
 
@@ -1585,6 +1411,37 @@ public:
     }
 };
 
+class spell_hoo_energy_flux : public SpellScriptLoader
+{
+public:
+    spell_hoo_energy_flux() : SpellScriptLoader("spell_hoo_energy_flux")
+    {
+    }
+
+    class spell_hoo_energy_flux_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hoo_energy_flux_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hoo_energy_flux_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hoo_energy_flux_SpellScript();
+    }
+};
+
 void AddSC_boss_isiset()
 {
     new boss_isiset();
@@ -1602,4 +1459,5 @@ void AddSC_boss_isiset()
     new npc_hoo_star_shard();
     new npc_hoo_flux_animator();
     new npc_hoo_spatial_anomaly();
+    new spell_hoo_energy_flux();
 }

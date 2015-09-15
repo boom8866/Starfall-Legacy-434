@@ -1124,6 +1124,11 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
             case 5283:  // Too Hot To Handle
             case 5284:  // Ascendant Descending
                 continue;
+            /* Bastion of Twilight */
+            case 5300:  // The Only Escape
+            case 5312:  // The Abyss Will Gaze Back Into You
+            case 4852:  // Double Dragon
+                continue;
             default:
                 break;
         }

@@ -4792,6 +4792,7 @@ bool Player::ResetTalents(bool no_cost)
         SetPower(POWER_ECLIPSE, 0);
 
     RemoveRespecAuras();
+    RemoveNotOwnSingleTargetAuras();
 
     return true;
 }
@@ -7989,7 +7990,7 @@ bool Player::HasCurrency(uint32 id, uint32 count) const
     return itr != _currencyStorage.end() && itr->second.totalCount >= count;
 }
 
-void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bool ignoreMultipliers/* = false*/)
+void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bool ignoreMultipliers/* = false*/, bool isRefunded/*= false*/)
 {
     if (!count)
         return;
@@ -8022,12 +8023,12 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
 
     // count can't be more then weekCap if used (weekCap > 0)
     uint32 weekCap = GetCurrencyWeekCap(currency);
-    if (weekCap && count > int32(weekCap))
+    if (weekCap && count > int32(weekCap) && !isRefunded)
         count = weekCap;
 
     // count can't be more then totalCap if used (totalCap > 0)
     uint32 totalCap = GetCurrencyTotalCap(currency);
-    if (totalCap && count > int32(totalCap))
+    if (totalCap && count > int32(totalCap) && !isRefunded)
         count = totalCap;
 
     int32 newTotalCount = int32(oldTotalCount) + count;
@@ -8039,7 +8040,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
         newWeekCount = 0;
 
     // if we get more then weekCap just set to limit
-    if (weekCap && int32(weekCap) < newWeekCount)
+    if (weekCap && int32(weekCap) < newWeekCount && !isRefunded)
     {
         newWeekCount = int32(weekCap);
         // weekCap - oldWeekCount always >= 0 as we set limit before!
@@ -8047,11 +8048,14 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
     }
 
     // if we get more then totalCap set to maximum;
-    if (totalCap && int32(totalCap) < newTotalCount)
+    if (totalCap && int32(totalCap) < newTotalCount && !isRefunded)
     {
         newTotalCount = int32(totalCap);
         newWeekCount = weekCap;
     }
+
+    if (isRefunded)
+        newWeekCount -= count;
 
     if (uint32(newTotalCount) != oldTotalCount)
     {
@@ -8061,10 +8065,10 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
         itr->second.totalCount = newTotalCount;
         itr->second.weekCount = newWeekCount;
 
-        if (count > 0)
+        if (count > 0 && !isRefunded)
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CURRENCY, id, count);
 
-        if (currency->Category == CURRENCY_CATEGORY_META_CONQUEST)
+        if (currency->Category == CURRENCY_CATEGORY_META_CONQUEST && !isRefunded)
         {
             // count was changed to week limit, now we can modify original points.
             ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, count, printLog);
@@ -13232,6 +13236,13 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, pItem->GetEntry(), slot);
     UpdateArmorSpecialization();
 
+    // Sanctity of Battle
+    if (HasAura(25956))
+    {
+        RemoveAurasDueToSpell(25956);
+        CastSpell(this, 25956, true);
+    }
+
     // Update Pet Scaling Auras
     if (Pet* pet = GetPet())
     {
@@ -13277,6 +13288,13 @@ void Player::QuickEquipItem(uint16 pos, Item* pItem)
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM, pItem->GetEntry());
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, pItem->GetEntry(), slot);
         UpdateArmorSpecialization();
+
+        // Sanctity of Battle
+        if (HasAura(25956))
+        {
+            RemoveAurasDueToSpell(25956);
+            CastSpell(this, 25956, true);
+        }
 
         // Update Pet Scaling Auras
         if (Pet* pet = GetPet())
@@ -13420,7 +13438,16 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
         pItem->SetSlot(NULL_SLOT);
         if (IsInWorld() && update)
         {
+            // Armor Specialization
             UpdateArmorSpecialization();
+
+            // Sanctity of Battle
+            if (HasAura(25956))
+            {
+                RemoveAurasDueToSpell(25956);
+                CastSpell(this, 25956, true);
+            }
+
             // Update Pet Scaling Auras
             if (Pet* pet = GetPet())
             {
@@ -22333,7 +22360,7 @@ void Player::SendRemoveControlBar()
 
 bool Player::IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod, Spell* spell)
 {
-    if (!mod || !spellInfo)
+    if (!spellInfo || !mod)
         return false;
 
     // Mod out of charges
@@ -24502,7 +24529,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     data << uint32(sWorld->GetNextWeeklyQuestsResetTime() - WEEK);  // LastWeeklyReset (not instance reset)
     data << uint32(GetMap()->GetDifficulty());
-    GetSession()->SendPacket(&data); 
+    GetSession()->SendPacket(&data);
 
     SetMover(this);
 }
@@ -24544,6 +24571,9 @@ void Player::SendInitialPacketsAfterAddToMap()
     SendItemDurations();                                    // must be after add to map
 
     RestoreAllSpellMods();
+
+    phaseMgr.AddUpdateFlag(PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED);
+    phaseMgr.Update();
 
     // raid downscaling - send difficulty to player
     if (GetMap()->IsRaid())
@@ -27937,15 +27967,10 @@ void Player::ActivateSpec(uint8 spec)
 
     UpdateArmorSpecialization();
 
-    // Remove Warlock summons
-    if (getClass() == CLASS_WARLOCK)
-    {
-        if (Pet* pet = GetPet())
-            pet->DespawnOrUnsummon(1);
-    }
-
     if (!sTalentTabStore.LookupEntry(GetPrimaryTalentTree(GetActiveSpec())))
         ResetTalents(true);
+
+    RemoveNotOwnSingleTargetAuras();
 }
 
 void Player::ResetTimeSync()
@@ -28243,7 +28268,7 @@ void Player::RefundItem(Item* item)
         uint32 count = iece->RequiredCurrencyCount[i];
         uint32 currencyid = iece->RequiredCurrency[i];
         if (count && currencyid)
-            ModifyCurrency(currencyid, count, false, true);
+            ModifyCurrency(currencyid, count, false, true, true);
     }
 
     // Grant back money

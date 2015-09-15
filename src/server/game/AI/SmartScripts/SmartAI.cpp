@@ -457,8 +457,7 @@ void SmartAI::EnterEvadeMode()
     if (me->HasAura(82579))
         return;
 
-    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
-
+    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE, SPELL_AURA_SET_VEHICLE_ID, SPELL_AURA_CLONE_CASTER);
     me->AddUnitState(UNIT_STATE_EVADE);
     me->DeleteThreatList();
     me->CombatStop(true);

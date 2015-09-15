@@ -561,6 +561,11 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             damage += damage * (maxDuration - duration);
                         }
                         break;
+                    case 86825: // Blackout (Theralion & Valiona - The Bastion of Twilight)
+                        // Prevent damage if target is under Ice Block, Divine Shield or Cloak of Shadows
+                        if (unitTarget->HasAura(27619) || unitTarget->HasAura(642) || unitTarget->HasAura(31224))
+                            damage = 0;
+                        break;
                     default:
                         break;
                 }
@@ -607,23 +612,43 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 switch (m_spellInfo->Id)
                 {
                     case 879: // Exorcism
-                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                            if (m_caster->GetTotalAttackPowerValue(BASE_ATTACK) > m_caster->ToPlayer()->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()))
-                                damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.344f;
-                            else
-                                damage += m_caster->ToPlayer()->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()) * 0.344f;
+                    {
+                        if (m_caster)
+                        {
+                            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if (m_caster->GetTotalAttackPowerValue(BASE_ATTACK) > m_caster->ToPlayer()->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()))
+                                    damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.344f;
+                                else
+                                    damage += m_caster->ToPlayer()->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()) * 0.344f;
+                            }
+                        }
                         break;
+                    }
                     case 81297: // Consecration
                     {
-                        float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                        int32 holy = m_caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
-                        int8 divideCoeff = 10;
+                        if (m_caster && unitTarget)
+                        {
+                            float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                            int32 holy = m_caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
+                            int8 divideCoeff = 10;
 
-                        // Glyph of Consecration
-                        if (m_caster->HasAura(54928))
-                            divideCoeff += 2;
+                            // Glyph of Consecration
+                            if (m_caster->HasAura(54928))
+                                divideCoeff += 2;
 
-                        damage += (8 * (0.04f * holy + 0.04f * ap) / divideCoeff);
+                            damage += (8 * (0.04f * holy + 0.04f * ap) / divideCoeff);
+                        }
+                        break;
+                    }
+                    case 20170: // Seal of Justice
+                    {
+                        if (m_caster)
+                        {
+                            uint32 casterAP = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.16f;
+                            uint32 casterSP = m_caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.25f;
+                            damage += (casterAP + casterSP);
+                        }
                         break;
                     }
                     default:
@@ -722,6 +747,10 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
                             damage += int32((spellpower * 1.2855f));
                         }
+                        break;
+                    case 31117: // Unstable Affliction (dispel)
+                        float spellpower = (float)(m_caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW)) * 1.80f;
+                        damage = int32((damage + spellpower) * 2);
                         break;
                 }
                 break;
@@ -1718,12 +1747,18 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                     {
                         for (std::list<Creature*>::const_iterator itr = templist.begin(); itr != templist.end(); ++itr)
                         {
+                            if (!(*itr)->ToCreature())
+                                continue;
+
+                            if ((*itr)->ToCreature()->GetEntry() != 47649)
+                                continue;
+
                             // You cannot detonate other people's mushrooms
                             if ((*itr)->GetOwner() != m_caster || !(*itr)->IsVisible())
                                 continue;
 
                             if ((*itr)->GetOwner())
-                                (*itr)->GetOwner()->CastSpell((*itr), 78777, true);
+                                (*itr)->GetOwner()->CastSpell((*itr), 78777);
 
                             // Suicide spell
                             (*itr)->CastSpell((*itr), 92853, true);
@@ -2343,7 +2378,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
         case SPELLFAMILY_GENERIC:
         {
             // Food buffs cannot stack!
-            if (m_spellInfo->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)
+            if (m_spellInfo && m_caster && m_spellInfo->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)
                 m_caster->RemoveFoodBuffAurasWithExclusion(m_spellInfo->Id);
 
             switch (m_spellAura->GetId())
@@ -2679,6 +2714,13 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     // Item - Death Knight T11 DPS 4P Bonus
                     if (m_caster->HasAura(90459))
                         m_caster->CastSpell(m_caster, 90507, true);
+                    break;
+                }
+                case 59052: // Freezing Fog
+                {
+                    if (Player* player = m_caster->ToPlayer())
+                        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(45477))
+                            player->GetGlobalCooldownMgr().AddGlobalCooldown(spellInfo, 500);
                     break;
                 }
             }
@@ -3080,31 +3122,65 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
         if (unitTarget->HasAura(48920) && (unitTarget->GetHealth() + addhealth >= unitTarget->GetMaxHealth()))
             unitTarget->RemoveAura(48920);
 
+        // Healing Rain
+        if (m_spellInfo->AttributesCu & SPELL_ATTR0_CU_DIMINISH_HEAL)
+        {
+            uint32 count = 0;
+            for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                ++count;
+
+            if (count > 6)
+                addhealth *= (6.0f / count);
+        }
+
         // Init switch for special spell procs
         switch (m_spellInfo->Id)
         {
+            case 81751: // Atonement
+            {
+                if (unitTarget == m_caster)
+                    addhealth /= 2;
+
+                // Cap at 30% of caster max health
+                if (addhealth >= (int32(m_caster->GetMaxHealth() * 0.30f)))
+                    addhealth = int32(m_caster->GetMaxHealth() * 0.30f);
+                break;
+            }
+            case 94472: // Atonement (secondary)
+            {
+                if (unitTarget == m_caster)
+                    addhealth /= 2;
+
+                // Cap at 30% of caster max health
+                if (addhealth >= (int32(m_caster->GetMaxHealth() * 0.15f)))
+                    addhealth = int32(m_caster->GetMaxHealth() * 0.15f);
+                break;
+            }
             case 61295: // Riptide
             {
                 // Only Direct Heal
-                if (m_spellInfo->IsPeriodicDamage())
-                    break;
-
-                // Nature's Blessing
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2012, EFFECT_0))
+                if (!m_spellInfo->IsPeriodicDamage())
                 {
-                    // Earth Shield
-                    if (unitTarget && unitTarget->HasAura(974))
+                    // Nature's Blessing
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2012, EFFECT_0))
                     {
-                        int32 healAmount = aurEff->GetAmount();
-                        addhealth += (addhealth * healAmount) / 100;
+                        // Earth Shield
+                        if (unitTarget && unitTarget->HasAura(974))
+                        {
+                            int32 healAmount = aurEff->GetAmount();
+                            addhealth += (addhealth * healAmount) / 100;
+                        }
                     }
                 }
                 break;
             }
             case 20167: // Seal of Insight
             {
-                int32 ap = caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.155f;
-                addhealth += ap;
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    int32 ap = caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.15f;
+                    addhealth += ap;
+                }
                 break;
             }
             case 87188: // Enlightened Judgements
@@ -3148,22 +3224,22 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
             case 50464: // Nourish
             {
                 // Only for player casters
-                if (caster->GetTypeId() != TYPEID_PLAYER)
-                    break;
-
-                // Need Mastery
-                if (!caster->HasAura(86470))
-                    break;
-
-                // Increase direct healing by 10% and 1.25% bonus per mastery points
-                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                addhealth += addhealth * (0.10f + (0.0125f * masteryPoints));
-
-                // Mastery: Harmony
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 1929, 1))
+                if (caster->GetTypeId() == TYPEID_PLAYER)
                 {
-                    int32 bp0 = aurEff->GetAmount();
-                    m_caster->CastCustomSpell(m_caster, 100977, &bp0, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                    // Need Mastery
+                    if (caster->HasAura(86470))
+                    {
+                        // Increase direct healing by 10% and 1.25% bonus per mastery points
+                        float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        addhealth += addhealth * (0.10f + (0.0125f * masteryPoints));
+
+                        // Mastery: Harmony
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 1929, 1))
+                        {
+                            int32 bp0 = aurEff->GetAmount();
+                            m_caster->CastCustomSpell(m_caster, 100977, &bp0, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                        }
+                    }
                 }
                 break;
             }
@@ -3174,6 +3250,28 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                     m_caster->CastSpell(m_caster, 81208, true);
                     m_caster->RemoveAurasDueToSpell(14751);
                 }
+                break;
+            }
+            case 85673: // Word of Glory
+            {
+                if (m_caster)
+                {
+                    uint32 casterAP = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.198f;
+                    uint32 casterSP = m_caster->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.209f;
+                    addhealth += (casterAP + casterSP);
+                    // Walk in the Light
+                    if (m_caster->HasAura(85102))
+                        addhealth += addhealth * 0.20f;
+                    // Glyph of Word of Glory
+                    if (m_caster->HasAura(54936))
+                        addhealth += addhealth * 0.10f;
+                }
+                break;
+            }
+            case 48153: // Guardian Spirit
+            {
+                if (m_caster)
+                    addhealth = m_caster->GetMaxHealth() * 0.50f;
                 break;
             }
         }
@@ -3189,6 +3287,27 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                     int32 healAmount = aurEff->GetAmount();
                     addhealth += (addhealth * healAmount) / 100;
                 }
+            }
+        }
+
+        // For debuffs that reduce healing received
+        if (unitTarget)
+        {
+            Unit::AuraEffectList const &aurEff = unitTarget->GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_PCT);
+            for (Unit::AuraEffectList::const_iterator i = aurEff.begin(); i != aurEff.end(); ++i)
+            {
+                if (aurEff.empty())
+                    continue;
+
+                // Only for hostile buffs
+                if (aurEff.front()->GetCaster() && !aurEff.front()->GetCaster()->IsHostileTo(unitTarget) && aurEff.front()->GetSpellInfo()->IsPositive())
+                    continue;
+
+                int32 healingReduction = int32(-aurEff.front()->GetAmount());
+                addhealth -= uint32(addhealth * healingReduction / 100);
+
+                if (addhealth < 0)
+                    addhealth = 0;
             }
         }
 
@@ -4395,7 +4514,7 @@ void Spell::EffectDispel (SpellEffIndex effIndex)
         }
     }
 
-    if (failCount)
+    if (failCount && m_caster->getClass() != CLASS_PRIEST)
         m_caster->SendMessageToSet(&dataFail, true);
 
     if (success_list.empty())
@@ -4927,12 +5046,6 @@ void Spell::EffectSummonPet (SpellEffIndex effIndex)
             pet->SetPower(POWER_ENERGY, 100);
         }
     }
-
-    // Camouflage
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        if (m_caster->getClass() == CLASS_HUNTER)
-            if (m_caster->HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE))
-                m_caster->RemoveAurasByType(SPELL_AURA_MOD_CAMOUFLAGE);
 }
 
 void Spell::EffectLearnPetSpell (SpellEffIndex effIndex)
@@ -5162,6 +5275,10 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                             searingFlames->Remove();
                         }
                     }
+
+                    // Primal Wisdom
+                    if (m_caster->HasAura(51522) && roll_chance_i(40))
+                        m_caster->CastSpell(m_caster, 63375, true);
                     break;
                 }
             }
@@ -5538,11 +5655,14 @@ void Spell::EffectHealMaxHealth (SpellEffIndex /*effIndex*/)
             continue;
 
         // Only for hostile buffs
-        if (aurEff.front()->GetCaster() && !aurEff.front()->GetCaster()->IsHostileTo(unitTarget))
+        if (aurEff.front()->GetCaster() && !aurEff.front()->GetCaster()->IsHostileTo(unitTarget) && aurEff.front()->GetSpellInfo()->IsPositive())
             continue;
 
         int32 healingReduction = int32(-aurEff.front()->GetAmount());
-        m_healing -= m_healing * healingReduction / 100;
+        m_healing -= uint32(m_healing * healingReduction / 100);
+
+        if (m_healing < 0)
+            m_healing = 0;
         return;
     }
 }
@@ -6211,9 +6331,9 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
 
                             for (Unit::AuraEffectList::const_iterator itr = dotList.begin(); itr != dotList.end(); ++itr)
                             {
-                                if ((*itr) && (*itr)->GetCaster() && (*itr)->GetCaster()->IsInWorld())
+                                if ((*itr))
                                 {
-                                    if ((*itr)->GetCaster()->GetGUID() == m_caster->GetGUID())
+                                    if ((*itr)->GetCasterGUID() == m_caster->GetGUID())
                                     {
                                         uint32 duration = (*itr)->GetBase()->GetDuration();
                                         uint32 spellId = (*itr)->GetId();
@@ -6546,7 +6666,7 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
             if (m_spellInfo->SpellFamilyFlags[2] & 0x1)
             {
                 m_caster->CastSpell(m_caster, 53353, true);
-                if (unitTarget->GetAura(1978))
+                if (unitTarget->GetAura(1978, m_caster->GetGUID()))
                     unitTarget->GetAura(1978)->RefreshDuration();
             }
             break;
@@ -6669,20 +6789,21 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         // Get diseases on target of spell
                         if (m_targets.GetUnitTarget() && (m_targets.GetUnitTarget() != unitTarget))
                         {
-                            AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, EFFECT_0);
-                            int32 bp0 = aurEff ? (aurEff->GetAmount()) : 0;
-
                             // Blood Plague
                             if (AuraEffect* bloodPlague = m_targets.GetUnitTarget()->GetAuraEffect(55078, EFFECT_0, m_caster->GetGUID()))
                             {
-                                bp0 += bp0 * bloodPlague->GetAmount() / 100;
-                                m_caster->CastCustomSpell(unitTarget, 55078, &bp0, NULL, NULL, true);
+                                int32 bloodPlagueAmount = bloodPlague->GetAmount();
+                                m_caster->CastCustomSpell(unitTarget, 55078, &bloodPlagueAmount, NULL, NULL, true);
+                                if (Aura* bPlague = unitTarget->GetAura(55078, m_caster->GetGUID()))
+                                    bPlague->GetEffect(EFFECT_0)->SetCanBeRecalculated(false);
                             }
                             // Frost Fever
                             if (AuraEffect* frostFever = m_targets.GetUnitTarget()->GetAuraEffect(55095, EFFECT_0, m_caster->GetGUID()))
                             {
-                                bp0 += bp0 * frostFever->GetAmount() / 100;
-                                m_caster->CastCustomSpell(unitTarget, 55095, &bp0, NULL, NULL, true);
+                                int32 frostFeverAmount = frostFever->GetAmount();
+                                m_caster->CastCustomSpell(unitTarget, 55095, &frostFeverAmount, NULL, NULL, true);
+                                if (Aura* fFever = unitTarget->GetAura(55095, m_caster->GetGUID()))
+                                    fFever->GetEffect(EFFECT_0)->SetCanBeRecalculated(false);
                             }
                             // Ebon Plague
                             if (AuraEffect* ebonPlague = m_targets.GetUnitTarget()->GetAuraEffect(65142, EFFECT_0, m_caster->GetGUID()))
@@ -7271,12 +7392,6 @@ void Spell::EffectDismissPet (SpellEffIndex effIndex)
 
     ExecuteLogEffectUnsummonObject(effIndex, pet);
     pet->GetOwner()->RemoveCurrentPet();
-
-    // Camouflage
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        if (m_caster->getClass() == CLASS_HUNTER)
-            if (m_caster->HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE))
-                m_caster->RemoveAurasByType(SPELL_AURA_MOD_CAMOUFLAGE);
 }
 
 void Spell::EffectSummonObject (SpellEffIndex effIndex)
@@ -7438,52 +7553,65 @@ void Spell::EffectResurrect (SpellEffIndex effIndex)
         case 20484: // Rebirth
         case 61999: // Raise Ally
         {
-            // Players only!
-            if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                break;
-
-            Player* caster = m_caster->ToPlayer();
-            if (!caster)
-                break;
-
-            if (!caster->GetInstanceScript())
-                break;
-
-            if (caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
+            if (Player* caster = m_caster->ToPlayer())
             {
-                if (caster->m_bressCount > 0 && caster->GetInstanceScript()->IsEncounterInProgress())
+                if (caster->GetInstanceScript() && caster->GetMap()->IsRaid())
                 {
-                    caster->GetSession()->SendNotification("You can no longer resurrect during combat!");
-                    caster->RemoveSpellCooldown(m_spellInfo->Id, true);
 
-                    // Rebirth (Maple Seed)
-                    if (m_spellInfo->Id == 20484)
-                        caster->AddItem(17034, 1);
-                    return;
-                }
-                else
-                {
-                    if (caster->GetInstanceScript()->IsEncounterInProgress())
-                        caster->m_bressCount++;
-                }
-            }
+                    // 10 Normal / 10 Heroic
+                    if (!caster->GetMap()->Is25ManRaid())
+                    {
+                        if (caster->m_bressCount > 0 && caster->GetInstanceScript()->IsEncounterInProgress())
+                        {
+                            if (WorldSession* session = caster->GetSession())
+                                session->SendNotification("You can no longer resurrect during combat!");
 
-            if (caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-            {
-                if (caster->m_bressCount > 2 && caster->GetInstanceScript()->IsEncounterInProgress())
-                {
-                    caster->GetSession()->SendNotification("You can no longer resurrect during combat!");
-                    caster->RemoveSpellCooldown(m_spellInfo->Id, true);
+                            caster->RemoveSpellCooldown(m_spellInfo->Id, true);
 
-                    // Rebirth (Maple Seed)
-                    if (m_spellInfo->Id == 20484)
-                        caster->AddItem(17034, 1);
-                    return;
-                }
-                else
-                {
-                    if (caster->GetInstanceScript()->IsEncounterInProgress())
-                        caster->m_bressCount++;
+                            // Rebirth (Maple Seed)
+                            if (m_spellInfo->Id == 20484)
+                                caster->AddItem(17034, 1);
+                            return;
+                        }
+                        else
+                        {
+                            if (caster->GetInstanceScript()->IsEncounterInProgress())
+                            {
+                                Map::PlayerList const &PlayerList = caster->GetInstanceScript()->instance->GetPlayers();
+                                if (!PlayerList.isEmpty())
+                                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                                        if (Player* player = i->getSource())
+                                            player->m_bressCount++;
+                            }
+                        }
+                    }
+                    // 25 Normal / 25 Heroic
+                    else
+                    {
+                        if (caster->m_bressCount > 2 && caster->GetInstanceScript()->IsEncounterInProgress())
+                        {
+                            if (WorldSession* session = caster->GetSession())
+                                session->SendNotification("You can no longer resurrect during combat!");
+
+                            caster->RemoveSpellCooldown(m_spellInfo->Id, true);
+
+                            // Rebirth (Maple Seed)
+                            if (m_spellInfo->Id == 20484)
+                                caster->AddItem(17034, 1);
+                            return;
+                        }
+                        else
+                        {
+                            if (caster->GetInstanceScript()->IsEncounterInProgress())
+                            {
+                                Map::PlayerList const &PlayerList = caster->GetInstanceScript()->instance->GetPlayers();
+                                if (!PlayerList.isEmpty())
+                                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                                        if (Player* player = i->getSource())
+                                            player->m_bressCount++;
+                            }
+                        }
+                    }
                 }
             }
             break;
@@ -7613,10 +7741,65 @@ void Spell::EffectSelfResurrect (SpellEffIndex effIndex)
 
     if (!m_caster || m_caster->isAlive())
         return;
+
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
+
     if (!m_caster->IsInWorld())
         return;
+
+    // Battle Ress System (Soulstone exception)
+    if (m_spellInfo->Id == 3026)
+    {
+        if (Player* caster = m_caster->ToPlayer())
+        {
+            if (caster->GetInstanceScript() && caster->GetMap()->IsRaid())
+            {
+                // 10 Normal / 10 Heroic
+                if (!caster->GetMap()->Is25ManRaid())
+                {
+                    if (caster->m_bressCount > 0 && caster->GetInstanceScript()->IsEncounterInProgress())
+                    {
+                        if (WorldSession* session = caster->GetSession())
+                            session->SendNotification("You can no longer resurrect during combat!");
+                        return;
+                    }
+                    else
+                    {
+                        if (caster->GetInstanceScript()->IsEncounterInProgress())
+                        {
+                            Map::PlayerList const &PlayerList = caster->GetInstanceScript()->instance->GetPlayers();
+                            if (!PlayerList.isEmpty())
+                                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                                    if (Player* player = i->getSource())
+                                        player->m_bressCount++;
+                        }
+                    }
+                }
+                // 25 Normal / 25 Heroic
+                else
+                {
+                    if (caster->m_bressCount > 2 && caster->GetInstanceScript()->IsEncounterInProgress())
+                    {
+                        if (WorldSession* session = caster->GetSession())
+                            session->SendNotification("You can no longer resurrect during combat!");
+                        return;
+                    }
+                    else
+                    {
+                        if (caster->GetInstanceScript()->IsEncounterInProgress())
+                        {
+                            Map::PlayerList const &PlayerList = caster->GetInstanceScript()->instance->GetPlayers();
+                            if (!PlayerList.isEmpty())
+                                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                                    if (Player* player = i->getSource())
+                                        player->m_bressCount++;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     uint32 health = 0;
     uint32 mana = 0;

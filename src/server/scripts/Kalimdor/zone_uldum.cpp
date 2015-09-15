@@ -3870,11 +3870,8 @@ public:
             {
                 case ACTION_DO_TALK:
                 {
-                    if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
-                    {
-                        me->AI()->TalkWithDelay(1000, 0, playerOwner->GetGUID());
-                        me->AI()->TalkWithDelay(9000, 1, playerOwner->GetGUID());
-                    }
+                    me->AI()->TalkWithDelay(1000, 0);
+                    me->AI()->TalkWithDelay(9000, 1);
                     break;
                 }
                 default:
@@ -7616,54 +7613,42 @@ public:
                 me->VisitNearbyObject(60.0f, searcher);
                 for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                 {
-                    if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                    if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
                     {
                         switch ((*itr)->ToCreature()->GetEntry())
                         {
                             case NPC_BRAZIER:
                             {
-                                std::list<Unit*> targets;
-                                Trinity::AnyUnitInObjectRangeCheck u_check(me, 60.0f);
-                                Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-                                me->VisitNearbyObject(60.0f, searcher);
-                                for (std::list<Unit*>::const_iterator itrs = targets.begin(); itrs != targets.end(); ++itrs)
+                                if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                                 {
-                                    if ((*itrs) && (*itrs)->ToTempSummon() && (*itrs)->ToTempSummon()->GetSummoner() == playerOwner)
+                                    std::list<Unit*> targets;
+                                    Trinity::AnyUnitInObjectRangeCheck u_check(me, 60.0f);
+                                    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                                    me->VisitNearbyObject(60.0f, searcher);
+                                    for (std::list<Unit*>::const_iterator itrs = targets.begin(); itrs != targets.end(); ++itrs)
                                     {
-                                        switch ((*itrs)->ToCreature()->GetEntry())
-                                        {
-                                            case NPC_BRAZIER_VEHICLE:
-                                            {
-                                                (*itr)->EnterVehicle((*itrs), 1);
-                                                break;
-                                            }
-                                            default:
-                                                break;
-                                        }
+                                        if ((*itrs) && (*itr))
+                                            if ((*itrs)->ToTempSummon() && (*itrs)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                                                if ((*itrs)->ToCreature()->GetEntry() == NPC_KEG_VEHICLE)
+                                                    (*itr)->EnterVehicle((*itrs), 1);
                                     }
                                 }
                                 break;
                             }
                             case NPC_POWDER_KEG:
                             {
-                                std::list<Unit*> targets;
-                                Trinity::AnyUnitInObjectRangeCheck u_check(me, 60.0f);
-                                Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-                                me->VisitNearbyObject(60.0f, searcher);
-                                for (std::list<Unit*>::const_iterator itrs = targets.begin(); itrs != targets.end(); ++itrs)
+                                if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                                 {
-                                    if ((*itrs) && (*itrs)->ToTempSummon() && (*itrs)->ToTempSummon()->GetSummoner() == playerOwner)
+                                    std::list<Unit*> targets;
+                                    Trinity::AnyUnitInObjectRangeCheck u_check(me, 60.0f);
+                                    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                                    me->VisitNearbyObject(60.0f, searcher);
+                                    for (std::list<Unit*>::const_iterator itrs = targets.begin(); itrs != targets.end(); ++itrs)
                                     {
-                                        switch ((*itrs)->ToCreature()->GetEntry())
-                                        {
-                                            case NPC_KEG_VEHICLE:
-                                            {
-                                                (*itr)->EnterVehicle((*itrs), 0);
-                                                break;
-                                            }
-                                            default:
-                                                break;
-                                        }
+                                        if ((*itrs) && (*itr))
+                                            if ((*itrs)->ToTempSummon() && (*itrs)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                                                if ((*itrs)->ToCreature()->GetEntry() == NPC_KEG_VEHICLE)
+                                                    (*itr)->EnterVehicle((*itrs), 0);
                                     }
                                 }
                                 break;

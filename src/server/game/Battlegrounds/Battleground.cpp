@@ -1315,7 +1315,22 @@ void Battleground::AddPlayer(Player* player)
         if (GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
         {
             player->CastSpell(player, SPELL_ARENA_PREPARATION, true);
-            player->ResetAllPowers();
+            // Cleanup for Eclipse system
+            if (player->getClass() == CLASS_DRUID)
+            {
+                if (player->HasSpell(78674))
+                {
+                    player->SetPower(POWER_ECLIPSE, 0);
+                    player->RemoveAurasDueToSpell(67483);
+                    player->RemoveAurasDueToSpell(67484);
+                    player->lunarEnabled = false;
+                    player->solarEnabled = false;
+                }
+                else
+                    player->ResetAllPowers();
+            }
+            else
+                player->ResetAllPowers();
         }
     }
     else

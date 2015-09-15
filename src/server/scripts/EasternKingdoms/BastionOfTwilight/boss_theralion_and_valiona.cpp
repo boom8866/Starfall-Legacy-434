@@ -89,6 +89,12 @@ enum Spells
     SPELL_TWILIGHT_SHIFT_6                  = 92892,
     SPELL_TWILIGHT_SHIFT_7                  = 92893,
     SPELL_TWILIGHT_SHIFT_8                  = 92894,
+
+    // Berserk
+    SPELL_BERSERK                           = 47008,
+
+    // Achievement Spell
+    SPELL_FIENDS_TRIGGER                    = 94150
 };
 
 enum Events
@@ -125,12 +131,16 @@ enum Events
     EVENT_MOVE_DEEP_BREATH,
     EVENT_PREPARE_NEXT_BREATH,
     EVENT_CHECK_VALIONA,
+    EVENT_BERSERK,
 
     // Generic
     EVENT_SUMMON_COLLAPSING_PORTAL,
     EVENT_ACTIVATE_UNSTABLE_TWILIGHT,
     EVENT_CHECK_PLAYER,
     EVENT_MOVE_RANDOM,
+
+    // Achievement
+    EVENT_ENABLE_TWILIGHT_FIENDS
 };
 
 enum Phases
@@ -150,6 +160,8 @@ enum Actions
     ACTION_RESET_GROUND_EVENTS,
     ACTION_RESET_AIR_EVENTS,
     ACTION_TAKEOFF_2,
+    ACTION_ENABLE_TWILIGHT_FIENDS,
+    ACTION_FIEND_KILLED
 };
 
 enum Points
@@ -162,7 +174,19 @@ enum Points
     POINT_TAKEOFF_2,
     POINT_DEEP_BREATH_PREPARE,
     POINT_DEEP_BREATH_MOVE,
+};
 
+enum ClassAuras
+{
+    CLASS_PALADIN_PROTECTION    = 76671,
+    CLASS_PALADIN_RETRIBUTION   = 76672,
+    CLASS_SHAMAN_ENHANCEMENT    = 30814,
+    CLASS_DRUID_FERAL           = 84735
+};
+
+enum Achievement
+{
+    ACHIEVEMENT_DOUBLE_DRAGON   = 4852
 };
 
 Position const TwilFlamePos[90] = // 15 per row, 2 rows per side, 3 sides.
@@ -326,6 +350,19 @@ private:
     Unit* caster;
 };
 
+class PlayerClassCheck
+{
+public:
+    PlayerClassCheck() { }
+
+    bool operator()(WorldObject* object)
+    {
+        // Exclude Death Knights, Rogues, Warriors, Feral Druids. Enhanchement Shamans, Retribution and Protection Paladins
+        return (object->ToUnit()->getClass() == CLASS_ROGUE || object->ToUnit()->getClass() == CLASS_WARRIOR || object->ToUnit()->getClass() == CLASS_DEATH_KNIGHT
+            || object->ToUnit()->HasAura(CLASS_DRUID_FERAL) || object->ToUnit()->HasAura(CLASS_SHAMAN_ENHANCEMENT) || object->ToUnit()->HasAura(CLASS_PALADIN_PROTECTION) || object->ToUnit()->HasAura(CLASS_PALADIN_RETRIBUTION));
+    }
+};
+
 class boss_valiona : public CreatureScript
 {
 public:
@@ -338,11 +375,19 @@ public:
             _isOnGround = true;
             _introDone = false;
             _breathCounter = 0;
+            _preparationRandom = 0;
+            _pathSelected = 0;
+            _sideLeft = true;
+            _fiendKilled = 0;
         }
 
         bool _introDone;
         bool _isOnGround;
         uint8 _breathCounter;
+        bool _sideLeft;
+        uint8 _pathSelected;
+        uint8 _preparationRandom;
+        uint16 _fiendKilled;
 
         void Reset()
         {
@@ -357,9 +402,13 @@ public:
 
             if (Creature* theralion = me->FindNearestCreature(BOSS_THERALION, 500.0f, true))
                 theralion->AI()->AttackStart(who);
+
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
             events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 30000);
             events.ScheduleEvent(EVENT_BLACKOUT, 6000);
             events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 1);
+            events.ScheduleEvent(EVENT_BERSERK, 600000);
+            _fiendKilled = 0;
         }
 
         void EnterEvadeMode()
@@ -375,6 +424,11 @@ public:
             summons.DespawnAll();
             _isOnGround = true;
             _breathCounter = 0;
+            _fiendKilled = 0;
+
+            if (Creature* fiendsTrigger = me->FindNearestCreature(NPC_FIEND_TRIGGER, 300.0f))
+                fiendsTrigger->RemoveAurasDueToSpell(SPELL_FIENDS_TRIGGER);
+
             _EnterEvadeMode();
             _DespawnAtEvade();
         }
@@ -392,6 +446,12 @@ public:
                 me->Kill(theralion);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoCastSpellOnPlayers(SPELL_TWILIGHT_SHIFT_SCRIPT);
+            if (_fiendKilled >= 6)
+                instance->DoCompleteAchievement(ACHIEVEMENT_DOUBLE_DRAGON);
+
+            if (Creature* fiendsTrigger = me->FindNearestCreature(NPC_FIEND_TRIGGER, 300.0f))
+                fiendsTrigger->RemoveAurasDueToSpell(SPELL_FIENDS_TRIGGER);
+
             summons.DespawnAll();
             _JustDied();
         }
@@ -457,6 +517,12 @@ public:
                 events.CancelEvent(EVENT_DEVOURING_FLAMES_TARGETING);
                 events.CancelEvent(EVENT_BLACKOUT);
                 break;
+            case ACTION_ENABLE_TWILIGHT_FIENDS:
+                events.ScheduleEvent(EVENT_ENABLE_TWILIGHT_FIENDS, 20000);
+                break;
+            case ACTION_FIEND_KILLED:
+                _fiendKilled++;
+                break;
             default:
                 break;
             }
@@ -485,11 +551,7 @@ public:
                 events.ScheduleEvent(EVENT_LAND, 1);
                 break;
             case POINT_DEEP_BREATH_PREPARE:
-                if (_breathCounter == 0)
-                    events.ScheduleEvent(EVENT_MOVE_DEEP_BREATH, 2000);
-                if (_breathCounter == 1)
-                    events.ScheduleEvent(EVENT_MOVE_DEEP_BREATH, 2000);
-                if (_breathCounter)
+                if (_breathCounter < 3)
                     events.ScheduleEvent(EVENT_MOVE_DEEP_BREATH, 2000);
                 break;
             case POINT_DEEP_BREATH_MOVE:
@@ -517,8 +579,10 @@ public:
         void UpdateAI(uint32 diff)
         {
             if (!(events.IsInPhase(PHASE_INTRO)))
+            {
                 if (!UpdateVictim())
                     return;
+            }
 
             events.Update(diff);
 
@@ -535,7 +599,7 @@ public:
                     events.SetPhase(PHASE_BATTLE);
                     break;
                 case EVENT_DEVOURING_FLAMES_TARGETING:
-                    DoCastAOE(SPELL_DEVOURING_FLAMES_DUMMY_AOE);
+                    DoCast(SPELL_DEVOURING_FLAMES_DUMMY_AOE);
                     events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 40000);
                     break;
                 case EVENT_DEVOURING_FLAMES:
@@ -598,29 +662,16 @@ public:
                     events.CancelEvent(EVENT_TWILIGHT_METEORITE);
                     TalkToMap(SAY_VALIONA_DEEP_BREATH);
                     TalkToMap(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
-                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -723.525f, -769.260f, me->GetPositionZ(), false);
+                    _preparationRandom = urand(0, 1);
+                    if (_preparationRandom == 1)
+                        SelectPreparationRightToLeft(urand(1, 3));
+                    else
+                        SelectPreparationLeftToRight(urand(1, 3));
                     break;
                 case EVENT_MOVE_DEEP_BREATH:
                     DoCast(me, SPELL_DEEP_BREATH_SCRIPT);
                     DoCast(me, SPELL_SPEED_BURST);
-                    if (_breathCounter == 0)
-                    {
-                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -725.077f, -613.762f, me->GetPositionZ(), false);
-                        for (uint16 i = 1; i < 31; i++)
-                            me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
-                    }
-                    else if (_breathCounter == 1)
-                    {
-                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -738.849f, -769.072f, me->GetPositionZ(), false);
-                        for (uint16 i = 31;  i < 61; i++)
-                            me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
-                    }
-                    else if (_breathCounter == 2)
-                    {
-                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -763.181f, -626.995f, me->GetPositionZ(), false);
-                        for (uint16 i = 61; i < 90; i++)
-                            me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
-                    }
+                    SelectPathForBreath(_pathSelected);
                     break;
                 case EVENT_PREPARE_TO_LAND:
                     me->RemoveAurasDueToSpell(SPELL_SPEED_BURST);
@@ -639,18 +690,132 @@ public:
                     break;
                 case EVENT_PREPARE_NEXT_BREATH:
                     me->RemoveAurasDueToSpell(SPELL_SPEED_BURST);
-                    if (_breathCounter == 1)
-                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -740.447f, -612.804f, me->GetPositionZ(), false);
-                    else if (_breathCounter == 2)
-                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -757.691f, -766.305f, me->GetPositionZ(), false);
+                    _sideLeft ? SelectPreparationLeftToRight(urand(1, 3)) : SelectPreparationRightToLeft(urand(1, 3));
+                    break;
+                case EVENT_BERSERK:
+                    DoCast(SPELL_BERSERK);
+                    break;
+                case EVENT_ENABLE_TWILIGHT_FIENDS:
+                    if (Creature* fiendsTrigger = me->FindNearestCreature(NPC_FIEND_TRIGGER, 300.0f))
+                        fiendsTrigger->AddAura(SPELL_FIENDS_TRIGGER, fiendsTrigger);
                     break;
                 default:
                     break;
                 }
             }
+
             DoMeleeAttackIfReady();
         }
+
+        // Theralion Side (Left)
+        void SelectPreparationLeftToRight(uint8 selected)
+        {
+            switch (selected)
+            {
+                case 1:
+                    // Theralion Left
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -757.414f, -767.221f, me->GetPositionZ(), false);
+                    _pathSelected = 6;
+                    break;
+                case 2:
+                    // Theralion Center
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -740.481f, -770.554f, me->GetPositionZ(), false);
+                    _pathSelected = 5;
+                    break;
+                case 3:
+                    // Theralion Right
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -724.299f, -769.867f, me->GetPositionZ(), false);
+                    _pathSelected = 4;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // Valiona Side (Right)
+        void SelectPreparationRightToLeft(uint8 selected)
+        {
+            switch (selected)
+            {
+                case 1:
+                    // Valiona Left
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -725.369f, -600.206f, me->GetPositionZ(), false);
+                    _pathSelected = 3;
+                    break;
+                case 2:
+                    // Valiona Center
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -740.937f, -601.679f, me->GetPositionZ(), false);
+                    _pathSelected = 2;
+                    break;
+                case 3:
+                    // Valiona Right
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -759.226f, -603.424f, me->GetPositionZ(), false);
+                    _pathSelected = 1;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // Path Selector (Final)
+        void SelectPathForBreath(uint8 pathSelected)
+        {
+            if (pathSelected >= 4)
+                _sideLeft = false;
+
+            if (pathSelected <= 3)
+                _sideLeft = true;
+
+            switch (pathSelected)
+            {
+                case 1:
+                {
+                    DoCast(SPELL_SPEED_BURST);
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -757.414f, -767.221f, me->GetPositionZ(), false);
+                    for (uint16 i = 61; i < 90; i++)
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    break;
+                }
+                case 2:
+                {
+                    DoCast(SPELL_SPEED_BURST);
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -740.481f, -770.554f, me->GetPositionZ(), false);
+                    for (uint16 i = 31; i < 61; i++)
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    break;
+                }
+                case 3:
+                {
+                    DoCast(SPELL_SPEED_BURST);
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -724.299f, -769.867f, me->GetPositionZ(), false);
+                    for (uint16 i = 1; i < 31; i++)
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    break;
+                }
+                case 4:
+                    DoCast(SPELL_SPEED_BURST);
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -725.369f, -600.206f, me->GetPositionZ(), false);
+                    for (uint16 i = 1; i < 31; i++)
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    break;
+                case 5:
+                    DoCast(SPELL_SPEED_BURST);
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -740.937f, -601.679f, me->GetPositionZ(), false);
+                    for (uint16 i = 31; i < 61; i++)
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    break;
+                case 6:
+                    DoCast(SPELL_SPEED_BURST);
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -759.226f, -603.424f, me->GetPositionZ(), false);
+                    for (uint16 i = 61; i < 90; i++)
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    break;
+                default:
+                    break;
+            }
+        }
     };
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new boss_valionaAI(creature);
@@ -684,8 +849,10 @@ public:
         {
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
             events.ScheduleEvent(EVENT_TAKEOFF_AT_AGGRO, 100);
             events.ScheduleEvent(EVENT_SCHEDULE_DAZZLING_DESTRUCTION, 85000);
+            events.ScheduleEvent(EVENT_BERSERK, 600000);
             if (Creature* valiona = me->FindNearestCreature(BOSS_VALIONA, 500.0f, true))
                 valiona->AI()->AttackStart(who);
         }
@@ -828,8 +995,10 @@ public:
         void UpdateAI(uint32 diff)
         {
             if (!(events.IsInPhase(PHASE_INTRO)))
+            {
                 if (!UpdateVictim())
                     return;
+            }
 
             events.Update(diff);
 
@@ -930,6 +1099,9 @@ public:
                     }
                     break;
                 }
+                case EVENT_BERSERK:
+                    DoCast(SPELL_BERSERK);
+                    break;
                 default:
                     break;
                 }
@@ -961,11 +1133,10 @@ public:
         {
             if (Creature* valiona = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALIONA)))
             {
-                valiona->GetMotionMaster()->MovementExpired();
-                valiona->AddUnitState(UNIT_STATE_CANNOT_TURN);
                 valiona->SetReactState(REACT_PASSIVE);
                 valiona->AttackStop();
                 valiona->SetFacingToObject(me);
+                valiona->AddUnitState(UNIT_STATE_CANNOT_TURN);
                 valiona->AI()->DoAction(ACTION_CAST_DEVOURING_FLAMES);
             }
         }
@@ -1154,8 +1325,9 @@ public:
         void IsSummonedBy(Unit* /*summoner*/)
         {
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            if (Creature* valiona = me->FindNearestCreature(BOSS_VALIONA, 500.0f))
+                valiona->AI()->DoAction(ACTION_ENABLE_TWILIGHT_FIENDS);
         }
-
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -1249,6 +1421,7 @@ public:
         void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
+            {
                 if (Unit* target = GetTarget())
                 {
                     if (target->GetEntry() == 46588)
@@ -1262,6 +1435,7 @@ public:
                         caster->SetFacingToObject(target);
                     }
                 }
+            }
         }
 
         void Register()
@@ -1330,7 +1504,7 @@ public:
     {
         PrepareAuraScript(spell_tav_blackout_aura_AuraScript);
 
-        void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* owner = GetOwner()->ToUnit())
                 owner->CastSpell(owner, SPELL_BLACKOUT_DAMAGE, true);
@@ -1338,7 +1512,7 @@ public:
 
         void Register()
         {
-            OnEffectRemove += AuraEffectRemoveFn(spell_tav_blackout_aura_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SCHOOL_HEAL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_tav_blackout_aura_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SCHOOL_HEAL_ABSORB, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
@@ -1494,32 +1668,8 @@ public:
             if (targets.empty())
                 return;
 
-            std::list<WorldObject*>::iterator it = targets.begin();
-
-            while (it != targets.end())
-            {
-                if (!GetCaster())
-                    return;
-
-                WorldObject* unit = *it;
-
-                if (!unit)
-                    continue;
-
-                if (unit->GetTypeId() == TYPEID_PLAYER)
-                    if (!(unit->ToPlayer()->getClassMask() & CLASSMASK_WAND_USERS))
-                        it = targets.erase(it);
-                    else
-                        it++;
-            }
-
-            if (targets.empty())
-                return;
-
             targets.remove_if(TwilightShiftCheck());
-
-            if (targets.empty())
-                return;
+            targets.remove_if(PlayerClassCheck());
 
             if (!GetCaster()->GetMap()->Is25ManRaid())
                 Trinity::Containers::RandomResizeList(targets, 1);
@@ -1866,6 +2016,82 @@ public:
     }
 };
 
+class npc_bot_twilight_fiend : public CreatureScript
+{
+public:
+    npc_bot_twilight_fiend() : CreatureScript("npc_bot_twilight_fiend") { }
+
+    enum eventId
+    {
+        EVENT_START_CHASING  = 1
+    };
+
+    struct npc_bot_twilight_fiendAI : public ScriptedAI
+    {
+        npc_bot_twilight_fiendAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            // Force Phasemask 2
+            me->SetPhaseMask(2, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+            me->SetWalk(true);
+            events.ScheduleEvent(EVENT_START_CHASING, 2500);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            if (Creature* valiona = me->FindNearestCreature(BOSS_VALIONA, 500.0f))
+                valiona->AI()->DoAction(ACTION_FIEND_KILLED);
+        }
+
+        void DamageDealt(Unit* victim, uint32& damage, DamageEffectType damageType)
+        {
+            if (victim && damage && damageType == DIRECT_DAMAGE)
+                me->DespawnOrUnsummon(1000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_START_CHASING:
+                        if (Player* target = me->FindNearestPlayer(500.0f))
+                        {
+                            me->GetMotionMaster()->MoveChase(target);
+                            events.CancelEvent(EVENT_START_CHASING);
+                        }
+                        else
+                            events.RescheduleEvent(EVENT_START_CHASING, 1500);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_bot_twilight_fiendAI(creature);
+    }
+};
+
 void AddSC_boss_theralion_and_valiona()
 {
     new at_theralion_and_valiona();
@@ -1896,4 +2122,5 @@ void AddSC_boss_theralion_and_valiona()
     new spell_tav_twilight_shift();
     new spell_tav_twilight_shift_1();
     new spell_tav_twilight_shift_2();
+    new npc_bot_twilight_fiend();
 }

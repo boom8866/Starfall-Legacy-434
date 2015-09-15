@@ -1,0 +1,2 @@
+UPDATE `creature_text` SET `text`='|TInterface\\Icons\\spell_fire_twilightpyroblast.blp:20|t%s begins to cast |cFF00EEFF|Hspell:86408|h[Dazzling Destruction]|h|r!' WHERE `entry`=45993 AND `groupid`=3 AND `id`=0;
+UPDATE `creature_template` SET `flags_extra`=128, `ScriptName`='npc_tav_deep_breath_triggers' WHERE `entry`=46296;

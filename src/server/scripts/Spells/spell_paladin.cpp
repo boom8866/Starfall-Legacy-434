@@ -59,6 +59,8 @@ enum PaladinSpells
     SPELL_PALADIN_DIVINE_SACRIFICE               = 64205,
 
     SPELL_PALADIN_DIVINE_PURPOSE_PROC            = 90174,
+    SPELL_PALADIN_DIVINE_PURPOSE_R1              = 85117,
+    SPELL_PALADIN_DIVINE_PURPOSE_R2              = 86172,
 
     SPELL_PALADIN_CONSECRATION_SUMMON            = 82366,
     SPELL_PALADIN_CONSECRATION_DAMAGE            = 81297,
@@ -77,6 +79,9 @@ enum PaladinSpells
     SPELL_PALADIN_RIGHTEOUS_DEFENSE_TAUNT        = 31790,
 
     SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS          = 25742,
+    SPELL_PALADIN_SEALS_OF_COMMAND               = 85126,
+    SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS_TALENT   = 20154,
+    SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS_TRIG     = 101423,
 
     SPELL_PALADIN_AURA_MASTERY                   = 19891,
 
@@ -103,7 +108,7 @@ class spell_pal_ardent_defender : public SpellScriptLoader
 
             uint32 absorbPct, healPct;
 
-            enum
+            enum spellId
             {
                 PAL_SPELL_ARDENT_DEFENDER_HEAL = 66235,
             };
@@ -318,6 +323,9 @@ class spell_pal_divine_storm : public SpellScriptLoader
                     if (targetCount >= 4)
                         HandleEnergize();
                 }
+
+                if (targets.empty())
+                    return;
             }
 
             void CalculateDamage(SpellEffIndex /*effIndex*/)
@@ -343,6 +351,21 @@ class spell_pal_divine_storm : public SpellScriptLoader
                 }
             }
 
+            void HandleDivinePurpose()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->HasAura(SPELL_PALADIN_SEALS_OF_COMMAND) && caster->HasAura(SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS_TALENT))
+                        caster->CastSpell(caster, SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS_TRIG, true);
+
+                    if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_R1) && roll_chance_i(7))
+                        caster->CastSpell(caster, SPELL_PALADIN_DIVINE_PURPOSE_PROC, true);
+
+                    if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_R2) && roll_chance_i(15))
+                        caster->CastSpell(caster, SPELL_PALADIN_DIVINE_PURPOSE_PROC, true);
+                }
+            }
+
             void HandleEnergize()
             {
                 GetCaster()->EnergizeBySpell(GetCaster(), SPELL_PALADIN_DIVINE_STORM_DUMMY, 1, POWER_HOLY_POWER);
@@ -354,6 +377,7 @@ class spell_pal_divine_storm : public SpellScriptLoader
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_divine_storm_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
                 OnEffectHitTarget += SpellEffectFn(spell_pal_divine_storm_SpellScript::CalculateDamage, EFFECT_2, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
                 AfterHit += SpellHitFn(spell_pal_divine_storm_SpellScript::TriggerHeal);
+                AfterCast += SpellCastFn(spell_pal_divine_storm_SpellScript::HandleDivinePurpose);
             }
 
         private:
@@ -389,6 +413,9 @@ class spell_pal_divine_storm_dummy : public SpellScriptLoader
                     return;
 
                 _targetCount = targetList.size();
+
+                if (targetList.empty())
+                    return;
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -913,6 +940,9 @@ class spell_pal_holy_wrath : public SpellScriptLoader
                     targets.push_back((*iter));
                     targetCount++;
                 }
+
+                if (targets.empty())
+                    return;
             }
 
             void DivideDamage(SpellEffIndex effIndex)
@@ -1251,7 +1281,7 @@ class spell_pal_light_of_dawn : public SpellScriptLoader
                                     // Increase amount if buff is already present
                                     if (target)
                                     {
-                                        if (AuraEffect* aurEff = target->GetAuraEffect(86273, 0))
+                                        if (AuraEffect* aurEff = target->GetAuraEffect(86273, EFFECT_0, caster->GetGUID()))
                                             bp0 += aurEff->GetAmount();
 
                                         if (bp0 > int32(caster->GetMaxHealth() / 3))
@@ -1711,7 +1741,7 @@ public:
                                 // Increase amount if buff is already present
                                 if (target)
                                 {
-                                    if (AuraEffect* aurEff = target->GetAuraEffect(86273, 0))
+                                    if (AuraEffect* aurEff = target->GetAuraEffect(86273, EFFECT_0, caster->GetGUID()))
                                         bp0 += aurEff->GetAmount();
 
                                     if (bp0 > int32(caster->GetMaxHealth() / 3))
@@ -1898,60 +1928,51 @@ public:
 class spell_pal_lights_beacon : public SpellScriptLoader
 {
 public:
-    spell_pal_lights_beacon() : SpellScriptLoader("spell_pal_lights_beacon")
-    {
-    }
+    spell_pal_lights_beacon() : SpellScriptLoader("spell_pal_lights_beacon") { }
 
     class spell_pal_lights_beacon_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_pal_lights_beacon_AuraScript);
 
-        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
         {
             PreventDefaultAction();
-
-            Unit* beaconOwner = GetCaster();
-            Unit* healTarget = GetTarget();
-            Unit* owner = eventInfo.GetProcTarget();
-
-            if (!beaconOwner || !healTarget || !owner)
-                return;
-
-            // Check if it was heal by paladin which casted this beacon of light
-            if (beaconOwner->GetAura(53563, owner->GetGUID()))
+            if (Unit* beaconOwner = GetCaster())
             {
-                if (beaconOwner->IsWithinLOSInMap(owner))
+                if (Unit* healTarget = GetTarget())
                 {
-                    int32 mod = 0;
-
-                    switch (eventInfo.GetDamageInfo()->GetSpellInfo()->Id)
+                    if (Unit* owner = eventInfo.GetProcTarget())
                     {
-                        case 19750: // Flash of Light
-                        case 82326: // Divine Light
-                        case 85673: // Word of Glory
-                        case 25914: // Holy Shock
-                        case 85222: // Light of Dawn
-                        case 87188: // Enlightened Judgements
-                        case 87189: // Enlightened Judgements
-                            mod = 50; // 50% heal from these spells
-                            break;
-                        case 635:   // Holy Light
-                            mod = 100; // 100% heal from Holy Light
-                            break;
-                        case 82327: // Holy Radiance
-                        case 86452:
-                            mod = 0;
-                            break;
-                        default:
-                            return;
+                        // Check if it was heal by paladin which casted this beacon of light
+                        if (beaconOwner->GetAura(53563, owner->GetGUID()))
+                        {
+                            if (beaconOwner->IsWithinLOSInMap(owner))
+                            {
+                                int32 mod = 0;
+                                switch (eventInfo.GetDamageInfo()->GetSpellInfo()->Id)
+                                {
+                                    case 19750: // Flash of Light
+                                    case 82326: // Divine Light
+                                    case 85673: // Word of Glory
+                                    case 25914: // Holy Shock
+                                    case 85222: // Light of Dawn
+                                    case 87188: // Enlightened Judgements
+                                    case 87189: // Enlightened Judgements
+                                        mod = 50; // 50% heal from these spells
+                                        break;
+                                    case 635:   // Holy Light
+                                        mod = 100; // 100% heal from Holy Light
+                                        break;
+                                    default:
+                                        break;
+                                }
+
+                                int32 basepoints0 = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), mod);
+                                if (beaconOwner != healTarget)
+                                    owner->CastCustomSpell(beaconOwner, 53652, &basepoints0, NULL, NULL, true);
+                            }
+                        }
                     }
-
-                    // False when target of heal is beaconed
-                    if (beaconOwner == healTarget || mod == 0)
-                        return;
-
-                    int32 basepoints0 = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), mod);
-                    owner->CastCustomSpell(beaconOwner, 53652, &basepoints0, NULL, NULL, true);
                 }
             }
         }

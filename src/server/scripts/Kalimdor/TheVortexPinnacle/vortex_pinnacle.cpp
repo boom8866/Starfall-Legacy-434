@@ -1273,10 +1273,13 @@ public:
         void EnterCombat(Unit* /*target*/)
         {
             events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(4000, 8000));
-            if (!me->GetCharmerOrOwner())
+            if (me->ToTempSummon())
             {
-                events.ScheduleEvent(EVENT_MOVE, 4000);
-                me->GetMotionMaster()->MoveRandom(40.0f);
+                if (!me->ToTempSummon()->GetSummoner())
+                {
+                    events.ScheduleEvent(EVENT_MOVE, 4000);
+                    me->GetMotionMaster()->MoveRandom(20.0f);
+                }
             }
         }
 
@@ -1496,6 +1499,50 @@ public:
     };
 };
 
+class npc_vp_golden_orb : public CreatureScript
+{
+public:
+    npc_vp_golden_orb() : CreatureScript("npc_vp_golden_orb") { }
+
+    enum achievementId
+    {
+        ACHIEVEMENT_BONUS_STAGE      = 5289
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        uint16 totalOrbs = 0;
+
+        if (InstanceScript* instance = creature->GetInstanceScript())
+        {
+            player->CLOSE_GOSSIP_MENU();
+            std::list<Unit*> targets;
+            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(creature, creature, 1000.0f);
+            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(creature, targets, u_check);
+            creature->VisitNearbyObject(1000.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if (!(*itr)->ToCreature())
+                    continue;
+
+                if ((*itr)->ToCreature()->GetEntry() != creature->GetEntry())
+                    continue;
+
+                if (!(*itr)->isAlive())
+                    continue;
+
+                totalOrbs++;
+            }
+
+            if (totalOrbs <= 2)
+                instance->DoCompleteAchievement(ACHIEVEMENT_BONUS_STAGE);
+
+            creature->DisappearAndDie();
+        }
+        return true;
+    }
+};
+
 void AddSC_vortex_pinnacle()
 {
     new npc_slipstream();
@@ -1515,4 +1562,5 @@ void AddSC_vortex_pinnacle()
     new npc_vp_skyfall_star();
     new npc_vp_howling_gale();
     new npc_vp_grounding_field();
+    new npc_vp_golden_orb();
 }

@@ -262,6 +262,13 @@ class spell_rog_preparation : public SpellScriptLoader
     public:
         spell_rog_preparation() : SpellScriptLoader("spell_rog_preparation") { }
 
+        enum spellId
+        {
+            SPELL_ROGUE_SPRINT      = 2983,
+            SPELL_ROGUE_VANISH      = 1856,
+            SPELL_ROGUE_SHADOWSTEP  = 36554
+        };
+
         class spell_rog_preparation_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_rog_preparation_SpellScript);
@@ -281,34 +288,41 @@ class spell_rog_preparation : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Player* caster = GetCaster()->ToPlayer();
+                if (!caster)
+                    return;
 
                 // immediately finishes the cooldown on certain Rogue abilities
                 const SpellCooldowns& cm = caster->GetSpellCooldownMap();
                 for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
                 {
-                    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
-
-                    if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
+                    if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first))
                     {
-                        if (spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_COLDB_SHADOWSTEP ||     // Cold Blood, Shadowstep
-                            spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_VAN_EVAS_SPRINT)         // Vanish, Evasion, Sprint
-                            caster->RemoveSpellCooldown((itr++)->first, true);
-                        else if (caster->HasAura(SPELL_ROGUE_GLYPH_OF_PREPARATION))
+                        if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
                         {
-                            if (spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_DISMANTLE ||        // Dismantle
-                                spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_KICK ||              // Kick
-                                spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_SMOKE_BOMB ||       // Smoke Bomb
-                                (spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_BLADE_FLURRY &&     // Blade Flurry
-                                spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_BLADE_FLURRY))
-                                caster->RemoveSpellCooldown((itr++)->first, true);
+                            if (spellInfo->Id == SPELL_ROGUE_SPRINT || spellInfo->Id == SPELL_ROGUE_VANISH || spellInfo->Id == SPELL_ROGUE_SHADOWSTEP)     // Sprint, Vanish, Shadowstep
+                            {
+                                for (int i = 0; i < 2; i++)
+                                    caster->SendClearCooldown((itr++)->first, caster);
+                            }
+
+                            if (caster->HasAura(SPELL_ROGUE_GLYPH_OF_PREPARATION))
+                            {
+                                if (spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_DISMANTLE ||        // Dismantle
+                                    spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_KICK ||              // Kick
+                                    spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_SMOKE_BOMB ||       // Smoke Bomb
+                                    (spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_BLADE_FLURRY &&     // Blade Flurry
+                                    spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_BLADE_FLURRY))
+                                    for (int i = 0; i < 2; i++)
+                                        caster->SendClearCooldown((itr++)->first, caster);
+                                else
+                                    ++itr;
+                            }
                             else
                                 ++itr;
                         }
                         else
                             ++itr;
                     }
-                    else
-                        ++itr;
                 }
             }
 
@@ -679,7 +693,7 @@ class spell_rog_main_gauche : public SpellScriptLoader
        {
            PrepareAuraScript(spell_rog_main_gauche_AuraScript);
 
-           enum
+           enum spellId
            {
                 SPELL_MAIN_GAUCHE_TRIGGERED = 86392
            };
@@ -1115,28 +1129,44 @@ class spell_rog_revealing_strike : public SpellScriptLoader
         enum spellId
         {
             SPELL_ROGUE_KIDNEY_SHOT     = 408,
-            GLYPH_OF_REVEALING_STRIKE   = 57293
+            GLYPH_OF_REVEALING_STRIKE   = 56814,
+            SPELL_ROGUE_RUPTURE         = 1943,
+            SPELL_ROGUE_EXPOSE_ARMOR    = 8647
         };
 
         class spell_rog_revealing_strike_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_rog_revealing_strike_AuraScript);
 
-            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            void EffectRemoveStrike(AuraEffect const* aurEff, AuraEffectHandleModes mode)
             {
-                if (DamageInfo* damage = eventInfo.GetDamageInfo())
+                if (mode != AURA_REMOVE_BY_DEFAULT)
+                    return;
+
+                if (Unit* target = GetTarget())
                 {
-                    if (Unit* target = damage->GetVictim())
+                    if (Unit* caster = GetCaster())
                     {
-                        if (damage->GetAttacker())
+                        // Kidney Shot
+                        if (Aura* kidneyShot = target->GetAura(SPELL_ROGUE_KIDNEY_SHOT, caster->GetGUID()))
                         {
-                            if (Aura* kidneyShot = target->GetAura(SPELL_ROGUE_KIDNEY_SHOT, damage->GetAttacker()->GetGUID()))
-                            {
-                                if (damage->GetAttacker()->HasAura(GLYPH_OF_REVEALING_STRIKE))
-                                    kidneyShot->SetDuration(kidneyShot->GetDuration() + kidneyShot->GetDuration()* 0.45f);
-                                else
-                                    kidneyShot->SetDuration(kidneyShot->GetDuration() + kidneyShot->GetDuration()* 0.35f);
-                            }
+                            uint32 duration = kidneyShot->GetDuration();
+                            caster->HasAura(GLYPH_OF_REVEALING_STRIKE) ? AddPct(duration, 45) : AddPct(duration, 35);
+                            kidneyShot->SetDuration(duration);
+                        }
+                        // Rupture
+                        if (Aura* rupture = target->GetAura(SPELL_ROGUE_RUPTURE, caster->GetGUID()))
+                        {
+                            uint32 dmg = rupture->GetEffect(EFFECT_0)->GetAmount();
+                            caster->HasAura(GLYPH_OF_REVEALING_STRIKE) ? AddPct(dmg, 45) : AddPct(dmg, 35);
+                            rupture->GetEffect(EFFECT_0)->SetAmount(dmg);
+                        }
+                        // Expose Armor
+                        if (Aura* exposeArmor = target->GetAura(SPELL_ROGUE_EXPOSE_ARMOR, caster->GetGUID()))
+                        {
+                            uint32 duration = exposeArmor->GetDuration();
+                            caster->HasAura(GLYPH_OF_REVEALING_STRIKE) ? AddPct(duration, 45) : AddPct(duration, 35);
+                            exposeArmor->SetDuration(duration);
                         }
                     }
                 }
@@ -1144,7 +1174,7 @@ class spell_rog_revealing_strike : public SpellScriptLoader
 
             void Register()
             {
-                OnEffectProc += AuraEffectProcFn(spell_rog_revealing_strike_AuraScript::HandleProc, EFFECT_2, SPELL_AURA_DUMMY);
+                OnEffectRemove += AuraEffectApplyFn(spell_rog_revealing_strike_AuraScript::EffectRemoveStrike, EFFECT_2, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
         };
 

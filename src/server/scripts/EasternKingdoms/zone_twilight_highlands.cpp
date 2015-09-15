@@ -2715,6 +2715,10 @@ public:
             SPELL_TWILIGHT_CHANNEL  = 88113
         };
 
+        void EnterEvadeMode()
+        {
+        }
+
         void Reset()
         {
             me->SetControlled(true, UNIT_STATE_ROOT);
@@ -2742,22 +2746,22 @@ public:
         {
             events.Update(diff);
 
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CHECK_PLAYERS:
                     {
-                        if (Player* player = me->FindNearestPlayer(60.0f, true))
+                        if (!me->isInCombat())
                         {
-                            AttackStart(player);
-                            me->CastStop();
-                            me->RemoveAllAuras();
-                            events.CancelEvent(EVENT_CHECK_PLAYERS);
-                            break;
+                            if (Player* player = me->FindNearestPlayer(60.0f, true))
+                            {
+                                AttackStart(player);
+                                me->CastStop();
+                                me->RemoveAllAuras();
+                                events.CancelEvent(EVENT_CHECK_PLAYERS);
+                                break;
+                            }
                         }
                         events.RescheduleEvent(EVENT_CHECK_PLAYERS, 2000);
                         break;
@@ -3462,7 +3466,7 @@ public:
                             me->VisitNearbyObject(100.0f, searcher);
                             for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                             {
-                                if ((*itr) && (*itr)->ToCreature() && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr) != me)
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr) != me)
                                     (*itr)->ToCreature()->DespawnOrUnsummon(1);
                             }
 
@@ -4906,7 +4910,7 @@ public:
             me->VisitNearbyObject(150.0f, searcher);
             for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
             {
-                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                 {
                     if ((*itr) == me)
                         continue;
@@ -5312,7 +5316,7 @@ public:
             me->VisitNearbyObject(150.0f, searcher);
             for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
             {
-                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                 {
                     switch ((*itr)->GetEntry())
                     {
@@ -5860,7 +5864,7 @@ public:
             me->VisitNearbyObject(150.0f, searcher);
             for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
             {
-                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                 {
                     switch ((*itr)->GetEntry())
                     {
@@ -5893,7 +5897,7 @@ public:
             me->VisitNearbyObject(150.0f, searcher);
             for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
             {
-                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                 {
                     switch ((*itr)->GetEntry())
                     {
@@ -5955,7 +5959,7 @@ public:
             me->VisitNearbyObject(150.0f, searcher);
             for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
             {
-                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                 {
                     switch ((*itr)->GetEntry())
                     {
@@ -7217,7 +7221,7 @@ public:
                         {
                             if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                             {
-                                if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                                if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                                     (*itr)->ToCreature()->DespawnOrUnsummon(1);
                             }
                         }
@@ -7722,7 +7726,7 @@ public:
             {
                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                 {
-                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_BRAIN_OF_ISO_RATH)
+                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_BRAIN_OF_ISO_RATH)
                         return false;
                 }
             }
@@ -7753,7 +7757,7 @@ public:
                 {
                     if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                     {
-                        if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player)
+                        if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player)
                             (*itr)->ToCreature()->DespawnOrUnsummon(1);
                     }
                 }
@@ -8592,7 +8596,7 @@ public:
             {
                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                 {
-                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_LIEUTENANT)
+                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_LIEUTENANT)
                         return false;
                 }
             }
@@ -8635,7 +8639,7 @@ public:
                 {
                     if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                     {
-                        if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_LIEUTENANT)
+                        if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_LIEUTENANT)
                             return false;
                     }
                 }
@@ -8920,7 +8924,7 @@ public:
                             {
                                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                                 {
-                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player)
+                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player)
                                     {
                                         switch ((*itr)->GetEntry())
                                         {
@@ -8964,7 +8968,7 @@ public:
                             {
                                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                                 {
-                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player)
+                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player)
                                     {
                                         (*itr)->GetMotionMaster()->Clear();
                                         (*itr)->GetMotionMaster()->MovementExpired(false);
@@ -8989,7 +8993,7 @@ public:
                             {
                                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                                 {
-                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && ((*itr)->GetEntry() == NPC_MEDIC || (*itr)->GetEntry() == NPC_NEWT))
+                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player && ((*itr)->GetEntry() == NPC_MEDIC || (*itr)->GetEntry() == NPC_NEWT))
                                     {
                                         (*itr)->GetMotionMaster()->MovePoint(POINT_GATE_2, -3974.88f, -3989.00f, 175.41f);
                                         (*itr)->ToCreature()->AI()->TalkWithDelay(1500, 0);
@@ -9012,7 +9016,7 @@ public:
                             {
                                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                                 {
-                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player)
+                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player)
                                     {
                                         switch ((*itr)->GetEntry())
                                         {
@@ -9092,7 +9096,7 @@ public:
                             {
                                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                                 {
-                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && ((*itr)->GetEntry() == NPC_DEMOLTIONIST || (*itr)->GetEntry() == NPC_TICKER))
+                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player && ((*itr)->GetEntry() == NPC_DEMOLTIONIST || (*itr)->GetEntry() == NPC_TICKER))
                                     {
                                         (*itr)->GetMotionMaster()->MovementExpired(false);
                                         (*itr)->ToCreature()->SetReactState(REACT_AGGRESSIVE);
@@ -9395,7 +9399,7 @@ public:
             {
                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                 {
-                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player)
+                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player)
                     {
                         switch ((*itr)->GetEntry())
                         {
@@ -9465,7 +9469,7 @@ public:
             player->VisitNearbyObject(500.0f, searcher);
             for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
             {
-                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player)
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player)
                 {
                     if ((*itr) == creature)
                         continue;
@@ -9539,7 +9543,7 @@ public:
             me->VisitNearbyObject(150.0f, searcher);
             for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
             {
-                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                 {
                     if ((*itr) == me)
                         continue;
@@ -10848,7 +10852,7 @@ public:
             me->VisitNearbyObject(800.0f, searcher);
             for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
             {
-                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                 {
                     if ((*itr) == me)
                         continue;
@@ -11760,7 +11764,7 @@ public:
                         me->VisitNearbyObject(1000.0f, searcher);
                         for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
-                            if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                            if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                             {
                                 switch ((*itr)->GetEntry())
                                 {
@@ -12003,7 +12007,7 @@ public:
                         me->VisitNearbyObject(100.0f, searcher);
                         for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
-                            if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                            if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                             {
                                 switch ((*itr)->GetEntry())
                                 {
@@ -12981,7 +12985,7 @@ public:
                             {
                                 if ((*itr)->GetTypeId() == TYPEID_UNIT)
                                 {
-                                    if ((*itr)->ToTempSummon() && ((*itr)->GetEntry() == NPC_ALLIANCE_GRYPHON || (*itr)->GetEntry() == NPC_HORDE_WINDRIDER))
+                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && ((*itr)->GetEntry() == NPC_ALLIANCE_GRYPHON || (*itr)->GetEntry() == NPC_HORDE_WINDRIDER))
                                     {
                                         Unit* summoner = (*itr)->ToTempSummon()->GetSummoner();
                                         if (summoner && summoner->GetTypeId() == TYPEID_PLAYER)
@@ -13163,7 +13167,7 @@ public:
             {
                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                 {
-                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player)
+                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player)
                     {
                         switch ((*itr)->GetEntry())
                         {
@@ -14572,7 +14576,7 @@ public:
                 player->VisitNearbyObject(80.0f, searcher);
                 for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                 {
-                    if ((*itr) && (*itr)->ToTempSummon() && (*itr)->GetEntry() == 46513 && (*itr)->ToTempSummon()->GetSummoner() == player)
+                    if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->GetEntry() == 46513 && (*itr)->ToTempSummon()->GetSummoner() == player)
                         return false;
                 }
 
@@ -17703,7 +17707,7 @@ public:
                         me->VisitNearbyObject(100.0f, searcher);
                         for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
-                            if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                            if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                             {
                                 if ((*itr)->GetEntry() != NPC_TARGET_SKY)
                                     continue;
@@ -19054,7 +19058,7 @@ public:
                         {
                             if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                             {
-                                if ((*itr)->ToTempSummon() && (*itr)->GetEntry() == NPC_NEGOTIATOR && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner() && (*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+                                if ((*itr)->ToTempSummon() && (*itr)->GetEntry() == NPC_NEGOTIATOR && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner() && (*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
                                 {
                                     if (eventInProgress == true)
                                     {
@@ -19105,7 +19109,7 @@ public:
                         {
                             if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                             {
-                                if ((*itr)->ToTempSummon() && (*itr)->GetEntry() == NPC_NEGOTIATOR && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                                if ((*itr)->ToTempSummon() && (*itr)->GetEntry() == NPC_NEGOTIATOR && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                                     me->Kill((*itr), false);
                             }
                         }
@@ -20712,7 +20716,7 @@ public:
                         me->VisitNearbyObject(100.0f, searcher);
                         for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
-                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                             {
                                 switch ((*itr)->GetEntry())
                                 {
@@ -20763,7 +20767,7 @@ public:
                         me->VisitNearbyObject(100.0f, searcher);
                         for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
-                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                             {
                                 switch ((*itr)->GetEntry())
                                 {
@@ -20794,7 +20798,7 @@ public:
                         me->VisitNearbyObject(100.0f, searcher);
                         for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
-                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                             {
                                 switch ((*itr)->GetEntry())
                                 {
@@ -20824,7 +20828,7 @@ public:
                         me->VisitNearbyObject(100.0f, searcher);
                         for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
-                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
                             {
                                 switch ((*itr)->GetEntry())
                                 {
@@ -21384,7 +21388,7 @@ public:
             {
                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                 {
-                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_PATCH)
+                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_PATCH)
                         return false;
                 }
             }
@@ -21425,7 +21429,7 @@ public:
                 {
                     if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                     {
-                        if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_PATCH)
+                        if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_PATCH)
                             return false;
                     }
                 }
@@ -21491,7 +21495,7 @@ public:
             {
                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                 {
-                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player)
+                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() && (*itr)->ToTempSummon()->GetSummoner() == player)
                     {
                         switch ((*itr)->GetEntry())
                         {

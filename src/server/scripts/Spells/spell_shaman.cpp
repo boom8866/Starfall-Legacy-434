@@ -1345,6 +1345,42 @@ public:
     }
 };
 
+class spell_sha_primal_strike : public SpellScriptLoader
+{
+public:
+    spell_sha_primal_strike() : SpellScriptLoader("spell_sha_primal_strike")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_SHA_PRIMAL_WISDOM             = 51522,
+        SPELL_SHA_PRIMAL_WISDOM_TRIGGERED   = 63375
+    };
+
+    class spell_sha_primal_strike_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_primal_strike_SpellScript);
+
+        void HandlePrimalWisdom(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (caster->HasAura(SPELL_SHA_PRIMAL_WISDOM) && roll_chance_i(40))
+                    caster->CastSpell(caster, SPELL_SHA_PRIMAL_WISDOM_TRIGGERED, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_sha_primal_strike_SpellScript::HandlePrimalWisdom, EFFECT_0, SPELL_EFFECT_WEAPON_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_sha_primal_strike_SpellScript();
+    }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_ancestral_awakening_proc();
@@ -1370,4 +1406,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_searing_bolt();
     new spell_sha_improved_lava_lash();
     new spell_sha_earth_shield_heal();
+    new spell_sha_primal_strike();
 }

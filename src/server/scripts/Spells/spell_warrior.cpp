@@ -70,6 +70,7 @@ enum WarriorSpells
     SPELL_WARRIOR_UNRELENTING_ASSAULT_TRIGGER_2     = 64850,
     SPELL_WARRIOR_VIGILANCE_PROC                    = 50725,
     SPELL_WARRIOR_VIGILANCE_REDIRECT_THREAT         = 59665,
+    SPELL_WARRIOR_VIGILANCE_TALENT                  = 50720,
     SPELL_WARRIOR_VENGEANCE                         = 76691,
     SPELL_WARRIOR_HEROIC_LEAP                       = 6544,
     SPELL_WARRIOR_IMPROVED_HAMSTRING                = 23694,
@@ -458,7 +459,8 @@ class spell_warr_execute : public SpellScriptLoader
                         caster->SetPower(POWER_RAGE, uint32(newRage));
 
                         /// Formula taken from the DBC: "${10+$AP*0.437*$m1/100}"
-                        int32 baseDamage = int32(10 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.437f * GetEffectValue() / 100.0f);
+                        int32 baseDamage = int32(57 + (caster->getLevel() * 0.67) * 0.30);
+                        baseDamage += int32(10 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.437f * GetEffectValue() / 100.0f);
                         /// Formula taken from the DBC: "${$ap*0.874*$m1/100-1} = 20 rage"
                         int32 moreDamage = int32(rageUsed * (caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.874f * GetEffectValue() / 100.0f - 1) / 200);
                         SetHitDamage(baseDamage + moreDamage);
@@ -468,6 +470,25 @@ class spell_warr_execute : public SpellScriptLoader
                             SetHitDamage(GetHitDamage() + (GetHitDamage() * 0.10f));
 
                         uint32 finalDamage = GetHitDamage();
+
+                        // Lambs to the Slaughter (Rank 3)
+                        if (Aura* slaughter = caster->GetAura(84586, caster->GetGUID()))
+                        {
+                            uint32 stackAmount = slaughter->GetStackAmount();
+                            AddPct(finalDamage, 10 * stackAmount);
+                        }
+                        // Lambs to the Slaughter (Rank 2)
+                        if (Aura* slaughter = caster->GetAura(84585, caster->GetGUID()))
+                        {
+                            uint32 stackAmount = slaughter->GetStackAmount();
+                            AddPct(finalDamage, 10 * stackAmount);
+                        }
+                        // Lambs to the Slaughter (Rank 1)
+                        if (Aura* slaughter = caster->GetAura(84584, caster->GetGUID()))
+                        {
+                            uint32 stackAmount = slaughter->GetStackAmount();
+                            AddPct(finalDamage, 10 * stackAmount);
+                        }
 
                         // Calculate also damage reductions
                         Unit::AuraEffectList const& mDamageTakenPct = GetHitUnit()->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
@@ -957,13 +978,14 @@ class spell_warr_sweeping_strikes : public SpellScriptLoader
             {
                 PreventDefaultAction();
                 if (Unit* caster = GetCaster())
-                {
                     if (Unit* target = GetTarget())
-                    {
                         if (_procTarget && _procTarget->IsInWorld())
-                            target->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, true, NULL, aurEff);
-                    }
-                }
+                            if (target->GetTypeId() == TYPEID_PLAYER)
+                                if (!target->ToPlayer()->HasSpellCooldown(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK))
+                                {
+                                    target->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, true, NULL, aurEff);
+                                    target->ToPlayer()->AddSpellCooldown(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, 0, time(NULL) + 1);
+                                }
             }
 
             void Register()
@@ -1086,8 +1108,14 @@ class spell_warr_vigilance : public SpellScriptLoader
                 PreventDefaultAction();
                 int32 damage = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue()));
 
-                GetTarget()->CastSpell(_procTarget, SPELL_WARRIOR_VIGILANCE_PROC, true, NULL, aurEff);
-                _procTarget->CastCustomSpell(_procTarget, SPELL_WARRIOR_VENGEANCE, &damage, &damage, &damage, true, NULL, aurEff);
+                if (Unit* owner = GetTarget())
+                {
+                    if (_procTarget)
+                    {
+                        owner->CastSpell(_procTarget, SPELL_WARRIOR_VIGILANCE_PROC, true, NULL, aurEff);
+                        _procTarget->CastCustomSpell(_procTarget, SPELL_WARRIOR_VENGEANCE, &damage, &damage, &damage, true, NULL, aurEff);
+                    }
+                }
             }
 
             void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -1165,18 +1193,37 @@ class spell_warr_strikes_of_opportunity : public SpellScriptLoader
            void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
            {
                // aurEff->GetAmount() % Chance to proc the event ...
-               if (urand(0,99) >= uint32(aurEff->GetAmount()))
+               if (urand(0, 99) >= uint32(aurEff->GetAmount()))
                    return;
 
-               Unit *caster = GetCaster();
-               Unit *target = procInfo.GetActionTarget();
+               if (Unit* caster = GetCaster())
+               {
+                   if (Unit* target = procInfo.GetActionTarget())
+                   {
+                       if (caster->GetTypeId() == TYPEID_PLAYER)
+                       {
+                           // If no weapon found in main hand, avoid to proc
+                           Item* mainHand = caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                           Item* offHand = caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
-               // Cast only for Warriors that have Strikes of Opportunity mastery active
-               if (!caster->HasAura(76838))
-                   return;
+                           if (procInfo.GetTypeMask() & PROC_FLAG_DONE_MAINHAND_ATTACK && !mainHand)
+                               return;
 
-               if (caster && target)
-                   caster->CastSpell(target, SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, true, NULL, aurEff);
+                           if (procInfo.GetTypeMask() & PROC_FLAG_DONE_OFFHAND_ATTACK && !offHand)
+                               return;
+
+                           // Cast only for Warriors that have Strikes of Opportunity mastery active
+                           if (caster->HasAura(76838))
+                           {
+                               if (!caster->ToPlayer()->HasSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED))
+                               {
+                                   caster->CastSpell(target, SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, true, NULL, aurEff);
+                                   caster->ToPlayer()->AddSpellCooldown(SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, 0, time(NULL) + 2);
+                               }
+                           }
+                       }
+                   }
+               }
            }
 
            void Register()

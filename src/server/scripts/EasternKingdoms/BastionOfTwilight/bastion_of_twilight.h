@@ -92,12 +92,17 @@ enum Creatures
 
     // Cho'Gall
     NPC_FIRE_PORTAL                 = 43393,
+    NPC_SHADOW_PORTAL               = 47019,
     NPC_FIRE_ELEMENTAL              = 43406,
     NPC_BLAZE                       = 43585,
 
     NPC_CHOGALL_HALFUS              = 46965,
     NPC_CHOGALL_DRAGONS             = 48142,
     NPC_CHOGALL_COUNCIL             = 46900,
+
+    // Achievement
+    NPC_TWILIGHT_FIEND              = 49864,
+    NPC_FIEND_TRIGGER               = 46364
 };
 
 enum Gameobjects

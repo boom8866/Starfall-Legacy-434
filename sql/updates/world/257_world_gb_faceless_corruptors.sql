@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `speed_walk`=3 WHERE `entry` IN (48844, 48845, 40600, 48828);

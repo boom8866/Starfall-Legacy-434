@@ -4169,7 +4169,7 @@ public:
                                     nearestPlayer->VisitNearbyObject(80.0f, searcher);
                                     for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                                     {
-                                        if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
+                                        if ((*itr) && (*itr)->isSummon() && (*itr)->ToTempSummon()->GetCharmerOrOwner() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
                                         {
                                             switch ((*itr)->ToTempSummon()->GetEntry())
                                             {
@@ -4223,7 +4223,7 @@ public:
                                 nearestPlayer->VisitNearbyObject(500.0f, searcher);
                                 for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                                 {
-                                    if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
+                                    if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() && (*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
                                     {
                                         switch ((*itr)->ToTempSummon()->GetEntry())
                                         {
@@ -4328,7 +4328,7 @@ public:
                                         nearestPlayer->VisitNearbyObject(500.0f, searcher);
                                         for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                                         {
-                                            if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
+                                            if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() && (*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
                                             {
                                                 switch ((*itr)->ToTempSummon()->GetEntry())
                                                 {
@@ -4803,7 +4803,7 @@ public:
                 player->VisitNearbyObject(300.0f, searcher);
                 for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                 {
-                    if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == player))
+                    if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() && (*itr)->ToTempSummon()->GetCharmerOrOwner() == player))
                     {
                         switch ((*itr)->GetEntry())
                         {
@@ -10318,6 +10318,211 @@ public:
     }
 };
 
+class npc_dh_xariona : public CreatureScript
+{
+public:
+    npc_dh_xariona() : CreatureScript("npc_dh_xariona")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_TWILIGHT_ZONE             = 93553,
+        SPELL_TWILIGHT_BREATH           = 93544,
+        SPELL_UNLEASHED_MAGIC           = 93556,
+        SPELL_TWILIGHT_FISSURE          = 93546,
+        SPELL_TWILIGHT_BUFFET           = 95357,
+        SPELL_FURY_OF_TWILIGHT_FLIGHT   = 93554
+    };
+
+    enum eventId
+    {
+        EVENT_TWILIGHT_ZONE             = 1,
+        EVENT_TWILIGHT_BREATH,
+        EVENT_UNLEASHED_MAGIC,
+        EVENT_TWILIGHT_FISSURE,
+        EVENT_TWILIGHT_BUFFET,
+        EVENT_FURY_OF_TWILIGHT_FLIGHT,
+        EVENT_CHECK_POWER
+    };
+
+    struct npc_dh_xarionaAI : public CreatureAI
+    {
+        npc_dh_xarionaAI(Creature* creature) : CreatureAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            events.Reset();
+            me->NearTeleportTo(621.049f, 736.982f, 462.755f, 1.244f);
+            me->Relocate(621.049f, 736.982f, 462.755f, 1.244f);
+            me->SetSpeed(MOVE_RUN, 1.8f, true);
+            me->SetSpeed(MOVE_WALK, 1.8f, true);
+            me->SetSpeed(MOVE_FLIGHT, 1.8f, true);
+            me->setPowerType(POWER_ENERGY);
+            me->SetPower(POWER_ENERGY, 0);
+            me->SetMaxPower(POWER_ENERGY, 100);
+        }
+
+        void EnterEvadeMode()
+        {
+            events.Reset();
+            me->GetMotionMaster()->MoveTargetedHome();
+            _EnterEvadeMode();
+            SetNewRespawnTime(urand(117000, 201600));
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            SetNewRespawnTime(urand(234000, 403200));
+        }
+
+        void SetNewRespawnTime(uint32 newDelay)
+        {
+            me->SetCorpseDelay(newDelay);
+            me->SetRespawnDelay(newDelay);
+            me->DespawnOrUnsummon(1);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_CHECK_POWER, 1);
+            events.ScheduleEvent(EVENT_FURY_OF_TWILIGHT_FLIGHT, 1);
+            events.ScheduleEvent(EVENT_TWILIGHT_BUFFET, 10000);
+            events.ScheduleEvent(EVENT_TWILIGHT_BREATH, 6000);
+            events.ScheduleEvent(EVENT_TWILIGHT_FISSURE, 9500);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_TWILIGHT_ZONE:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_TWILIGHT_ZONE);
+                        events.ScheduleEvent(EVENT_TWILIGHT_ZONE, 30000);
+                        break;
+                    case EVENT_TWILIGHT_BREATH:
+                        me->StopMoving();
+                        me->SendMovementFlagUpdate(false);
+                        DoCast(SPELL_TWILIGHT_BREATH);
+                        events.ScheduleEvent(EVENT_TWILIGHT_BREATH, urand(12000, 16000));
+                        break;
+                    case EVENT_TWILIGHT_FISSURE:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_TWILIGHT_FISSURE);
+                        events.RescheduleEvent(EVENT_TWILIGHT_FISSURE, 23000);
+                        break;
+                    case EVENT_UNLEASHED_MAGIC:
+                        me->RemoveAurasDueToSpell(SPELL_FURY_OF_TWILIGHT_FLIGHT);
+                        DoCast(SPELL_UNLEASHED_MAGIC);
+                        events.ScheduleEvent(EVENT_FURY_OF_TWILIGHT_FLIGHT, 5100);
+                        events.ScheduleEvent(EVENT_CHECK_POWER, 6000);
+                        break;
+                    case EVENT_TWILIGHT_BUFFET:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_TWILIGHT_BUFFET);
+                        events.ScheduleEvent(EVENT_TWILIGHT_BUFFET, 23000);
+                        break;
+                    case EVENT_FURY_OF_TWILIGHT_FLIGHT:
+                        DoCast(SPELL_FURY_OF_TWILIGHT_FLIGHT);
+                        events.ScheduleEvent(EVENT_TWILIGHT_ZONE, 1);
+                        break;
+                    case EVENT_CHECK_POWER:
+                        if (me->GetPower(POWER_ENERGY) >= 100)
+                        {
+                            events.ScheduleEvent(EVENT_UNLEASHED_MAGIC, 1);
+                            events.CancelEvent(EVENT_CHECK_POWER);
+                            break;
+                        }
+                        events.ScheduleEvent(EVENT_CHECK_POWER, 1000);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_dh_xarionaAI(creature);
+    }
+};
+
+class npc_dh_twilight_fissure : public CreatureScript
+{
+public:
+    npc_dh_twilight_fissure() : CreatureScript("npc_dh_twilight_fissure")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_VOID_BLAST    = 93545
+    };
+
+    enum eventId
+    {
+        EVENT_VOID_BLAST    = 1
+    };
+
+    struct npc_dh_twilight_fissureAI : public CreatureAI
+    {
+        npc_dh_twilight_fissureAI(Creature* creature) : CreatureAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* /*owner*/)
+        {
+            events.ScheduleEvent(EVENT_VOID_BLAST, 5000);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_VOID_BLAST:
+                        DoCast(SPELL_VOID_BLAST);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_dh_twilight_fissureAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -10424,4 +10629,6 @@ void AddSC_npcs_special()
     new npc_cold_water_crayfish();
     new npc_cook_ghilm();
     new npc_dancing_rune_weapon();
+    new npc_dh_xariona();
+    new npc_dh_twilight_fissure();
 }

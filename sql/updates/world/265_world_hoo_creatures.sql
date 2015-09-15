@@ -1,0 +1,1 @@
+UPDATE `creature` SET `spawntimesecs`=604800 WHERE `id`IN (39804, 40252, 40251);

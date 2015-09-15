@@ -238,6 +238,9 @@ public:
 
             if (Player* player = caster->ToPlayer())
             {
+                if (player->GetMap()->IsBattlegroundOrArena() || player->GetMap()->IsRaid() || player->GetMap()->IsDungeon() || player->GetMap()->IsRaidOrHeroicDungeon())
+                    return;
+
                 if (Group* group = player->GetGroup())
                 {
                     // Initialize group/raid check
@@ -249,10 +252,7 @@ public:
                         if (itr->getSource() == player)
                             continue;
 
-                        if (itr->getSource()->GetMap()->IsDungeon() || itr->getSource()->GetMap()->IsRaid() || itr->getSource()->GetMap()->IsBattlegroundOrArena())
-                            continue;
-
-                        if (itr->getSource()->isAlive())
+                        if (itr->getSource()->isAlive() && !itr->getSource()->GetMap()->IsDungeon() && !itr->getSource()->GetMap()->IsRaid() && !itr->getSource()->GetMap()->IsBattlegroundOrArena())
                         {
                             float x, y, z;
                             player->GetPosition(x, y, z);

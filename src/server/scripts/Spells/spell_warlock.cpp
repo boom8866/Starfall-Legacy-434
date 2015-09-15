@@ -180,16 +180,19 @@ class spell_warl_conflagrate : public SpellScriptLoader
 
             void HandleHit(SpellEffIndex /*effIndex*/)
             {
-                if (AuraEffect const* aurEff = GetHitUnit()->GetAuraEffect(SPELL_WARLOCK_IMMOLATE, EFFECT_2, GetCaster()->GetGUID()))
-                    SetHitDamage(CalculatePct(GetCaster()->SpellDamageBonusDone(GetHitUnit(), aurEff->GetSpellInfo(), aurEff->GetAmount(), DOT) * aurEff->GetTotalTicks(), GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster())));
-
-                if (Unit* target = GetHitUnit())
+                if (Unit* caster = GetCaster())
                 {
-                    Unit::AuraEffectList const& dmgPercentTaken = target->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
-                    for (Unit::AuraEffectList::const_iterator itr = dmgPercentTaken.begin(); itr != dmgPercentTaken.end(); ++itr)
+                    if (Unit* target = GetHitUnit())
                     {
-                        if ((*itr)->GetMiscValue() & SPELL_SCHOOL_MASK_FIRE)
-                            SetHitDamage(GetHitDamage() + (GetHitDamage() * (*itr)->GetAmount() / 100));
+                        if (AuraEffect const* aurEff = target->GetAuraEffect(SPELL_WARLOCK_IMMOLATE, EFFECT_2, caster->GetGUID()))
+                            SetHitDamage(CalculatePct(caster->SpellDamageBonusDone(target, aurEff->GetSpellInfo(), aurEff->GetAmount(), DOT) * aurEff->GetTotalTicks(), GetSpellInfo()->Effects[EFFECT_1].CalcValue(caster)));
+
+                        Unit::AuraEffectList const& dmgPercentTaken = target->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
+                        for (Unit::AuraEffectList::const_iterator itr = dmgPercentTaken.begin(); itr != dmgPercentTaken.end(); ++itr)
+                        {
+                            if ((*itr)->GetMiscValue() & SPELL_SCHOOL_MASK_FIRE)
+                                SetHitDamage(GetHitDamage() + (GetHitDamage() * uint32((*itr)->GetAmount() / 100)));
+                        }
                     }
                 }
             }
@@ -1068,7 +1071,6 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
                     if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
                     {
                         int32 damage = aurEff->GetAmount() * 9;
-                        AddPct(damage, 200);
 
                         // Shadow Mastery
                         if (AuraEffect* shadowMastery = caster->GetAuraEffect(SPELL_WARLOCK_SHADOW_MASTERY, EFFECT_0, caster->GetGUID()))

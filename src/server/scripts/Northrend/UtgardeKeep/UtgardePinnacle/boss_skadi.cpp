@@ -207,6 +207,8 @@ public:
 
             Summons.DespawnAll();
             me->SetSpeed(MOVE_FLIGHT, 3.0f);
+            me->SetCanFly(false);
+            me->SetDisableGravity(false);
             if ((Unit::GetCreature(*me, m_uiGraufGUID) == NULL) && !me->IsMounted())
                  me->SummonCreature(CREATURE_GRAUF, Location[0].GetPositionX(), Location[0].GetPositionY(), Location[0].GetPositionZ(), 3.0f);
             if (instance)
@@ -214,15 +216,19 @@ public:
                 instance->SetData(DATA_SKADI_THE_RUTHLESS_EVENT, NOT_STARTED);
                 instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
             }
+
+            me->NearTeleportTo(345.30f, -506.82f, 104.54f, 3.09f);
         }
 
         void JustReachedHome()
         {
             me->SetCanFly(false);
+            me->SetDisableGravity(false);
             me->Dismount();
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             if (!Unit::GetCreature(*me, m_uiGraufGUID))
                 me->SummonCreature(CREATURE_GRAUF, Location[0].GetPositionX(), Location[0].GetPositionY(), Location[0].GetPositionZ(), 3.0f);
+            me->NearTeleportTo(345.30f, -506.82f, 104.54f, 3.09f);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -242,6 +248,9 @@ public:
                 instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
                 me->GetMotionMaster()->MoveJump(Location[0].GetPositionX(), Location[0].GetPositionY(), Location[0].GetPositionZ(), 5.0f, 10.0f);
                 me->SetWalk(false);
+                me->SetCanFly(true);
+                me->SendGravityDisable();
+                me->SetDisableGravity(true);
                 m_uiMountTimer = 1000;
                 Summons.DespawnEntry(CREATURE_GRAUF);
             }
@@ -286,13 +295,16 @@ public:
                 {
                     Phase = SKADI;
                     me->SetCanFly(false);
+                    me->SetWalk(false);
+                    me->SendGravityEnable();
+                    me->SetDisableGravity(false);
                     me->Dismount();
                     if (Creature* pGrauf = me->SummonCreature(CREATURE_GRAUF, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3*IN_MILLISECONDS))
                     {
                         pGrauf->GetMotionMaster()->MoveFall();
                         pGrauf->HandleEmoteCommand(EMOTE_ONESHOT_FLYDEATH);
                     }
-                    me->GetMotionMaster()->MoveJump(Location[4].GetPositionX(), Location[4].GetPositionY(), Location[4].GetPositionZ(), 5.0f, 10.0f);
+                    me->GetMotionMaster()->MoveJump(Location[4].GetPositionX(), Location[4].GetPositionY(), Location[4].GetPositionZ(), 25.0f, 25.0f);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                     Talk(SAY_DRAKE_DEATH);
                     m_uiCrushTimer = 8000;

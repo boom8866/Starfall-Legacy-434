@@ -568,6 +568,20 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             }
             break;
         }
+        case SPELL_AURA_MOD_INCREASE_HEALTH_2:
+        {
+            switch (GetId())
+            {
+                // Frenzied Regeneration
+                case 22842:
+                {
+                    if (caster->GetShapeshiftForm() == FORM_BEAR)
+                        amount = GetBase()->GetUnitOwner()->CountPctFromMaxHealth(30);
+                    break;
+                }
+            }
+            break;
+        }
         case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
         {
             if (caster)
@@ -686,7 +700,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
                 caster->ModSpellCastTime(m_spellInfo, m_amplitude);
             else
             {
-                m_amplitude = int32(m_amplitude * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+                m_amplitude = int32(m_amplitude * caster->GetHasteMod(CTYPE_CAST));
                 if (GetBase())
                     if (int32 count = int32(0.5f + float(GetBase()->GetMaxDuration()) / m_amplitude))
                         m_amplitude = GetBase()->GetMaxDuration() / count;
@@ -716,7 +730,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
             m_tickNumber = 0;
         }
 
-        if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY) || m_spellInfo->Id == 64843 || m_spellInfo->Id == 64901)
+        if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY) || m_spellInfo->Id == 64843 || m_spellInfo->Id == 64901 || m_spellInfo->Id == 15407)
             m_periodicTimer += m_amplitude;
     }
 }
@@ -740,6 +754,26 @@ void AuraEffect::CalculateSpellMod()
                 m_spellmod->charges = GetBase()->GetCharges();
             }
 
+            // Sanctity of Battle
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (GetSpellInfo()->Id == 25956)
+                    {
+                        float haste = caster->GetFloatValue(UNIT_MOD_CAST_HASTE);
+                        int32 cooldown = 4500;
+                        int32 difference = 0;
+                        if (haste > 0)
+                        {
+                            cooldown /= haste;
+                            difference = 4500 - cooldown;
+                            m_spellmod->value = difference;
+                        }
+                        break;
+                    }
+                }
+            }
             m_spellmod->value = GetAmount();
             break;
         }
@@ -1613,9 +1647,6 @@ void AuraEffect::HandleModInvisibility(AuraApplication const* aurApp, uint8 mode
         }
 
         target->m_invisibility.AddValue(type, -GetAmount());
-
-        // Send update to nearest objects to avoid visibility problems
-        target->SendMovementFlagUpdate(false);
     }
 
     // call functions which may have additional effects after chainging state of unit
@@ -1684,9 +1715,6 @@ void AuraEffect::HandleModStealth(AuraApplication const* aurApp, uint8 mode, boo
         // Overkill
         if (Aura* overkill = target->GetAura(58427, target->GetGUID()))
             overkill->SetDuration(20000); // 20 seconds
-
-        // Send update to nearest objects to avoid visibility problems
-        target->SendMovementFlagUpdate(false);
     }
 
     // call functions which may have additional effects after chainging state of unit
@@ -3328,11 +3356,6 @@ void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const* aurApp, uint8
         }
     }
 
-    // The Quick and the Dead (Not in Battleground)
-    if (m_spellInfo->Id == 83950 || m_spellInfo->Id == 84559)
-        if (target->GetMap()->IsBattlegroundOrArena())
-            return;
-
     target->UpdateSpeed(MOVE_RUN, true);
 }
 
@@ -4101,11 +4124,10 @@ void AuraEffect::HandleAuraModSpellCooldownByHaste(AuraApplication const* aurApp
         return;
 
     Unit* target = aurApp->GetTarget();
-
     if (target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    // Temporarily implemented in Spell::Finish
+    return;
 }
 
 void AuraEffect::HandleModSpellDamagePercentFromStat(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const
@@ -4401,7 +4423,6 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint
     // Special cases
     switch (aurApp->GetBase()->GetSpellInfo()->Id)
     {
-        case 22842: // Frenzied Regeneration
         case 79437: // Soulburn: Healthstone
         {
             if (apply)
@@ -4416,24 +4437,16 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint
 
     if (apply)
     {
-        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, amount, apply);
-        // Frenzied Regeneration
-        if (aurApp->GetBase()->GetSpellInfo()->Id == 22842)
-        {
-            // "increases health to 30% (if below that value)"
-            if (target->GetHealth() < amount)
-                target->SetHealth(amount);
-        }
-        else
-            target->ModifyHealth(amount);
+        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
+        target->ModifyHealth(GetAmount());
     }
     else
     {
-        if (int32(target->GetHealth()) > amount)
-            target->ModifyHealth(-amount);
+        if (int32(target->GetHealth()) > GetAmount())
+            target->ModifyHealth(-GetAmount());
         else
             target->SetHealth(1);
-        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, amount, apply);
+        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
     }
 }
 
@@ -5109,12 +5122,15 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
                 case 14202:
                 {
                     // Mastery: Unshackled Fury
-                    float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
-                    if (target->HasAura(76856))
-                        GetBase()->GetEffect(EFFECT_0)->SetAmount(amount * (0.11f + (0.056f * masteryPoints)) + amount);
-                    else
-                        GetBase()->GetEffect(EFFECT_0)->SetAmount(amount);
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
+                        if (target->HasAura(76856))
+                            GetBase()->GetEffect(EFFECT_0)->SetAmount(amount * (0.11f + (0.056f * masteryPoints)) + amount);
+                        else
+                            GetBase()->GetEffect(EFFECT_0)->SetAmount(amount);
+                    }
                     break;
                 }
                 // Eclipse (Lunar) & Eclipse (Solar)
@@ -5122,12 +5138,20 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
                 case 48518:
                 {
                     // Mastery: Total Eclipse
-                    float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    if (target->HasAura(77492))
+                    if (target->GetTypeId() == TYPEID_PLAYER)
                     {
-                        int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
-                        amount += amount * (masteryPoints * 0.020f);
-                        GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetAmount() * (0.16f + (0.020f * masteryPoints)) + amount);
+                        float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        if (AuraEffect* aurEff = GetBase()->GetEffect(EFFECT_0))
+                        {
+                            if (target->HasAura(77492))
+                            {
+                                int32 amount = aurEff->GetAmount();
+                                int32 mastery = amount * (0.160f + (0.0200f * masteryPoints));
+                                amount += mastery;
+
+                                aurEff->SetAmount(amount);
+                            }
+                        }
                     }
                     break;
                 }
@@ -5135,11 +5159,14 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
                 case 47241:
                 {
                     // Mastery: Master Demonologist
-                    float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    if (target->HasAura(77219))
+                    if (target->GetTypeId() == TYPEID_PLAYER)
                     {
-                        uint32 amount = GetBase()->GetEffect(EFFECT_2)->GetAmount();
-                        GetBase()->GetEffect(EFFECT_2)->SetAmount(amount + (amount * 0.18f + (0.023f * masteryPoints)) + (amount * 2));
+                        float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        if (target->HasAura(77219))
+                        {
+                            uint32 amount = GetBase()->GetEffect(EFFECT_2)->GetAmount();
+                            GetBase()->GetEffect(EFFECT_2)->SetAmount(amount + (amount * 0.18f + (0.023f * masteryPoints)) + (amount * 2));
+                        }
                     }
                     break;
                 }
@@ -7048,27 +7075,42 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 if (!caster)
                     return;
 
-                damage += (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.32; // BasePoints = 0 + Level * 0,32
-                if (caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    // Mastery: Frozen Heart
-                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    if (caster->HasAura(77514))
-                        damage += damage * (0.160f + (0.020f * masteryPoints));
-                }
+                damage = (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.32; // BasePoints = 0 + Level * 0,32
 
-                // Virulence
-                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
-                    damage += (damage * aurEff->GetAmount()) / 100;
-
-                if (target)
+                // Half damage if spreaded by pestilence
+                if (!CanBeRecalculated())
                 {
-                    // Ebon Plague
-                    if (target->HasAura(65142))
+                    damage /= 2;
+                    // Handle Contagion talent (Unholy)
+                    if (AuraEffect* contagion = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, EFFECT_0))
                     {
-                        if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
-                            damage += (damage * aurEff->GetAmount()) / 100;
-                        damage += damage * 0.08f;
+                        float multiplier = contagion->GetId() == 91319 ? 1.0f : 0.50f;
+                        damage += damage * multiplier;
+                    }
+                }
+                else
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Mastery: Frozen Heart
+                        float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        if (caster->HasAura(77514))
+                            damage += damage * (0.160f + (0.020f * masteryPoints));
+                    }
+
+                    // Virulence
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
+                        damage += (damage * aurEff->GetAmount()) / 100;
+
+                    if (target)
+                    {
+                        // Ebon Plague
+                        if (target->HasAura(65142))
+                        {
+                            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+                                damage += (damage * aurEff->GetAmount()) / 100;
+                            damage += damage * 0.08f;
+                        }
                     }
                 }
                 break;
@@ -7079,27 +7121,42 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 if (!caster)
                     return;
 
-                damage += (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.39; // BasePoints = 0 + Level * 0,39
-                if (caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    // Mastery: Dreadblade
-                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    if (caster->HasAura(77515))
-                        damage += damage * (0.200f + (0.0250f * masteryPoints));
-                }
+                damage = (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.39; // BasePoints = 0 + Level * 0,39
 
-                // Virulence
-                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
-                    damage += (damage * aurEff->GetAmount()) / 100;
-
-                if (target)
+                // Half damage if spreaded by pestilence
+                if (!CanBeRecalculated())
                 {
-                    // Ebon Plague
-                    if (target->HasAura(65142))
+                    damage /= 2;
+                    // Handle Contagion talent (Unholy)
+                    if (AuraEffect* contagion = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, EFFECT_0))
                     {
-                        if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
-                            damage += (damage * aurEff->GetAmount()) / 100;
-                        damage += damage * 0.08f;
+                        float multiplier = contagion->GetId() == 91319 ? 1.0f : 0.50f;
+                        damage += damage * multiplier;
+                    }
+                }
+                else
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Mastery: Dreadblade
+                        float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        if (caster->HasAura(77515))
+                            damage += damage * (0.200f + (0.0250f * masteryPoints));
+                    }
+
+                    // Virulence
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
+                        damage += (damage * aurEff->GetAmount()) / 100;
+
+                    if (target)
+                    {
+                        // Ebon Plague
+                        if (target->HasAura(65142))
+                        {
+                            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+                                damage += (damage * aurEff->GetAmount()) / 100;
+                            damage += damage * 0.08f;
+                        }
                     }
                 }
                 break;
@@ -7227,23 +7284,19 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     // This will handle proc spells from absorbed DoT damage
     if (!damage)
     {
-        switch (m_spellInfo->Id)
+        // Mind Flay
+        if (m_spellInfo->Id == 15407)
         {
-            case 15407: // Mind Flay
-            {
-                // Dark Evangelism Handling
-                if (caster->HasAura(81659))
-                    caster->CastSpell(caster, 87117, true);
-                else if (caster->HasAura(81662))
-                    caster->CastSpell(caster, 87118, true);
+            // Dark Evangelism Handling
+            if (caster->HasAura(81659))
+                caster->CastSpell(caster, 87117, true);
+            else if (caster->HasAura(81662))
+                caster->CastSpell(caster, 87118, true);
 
-                if (Aura* evangelism = caster->GetAura(87154))
-                    evangelism->RefreshDuration();
-                else
-                    caster->CastSpell(caster, 87154, true);
-            }
-            default:
-                break;
+            if (Aura* evangelism = caster->GetAura(87154))
+                evangelism->RefreshDuration();
+            else
+                caster->CastSpell(caster, 87154, true);
         }
 
         // Rage from absorbed damage
@@ -7425,10 +7478,13 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
             }
             case 136: // Mend Pet, Improved Mend Pet talent
             {
-                if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 267, 0))
+                if (caster && target)
                 {
-                    if (roll_chance_i(aurEff->GetAmount()))
-                        caster->CastSpell(target, 24406, true);
+                    if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 267, EFFECT_0))
+                    {
+                        if (roll_chance_i(aurEff->GetAmount()))
+                            caster->CastSpell(target, 24406, true);
+                    }
                 }
                 break;
             }
@@ -7445,7 +7501,7 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         // Wild Growth = amount + (6 - 2*doneTicks) * ticks* amount / 100
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellIconID == 2864)
         {
-            int32 addition = int32(float(damage * GetTotalTicks()) * ((6-float(2*(GetTickNumber()-1)))/100));
+            int32 addition = int32(float(damage * GetTotalTicks()) * ((6 - float(2 * (GetTickNumber() - 1))) / 100));
 
             // Item - Druid T10 Restoration 2P Bonus
             if (AuraEffect* aurEff = caster->GetAuraEffect(70658, 0))
@@ -7485,7 +7541,7 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         case 94447: // Lifebloom (Tree of Life)
         {
             if (caster->GetTypeId() != TYPEID_PLAYER)
-                break;
+                return;
 
             // Revitalize chance init
             if (roll_chance_i(20))
@@ -7505,7 +7561,10 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         }
         case 59545: // Gift of the Naaru
         {
-            damage = int32(caster->GetMaxHealth() * 0.04f);
+            if (!target || !caster)
+                return;
+
+            damage = int32(target->GetMaxHealth() * 0.04f);
             break;
         }
         case 29841: // Second Wind

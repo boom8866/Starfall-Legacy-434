@@ -23,6 +23,8 @@
 #include "Player.h"
 #include "Weather.h"
 #include "WorldSession.h"
+#include "Vehicle.h"
+#include "AchievementMgr.h"
 #include "halls_of_origination.h"
 
 enum Texts
@@ -65,6 +67,11 @@ enum Phases
 enum PtahData
 {
     DATA_SUMMON_DEATHS  = 0
+};
+
+enum achievementId
+{
+    ACHIEVEMENT_STRAW_THAT_BROKE_THE_CAMEL_BACK     = 5294
 };
 
 class SummonScarab : public BasicEvent
@@ -114,6 +121,22 @@ public:
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             Talk(SAY_DEATH);
+
+            // Achievement: Straw That Broke the Camel's Back
+            if (IsHeroic())
+            {
+                // Defeat Earthrager Ptah while mounted on a camel in the Halls of Origination on Heroic Difficulty.
+                if (AchievementEntry const* achievement = sAchievementMgr->GetAchievement(ACHIEVEMENT_STRAW_THAT_BROKE_THE_CAMEL_BACK))
+                {
+                    Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+                    if (!PlayerList.isEmpty())
+                        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                            if (Vehicle* camel = i->getSource()->GetVehicle())
+                                if (camel->GetBase()->GetEntry() == NPC_CAMEL)
+                                    i->getSource()->CompletedAchievement(achievement);
+                }
+            }
+
             _JustDied();
             Cleanup();
         }
@@ -253,7 +276,16 @@ public:
                         break;
                     case EVENT_EARTH_SPIKE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                        {
+                            // If player is on the Camel target camel instead of player to get the ground correctly
+                            if (Vehicle* vehicle = target->GetVehicle())
+                            {
+                                DoCast(vehicle->GetBase(), SPELL_EARTH_SPIKE_WARN);
+                                events.ScheduleEvent(EVENT_EARTH_SPIKE, urand(16000, 21000), 0, PHASE_NORMAL);
+                                break;
+                            }
                             DoCast(target, SPELL_EARTH_SPIKE_WARN);
+                        }
                         events.ScheduleEvent(EVENT_EARTH_SPIKE, urand(16000, 21000), 0, PHASE_NORMAL);
                         break;
                     case EVENT_PTAH_EXPLODE:

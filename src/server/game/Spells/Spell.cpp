@@ -1261,13 +1261,19 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                     maxSize = 3;
                     power = POWER_MANA;
                 }
+                else if (m_spellInfo->Id == 81751 || m_spellInfo->Id == 94472) // Atonement
+                {
+                   maxSize = 1;
+                   power = POWER_HEALTH;
+                }
                 else
                     break;
 
                 // Remove targets outside caster's raid
                 for (std::list<Unit*>::iterator itr = unitTargets.begin(); itr != unitTargets.end();)
                 {
-                    if (!(*itr)->IsInRaidWith(m_caster))
+                    // Exception for Atonement!
+                    if (!(*itr)->IsInRaidWith(m_caster) || ((m_spellInfo->Id == 81751 || m_spellInfo->Id == 94472) && (m_caster->getAttackerForHelper() && !m_caster->getAttackerForHelper()->IsWithinDistInMap((*itr), 20.0f) && (*itr) != m_caster)))
                         itr = unitTargets.erase(itr);
                     else
                         ++itr;
@@ -1284,6 +1290,11 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                 {
                     maxSize = 5;
                     power = POWER_HEALTH;
+                }
+                else if (m_spellInfo->Id == 81269) // Efflorescence
+                {
+                   maxSize = 3;
+                   power = POWER_HEALTH;
                 }
                 else
                     break;
@@ -2524,8 +2535,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 caster->ToPlayer()->CastItemCombatSpell(unitTarget, m_attackType, procVictim, procEx);
         }
 
-
-
         m_damage = damageInfo.damage;
 
         // Anticheat Check: Damage Hack
@@ -2712,7 +2721,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         DiminishingReturnsType type = GetDiminishingReturnsGroupType(m_diminishGroup);
         // Increase Diminishing on unit, current informations for actually casts will use values above
         if ((type == DRTYPE_PLAYER && unit->GetCharmerOrOwnerPlayerOrPlayerItself()) || type == DRTYPE_ALL)
-            unit->IncrDiminishing(m_diminishGroup);
+            unit->IncrDiminishing(m_diminishGroup, m_spellInfo->Id);
     }
 
     uint8 aura_effmask = 0;
@@ -2760,7 +2769,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                 // Now Reduce spell duration using data received at spell hit
                 int32 duration = m_spellAura->GetMaxDuration();
                 int32 limitduration = GetDiminishingReturnsLimitDuration(m_diminishGroup, aurSpellInfo);
-                float diminishMod = unit->ApplyDiminishingToDuration(m_diminishGroup, duration, m_originalCaster, m_diminishLevel, limitduration);
+                float diminishMod = unit->ApplyDiminishingToDuration(m_diminishGroup, duration, m_originalCaster, m_diminishLevel, limitduration, m_spellInfo);
 
                 // unit is immune to aura if it was diminished to 0 duration
                 if (diminishMod == 0.0f)
@@ -2783,7 +2792,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
 
                     duration = m_originalCaster->ModSpellDuration(aurSpellInfo, unit, duration, positive, effectMask);
 
-                    if (duration > 0 && (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION) && m_spellInfo->Id != 64843 && m_spellInfo->Id != 64901)
+                    if (duration > 0 && (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION) && m_spellInfo->Id != 64843 && m_spellInfo->Id != 64901 && m_spellInfo->Id != 15407)
                     {
                         int32 origDuration = duration;
                         duration = 0;
@@ -2811,6 +2820,11 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
     for (uint32 effectNumber = 0; effectNumber < MAX_SPELL_EFFECTS; ++effectNumber)
         if (effectMask & (1 << effectNumber))
             HandleEffects(unit, NULL, NULL, effectNumber, SPELL_EFFECT_HANDLE_HIT_TARGET);
+
+    // Exception for Cloak of Shadows and Vanish
+    if (m_spellInfo && (unitTarget->HasAura(31224) || unitTarget->HasAura(11327)))
+        if (!(m_spellInfo->Attributes & SPELL_ATTR3_IGNORE_HIT_RESULT))
+            return SPELL_MISS_MISS;
 
     return SPELL_MISS_NONE;
 }
@@ -3133,7 +3147,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
     // set timer base at cast time
     ReSetTimer();
 
-    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell::prepare: spell id %u source %u caster %d customCastFlags %u mask %u", m_spellInfo->Id, m_caster->GetEntry(), m_originalCaster ? m_originalCaster->GetEntry() : -1, _triggeredCastFlags, m_targets.GetTargetMask());
+    //sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell::prepare: spell id %u source %u caster %d customCastFlags %u mask %u", m_spellInfo->Id, m_caster->GetEntry(), m_originalCaster ? m_originalCaster->GetEntry() : -1, _triggeredCastFlags, m_targets.GetTargetMask());
 
     //Containers for channeled spells have to be set
     //TODO:Apply this to all casted spells if needed
@@ -3448,7 +3462,7 @@ void Spell::handle_immediate()
             if (Player* modOwner = m_caster->GetSpellModOwner())
                 modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
             // Apply haste mods
-            if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION && m_spellInfo->Id != 64843 && m_spellInfo->Id != 64901)
+            if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION && m_spellInfo->Id != 64843 && m_spellInfo->Id != 64901 && m_spellInfo->Id != 15407)
                 m_caster->ModSpellCastTime(m_spellInfo, duration, this);
 
             m_spellState = SPELL_STATE_CASTING;
@@ -3909,7 +3923,7 @@ void Spell::finish(bool ok)
                         // Increase amount if buff is already present
                         if (unitTarget)
                         {
-                            if (AuraEffect* aurEff = unitTarget->GetAuraEffect(86273, 0))
+                            if (AuraEffect* aurEff = unitTarget->GetAuraEffect(86273, EFFECT_0, m_caster->GetGUID()))
                                 bp0 += aurEff->GetAmount();
 
                             if (bp0 > int32(m_caster->GetMaxHealth() / 3))
@@ -3927,30 +3941,28 @@ void Spell::finish(bool ok)
         case 6785:  // Ravage
         case 81170: // Ravage!
         {
-            if (!unitTarget)
-                break;
+            if (unitTarget)
+            {
+                // Infected Wounds
+                if (m_caster->HasAura(48483))
+                    m_caster->CastSpell(unitTarget, 58179, true);
+                if (m_caster->HasAura(48484))
+                    m_caster->CastSpell(unitTarget, 58180, true);
 
-            // Infected Wounds
-            if (m_caster->HasAura(48483))
-                m_caster->CastSpell(unitTarget, 58179, true);
-            if (m_caster->HasAura(48484))
-                m_caster->CastSpell(unitTarget, 58180, true);
-
-            m_caster->RemoveAurasDueToSpell(109881);
-            m_caster->RemoveAurasDueToSpell(81022);
-            m_caster->RemoveAurasDueToSpell(81021);
+                m_caster->RemoveAurasDueToSpell(109881);
+                m_caster->RemoveAurasDueToSpell(81022);
+                m_caster->RemoveAurasDueToSpell(81021);
+            }
             break;
         }
         case 77575: // Outbreak
         {
-            if (!unitTarget)
-                break;
-
             // Ebon Plaguebringer
             if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
             {
                 int32 bp0 = aurEff->GetAmount();
-                m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                if (unitTarget)
+                    m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
             }
             break;
         }
@@ -3981,19 +3993,19 @@ void Spell::finish(bool ok)
         }
         case 8056:  // Frost Shock
         {
-            if (!unitTarget)
-                break;
-
-            // Check if distance is correct
-            if (m_caster->GetDistance(unitTarget) < 15.0f)
-                return;
-
-            // Frozen Power
-            if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 3780, EFFECT_1))
+            if (unitTarget)
             {
-                int32 chance = aurEff->GetAmount();
-                if (roll_chance_i(chance))
-                    m_caster->CastSpell(unitTarget, 63685, true);
+                // Check if distance is correct
+                if (m_caster->GetDistance(unitTarget) >= 15.0f)
+                {
+                    // Frozen Power
+                    if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 3780, EFFECT_1))
+                    {
+                        int32 chance = aurEff->GetAmount();
+                        if (roll_chance_i(chance))
+                            m_caster->CastSpell(unitTarget, 63685, true);
+                    }
+                }
             }
             break;
         }
@@ -4006,19 +4018,19 @@ void Spell::finish(bool ok)
         case 5570: // Insect Swarm
         {
             // Only for player caster
-            if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                break;
-
-            // Nature's Grace
-            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DRUID, 10, 0))
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
             {
-                int32 bp0 = aurEff->GetAmount();
-                // Check for cooldown!
-                if (!m_caster->ToPlayer()->GetSpellCooldownDelay(16886))
+                // Nature's Grace
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DRUID, 10, 0))
                 {
-                    m_caster->CastCustomSpell(m_caster, 16886, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                    // 60 seconds of cooldown
-                    m_caster->ToPlayer()->AddSpellCooldown(16886, 0, time(NULL) + 60);
+                    int32 bp0 = aurEff->GetAmount();
+                    // Check for cooldown!
+                    if (!m_caster->ToPlayer()->GetSpellCooldownDelay(16886))
+                    {
+                        m_caster->CastCustomSpell(m_caster, 16886, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                        // 60 seconds of cooldown
+                        m_caster->ToPlayer()->AddSpellCooldown(16886, 0, time(NULL) + 60);
+                    }
                 }
             }
             break;
@@ -4027,14 +4039,12 @@ void Spell::finish(bool ok)
         case 58984: // Shadowmeld
         case 5384:  // Feign Death
         {
-            if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                break;
-
-            if (!m_caster->isInCombat())
-                break;
-
-            if (m_caster->GetMap() && (!m_caster->GetMap()->GetInstanceId() || m_caster->GetMap()->IsBattlegroundOrArena()))
-                m_caster->ClearInCombat();
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (m_caster->isInCombat())
+                    if (m_caster->GetMap() && (!m_caster->GetMap()->GetInstanceId() || m_caster->GetMap()->IsBattlegroundOrArena()))
+                        m_caster->ClearInCombat();
+            }
             break;
         }
         case 7386:  // Sunder Armor
@@ -4045,39 +4055,6 @@ void Spell::finish(bool ok)
             {
                 if (Unit* nearbyTarget = m_caster->SelectNearbyTarget(unitTarget, 10.0f))
                     m_caster->CastSpell(nearbyTarget, 58567, true);
-            }
-            break;
-        }
-        case 35395: // Crusader Strike
-        case 53385: // Divine Storm
-        {
-            if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            // Sanctity of Battle
-            if (m_caster->HasAura(25956))
-            {
-                float haste = (2 - m_caster->ToPlayer()->GetFloatValue(UNIT_MOD_CAST_HASTE));
-                int32 cooldown = 4500;
-                int32 difference = 0;
-                if (haste > 0)
-                {
-                    cooldown /= haste;
-                    difference = 4500-cooldown;
-                }
-
-                int32 newCooldownDelay = m_caster->ToPlayer()->GetSpellCooldownDelay(m_spellInfo->Id);
-                if (newCooldownDelay <= difference / 1000)
-                    newCooldownDelay = 0;
-                else
-                    newCooldownDelay -= difference / 1000;
-
-                m_caster->ToPlayer()->AddSpellCooldown(m_spellInfo->Id, 0, uint32(time(NULL) + newCooldownDelay));
-                WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
-                data << uint32(m_spellInfo->Id);
-                data << uint64(m_caster->GetGUID());
-                data << int32(-difference);
-                m_caster->ToPlayer()->GetSession()->SendPacket(&data);
             }
             break;
         }
@@ -4980,6 +4957,10 @@ void Spell::TakeRunePower(bool didHit)
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this);
     }
 
+    // Let's say we use a skill that requires a Frost rune. This is the order:
+    // - Frost rune
+    // - Death rune, originally a Frost rune
+    // - Death rune, any kind
     runeCost[RUNE_DEATH] = 0;                               // calculated later
 
     for (uint32 i = 0; i < MAX_RUNES; ++i)
@@ -4993,8 +4974,32 @@ void Spell::TakeRunePower(bool didHit)
         }
     }
 
+    // Find a Death rune where the base rune matches the one we need
     runeCost[RUNE_DEATH] = runeCost[RUNE_BLOOD] + runeCost[RUNE_UNHOLY] + runeCost[RUNE_FROST];
+    if (runeCost[RUNE_DEATH] > 0)
+    {
+        for (uint32 i = 0; i < MAX_RUNES; ++i)
+        {
+            RuneType rune = player->GetCurrentRune(i);
+            RuneType baseRune = player->GetBaseRune(i);
+            if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH && runeCost[baseRune] > 0)
+            {
+                player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
+                player->SetLastUsedRune(rune);
+                runeCost[baseRune]--;
+                runeCost[rune]--;
 
+                // keep Death Rune type if missed
+                if (didHit)
+                    player->RestoreBaseRune(i);
+
+                if (runeCost[RUNE_DEATH] == 0)
+                    break;
+            }
+        }
+    }
+
+    // Grab any Death rune
     if (runeCost[RUNE_DEATH] > 0)
     {
         for (uint32 i = 0; i < MAX_RUNES; ++i)
@@ -5023,7 +5028,7 @@ void Spell::TakeRunePower(bool didHit)
         case 49184: // Howling Blast
         {
             // Rime
-            if (m_caster->HasAura(59052))
+            if (player->HasAura(59052))
                 didHit = false;
             break;
         }
@@ -5035,6 +5040,15 @@ void Spell::TakeRunePower(bool didHit)
         if (int32 rp = int32(runeCostData->runePowerGain * sWorld->getRate(RATE_POWER_RUNICPOWER_INCOME)))
         {
             rp += player->GetTotalAuraModifier(SPELL_AURA_MOD_RUNE_REGEN_SPEED) * rp / 100;
+
+            // Improved Frost Presence (Blood and Unholy)
+            if (player->HasAura(48265) || player->HasAura(48263))
+            {
+                if (player->HasAura(50384))
+                    rp += 5;
+                if (player->HasAura(50385))
+                    rp += 10;
+            }
             player->ModifyPower(POWER_RUNIC_POWER, int32(rp));
         }
     }
@@ -5133,10 +5147,11 @@ void Spell::HandleThreatSpells()
         // for negative spells threat gets distributed among affected targets
         else
         {
-            if (!target->CanHaveThreatList())
+            if (target && !target->CanHaveThreatList())
                 continue;
 
-            target->AddThreat(m_caster, threatToAdd, m_spellInfo->GetSchoolMask(), m_spellInfo);
+            if (target && m_caster)
+                target->AddThreat(m_caster, threatToAdd, m_spellInfo->GetSchoolMask(), m_spellInfo);
         }
     }
     sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell %u, added an additional %f threat for %s %u target(s)", m_spellInfo->Id, threat, m_spellInfo->_IsPositiveSpell() ? "assisting" : "harming", uint32(m_UniqueTargetInfo.size()));
@@ -5243,26 +5258,11 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_CastItem)
-    {
-        if (ItemTemplate const* proto = m_CastItem->GetTemplate())
-        {
-            for (int i = 0; i < MAX_ITEM_SPELLS; ++i)            {
-                if (m_caster->ToPlayer()->HasSpellCooldown(proto->Spells[i].SpellId))
-                    m_caster->ToPlayer()->AddSpellCooldown(proto->Spells[i].SpellId, m_CastItem->GetEntry(), time(NULL) + (proto->Spells[i].SpellCooldown / 1000));
-            }
-        }
-    }
-
     if (m_spellInfo->AttributesEx7 & SPELL_ATTR7_IS_CHEAT_SPELL && !m_caster->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS))
     {
         m_customError = SPELL_CUSTOM_ERROR_GM_ONLY;
         return SPELL_FAILED_CUSTOM_ERROR;
     }
-
-    // Check global cooldown
-    if (strict && !(_triggeredCastFlags & TRIGGERED_IGNORE_GCD) && HasGlobalCooldown())
-        return SPELL_FAILED_NOT_READY;
 
     // only triggered spells can be processed an ended battleground
     if (!IsTriggered() && m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -5799,6 +5799,19 @@ SpellCastResult Spell::CheckCast(bool strict)
                         !m_caster->ToPlayer()->CanUseBattlegroundObject(m_targets.GetGOTarget()))
                         return SPELL_FAILED_TRY_AGAIN;
 
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (m_targets.GetGOTarget() && m_targets.GetGOTarget()->GetGOInfo()->type != GAMEOBJECT_TYPE_TRAP && m_caster->ToPlayer()->InBattleground())
+                    {
+                        if (m_caster->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                            m_caster->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                        if (m_caster->HasAuraType(SPELL_AURA_MOD_INVISIBILITY))
+                            m_caster->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
+                        if (m_caster->HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE))
+                            m_caster->RemoveAurasByType(SPELL_AURA_MOD_CAMOUFLAGE);
+                    }
+                }
+
                 // get the lock entry
                 uint32 lockId = 0;
                 if (GameObject* go = m_targets.GetGOTarget())
@@ -6152,6 +6165,25 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
+    if (m_spellInfo)
+    {
+        switch (m_spellInfo->Id)
+        {
+            case 8690:  // Hearthstone
+            case 2641:  // Dismiss Pet
+            case 883:   // Call Pet 1-5
+            case 83242:
+            case 83243:
+            case 83244:
+            case 83245:
+                if (m_caster->HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE))
+                    m_caster->RemoveAurasByType(SPELL_AURA_MOD_CAMOUFLAGE);
+                break;
+            default:
+                break;
+        }
+    }
+
     // check trade slot case (last, for allow catch any another cast problems)
     if (m_targets.GetTargetMask() & TARGET_FLAG_TRADE_ITEM)
     {
@@ -6186,6 +6218,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_NO_COMBO_POINTS;
         }
     }
+
+    // Check global cooldown
+    if (strict && !(_triggeredCastFlags & TRIGGERED_IGNORE_GCD) && HasGlobalCooldown())
+        return SPELL_FAILED_NOT_READY;
 
     // Check for cooldown too
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -6741,12 +6777,6 @@ SpellCastResult Spell::CheckItems()
         ItemTemplate const* proto = m_CastItem->GetTemplate();
         if (!proto)
             return SPELL_FAILED_ITEM_NOT_READY;
-
-        for (int i = 0; i < MAX_ITEM_SPELLS; ++i)
-        {
-            if (p_caster->HasSpellCooldown(proto->Spells[i].SpellId))
-                return SPELL_FAILED_ITEM_NOT_READY;
-        }
 
         for (int i = 0; i < MAX_ITEM_SPELLS; ++i)
             if (proto->Spells[i].SpellCharges)
@@ -8106,6 +8136,12 @@ bool Spell::HasGlobalCooldown() const
 void Spell::TriggerGlobalCooldown()
 {
     int32 gcd = m_spellInfo->StartRecoveryTime;
+    bool isItemCast = m_CastItem ? true : false;
+
+    // Items
+    if (!gcd && isItemCast)
+        gcd = MIN_GCD;
+
     if (!gcd)
         return;
 
@@ -8118,14 +8154,19 @@ void Spell::TriggerGlobalCooldown()
     // Global cooldown can't leave range 1..1.5 secs
     // There are some spells (mostly not casted directly by player) that have < 1 sec and > 1.5 sec global cooldowns
     // but as tests show are not affected by any spell mods.
-    if (m_spellInfo->StartRecoveryTime >= MIN_GCD && m_spellInfo->StartRecoveryTime <= MAX_GCD)
+    if (m_spellInfo->StartRecoveryTime >= MIN_GCD && m_spellInfo->StartRecoveryTime <= MAX_GCD && !isItemCast)
     {
         // gcd modifier auras are applied only to own spells and only players have such mods
         if (m_caster->GetTypeId() == TYPEID_PLAYER)
             m_caster->ToPlayer()->ApplySpellMod(m_spellInfo->Id, SPELLMOD_GLOBAL_COOLDOWN, gcd, this);
 
         // Apply haste rating
-        gcd = int32(float(gcd) * m_caster->GetHasteMod(CTYPE_CAST) * 0.50f);
+        gcd = int32(float(gcd) * (m_caster->GetHasteMod(CTYPE_CAST) * 0.50f));
+
+        if (Player* player = m_caster->ToPlayer())
+            if (WorldSession* session = player->GetSession())
+                gcd -= session->GetLatency();
+
         if (gcd < MIN_GCD)
             gcd = MIN_GCD;
         else if (gcd > MAX_GCD)
@@ -8137,6 +8178,38 @@ void Spell::TriggerGlobalCooldown()
         m_caster->GetCharmInfo()->GetGlobalCooldownMgr().AddGlobalCooldown(m_spellInfo, gcd);
     else if (m_caster->GetTypeId() == TYPEID_PLAYER)
         m_caster->ToPlayer()->GetGlobalCooldownMgr().AddGlobalCooldown(m_spellInfo, gcd);
+
+    // Crusader Strike + Divine Storm for unknown reasons sometime can be casted in the same time, so let's add a fake cooldown
+    if (m_caster->ToPlayer())
+    {
+        switch (m_spellInfo->Id)
+        {
+            case 35395: // Crusader Strike
+                m_caster->ToPlayer()->AddSpellCooldown(53385, 0, time(NULL) + 2);
+                m_caster->ToPlayer()->AddSpellCooldown(53595, 0, time(NULL) + 2);
+                break;
+            case 53385: // Divine Storm
+                m_caster->ToPlayer()->AddSpellCooldown(35395, 0, time(NULL) + 2);
+                break;
+            case 53595: // Hammer of the Righteous
+                m_caster->ToPlayer()->AddSpellCooldown(35395, 0, time(NULL) + 3);
+                break;
+            case 8056:  // Frost Shock
+                m_caster->ToPlayer()->AddSpellCooldown(8050, 0, time(NULL) + 3);
+                m_caster->ToPlayer()->AddSpellCooldown(8042, 0, time(NULL) + 3);
+                break;
+            case 8050:  // Flame Shock
+                m_caster->ToPlayer()->AddSpellCooldown(8056, 0, time(NULL) + 3);
+                m_caster->ToPlayer()->AddSpellCooldown(8042, 0, time(NULL) + 3);
+                break;
+            case 8042:  // Earth Shock
+                m_caster->ToPlayer()->AddSpellCooldown(8056, 0, time(NULL) + 3);
+                m_caster->ToPlayer()->AddSpellCooldown(8050, 0, time(NULL) + 3);
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 void Spell::CancelGlobalCooldown()

@@ -995,6 +995,7 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
 
     Passenger->InterruptNonMeleeSpells(false);
     Passenger->RemoveAurasByType(SPELL_AURA_MOUNTED);
+    Passenger->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
 
     Player* player = Passenger->ToPlayer();
     if (player)
@@ -1107,6 +1108,7 @@ void VehicleJoinEvent::Abort(uint64)
             Target->GetBase()->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE, Passenger->GetGUID());
     }
 
-    if (Passenger->IsInWorld() && Passenger->HasUnitTypeMask(UNIT_MASK_ACCESSORY))
-        Passenger->ToCreature()->DespawnOrUnsummon();
+    if (Passenger)
+        if (Passenger->IsInWorld() && Passenger->HasUnitTypeMask(UNIT_MASK_ACCESSORY) && Passenger->ToCreature())
+            Passenger->ToCreature()->DespawnOrUnsummon();
 }
