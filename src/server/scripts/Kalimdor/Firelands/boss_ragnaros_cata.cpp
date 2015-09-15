@@ -1766,7 +1766,7 @@ class npc_fl_dreadflame : public CreatureScript
 
             void IsSummonedBy(Unit* summoner)
             {
-                if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0, false))
+                if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0, true))
                     if (ragnaros->isDead())
                         me->DespawnOrUnsummon(0);
             }

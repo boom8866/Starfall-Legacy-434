@@ -594,7 +594,9 @@ class spell_dm_chest_bomb : public SpellScriptLoader
 
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                GetTarget()->CastSpell(GetCaster(), SPELL_CHEST_BOMB_EXPLOSION);
+                if (Unit* target = GetTarget())
+                    if (Unit* caster = GetCaster())
+                        target->CastSpell(caster, SPELL_CHEST_BOMB_EXPLOSION, true);
             }
 
             void Register()

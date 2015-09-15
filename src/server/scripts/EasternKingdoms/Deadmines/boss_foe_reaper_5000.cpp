@@ -37,9 +37,9 @@ enum Actions
 
 enum Events
 {
-    EVENT_ACTIVATE_1    = 1,
-    EVENT_ACTIVATE_2    = 2,
-    EVENT_OVERDRIVE     = 3,
+    EVENT_ACTIVATE_1 = 1,
+    EVENT_ACTIVATE_2,
+    EVENT_OVERDRIVE,
 };
 
 enum Texts
@@ -59,31 +59,10 @@ public:
     {
         boss_foe_reaper_5000AI(Creature* creature) : BossAI(creature, DATA_FOE_REAPER_5000)
         {
-            _introDone = false;
-            _energizeCounter = 0;
         }
-
-        bool _introDone;
-        uint8 _energizeCounter;
 
         void Reset()
         {
-            _Reset();
-            me->GetMotionMaster()->MoveTargetedHome();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            if (Creature* prototype = me->FindNearestCreature(NPC_PROTOTYPE_REAPER, 500.0f))
-                prototype->Respawn(true);
-
-            if (!_introDone)
-            {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->AddAura(SPELL_OFFLINE, me);
-                me->AddAura(SPELL_COSMETIC_STAND, me);
-                me->SetReactState(REACT_PASSIVE);
-                events.SetPhase(PHASE_INTRO);
-            }
-            else
-                me->AddAura(SPELL_RED_EYES, me);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -92,7 +71,7 @@ public:
             Talk(SAY_AGGRO);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.SetPhase(PHASE_BATTLE);
-            events.ScheduleEvent(EVENT_OVERDRIVE, 12000, 0, PHASE_BATTLE);
+            events.ScheduleEvent(EVENT_OVERDRIVE, 12000);
         }
 
         void JustDied(Unit* /*Killer*/)
@@ -106,29 +85,19 @@ public:
             switch (action)
             {
                 case ACTION_ACTIVATE:
-                    _energizeCounter++;
-                    if (_energizeCounter == 4 && !_introDone)
-                    {
-                        me->setPowerType(POWER_ENERGY);
-                        me->SetPower(POWER_ENERGY, 100);
-                        me->RemoveAurasDueToSpell(SPELL_OFFLINE);
-                        DoCastAOE(SPELL_ONLINE);
-                        events.ScheduleEvent(EVENT_ACTIVATE_1, 8000);
-                        _introDone = true;
-                    }
                     break;
                 default:
                     break;
             }
-        }           
+        }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(uint32 diff)
         {
             if (!(events.IsInPhase(PHASE_INTRO)))
                 if (!UpdateVictim())
                     return;
 
-            events.Update(uiDiff);
+            events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
             {
