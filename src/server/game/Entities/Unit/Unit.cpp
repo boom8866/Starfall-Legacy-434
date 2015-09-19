@@ -18881,6 +18881,7 @@ void Unit::PlaySpellVisual(uint32 id, float positionX, float positionY, float po
     data.WriteBit(1); // Unknown
     data << uint64(GetGUID());
     data << uint64(0); // Uknown GUID
+    SendMessageToSet(&data, true);
 }
 
 void Unit::ApplyResilience(Unit const* victim, int32* damage) const

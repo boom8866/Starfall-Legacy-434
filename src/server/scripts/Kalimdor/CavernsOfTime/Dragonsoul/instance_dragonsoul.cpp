@@ -21,6 +21,8 @@ public:
         uint64 _nozdormuMadnessGUID;
         uint64 _alexstraszaMadnessGUID;
         uint64 _thrallMadnessGUID;
+        
+        uint64 _lordAfrasastraszGUID;
 
         void Initialize()
         {
@@ -33,6 +35,7 @@ public:
             _nozdormuMadnessGUID = 0;
             _alexstraszaMadnessGUID = 0;
             _thrallMadnessGUID = 0;
+            _lordAfrasastraszGUID = 0;
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -62,6 +65,9 @@ public:
                     break;
                 case NPC_THRALL_MADNESS:
                     _thrallMadnessGUID = creature->GetGUID();
+                    break;
+                case NPC_LORD_AFRASASTRASZ:
+                    _lordAfrasastraszGUID = creature->GetGUID();
                     break;
                 default:
                     break;
@@ -103,6 +109,8 @@ public:
                     return _nozdormuMadnessGUID;
                 case DATA_THRALL_MADNESS:
                     return _thrallMadnessGUID;
+                case DATA_LORD_AFRASASTRASZ:
+                    return _lordAfrasastraszGUID;
                 default:
                     break;
             }

@@ -20,15 +20,21 @@ enum Datas
     DATA_YSERA_MADNESS,
     DATA_NOZDORMU_MADNESS,
     DATA_THRALL_MADNESS,
+
+    DATA_LORD_AFRASASTRASZ,
 };
 
 enum CreatureIds
 {
     // Generic Events
     NPC_SIEGE_BREAKER_DUMMY         = 57261,
+    NPC_LORD_AFRASASTRASZ           = 55476,
+    NPC_IMAGE_OF_TYRYGOSA           = 57684,
+    NPC_ANCIENT_WATER_LORD          = 57160,
+    NPC_EARTHEN_DESTROYER           = 57158,
 
     // Bosses
-    BOSS_MORCHOK                    = 55264,
+    BOSS_MORCHOK                    = 55265,
     BOSS_ULTRAXION                  = 55294,
 
     BOSS_MADNESS_OF_DEATHWING       = 56173,

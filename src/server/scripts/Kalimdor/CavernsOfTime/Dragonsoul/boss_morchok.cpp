@@ -29,19 +29,22 @@ enum Spells
     SPELL_FALLING_FRAGMENT_KNOCKBACK    = 103174,
 
     SPELL_BLOOD_VISUAL                  = 103180,
-    SPELL_RAGE                          = 103846,
+    SPELL_FURIOUS                       = 103846,
 };
 
 enum Texts
 {
-    SAY_SIEGE               = 1,
-    SAY_AGGRO               = 2,
-    SAY_SLAY                = 3,
-    SAY_ANNOUNCE_CRYSTAL    = 4,
-    SAY_CRYSTAL             = 5,
-    SAY_EARTHS_VENGEANCE    = 6,
-    SAY_BLOOD_OF_ANCIENTS   = 7,
-    SAY_DEATH               = 8,
+    SAY_SIEGE_1                     = 0,
+    SAY_SIEGE_2                     = 1,
+    SAY_SIEGE_3                     = 2,
+    SAY_SIEGE_4                     = 3,
+    SAY_AGGRO                       = 4,
+    SAY_SLAY                        = 5,
+    SAY_RESONATING_CRYSTAL          = 6,
+    SAY_ANNOUNCE_RESONATING_CRYSTAL = 7,
+    SAY_EARTHEN_VORTEX              = 8,
+    SAY_BLOOD_OF_THE_EARTH          = 9,
+    SAY_DEATH                       = 10,
 };
 
 enum Phases
@@ -69,7 +72,8 @@ enum Events
 
 enum Actions
 {
-    ACTION_START_INTRO = 1,
+    ACTION_TRIGGER_INTRO_1 = 1,
+    ACTION_TRIGGER_INTRO_2,
 };
 
 enum Points
@@ -90,15 +94,14 @@ public:
     {
         boss_morchokAI(Creature* creature) : BossAI(creature, DATA_MORCHOK)
         {
-            _introStarted = false;
+            _furious = false;
         }
 
-        bool _introStarted;
+        bool _furious;
 
         void Reset()
         {
-            DoAction(ACTION_START_INTRO);
-            _introStarted = true;
+            _Reset();
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -107,10 +110,9 @@ public:
             Talk(SAY_AGGRO);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.SetPhase(PHASE_COMBAT);
-            events.CancelEvent(EVENT_SIEGE_INTRO);
             events.ScheduleEvent(EVENT_CRUSH_ARMOR, 6000, 0, PHASE_COMBAT);
             events.ScheduleEvent(EVENT_STOMP, 12500, 0, PHASE_COMBAT);
-            events.ScheduleEvent(EVENT_RESONATING_CRYSTAL, 19000, 0, PHASE_COMBAT);
+            events.ScheduleEvent(EVENT_RESONATING_CRYSTAL, 18000, 0, PHASE_COMBAT);
             events.ScheduleEvent(EVENT_EARTHEN_VORTEX, 56000, 0, PHASE_COMBAT);
         }
 
@@ -128,6 +130,7 @@ public:
         {
             _EnterEvadeMode();
             events.Reset();
+            _furious = false;
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             summons.DespawnAll();
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SAFE);
@@ -148,10 +151,10 @@ public:
             summons.Summon(summon);
             switch (summon->GetEntry())
             {
-            case 0:
-                break;
-            default:
-                break;
+                case 0:
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -159,12 +162,23 @@ public:
         {
             switch (action)
             {
-            case ACTION_START_INTRO:
-                events.SetPhase(PHASE_INTRO);
-                events.ScheduleEvent(EVENT_SIEGE_INTRO, 11000);
-                break;
-            default:
-                break;
+                case ACTION_TRIGGER_INTRO_1:
+                    TalkToMap(SAY_SIEGE_1);
+                    break;
+                case ACTION_TRIGGER_INTRO_2:
+                    TalkToMap(SAY_SIEGE_2);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        {
+            if (HealthBelowPct(20) && !_furious)
+            {
+                DoCast(me, SPELL_FURIOUS, true);
+                _furious = true;
             }
         }
 
@@ -183,26 +197,8 @@ public:
             {
                 switch (eventId)
                 {
-                    case EVENT_SIEGE_INTRO:
-                        Talk(SAY_SIEGE);
-                        switch (urand(0, 2))
-                        {
-                            case 0:
-                                if (Unit* target = me->SummonCreature(NPC_SIEGE_TARGET, SiegePos1, TEMPSUMMON_TIMED_DESPAWN, 10000))
-                                    DoCast(target, SPELL_SIEGE_MISSILE);
-                                break;
-                            case 1:
-                                if (Unit* target = me->SummonCreature(NPC_SIEGE_TARGET, SiegePos2, TEMPSUMMON_TIMED_DESPAWN, 10000))
-                                    DoCast(target, SPELL_SIEGE_MISSILE);
-                                break;
-                            case 2:
-                                if (Unit* target = me->SummonCreature(NPC_SIEGE_TARGET, SiegePos3, TEMPSUMMON_TIMED_DESPAWN, 10000))
-                                    DoCast(target, SPELL_SIEGE_MISSILE);
-                                break;
-                        }
-                        events.ScheduleEvent(EVENT_SIEGE_INTRO, 11000, 0, PHASE_INTRO);
-                        break;
                     case EVENT_CRUSH_ARMOR:
+                        me->PlaySpellVisual(21700, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
                         DoCastVictim(SPELL_CRUSH_ARMOR);
                         events.ScheduleEvent(EVENT_CRUSH_ARMOR, 8000, 0, PHASE_COMBAT);
                         break;
@@ -213,14 +209,18 @@ public:
                     case EVENT_RESONATING_CRYSTAL:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_SUMMON_RESONATING_CRYSTAL);
+                        Talk(SAY_RESONATING_CRYSTAL);
+                        Talk(SAY_ANNOUNCE_RESONATING_CRYSTAL);
                         events.ScheduleEvent(EVENT_RESONATING_CRYSTAL, 14500, 0, PHASE_COMBAT);
                         break;
                     case EVENT_EARTHEN_VORTEX:
                         DoCast(me, SPELL_EARTHEN_VORTEX);
                         DoCast(me, SPELL_FALLING_FRAGMENTS);
+                        Talk(SAY_EARTHEN_VORTEX);
                         events.ScheduleEvent(EVENT_BLACK_BLOOD_OF_THE_EARTH, 4500);
                         break;
                     case EVENT_BLACK_BLOOD_OF_THE_EARTH:
+                        Talk(SAY_BLOOD_OF_THE_EARTH);
                         DoCast(me, SPELL_BLACK_BLOOD_OF_THE_EARTH_1);
                         break;
                     default:
@@ -325,11 +325,11 @@ public:
 
             switch (pointId)
             {
-            case POINT_MORCHOK:
-                events.ScheduleEvent(EVENT_DESPAWN, 1);
-                break;
-            default:
-                break;
+                case POINT_MORCHOK:
+                    events.ScheduleEvent(EVENT_DESPAWN, 1);
+                    break;
+                default:
+                    break;
             }
         }
 
