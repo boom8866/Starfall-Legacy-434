@@ -4930,7 +4930,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
 
     // check primary prof. limit
     // first rank of primary profession spell when there are no proffesions avalible is disabled
-    for (uint8 i = 0; i < MAX_TRAINERSPELL_ABILITY_REQS; ++i)
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
         if (!trainer_spell->learnedSpell[i])
             continue;
@@ -24647,18 +24647,20 @@ void Player::SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8
     GetSession()->SendPacket(&data);
 }
 
-void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time)
+void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time, bool welcome)
 {
-    // type of warning, based on the time remaining until reset
-    uint32 type;
-    if (time > 3600)
-        type = RAID_INSTANCE_WELCOME;
-    else if (time > 900 && time <= 3600)
-        type = RAID_INSTANCE_WARNING_HOURS;
-    else if (time > 300 && time <= 900)
-        type = RAID_INSTANCE_WARNING_MIN;
-    else
-        type = RAID_INSTANCE_WARNING_MIN_SOON;
+	// type of warning, based on the time remaining until reset
+	uint32 type;
+	if (welcome)
+		type = RAID_INSTANCE_WELCOME;
+	else if (time > 21600)
+		type = RAID_INSTANCE_WELCOME;
+	else if (time > 3600)
+		type = RAID_INSTANCE_WARNING_HOURS;
+	else if (time > 300)
+		type = RAID_INSTANCE_WARNING_MIN;
+	else
+		type = RAID_INSTANCE_WARNING_MIN_SOON;
 
     WorldPacket data(SMSG_RAID_INSTANCE_MESSAGE, 4+4+4+4);
     data << uint32(type);

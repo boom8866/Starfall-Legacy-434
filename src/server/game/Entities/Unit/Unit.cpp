@@ -13816,9 +13816,9 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
         || target->GetReactionTo(this) > REP_NEUTRAL)
         return false;
 
-    // Not all neutral creatures can be attacked
+    // Not all neutral creatures can be attacked (even some unfriendly faction does not react aggresive to you, like Sporaggar)
     if (GetReactionTo(target) == REP_NEUTRAL &&
-        target->GetReactionTo(this) == REP_NEUTRAL)
+        target->GetReactionTo(this) <= REP_NEUTRAL)
     {
         if  (!(target->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER) &&
             !(target->GetTypeId() == TYPEID_UNIT && GetTypeId() == TYPEID_UNIT))
@@ -15000,6 +15000,7 @@ Unit* Creature::SelectVictim()
                 case 48854: // Squall Line SW
                 case 48855: // Squall Line SE
                 case 42333: // High Priestess Azil
+				case 55723: // Earthen Vortex
                     return getVictim();
                     break;
                 default:
@@ -18867,6 +18868,21 @@ void Unit::SendPlaySpellVisualKit(uint32 id, uint32 unkParam)
     SendMessageToSet(&data, true);
 }
 
+void Unit::PlaySpellVisual(uint32 id, float positionX, float positionY, float positionZ, float orientation)
+{
+    WorldPacket data(SMSG_PLAY_SPELL_VISUAL);
+    data << float(positionZ);
+    data << uint32(id);
+    data << uint16(0); // Unknown
+    data << float(orientation);
+    data << float(positionX);
+    data << uint16(0); // Unknown
+    data << float(positionY);
+    data.WriteBit(1); // Unknown
+    data << uint64(GetGUID());
+    data << uint64(0); // Uknown GUID
+}
+
 void Unit::ApplyResilience(Unit const* victim, int32* damage) const
 {
     // player mounted on multi-passenger mount is also classified as vehicle
@@ -21616,7 +21632,7 @@ void Unit::SendChangeCurrentVictimOpcode(HostileReference* pHostileReference)
         for (ThreatContainer::StorageType::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
         {
             data.appendPackGUID((*itr)->getUnitGuid());
-            data << uint32((*itr)->getThreat());
+            data << uint32((*itr)->getThreat()*100);
         }
         SendMessageToSet(&data, false);
     }
