@@ -382,6 +382,7 @@ void AddSC_instance_well_of_eternity();      //CoT Well of Eternity
 void AddSC_well_of_eternity();
 void AddSC_boss_perotharn();
 void AddSC_instance_dragonsoul();            //CoT Dragonsoul
+void AddSC_dragonsoul();
 void AddSC_boss_morchok();
 void AddSC_boss_ultraxion();
 void AddSC_boss_madness_of_deathwing();
@@ -1160,6 +1161,7 @@ void AddKalimdorScripts()
     AddSC_well_of_eternity();
     AddSC_boss_perotharn();
     AddSC_instance_dragonsoul();            //CoT Dragonsoul
+    AddSC_dragonsoul();
     AddSC_boss_morchok();
     AddSC_boss_ultraxion();
     AddSC_boss_madness_of_deathwing();

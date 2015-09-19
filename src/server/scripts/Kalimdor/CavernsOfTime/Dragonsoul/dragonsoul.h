@@ -24,6 +24,9 @@ enum Datas
 
 enum CreatureIds
 {
+    // Generic Events
+    NPC_SIEGE_BREAKER_DUMMY         = 57261,
+
     // Bosses
     BOSS_MORCHOK                    = 55264,
     BOSS_ULTRAXION                  = 55294,
@@ -34,6 +37,7 @@ enum CreatureIds
     // Morchok
     NPC_SIEGE_TARGET                = 56126,
     NPC_RESONATING_CRYSTAL          = 55346,
+    NPC_EARTHEN_VORTEX_VEHICLE      = 55723,
 
     // Ultraxion Part
     NPC_YSERA_ULTRAXION             = 56630,

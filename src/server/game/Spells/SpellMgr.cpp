@@ -5432,6 +5432,17 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 94984: // Dark Simulacrum dummy aura
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
                 break;
+                // Dragon Soul
+                // * Morchok
+            case 103494: // Resonating Crystal - Trigger correct Target Selection spell
+                spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
+                break;
+            case 103821: // Earthen Vortex
+            case 110047:
+            case 110046:
+            case 110045:
+                spellInfo->Effects[EFFECT_1].Effect = 0;
+                break;
             default:
                 break;
         }
