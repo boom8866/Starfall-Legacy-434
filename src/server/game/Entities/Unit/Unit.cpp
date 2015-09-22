@@ -18870,7 +18870,7 @@ void Unit::SendPlaySpellVisualKit(uint32 id, uint32 unkParam)
 
 void Unit::PlaySpellVisual(uint32 id, float positionX, float positionY, float positionZ, float orientation)
 {
-    WorldPacket data(SMSG_PLAY_SPELL_VISUAL);
+    WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 4 + 4 + 4 + 4 + 4 + 4 + 4 + 8 + 4 + 4);
     data << float(positionZ);
     data << uint32(id);
     data << uint16(0); // Unknown

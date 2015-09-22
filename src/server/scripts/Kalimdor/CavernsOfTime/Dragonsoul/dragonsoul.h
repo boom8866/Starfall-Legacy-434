@@ -29,6 +29,12 @@ enum CreatureIds
     // Generic Events
     NPC_SIEGE_BREAKER_DUMMY         = 57261,
     NPC_LORD_AFRASASTRASZ           = 55476,
+    NPC_CRIMSON_LIFEBINDER          = 57632,
+    NPC_WYRMREST_DEFENDER_1         = 57334,
+    NPC_WYRMREST_DEFENDER_2         = 57348,
+    NPC_WYRMREST_CAPTAIN            = 57380,
+    NPC_WYRMREST_PROTECTOR          = 57398,
+
     NPC_IMAGE_OF_TYRYGOSA           = 57684,
     NPC_ANCIENT_WATER_LORD          = 57160,
     NPC_EARTHEN_DESTROYER           = 57158,
@@ -67,6 +73,11 @@ enum CreatureIds
     NPC_YSERA_MADNESS               = 56100,
     NPC_NOZDORMU_MADNESS            = 56102,
     NPC_ALEXSTRASZA_MADNESS         = 56099,
+};
+
+enum GobjectIds
+{
+    GO_INNER_WALL                   = 209596,
 };
 
 #endif

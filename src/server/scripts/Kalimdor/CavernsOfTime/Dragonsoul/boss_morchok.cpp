@@ -74,6 +74,8 @@ enum Actions
 {
     ACTION_TRIGGER_INTRO_1 = 1,
     ACTION_TRIGGER_INTRO_2,
+    ACTION_TRIGGER_INTRO_3,
+    ACTION_TRIGGER_INTRO_4,
 };
 
 enum Points
@@ -168,6 +170,12 @@ public:
                 case ACTION_TRIGGER_INTRO_2:
                     TalkToMap(SAY_SIEGE_2);
                     break;
+                case ACTION_TRIGGER_INTRO_3:
+                    TalkToMap(SAY_SIEGE_3);
+                    break;
+                case ACTION_TRIGGER_INTRO_4:
+                    TalkToMap(SAY_SIEGE_4);
+                    break;
                 default:
                     break;
             }
@@ -175,7 +183,7 @@ public:
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
-            if (HealthBelowPct(20) && !_furious)
+            if (HealthBelowPct(21) && !_furious)
             {
                 DoCast(me, SPELL_FURIOUS, true);
                 _furious = true;
@@ -315,7 +323,7 @@ public:
             summoner->CastSpell(me, SPELL_EARTHEN_VORTEX_CONTROL_VEHICLE, true);
             me->MonsterYell("Willkommen in den fliegenden Flitzepuff. Bitte schnallen sie sich und ihre Hosenschlange äään.", LANG_UNIVERSAL, 0);
             if (Creature* morchok = me->FindNearestCreature(BOSS_MORCHOK, 200.0f, true))
-                me->GetMotionMaster()->MovePoint(POINT_MORCHOK, morchok->GetPositionX(), morchok->GetPositionY(), morchok->GetPositionZ(), true);
+                me->GetMotionMaster()->MovePoint(POINT_MORCHOK, morchok->GetPositionX(), morchok->GetPositionY(), morchok->GetPositionZ() + 1.0f, true);
         }
 
         void MovementInform(uint32 type, uint32 pointId)
@@ -549,7 +557,17 @@ public:
         void OnPeriodic(AuraEffect const* /*aurEff*/)
         {
             if (Unit* caster = GetCaster())
-                caster->CastSpell(caster, SPELL_FALLING_FRAGMENT, false);
+            {
+                if (float angle = frand(0.0f, (2 * M_PI)))
+                    if (float dist = frand(caster->GetFloatValue(UNIT_FIELD_COMBATREACH), 40.0f))
+                    {
+                        float x = caster->GetPositionX() + cos(angle) * dist;
+                        float y = caster->GetPositionY() + sin(angle) * dist;
+                        float z = caster->GetPositionZ() + 20.0f;
+                        float ground = caster->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
+                        caster->CastSpell(x, y, ground, SPELL_FALLING_FRAGMENT, true);
+                    }
+            }
         }
 
         void Register()
@@ -564,6 +582,137 @@ public:
     }
 };
 
+class spell_ds_black_blood_of_the_earth_damage : public SpellScriptLoader
+{
+public:
+    spell_ds_black_blood_of_the_earth_damage() : SpellScriptLoader("spell_ds_black_blood_of_the_earth_damage") { }
+
+    class spell_ds_black_blood_of_the_earth_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_black_blood_of_the_earth_damage_SpellScript);
+
+        class BehindStalaktiteSelector
+        {
+        public:
+            BehindStalaktiteSelector(WorldObject* unit) : caster(unit) { }
+
+            bool operator() (WorldObject* unit)
+            {
+                if (Unit* target = unit->ToUnit())
+                {
+                    std::list<GameObject*> blockList;
+                    caster->GetGameObjectListWithEntryInGrid(blockList, GO_INNER_WALL, 300.0f);
+                    if (!blockList.empty())
+                    {
+                        for (std::list<GameObject*>::const_iterator itr = blockList.begin(); itr != blockList.end(); ++itr)
+                        {
+                            if (!(*itr)->IsInvisibleDueToDespawn())
+                            {
+                                if ((*itr)->IsInBetween(caster, target, 3.0f))
+                                    return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+
+        private:
+            WorldObject* caster;
+        };
+
+        class RadiusCheckFilter
+        {
+        public:
+            RadiusCheckFilter(Unit* caster) : caster(caster) { }
+
+            bool operator()(WorldObject* object)
+            {
+                if (Aura* blood = caster->GetAura(SPELL_BLACK_BLOOD_OF_THE_EARTH_1))
+                    if (uint32 stack = blood->GetEffect(EFFECT_0)->GetTickNumber())
+                        if (float radius = 5.0f * stack)
+                            return (object->GetDistance2d(caster->GetPositionX(), caster->GetPositionY()) > radius);
+                return false;
+            }
+
+        private:
+            Unit* caster;
+        };
+
+        void FilterTargets(std::list<WorldObject*>& unitList)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                unitList.remove_if(RadiusCheckFilter(caster));
+
+                if (!unitList.empty())
+                    return;
+
+                unitList.remove_if(BehindStalaktiteSelector(caster));
+            }
+            else
+                unitList.clear();
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ds_black_blood_of_the_earth_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ds_black_blood_of_the_earth_damage_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ds_black_blood_of_the_earth_damage_SpellScript();
+    }
+};
+
+class spell_ds_black_blood_of_the_earth_aura : public SpellScriptLoader
+{
+public:
+    spell_ds_black_blood_of_the_earth_aura() : SpellScriptLoader("spell_ds_black_blood_of_the_earth_aura") { }
+
+    class spell_ds_black_blood_of_the_earth_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_ds_black_blood_of_the_earth_aura_AuraScript);
+
+        void OnPeriodic(AuraEffect const* aurEff)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                /*
+                if (uint32 stack = GetEffect(EFFECT_0)->GetTickNumber())
+                    if (stack > 1)
+                    {
+                        if (uint32 numberPerCircle = stack * 2.5f)
+                            if (float radius = 5.0f * stack)
+                            {
+                                for (uint32 i = 0; i <= numberPerCircle; i++)
+                                {
+                                    float angle = ((2 * M_PI) / numberPerCircle) * i;
+                                    float x = caster->GetPositionX() + cos(angle) * radius;
+                                    float y = caster->GetPositionZ() + sin(angle) * radius;
+                                    float z = caster->GetPositionZ();
+                                    caster->CastSpell(x, y, z, SPELL_BLOOD_VISUAL, true);
+                                }
+                            }
+                    }
+                */
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_ds_black_blood_of_the_earth_aura_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_ds_black_blood_of_the_earth_aura_AuraScript();
+    }
+};
+
 void AddSC_boss_morchok()
 {
     new boss_morchok();
@@ -573,4 +722,6 @@ void AddSC_boss_morchok()
     new spell_ds_resonating_crystal_explosion();
     new spell_ds_stomp();
     new spell_ds_falling_fragments();
+    new spell_ds_black_blood_of_the_earth_damage();
+    new spell_ds_black_blood_of_the_earth_aura();
 }

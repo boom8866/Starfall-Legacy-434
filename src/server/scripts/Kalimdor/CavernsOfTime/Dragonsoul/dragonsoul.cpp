@@ -6,6 +6,8 @@ enum Texts
     // Lord Afrasastrasz
     SAY_INTRO_1 = 0,
     SAY_INTRO_2 = 1,
+    SAY_INTRO_3 = 2,
+    SAY_INTRO_4 = 3,
 
     // Image of Tyrygosa
     SAY_IMAGE_1 = 0,
@@ -19,6 +21,9 @@ enum Spells
 
     // Image of Tyrygosa
     SPELL_IMAGE_EFFECT              = 108841,
+
+    // Generic Spells
+    SPELL_WYRMREST_AGGRO            = 108488,
 };
 
 enum Events
@@ -26,9 +31,15 @@ enum Events
     // Lord Afrasastrasz
     EVENT_MOVE_TO_FIRST_LOCATION_1 = 1,
     EVENT_MOVE_TO_FIRST_LOCATION_2,
+    EVENT_MOVE_TO_SECOND_LOCATION_1,
+    EVENT_MOVE_TO_SECOND_LOCATION_2,
+    EVENT_TALK_INTRO_4,
+    EVENT_AGGRO_ALLIES,
+
     EVENT_SUMMON_IMAGE_OF_TYRYGOSA,
     EVENT_TALK_INTRO_2,
     EVENT_SCHEDULE_MORCHOK_TALK_2,
+    EVENT_SCHEDULE_MORCHOK_TALK_4,
 
     // Image of Tyrygosa
     EVENT_TALK_IMAGE_1,
@@ -41,6 +52,8 @@ enum Actions
     ACTION_COUNT_MORCHOK_GAUNTLET = 1,
     ACTION_TRIGGER_FIRST_INTRO = 1,
     ACTION_TRIGGER_SECOND_INTRO,
+    ACTION_TRIGGER_THIRD_INTRO,
+    ACTION_TRIGGER_FOURTH_INTRO,
 };
 
 enum MovePoints
@@ -48,12 +61,25 @@ enum MovePoints
     POINT_INTRO_1 = 1,
     POINT_INTRO_2,
     POINT_INTRO_3,
+    POINT_INTRO_4,
 };
 
 Position const AfrasastraszWaypoints[] =
 {
-    {-2278.106f, -2399.724f, 80.13097f },
-    {-2233.105f, -2397.879f, 85.71294f },
+    { -2278.106f, -2399.724f, 80.13097f },
+    { -2233.105f, -2397.879f, 85.71294f },
+    { -2169.329f, -2396.872f, 80.0222f  },
+    { -2141.175f, -2398.826f, 80.2487f  },
+};
+
+Position const WyrmrestCaptainLeftWaypoints[] =
+{
+    { -2222.689f, -2351.419f, 80.4443f },
+};
+
+Position const WyrmrestCaptainRightWaypoints[] =
+{
+    {0.0f},
 };
 
 // We're using following position to decide between the required and the optional waves
@@ -94,6 +120,12 @@ public:
                         if (Creature* morchok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_MORCHOK)))
                             morchok->AI()->DoAction(ACTION_TRIGGER_FIRST_INTRO);
                     }
+                    else if (_gauntletCount == 6)
+                    {
+                        events.ScheduleEvent(EVENT_MOVE_TO_SECOND_LOCATION_1, 10000);
+                        if (Creature* morchok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_MORCHOK)))
+                            morchok->AI()->DoAction(ACTION_TRIGGER_THIRD_INTRO);
+                    }
                     break;
                 default:
                     break;
@@ -109,10 +141,30 @@ public:
                 switch (eventId)
                 {
                     case EVENT_MOVE_TO_FIRST_LOCATION_1:
+                    {
+                        std::list<Creature*> units;
+                        GetCreatureListWithEntryInGrid(units, me, NPC_CRIMSON_LIFEBINDER, 10.0f);
+                        GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_DEFENDER_1, 10.0f);
+                        GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_DEFENDER_2, 10.0f);
+                        if (!units.empty())
+                            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                                (*itr)->GetMotionMaster()->MoveFollow(me, (*itr)->GetDistance2d(me), ((*itr)->GetAngle(me->GetPositionX(), me->GetPositionY()) + M_PI));
+                        units.clear();
+
+                        // Build Wyrmrest Captain Formations and move them.
+                        GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_CAPTAIN, 50.0f);
+                        if (!units.empty())
+                            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                            {
+                            }
+
+
                         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                        me->SetWalk(false);
                         me->GetMotionMaster()->MovePoint(POINT_INTRO_1, AfrasastraszWaypoints[0]);
                         Talk(SAY_INTRO_1);
                         break;
+                    }
                     case EVENT_MOVE_TO_FIRST_LOCATION_2:
                         me->GetMotionMaster()->MovePoint(POINT_INTRO_2, AfrasastraszWaypoints[1]);
                         break;
@@ -120,6 +172,7 @@ public:
                         DoCast(me, SPELL_SUMMON_IMAGE_OF_TYRYGOSA, true);
                         events.ScheduleEvent(EVENT_TALK_INTRO_2, 20500);
                         events.ScheduleEvent(EVENT_SCHEDULE_MORCHOK_TALK_2, 24000);
+                        events.ScheduleEvent(EVENT_AGGRO_ALLIES, 2000);
                         break;
                     case EVENT_TALK_INTRO_2:
                         Talk(SAY_INTRO_2);
@@ -127,6 +180,21 @@ public:
                     case EVENT_SCHEDULE_MORCHOK_TALK_2:
                         if (Creature* morchok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_MORCHOK)))
                             morchok->AI()->DoAction(ACTION_TRIGGER_SECOND_INTRO);
+                        break;
+                    case EVENT_MOVE_TO_SECOND_LOCATION_1:
+                        me->GetMotionMaster()->MovePoint(POINT_INTRO_3, AfrasastraszWaypoints[2]);
+                        Talk(SAY_INTRO_3);
+                        break;
+                    case EVENT_MOVE_TO_SECOND_LOCATION_2:
+                        me->GetMotionMaster()->MovePoint(POINT_INTRO_4, AfrasastraszWaypoints[3]);
+                        break;
+                    case EVENT_TALK_INTRO_4:
+                        Talk(SAY_INTRO_4);
+                        events.ScheduleEvent(EVENT_SCHEDULE_MORCHOK_TALK_4, 8000);
+                        break;
+                    case EVENT_SCHEDULE_MORCHOK_TALK_4:
+                        if (Creature* morchok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_MORCHOK)))
+                            morchok->AI()->DoAction(ACTION_TRIGGER_FOURTH_INTRO);
                         break;
                     default:
                         break;
@@ -146,6 +214,12 @@ public:
                     break;
                 case POINT_INTRO_2:
                     events.ScheduleEvent(EVENT_SUMMON_IMAGE_OF_TYRYGOSA, 1);
+                    break;
+                case POINT_INTRO_3:
+                    events.ScheduleEvent(EVENT_MOVE_TO_SECOND_LOCATION_2, 1);
+                    break;
+                case POINT_INTRO_4:
+                    events.ScheduleEvent(EVENT_TALK_INTRO_4, 1);
                     break;
                 default:
                     break;

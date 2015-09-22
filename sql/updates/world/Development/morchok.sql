@@ -23,18 +23,22 @@
 12:43:24.233 -- black blood of the earth
 
 -- ---------------
+
 12:40:16.205 -- morchok intro 1
-12:40:26.689 -- lord afrasastrasz intro 1
+12:40:26.689 -- lord afrasastrasz intro 1   12:40:26.689  captain move 1
 12:40:36.330 -- tyrygosa image
+12:40:38.030 -- wyrmrest aggro
+
 12:40:39.231 -- image talk 1
 12:40:50.182 -- image talk 2
 12:40:56.953 -- lord intro 2
 12:40:59.948 -- tyrygosa despawn
 12:41:04.347 -- morchok intro 2
 
-12:41:32.521 -- intro 3
-
-
+12:41:22.584 -- morchok yell 1
+12:41:32.521 -- lord intro 3 -- advance to the front
+12:41:44.440 -- lord intro 4 -- the siege must be broken
+12:41:52.349 -- morchok final intro -- i will scatter this tower
 */
 
 -- Resonating Crystal
@@ -68,7 +72,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 -- Morchok
 (55265, 0, 0, 'No mortal shall turn me from my task.', 14, 0, 100, 0, 0, 26282, 'Morchok - Intro 1'),
 (55265, 1, 0, 'Cowards. Weaklings. Come down and fight, or I will bring you down.', 14, 0, 100, 0, 0, 26270, 'Morchok - Intro 2'),
-(55265, 2, 0, 'You cannot hide in this temple forever, Shaman.', 14, 0, 100, 0, 0, 26271, 'Morchok - Intro 3'),
+(55265, 2, 0, 'Wyrmrest will fall. All will be dust.', 14, 0, 100, 0, 0, 26273, 'Morchok - Intro 3'),
 (55265, 3, 0, 'I will turn this tower to rubble, and scatter it across the wastes.', 14, 0, 100, 0, 0, 26272, 'Morchok - Intro 4'),
 (55265, 4, 0, 'You seek to halt an avalanche. I will bury you.', 14, 0, 100, 0, 0, 26268, 'Morchok - Aggro'),
 (55265, 5, 0, 'I am unstoppable.', 14, 0, 100, 0, 0, 26285, 'Morchok - Slay 1'),
@@ -89,6 +93,8 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 -- Lord Afrasastrasz
 (55476, 0, 0, 'Wyrmrest Accord, Attack!', 14, 0, 100, 0, 0, 26531, 'Lord Afrasastrasz - Intro 1'),
 (55476, 1, 0, 'Tyrygosa yet lives! We must press on, to the Temple!', 14, 0, 100, 0, 0, 26532, 'Lord Afrasastrasz - Intro 2'),
+(55476, 2, 0, 'Advance to the front!', 14, 0, 100, 0, 0, 26533, 'Lord Afrasastrasz - Intro 3'),
+(55476, 3, 0, 'The siege must be broken. Wyrmrest Accord, defend the line!', 14, 0, 100, 0, 0, 26534, 'Lord Afrasastrasz - Intro 4'),
 -- Image of Tyrygosa
 (57684, 0, 0, 'They have broken our defenses... the very earth turns against us in Deathwing''s name.', 14, 0, 100, 0, 0, 26305, 'Image of Tyrygosa - Intro 1'),
 (57684, 1, 0, 'You must hurry... Wyrmrest falls as we speak... all... is lost...', 14, 0, 100, 0, 0, 26306, 'Image of Tyrygosa - Intro 2');
@@ -105,4 +111,9 @@ REPLACE INTO `spell_script_names` (`spell_id`, `scriptname`) VALUES
 (108571, 'spell_ds_stomp'),
 (109033, 'spell_ds_stomp'),
 (109034, 'spell_ds_stomp'),
-(103176, 'spell_ds_falling_fragments');
+(103176, 'spell_ds_falling_fragments'),
+(103785, 'spell_ds_black_blood_of_the_earth_damage'),
+(108570, 'spell_ds_black_blood_of_the_earth_damage'),
+(110288, 'spell_ds_black_blood_of_the_earth_damage'),
+(110287, 'spell_ds_black_blood_of_the_earth_damage'),
+(103851, 'spell_ds_black_blood_of_the_earth_aura');
