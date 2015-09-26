@@ -151,12 +151,12 @@ public:
                     tele.m_positionX = trigger->GetPositionX();
                     tele.m_positionY = trigger->GetPositionY();
                     tele.m_positionZ = me->GetPositionZ() + 10.0f;
-                    tele.m_orientation = (trigger->GetOrientation() + (M_PI/1.1f));
+                    tele.SetOrientation((trigger->GetOrientation() + (M_PI/1.1f)));
 
                     uint32 distance = 6;
                     me->StopMoving();
-                    me->CastSpell(tele.m_positionX + cos(tele.m_orientation)*distance, tele.m_positionY + sin(tele.m_orientation)*distance, tele.m_positionZ - 4.0f, SPELL_SOTS_SUMMON, true);
-                    DoTeleportTo(tele.m_positionX + cos(tele.m_orientation)*distance, tele.m_positionY + sin(tele.m_orientation)*distance, tele.m_positionZ);
+                    me->CastSpell(tele.m_positionX + cos(tele.GetOrientation())*distance, tele.m_positionY + sin(tele.GetOrientation())*distance, tele.m_positionZ - 4.0f, SPELL_SOTS_SUMMON, true);
+                    DoTeleportTo(tele.m_positionX + cos(tele.GetOrientation())*distance, tele.m_positionY + sin(tele.GetOrientation())*distance, tele.m_positionZ);
                     me->UpdatePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
                     me->SendMovementFlagUpdate(false);
                 }

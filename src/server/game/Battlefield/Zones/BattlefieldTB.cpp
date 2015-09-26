@@ -517,11 +517,11 @@ void BattlefieldTB::OnBattleStart()
                 if (player->GetTeamId() == GetDefenderTeam())
                 {
                     uint32 k = urand(0, 3);
-                    player->TeleportTo(732, TbDefencerStartPosition[k].m_positionX, TbDefencerStartPosition[k].m_positionY, TbDefencerStartPosition[k].m_positionZ, TbDefencerStartPosition[k].m_orientation);
+                    player->TeleportTo(732, TbDefencerStartPosition[k].GetPositionX(), TbDefencerStartPosition[k].GetPositionY(), TbDefencerStartPosition[k].GetPositionZ(), TbDefencerStartPosition[k].GetOrientation());
                     player->CastSpell(player, 88473, true);
                 }
                 else
-                    player->TeleportTo(732, TbDefencerStartPosition[4].m_positionX, TbDefencerStartPosition[4].m_positionY, TbDefencerStartPosition[4].m_positionZ, TbDefencerStartPosition[4].m_orientation);
+                    player->TeleportTo(732, TbDefencerStartPosition[4].GetPositionX(), TbDefencerStartPosition[4].GetPositionY(), TbDefencerStartPosition[4].GetPositionZ(), TbDefencerStartPosition[4].GetOrientation());
             }
         }
     }

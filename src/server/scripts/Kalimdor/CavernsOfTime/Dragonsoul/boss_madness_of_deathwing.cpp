@@ -562,9 +562,12 @@ public:
             switch (action)
             {
                 case ACTION_RESET_ENCOUNTER:
-                    me->NearTeleportTo(me->GetHomePosition());
+                {
+                    Position homePos = me->GetHomePosition();
+                    me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation());
                     me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     break;
+                }
                 default:
                     break;
             }

@@ -24,6 +24,7 @@ enum Spells
 
     // Generic Spells
     SPELL_WYRMREST_AGGRO            = 108488,
+    SPELL_WYRMREST_DEFENSE_NUKE     = 108536,
 };
 
 enum Events
@@ -45,23 +46,38 @@ enum Events
     EVENT_TALK_IMAGE_1,
     EVENT_TALK_IMAGE_2,
     EVENT_CAST_IMAGE_EFFECT,
+
+    // Wyrmrest Captain
+    EVENT_ENGAGE_COMBAT,
 };
 
 enum Actions
 {
+    // Lord Afrasastrasz
     ACTION_COUNT_MORCHOK_GAUNTLET = 1,
+
+    // Morchok
     ACTION_TRIGGER_FIRST_INTRO = 1,
     ACTION_TRIGGER_SECOND_INTRO,
     ACTION_TRIGGER_THIRD_INTRO,
     ACTION_TRIGGER_FOURTH_INTRO,
+
+    // Wyrmrest Captain
+    ACTION_MOVE_TO_COMBAT,
+    ACTION_ADANCE_TO_FRONT,
 };
 
 enum MovePoints
 {
+    // Lord Afrasastrasz
     POINT_INTRO_1 = 1,
     POINT_INTRO_2,
     POINT_INTRO_3,
     POINT_INTRO_4,
+
+    // Wyrmrest Captain
+    POINT_COMBAT_1,
+    POINT_COMBAT_2,
 };
 
 Position const AfrasastraszWaypoints[] =
@@ -72,6 +88,7 @@ Position const AfrasastraszWaypoints[] =
     { -2141.175f, -2398.826f, 80.2487f  },
 };
 
+Position const WyrmrestCaptainLeftComparisionPosition = { -2281.760f, -2367.352f, 83.591f };
 Position const WyrmrestCaptainLeftWaypoints[] =
 {
     { -2222.689f, -2351.419f, 80.4443f },
@@ -155,9 +172,7 @@ public:
                         GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_CAPTAIN, 50.0f);
                         if (!units.empty())
                             for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                            {
-                            }
-
+                                (*itr)->AI()->DoAction(ACTION_MOVE_TO_COMBAT);
 
                         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
                         me->SetWalk(false);
@@ -285,6 +300,94 @@ public:
     }
 };
 
+class npc_ds_wyrmrest_captain : public CreatureScript
+{
+public:
+    npc_ds_wyrmrest_captain() : CreatureScript("npc_ds_wyrmrest_captain") { }
+
+    struct npc_ds_wyrmrest_captainAI : public ScriptedAI
+    {
+        npc_ds_wyrmrest_captainAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void DamageTaken(Unit* /*damager*/, uint32& damage)
+        {
+            damage = 0;
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+            case ACTION_MOVE_TO_COMBAT:
+            {
+                std::list<Creature*> units;
+                GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_PROTECTOR, 10.0f);
+                GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_DEFENDER_1, 10.0f);
+                GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_DEFENDER_2, 10.0f);
+                if (!units.empty())
+                    for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                        (*itr)->GetMotionMaster()->MoveFollow(me, (*itr)->GetDistance2d(me), ((*itr)->GetAngle(me->GetPositionX(), me->GetPositionY()) + M_PI));
+                me->SetWalk(false);
+                if (me->GetDistance2d(WyrmrestCaptainLeftComparisionPosition.GetPositionX(), WyrmrestCaptainLeftComparisionPosition.GetPositionY() <= 15.0f))
+                    me->GetMotionMaster()->MovePoint(POINT_COMBAT_1, WyrmrestCaptainLeftWaypoints[0]);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ENGAGE_COMBAT:
+                    {
+                        std::list<Creature*> units;
+                        GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_PROTECTOR, 10.0f);
+                        GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_DEFENDER_1, 10.0f);
+                        GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_DEFENDER_2, 10.0f);
+                        if (!units.empty())
+                            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                                (*itr)->AI()->DoCast((*itr), SPELL_WYRMREST_AGGRO, true);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+                return;
+
+            switch (pointId)
+            {
+                case POINT_COMBAT_1:
+                    events.ScheduleEvent(EVENT_ENGAGE_COMBAT, 1);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ds_wyrmrest_captainAI(creature);
+    }
+};
+
 class npc_ds_earthen_destroyer : public CreatureScript
 {
 public:
@@ -392,6 +495,7 @@ void AddSC_dragonsoul()
 {
     new npc_ds_lord_afrasastrasz();
     new npc_ds_image_of_tyrygosa();
+    new npc_ds_wyrmrest_captain();
     new npc_ds_earthen_destroyer();
     new npc_ds_ancient_water_lord();
 }

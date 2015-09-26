@@ -114,8 +114,9 @@ public:
                                     if (Unit* passenger = vehicle->GetPassenger(seat))
                                         if (Creature* creature = passenger->ToCreature())
                                         {
+                                            Position homePos = creature->GetHomePosition();
                                             creature->ExitVehicle();
-                                            creature->NearTeleportTo(creature->GetHomePosition());
+                                            creature->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation());
                                             creature->DespawnOrUnsummon();
                                             creature->SetRespawnDelay(40000);
                                         }

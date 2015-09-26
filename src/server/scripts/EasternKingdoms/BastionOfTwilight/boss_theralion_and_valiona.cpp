@@ -916,6 +916,7 @@ public:
                 events.ScheduleEvent(EVENT_THERALION_INTRO_1, 12000);
                 break;
             case ACTION_TAKEOFF:
+            {
                 me->CastStop();
                 me->AttackStop();
                 me->SetReactState(REACT_PASSIVE);
@@ -927,6 +928,7 @@ public:
                 me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                 _isOnGround = false;
                 break;
+            }
             case ACTION_LAND:
             {
                 events.Reset();

@@ -1052,7 +1052,7 @@ public:
                     }
 
                     // Summon position
-                    targetDest->GetPosition(&pos);
+                    pos = targetDest->GetPosition();
 
                     // Summon properties
                     const SummonPropertiesEntry* properties = sSummonPropertiesStore.LookupEntry(spellInfo->Effects[effIndex].MiscValueB);
@@ -1127,11 +1127,9 @@ public:
 
                     for (std::list<Creature*>::const_iterator i = mushroomList.begin(); i != mushroomList.end(); i)
                     {
-                        if((*i))
+                        if ((*i))
                         {
-                            Position pos;
-                            (*i)->GetPosition(&pos);
-
+                            Position pos = (*i)->GetPosition();
                             // Must have at least one mushroom within 40 yards
                             if (player->IsWithinDist3d(&pos, spellRange))
                                 return SPELL_CAST_OK;
@@ -1158,7 +1156,7 @@ public:
                         Creature* tempMushroom = (*i);
                         if (tempMushroom)
                         {
-                            tempMushroom->GetPosition(&pos);
+                            pos = tempMushroom->GetPosition();
 
                             if (player->HasAura(DRUID_TALENT_FUNGAL_GROWTH_1))  // Fungal Growth Rank 1
                                 player->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), DRUID_SPELL_FUNGAL_GROWTH_1, true);

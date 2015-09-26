@@ -540,10 +540,10 @@ public:
                         if (Creature* target = me->GetCreature(*me, me->AI()->GetGUID()))
                         {
                             Position targetPos = *target;
-                            target->NearTeleportTo(*me);
+                            target->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
                             target->SetInCombatWithZone();
 
-                            me->NearTeleportTo(targetPos);
+                            me->NearTeleportTo(targetPos.GetPositionX(), targetPos.GetPositionY(), targetPos.GetPositionZ(), targetPos.GetOrientation());
                             me->SetInCombatWithZone();
                             me->getThreatManager().resetAllAggro();
                             me->getHostileRefManager().deleteReferences();

@@ -470,8 +470,8 @@ public:
                     DoCast(me, SPELL_VORTEX_3, true);
                     break;
                 case ACTION_LIFT_IN_AIR:
-                    Position _zToLift;
-                    me->GetPosition(&_zToLift);
+                {
+                    Position _zToLift = me->GetPosition();
                     if (_phase == PHASE_ONE)
                     {
                         _zToLift.m_positionZ += 20.0f;
@@ -483,6 +483,7 @@ public:
                         me->GetMotionMaster()->MoveTakeoff(POINT_PHASE_ONE_TO_TWO_TRANSITION, _zToLift);
                     }
                     break;
+                }
                 case ACTION_HANDLE_P_THREE_INTRO:
                     events.CancelEventGroup(0);
                     events.CancelEventGroup(1);
@@ -502,6 +503,7 @@ public:
                     events.ScheduleEvent(EVENT_LIGHT_DIMENSION_CHANGE, 1*IN_MILLISECONDS, 0, PHASE_TWO);
                     break;
                 case ACTION_HANDLE_RESPAWN:
+                {
                     // Teleport to spawn position, we can't use normal relocate
                     float x, y, z, o;
                     me->GetRespawnPosition(x, y, z, &o);
@@ -510,6 +512,7 @@ public:
                     instance->SetData(DATA_RESPAWN_IRIS, 0);
                     _despawned = false;
                     break;
+                }
                 case ACTION_CYCLIC_MOVEMENT:
                     Movement::MoveSplineInit init(me);
                     FillCirclePath(MalygosPositions[3], 120.0f, 283.2763f, init.Path(), true);
@@ -1623,8 +1626,7 @@ public:
                 me->DespawnOrUnsummon(2050);
                 me->SetOrientation(2.5f);
                 me->SetSpeed(MOVE_FLIGHT, 1.0f, true);
-                Position pos;
-                me->GetPosition(&pos);
+                Position pos = me->GetPosition();
                 pos.m_positionX += 10.0f;
                 pos.m_positionY += 10.0f;
                 pos.m_positionZ += 12.0f;

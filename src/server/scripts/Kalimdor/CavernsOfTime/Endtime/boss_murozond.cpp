@@ -149,12 +149,16 @@ public:
                 switch (eventId)
                 {
                     case EVENT_FINISH_INTRO_1:
+                    {
                         Position pos;
                         pos.Relocate(me);
                         pos.m_positionZ -= 20.0f;
                         me->GetMotionMaster()->MoveLand(POINT_LAND, pos);
                         break;
+                    }
                     case EVENT_FINISH_INTRO_2:
+                    {
+                        Position pos;
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                         me->SetReactState(REACT_AGGRESSIVE);
                         pos.Relocate(me);
@@ -162,6 +166,7 @@ public:
                         me->SetFacingTo(2.76f);
                         _introDone = true;
                         break;
+                    }
                     case EVENT_TEMPORAL_SNAPSHOT:
                         DoCastAOE(SPELL_TEMPORAL_SNAPSHOT);
                         break;

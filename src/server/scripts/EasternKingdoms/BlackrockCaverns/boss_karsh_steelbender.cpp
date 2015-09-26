@@ -195,8 +195,7 @@ public:
                         // Heroic: Summon Adds
                         for (uint8 i = 0; i <= 2; i++)
                         {
-                            Position pos;
-                            me->GetRandomNearPosition(pos, 35.f);
+                            Position pos = me->GetRandomNearPosition(35.0f);
                             me->SummonCreature(NPC_BOUND_FLAMES, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
                         }
                         events.CancelEvent(EVENT_SUMMON_ADDS);

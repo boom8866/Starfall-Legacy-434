@@ -937,7 +937,7 @@ public:
                 target->MovePosition(pos, 6.5f, 0);
             }
             else
-                caster->GetRandomNearPosition(pos, 25.f);
+                pos = caster->GetRandomNearPosition(25.0f);
 
             target->GetMotionMaster()->MoveJump(pos.GetPositionX(), pos.GetPositionY(), groundZ, speed, speed);
             target->SetInCombatWithZone();

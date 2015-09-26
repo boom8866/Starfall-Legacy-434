@@ -79,7 +79,8 @@ namespace ConclaveOfWind
             me->CombatStop();
             me->DeleteThreatList();
 
-            me->NearTeleportTo(me->GetHomePosition(), false);
+            Position homePos = me->GetHomePosition();
+            me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation(), false);
             me->DestroyForNearbyPlayers();
 
             if (me->GetEntry() == BOSS_ANSHAL || me->GetEntry() == BOSS_NEZIR)
@@ -163,7 +164,8 @@ public:
         {
             if (me->GetEntry() != BOSS_ROHASH)
             {
-                me->NearTeleportTo(me->GetHomePosition(), false);
+                Position homePos = me->GetHomePosition();
+                me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation(), false);
                 DoCast(me, SPELL_TELEPORT_VISUAL, true);
             }
         }
@@ -541,8 +543,7 @@ public:
         {
             if (Unit* caster = GetCaster())
             {
-                Position pos;
-                caster->GetRandomNearPosition(pos, frand(14.f, 27.f));
+                Position pos = caster->GetRandomNearPosition(frand(14.f, 27.f));
                 pos.m_positionZ = caster->GetPositionZ();
 
                 caster->SummonCreature(NPC_RAVENOUS_CREEPER_TRIGGER, pos, TEMPSUMMON_TIMED_DESPAWN, 14000);

@@ -142,8 +142,9 @@ public:
             GetCreatureListWithEntryInGrid(snakes, me, NPC_PIT_SNAKE, 500.0f);
             for (std::list<Creature*>::iterator itr = snakes.begin(); itr != snakes.end(); ++itr)
             {
+                Position homePos = (*itr)->GetHomePosition();
                 (*itr)->Respawn();
-                (*itr)->NearTeleportTo((*itr)->GetHomePosition());
+                (*itr)->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation(), false);
             }
         }
 

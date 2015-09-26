@@ -542,7 +542,7 @@ public:
                     Position pos = *atramedes;
                     atramedes->MovePosition(pos, -20.f, 0);
 
-                    me->NearTeleportTo(pos);
+                    me->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
                     me->DestroyForNearbyPlayers();
 
                     me->SetOrientation(atramedes->GetOrientation());

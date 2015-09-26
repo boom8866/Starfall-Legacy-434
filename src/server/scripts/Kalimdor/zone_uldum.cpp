@@ -4169,7 +4169,7 @@ class spell_move_champions : public SpellScriptLoader
 
             void HandleTeleportController()
             {
-                WorldLocation const* const position = GetExplTargetDest();
+                Position const position = GetExplTargetDest()->GetPosition();
 
                 if (Unit* caster = GetCaster())
                 {
@@ -4183,7 +4183,7 @@ class spell_move_champions : public SpellScriptLoader
                         {
                             if ((*itr)->GetEntry() == NPC_ENTRY_CHAMPION_CONTROLLER)
                             {
-                                (*itr)->NearTeleportTo(*position);
+                                (*itr)->NearTeleportTo(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ(), position.GetOrientation());
                                 (*itr)->ToCreature()->AI()->DoAction(1);
                             }
                         }
@@ -4219,7 +4219,7 @@ class spell_flame_arrows : public SpellScriptLoader
 
             void HandleTeleportController()
             {
-                WorldLocation const* const position = GetExplTargetDest();
+                Position const position = GetExplTargetDest()->GetPosition();
 
                 if (Unit* caster = GetCaster())
                 {
@@ -4233,7 +4233,7 @@ class spell_flame_arrows : public SpellScriptLoader
                         {
                             if ((*itr)->GetEntry() == NPC_ENTRY_ARCHER_CONTROLLER)
                             {
-                                (*itr)->NearTeleportTo(*position);
+                                (*itr)->NearTeleportTo(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ(), position.GetOrientation());
                                 (*itr)->ToCreature()->AI()->DoAction(1);
                             }
                         }
@@ -4269,7 +4269,7 @@ class spell_sun_radiance : public SpellScriptLoader
 
             void HandleTeleportController()
             {
-                WorldLocation const* const position = GetExplTargetDest();
+                Position const position = GetExplTargetDest()->GetPosition();
 
                 if (Unit* caster = GetCaster())
                 {
@@ -4283,7 +4283,7 @@ class spell_sun_radiance : public SpellScriptLoader
                         {
                             if ((*itr)->GetEntry() == NPC_ENTRY_LIGHT_CONTROLLER)
                             {
-                                (*itr)->NearTeleportTo(*position);
+                                (*itr)->NearTeleportTo(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ(), position.GetOrientation());
                                 (*itr)->ToCreature()->AI()->DoAction(1);
                             }
                         }
@@ -5722,7 +5722,7 @@ class spell_lions_move : public SpellScriptLoader
 
             void HandleTeleportController()
             {
-                WorldLocation const* const position = GetExplTargetDest();
+                Position const position = GetExplTargetDest()->GetPosition();
 
                 if (Unit* caster = GetCaster())
                 {
@@ -5736,7 +5736,7 @@ class spell_lions_move : public SpellScriptLoader
                         {
                             if ((*itr)->GetEntry() == NPC_ENTRY_LIONS_CONTROLLER)
                             {
-                                (*itr)->NearTeleportTo(*position);
+                                (*itr)->NearTeleportTo(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ(), position.GetOrientation());
                                 (*itr)->ToCreature()->AI()->DoAction(1);
                             }
                         }

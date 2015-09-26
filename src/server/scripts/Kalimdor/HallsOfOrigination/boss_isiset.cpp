@@ -224,8 +224,7 @@ public:
                     me->RemoveAllAuras();
                     me->SetPower(POWER_MANA, me->GetMaxPower(POWER_MANA));
 
-                    Position pos;
-                    me->GetPosition(&pos);
+                    Position pos = me->GetPosition();
 
                     if (events.IsInPhase(PHASE_TWO))
                     {
@@ -296,9 +295,8 @@ public:
                             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, (*itr));
                             if (Creature* isiset = (*itr)->FindNearestCreature(BOSS_ISISET, 500.0f))
                             {
-                                Position pos;
-                                isiset->GetPosition(&pos);
-                                (*itr)->NearTeleportTo(pos, true);
+                                Position pos = isiset->GetPosition();
+                                (*itr)->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), true);
                                 (*itr)->SetHealth((*itr)->GetMaxHealth());
                                 (*itr)->SetPower((*itr)->getPowerType(), (*itr)->GetMaxPower((*itr)->getPowerType()));
                                 (*itr)->RemoveAllAurasExceptType(SPELL_AURA_MANA_SHIELD);

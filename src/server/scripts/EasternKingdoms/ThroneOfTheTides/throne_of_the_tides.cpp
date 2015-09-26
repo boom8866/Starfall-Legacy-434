@@ -97,7 +97,7 @@ public:
                             creature->CastWithDelay(1250, creature, SPELL_WATER_WINDOW_JUMP_VISUAL, true);
                             creature->GetMotionMaster()->MovementExpired(false);
                             creature->GetMotionMaster()->MoveJump(eventSpawn[i].endPosition.m_positionX, eventSpawn[i].endPosition.m_positionY, eventSpawn[i].endPosition.m_positionZ, 10.0f, 10.0f);
-                            creature->SetOrientation(eventSpawn[i].endPosition.m_orientation);
+                            creature->SetOrientation(eventSpawn[i].endPosition.GetOrientation());
 
                             creature->SetHomePosition(eventSpawn[i].endPosition);
                             creature->m_Events.AddEvent(new MoveHomePos(creature), creature->m_Events.CalculateTime(2000));
