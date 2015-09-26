@@ -116,6 +116,7 @@ class CreatureAI;
 class ZoneScript;
 class Unit;
 class Transport;
+class WorldObject;
 
 typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
 
