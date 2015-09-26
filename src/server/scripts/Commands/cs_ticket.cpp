@@ -236,7 +236,10 @@ public:
 
         if (Player* player = ticket->GetPlayer())
             if (player->IsInWorld())
+            {
                 ticket->SendResponse(player->GetSession());
+                sTicketMgr->SetTicketStatus(player->GetSession(), ticketId, GMTICKET_STATUS_SURVEY);
+            }
 
         sTicketMgr->UpdateLastChange();
         return true;
