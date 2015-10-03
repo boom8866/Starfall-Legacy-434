@@ -357,10 +357,10 @@ void WorldSession::SendLfgPlayerLockInfo()
             {
                 uint8 diffCount = 7;
                 if (quest)
-                    diffCount =- player->GetWeeklyLFGRewardCount(quest->GetQuestId());
+                    diffCount = (diffCount - player->GetWeeklyLFGRewardCount(quest->GetQuestId()));
 
                 data << uint8(weeklyLimitReached);
-                data << uint32(1500 * (7 + (diffCount * 2)));                           // 1500 * completed runs this week (7 times total per week)
+                data << uint32(100000 - (12000 * diffCount));                       // 1500 * completed runs this week (7 times total per week)
                 data << uint32(100000);                                             // some sort of overall cap/weekly cap
                 data << uint32(CURRENCY_TYPE_VALOR_POINTS);                         // currency ID (Valor Points)
                 data << uint32(0);                                                  // tier1Quantity
