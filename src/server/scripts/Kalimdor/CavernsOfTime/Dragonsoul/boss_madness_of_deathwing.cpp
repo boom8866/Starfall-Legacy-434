@@ -73,7 +73,7 @@ enum Spells
     SPELL_CONCENTRATION_ALEXTRASZA  = 106641,
     SPELL_TRIGGER_ASPECT_BUFFS      = 106943,
     SPELL_CALM_MAELSTROM            = 109480,
-    SPELL_RIDE_VEHICLE              = 46598,
+    SPELL_RIDE_VEHICLE_HARDCODED    = 46598, 
     SPELL_REDUCE_DODGE_PARRY        = 110470,
 
     // Jump Pads
@@ -88,8 +88,8 @@ enum Events
     EVENT_EMERGE = 1,
     EVENT_ASSAULT_ASPECTS,
     EVENT_ASSAULT_ASPECT,
-
     EVENT_SEND_FRAME,
+
     EVENT_CATACLYSM,
     EVENT_ELEMENTIUM_BOLT,
     EVENT_MOVE_BOLT,
@@ -142,11 +142,11 @@ enum SpellVisualKits
 };
 
 Position const DeathwingPos = {-11903.9f, 11989.1f, -113.204f, 2.16421f};
-Position const TailPos      = {-11857.0f, 11795.6f, -73.9549f, 2.23402f};
-Position const WingLeftPos     = {-11941.2f, 12248.9f, 12.1499f, 1.98968f};
-Position const WingRightPos    = {-12097.8f, 12067.4f, 13.4888f, 2.21657f};
-Position const ArmLeftPos      = {-12005.8f, 12190.3f, -6.59399f, 2.1293f};
-Position const ArmRightPos     = {-12065.0f, 12127.2f, -3.2946f, 2.33874f};
+Position const TailPos = {-11857.0f, 11795.6f, -73.9549f, 2.23402f};
+Position const WingLeftPos = {-11941.2f, 12248.9f, 12.1499f, 1.98968f};
+Position const WingRightPos = {-12097.8f, 12067.4f, 13.4888f, 2.21657f};
+Position const ArmLeftPos = {-12005.8f, 12190.3f, -6.59399f, 2.1293f};
+Position const ArmRightPos = {-12065.0f, 12127.2f, -3.2946f, 2.33874f};
 Position const ThrallTeleport = {-12128.3f, 12253.8f, 0.0450132f, 5.456824f};
 
 class CarryingWindsDistanceCheck
@@ -185,6 +185,7 @@ public:
         Creature* armLeft;
         Creature* armRight;
         Creature* currentPlatform;
+        Creature* hpController;
         uint8 _armCounter;
 
         void Reset()
@@ -197,6 +198,7 @@ public:
             TalkToMap(SAY_AGGRO);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_SET_COMBAT_RES_LIMIT, 0, 0);
             events.ScheduleEvent(EVENT_ASSAULT_ASPECTS, 5000);
+            events.ScheduleEvent(EVENT_SEND_FRAME, 16000);
 
 
             me->SummonCreature(NPC_WING_TENTACLE, WingLeftPos, TEMPSUMMON_MANUAL_DESPAWN);
@@ -216,6 +218,7 @@ public:
         void EnterEvadeMode()
         {
             ResetTentacles();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             if (Creature* thrall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THRALL_MADNESS)))
                 thrall->AI()->DoAction(ACTION_RESET_ENCOUNTER);
             _EnterEvadeMode();
@@ -275,7 +278,7 @@ public:
                     summons.Summon(summon);
                     break;
                 case NPC_ARM_TENTACLE_2:
-                    armRight = summon;
+                    armLeft = summon;
                     summon->CastSpell(summon, SPELL_REDUCE_DODGE_PARRY, true);
                     summon->CastSpell(summon, SPELL_LIMB_EMERGE_VISUAL, false);
                     summon->SendPlaySpellVisualKit(VISUAL_2, 0);
@@ -305,6 +308,8 @@ public:
                     summons.Summon(summon);
                     break;
                 case BOSS_MADNESS_OF_DEATHWING_HP:
+                    hpController = summon;
+                    summon->CastSpell(me, SPELL_RIDE_VEHICLE_HARDCODED, true);
                     me->CastSpell(summon, SPELL_SHARE_HEALTH_1, true);
                     summon->CastSpell(me, SPELL_SHARE_HEALTH_2, true);
                     break;
@@ -326,9 +331,9 @@ public:
                     armLeft = NULL;
                     break;
                 case NPC_WING_TENTACLE:
-                    if (wingLeft->GetGUID() && wingLeft->GetGUID() == summon->GetGUID())
+                    if (wingLeft && wingLeft->GetGUID() == summon->GetGUID())
                         wingLeft = NULL;
-                    else if (wingRight->GetGUID() && wingRight->GetGUID() == summon->GetGUID())
+                    else if (wingRight && wingRight->GetGUID() == summon->GetGUID())
                         wingRight = NULL;
                     break;
                 default:
@@ -348,8 +353,13 @@ public:
         {
             switch (action)
             {
-                case 0:
+                case ACTION_TENTACLE_KILLED:
+                {
+                    uint8 random = urand(0, 1);
+                    DoPlaySoundToSet(me, random == 0 ? SOUND_AGONY_1 : SOUND_AGONY_2);
+                    events.ScheduleEvent(EVENT_ASSAULT_ASPECTS, 6500);
                     break;
+                }
                 default:
                     break;
             }
@@ -374,23 +384,29 @@ public:
                         if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_ARM_TENTACLE_1, 70.0f, true))
                             if (tentacle->GetGUID() == armRight->GetGUID())
                             {
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, armRight, 2);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_YSERA);
                             }
                         else if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_ARM_TENTACLE_2, 70.0f, true))
                             if (tentacle->GetGUID() == armLeft->GetGUID())
                             {
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, armLeft, 2);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_NOZDORMU);
                             }
                         else if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_WING_TENTACLE, 70.0f, true))
                             if (tentacle->GetGUID() == wingRight->GetGUID())
                             {
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, wingRight, 2);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_KALECGOS);
                             }
                             else if (tentacle->GetGUID() == wingLeft->GetGUID())
                             {
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, wingLeft, 2);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_ALEXSTRASZA);
                             }
                         break;
+                    case EVENT_SEND_FRAME:
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
                         break;
                     default:
                         break;
@@ -444,6 +460,9 @@ class boss_tentacle : public CreatureScript
             void JustDied(Unit* /*killer*/)
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                DoCast(me, SPELL_AGONIZING_PAIN, true);
+                if (Creature* deathwing = me->FindNearestCreature(BOSS_MADNESS_OF_DEATHWING, 200.0f, true))
+                    deathwing->AI()->DoAction(ACTION_TENTACLE_KILLED);
             }
 
             void UpdateAI(uint32 diff)
@@ -633,7 +652,7 @@ public:
                                 if (player->isAlive())
                                 {
                                     sLog->outError(LOG_FILTER_SQL, "Player %u", player->GetName());
-                                    if (target->GetDistance(player) <= 50.0f) // Platform radius
+                                    if (target->GetDistance(player) <= 55.0f) // Platform radius
                                         ++counter;
 
                                     if (counter > (players.getSize() > 1 ? players.getSize() / 2 - 1 : 0))
