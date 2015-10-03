@@ -2704,6 +2704,15 @@ class Player : public Unit, public GridObject<Player>
 
         bool isAllowedToLoot(const Creature* creature);
 
+        void UpdateWeeklyLFGRewardCount(uint32 questId);
+        uint8 GetWeeklyLFGRewardCount(uint32 questId) const;
+        uint8 m_lfg_reward_count;
+
+        bool CanLootWeeklyBoss(uint32 creatureEntry);
+        void SetWeeklyBossLooted(uint32 creatureEntry, bool looted);
+        std::list<uint32> GetKilledWeeklyBosses();
+        uint32 GetKilledWeeklyBossEncounterMask();
+
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
         uint8 GetRunesState() const { return m_runes->runeState; }
         RuneType GetBaseRune(uint8 index) const { return RuneType(m_runes->runes[index].BaseRune); }

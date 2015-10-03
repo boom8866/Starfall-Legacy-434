@@ -1546,6 +1546,20 @@ bool Creature::hasInvolvedQuest(uint32 quest_id) const
     return false;
 }
 
+bool Creature::IsLFRBoss(Player* looter) const
+{
+    if (GetMapId() == 967 && GetCreatureTemplate()->rank == 3)
+    {
+        if (looter->isGameMaster())
+            return true;
+
+        if (Group* group = looter->GetGroup())
+            if (group->GetGroupType() & GROUPTYPE_LFG)
+                return true;
+    }
+    return false;
+}
+
 void Creature::DeleteFromDB()
 {
     if (!m_DBTableGuid)

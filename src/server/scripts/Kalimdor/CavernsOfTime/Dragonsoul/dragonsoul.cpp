@@ -25,6 +25,10 @@ enum Spells
     // Generic Spells
     SPELL_WYRMREST_AGGRO            = 108488,
     SPELL_WYRMREST_DEFENSE_NUKE     = 108536,
+
+    // Dragon Defense
+    SPELL_DEFEND_WYRMREST           = 110763,
+    SPELL_ATTACK_WYRMREST           = 110768,
 };
 
 enum Events
@@ -101,7 +105,7 @@ Position const WyrmrestCaptainRightWaypoints[] =
 
 // We're using following position to decide between the required and the optional waves
 Position const FirstWaveComparisionLocation = { -2226.900f, -2400.812f, 85.263f };
-Position const SecondWaveComparisionLocation = { -2054.193f, -2407.005f, 73.233f };
+Position const SecondWaveComparisionLocation = { -2105.070f, -2417.100f, 74.343f };
 
 class npc_ds_lord_afrasastrasz : public CreatureScript
 {
@@ -137,7 +141,7 @@ public:
                         if (Creature* morchok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_MORCHOK)))
                             morchok->AI()->DoAction(ACTION_TRIGGER_FIRST_INTRO);
                     }
-                    else if (_gauntletCount == 6)
+                    else if (_gauntletCount == 5)
                     {
                         events.ScheduleEvent(EVENT_MOVE_TO_SECOND_LOCATION_1, 10000);
                         if (Creature* morchok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_MORCHOK)))
@@ -322,22 +326,22 @@ public:
         {
             switch (action)
             {
-            case ACTION_MOVE_TO_COMBAT:
-            {
-                std::list<Creature*> units;
-                GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_PROTECTOR, 10.0f);
-                GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_DEFENDER_1, 10.0f);
-                GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_DEFENDER_2, 10.0f);
-                if (!units.empty())
-                    for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                        (*itr)->GetMotionMaster()->MoveFollow(me, (*itr)->GetDistance2d(me), ((*itr)->GetAngle(me->GetPositionX(), me->GetPositionY()) + M_PI));
-                me->SetWalk(false);
-                if (me->GetDistance2d(WyrmrestCaptainLeftComparisionPosition.GetPositionX(), WyrmrestCaptainLeftComparisionPosition.GetPositionY() <= 15.0f))
-                    me->GetMotionMaster()->MovePoint(POINT_COMBAT_1, WyrmrestCaptainLeftWaypoints[0]);
-                    break;
-                }
-                default:
-                    break;
+                case ACTION_MOVE_TO_COMBAT:
+                {
+                    std::list<Creature*> units;
+                    GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_PROTECTOR, 10.0f);
+                    GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_DEFENDER_1, 10.0f);
+                    GetCreatureListWithEntryInGrid(units, me, NPC_WYRMREST_DEFENDER_2, 10.0f);
+                    if (!units.empty())
+                        for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                            (*itr)->GetMotionMaster()->MoveFollow(me, (*itr)->GetDistance2d(me), ((*itr)->GetAngle(me->GetPositionX(), me->GetPositionY()) + M_PI));
+                    me->SetWalk(false);
+                    if (me->GetDistance2d(WyrmrestCaptainLeftComparisionPosition.GetPositionX(), WyrmrestCaptainLeftComparisionPosition.GetPositionY() <= 15.0f))
+                        me->GetMotionMaster()->MovePoint(POINT_COMBAT_1, WyrmrestCaptainLeftWaypoints[0]);
+                        break;
+                    }
+                    default:
+                        break;
             }
         }
 
@@ -421,7 +425,7 @@ public:
                 if (Creature* afrasastrasz = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_LORD_AFRASASTRASZ)))
                     afrasastrasz->AI()->DoAction(ACTION_COUNT_MORCHOK_GAUNTLET);
             }
-            else if (me->GetHomePosition().GetExactDist2d(SecondWaveComparisionLocation.GetPositionX(), SecondWaveComparisionLocation.GetPositionY() <= 30.0f))
+            else if (me->GetHomePosition().GetExactDist2d(SecondWaveComparisionLocation.GetPositionX(), SecondWaveComparisionLocation.GetPositionY() <= 10.0f))
             {
                if (Creature* afrasastrasz = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_LORD_AFRASASTRASZ)))
                     afrasastrasz->AI()->DoAction(ACTION_COUNT_MORCHOK_GAUNTLET);
@@ -491,6 +495,56 @@ public:
     }
 };
 
+class npc_ds_earthen_soldier : public CreatureScript
+{
+public:
+    npc_ds_earthen_soldier() : CreatureScript("npc_ds_earthen_soldier") { }
+
+    struct npc_ds_earthen_soldierAI : public ScriptedAI
+    {
+        npc_ds_earthen_soldierAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = me->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+
+        void EnterCombat(Unit* /*victim*/)
+        {
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            if (me->GetHomePosition().GetExactDist2d(SecondWaveComparisionLocation.GetPositionX(), SecondWaveComparisionLocation.GetPositionY() <= 10.0f))
+            {
+                if (Creature* afrasastrasz = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_LORD_AFRASASTRASZ)))
+                    afrasastrasz->AI()->DoAction(ACTION_COUNT_MORCHOK_GAUNTLET);
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ds_earthen_soldierAI(creature);
+    }
+};
+
 void AddSC_dragonsoul()
 {
     new npc_ds_lord_afrasastrasz();
@@ -498,4 +552,5 @@ void AddSC_dragonsoul()
     new npc_ds_wyrmrest_captain();
     new npc_ds_earthen_destroyer();
     new npc_ds_ancient_water_lord();
+    new npc_ds_earthen_soldier();
 }

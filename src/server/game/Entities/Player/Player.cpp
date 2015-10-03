@@ -9904,6 +9904,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     PermissionTypes permission = ALL_PERMISSION;
 
     sLog->outDebug(LOG_FILTER_LOOT, "Player::SendLoot");
+
     if (IS_GAMEOBJECT_GUID(guid))
     {
         sLog->outDebug(LOG_FILTER_LOOT, "IS_GAMEOBJECT_GUID(guid)");
@@ -16543,6 +16544,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
                 }
                 else if (quest->IsDFQuest())
                 {
+
                     MailSender sender(MAIL_CREATURE, 34337 /* The Postmaster */);
                     MailDraft draft("Recovered Item", "We recovered a lost item in the twisting nether and noted that it was yours.$B$BPlease find said object enclosed.");
                     SQLTransaction trans = CharacterDatabase.BeginTransaction();
@@ -19218,6 +19220,9 @@ bool Player::isAllowedToLoot(const Creature* creature)
     if (HasPendingBind())
         return false;
 
+    if (!CanLootWeeklyBoss(creature->GetEntry()))
+        return false;
+
     const Loot* loot = &creature->loot;
     if (loot->isLooted()) // nothing to loot or everything looted.
         return false;
@@ -19269,6 +19274,123 @@ void Player::_SaveRBGStats(SQLTransaction& trans)
     stmt->setUInt32(2, ratedBGStats.WeeklyWins10vs10);
     stmt->setUInt32(3, ratedBGStats.PersonalRating);
     trans->Append(stmt);
+}
+
+void Player::UpdateWeeklyLFGRewardCount(uint32 questId)
+{
+    if (!GetWeeklyLFGRewardCount(questId)) // Check for existing quest counter. If not we're gonna create one
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_WEEKLY_LFG_REWARD);
+        stmt->setUInt32(0, GetGUIDLow());
+        stmt->setUInt32(1, questId);
+        CharacterDatabase.Execute(stmt);
+    }
+    else // Else we gonna update the existing counter
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_WEEKLY_LFG_REWARD);
+        stmt->setUInt32(0, GetGUIDLow());
+        stmt->setUInt32(1, questId);
+        CharacterDatabase.Execute(stmt);
+    }
+}
+
+uint8 Player::GetWeeklyLFGRewardCount(uint32 questId) const
+{
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_WEEKLY_LFG_REWARD_COUNT);
+    stmt->setUInt32(0, GetGUIDLow());
+    stmt->setUInt32(1, questId);
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
+
+    if (!result)
+        return 0;
+
+    Field* fields = result->Fetch();
+    return fields[0].GetUInt8();
+
+    return 0;
+}
+
+bool Player::CanLootWeeklyBoss(uint32 creatureEntry)
+{
+    if (!creatureEntry)
+        return true;
+
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_WEEKLY_BOSS_KILL);
+    stmt->setUInt32(0, GetGUIDLow());
+    stmt->setUInt32(1, creatureEntry);
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
+
+    if (!result)
+        return true;
+
+    Field* fields = result->Fetch();
+    bool weeklyBossLooted = fields[0].GetUInt8();
+
+    // The boss cannot be looted if the player has done it before this week.
+    if (weeklyBossLooted)
+        return false;
+
+    return true;
+}
+
+void Player::SetWeeklyBossLooted(uint32 creatureEntry, bool looted)
+{
+    if (!looted) // This is the first insertion when the player kills the boss and has not been looted yet.
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_WEEKLY_BOSS_KILL);
+        stmt->setUInt32(0, GetGUIDLow());
+        stmt->setUInt32(1, creatureEntry);
+        stmt->setUInt8(2, looted);
+        CharacterDatabase.Execute(stmt);
+    }
+    else // We call this once the boss has been looted to update set the field to true.
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_WEEKLY_BOSS_KILL);
+        stmt->setUInt8(0, looted);
+        stmt->setUInt32(1, GetGUIDLow());
+        stmt->setUInt32(2, creatureEntry);
+        CharacterDatabase.Execute(stmt);
+    }
+}
+
+std::list<uint32> Player::GetKilledWeeklyBosses()
+{
+    std::list<uint32> weeklyBossEntries;
+
+    // Get the entry of all the bosses the player looted, based on map and difficulty.
+    PreparedStatement* entryStmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_WEEKLY_BOSS_KILLS);
+    entryStmt->setUInt32(0, GetGUIDLow());
+
+    PreparedQueryResult entryResult = CharacterDatabase.Query(entryStmt);
+
+    if (entryResult)
+    {
+        do
+        {
+            Field* resultField = entryResult->Fetch();
+            uint32 weeklyBossEntry = resultField[0].GetUInt32();
+
+            weeklyBossEntries.push_back(weeklyBossEntry);
+        } while (entryResult->NextRow());
+    }
+
+    return weeklyBossEntries;
+}
+
+uint32 Player::GetKilledWeeklyBossEncounterMask()
+{
+    uint32 encounterMask = 0;
+
+    DungeonEncounterList const* encounters = sObjectMgr->GetDungeonEncounterList(967, Difficulty(RAID_DIFFICULTY_25MAN_NORMAL));
+    std::list<uint32> weeklyBossesKilled = GetKilledWeeklyBosses();
+
+    if (encounters && !weeklyBossesKilled.empty())
+        for (DungeonEncounterList::const_iterator itr = encounters->begin(); itr != encounters->end(); ++itr)
+            for (auto weeklyBossKilled : weeklyBossesKilled)
+                if ((*itr)->creditEntry == weeklyBossKilled)
+                    encounterMask |= 1 << (*itr)->dbcEntry->encounterIndex;
+
+    return encounterMask;
 }
 
 void Player::_LoadActions(PreparedQueryResult result)
@@ -24997,6 +25119,9 @@ void Player::SetDailyQuestStatus(uint32 quest_id)
             m_lastDailyQuestTime = time(NULL);
             m_DailyQuestChanged = true;
         }
+
+        if (qQuest->IsDFQuest() && qQuest->IsRepeatable())
+            UpdateWeeklyLFGRewardCount(quest_id);
     }
 }
 
@@ -25517,6 +25642,23 @@ bool Player::GetsRecruitAFriendBonus(bool forXP)
 
 void Player::RewardPlayerAndGroupAtKill(Unit* victim, bool isBattleGround)
 {
+    // Check for boss loot quests and add them as completed for the player / group.
+    if (victim->GetTypeId() == TYPEID_UNIT)
+        if (Creature* deadCreature = victim->ToCreature())
+        {
+            if (Group* group = GetGroup()) // Group case.
+            {
+                for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+                {
+                    if (Player* groupGuy = itr->getSource())
+                        if (IsInMap(groupGuy) && CanLootWeeklyBoss(deadCreature->GetEntry()), deadCreature->IsLFRBoss(groupGuy))
+                            groupGuy->SetWeeklyBossLooted(deadCreature->GetEntry(), false);
+                }
+            }
+            else if (CanLootWeeklyBoss(deadCreature->GetEntry()))
+                SetWeeklyBossLooted(deadCreature->GetEntry(), false);
+        }
+
     KillRewarder(this, victim, isBattleGround).Reward();
 }
 

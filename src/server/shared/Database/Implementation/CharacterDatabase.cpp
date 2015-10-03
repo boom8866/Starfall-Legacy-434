@@ -627,4 +627,18 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_INS_ANTICHEAT_LOG, "REPLACE INTO character_anticheat_log (guid, checktype, alarm_time, ival, fval) VALUES (?, ?, ?, ?, ?);", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_ANTICHEAT_LOG_FOR_PLAYER_GUID, "SELECT checktype, alarm_time, ival, fval FROM character_anticheat_log WHERE guid = ? ORDER BY alarm_time ASC", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_ANTICHEAT_LOG, "DELETE FROM character_anticheat_log WHERE alarm_time < ?", CONNECTION_ASYNC);
+
+    // LFG Weekly Counter
+    PrepareStatement(CHAR_INS_WEEKLY_LFG_REWARD, "INSERT INTO character_weekly_lfg_reward (guid, questId, count) VALUES (?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_WEEKLY_LFG_REWARD, "DELETE FROM character_weekly_lfg_reward", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPD_WEEKLY_LFG_REWARD, "UPDATE character_weekly_lfg_reward SET count = count + 1 WHERE guid = ? AND questId = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_WEEKLY_LFG_REWARD_COUNT, "SELECT count FROM character_weekly_lfg_reward WHERE guid = ? AND questId = ?", CONNECTION_SYNCH);
+
+    // LFR Weekly Loot
+    PrepareStatement(CHAR_INS_WEEKLY_BOSS_KILL, "INSERT INTO character_weekly_boss_kills (guid, entry, looted) VALUES (?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPD_WEEKLY_BOSS_KILL, "UPDATE character_weekly_boss_kills SET looted = ? WHERE guid = ? AND entry = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_WEEKLY_BOSS_KILL, "DELETE FROM character_weekly_boss_kills WHERE guid = ? AND entry = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_WEEKLY_BOSS_KILLS, "DELETE FROM character_weekly_boss_kills", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_WEEKLY_BOSS_KILL, "SELECT looted FROM character_weekly_boss_kills WHERE guid = ? AND entry = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_WEEKLY_BOSS_KILLS, "SELECT entry FROM character_weekly_boss_kills WHERE guid = ? AND looted = 0", CONNECTION_SYNCH);
 }

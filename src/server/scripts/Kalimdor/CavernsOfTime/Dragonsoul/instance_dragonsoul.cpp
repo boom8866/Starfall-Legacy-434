@@ -36,6 +36,7 @@ public:
             _alexstraszaMadnessGUID = 0;
             _thrallMadnessGUID = 0;
             _lordAfrasastraszGUID = 0;
+            SetBossState(DATA_HAGARA, DONE);
         }
 
         void OnCreatureCreate(Creature* creature)

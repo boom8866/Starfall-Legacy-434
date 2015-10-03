@@ -3002,10 +3002,16 @@ void World::SetPlayerSecurityLimit(AccountTypes _sec)
 
 void World::ResetWeeklyQuests()
 {
-    sLog->outInfo(LOG_FILTER_GENERAL, "Weekly quests reset for all characters.");
+    sLog->outInfo(LOG_FILTER_GENERAL, "Weekly quests reset and LFR Bound Loot for all characters.");
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_QUEST_STATUS_WEEKLY);
     CharacterDatabase.Execute(stmt);
+
+    PreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_DEL_WEEKLY_BOSS_KILLS);
+    CharacterDatabase.Execute(stmt2);
+
+    PreparedStatement* stmt3 = CharacterDatabase.GetPreparedStatement(CHAR_DEL_WEEKLY_LFG_REWARD);
+    CharacterDatabase.Execute(stmt3);
 
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second->GetPlayer())

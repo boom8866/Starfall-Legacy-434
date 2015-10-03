@@ -441,6 +441,19 @@ void WorldSession::DoLootRelease(uint64 lguid)
             if (!creature->isAlive())
                 creature->AllLootRemovedFromCorpse();
 
+            if (Player* player = GetPlayer())
+            {
+                if (Group* group = player->GetGroup())
+                {
+                    for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+                        if (Player* groupGuy = itr->getSource())
+                            if (player->IsInMap(groupGuy) && creature->IsLFRBoss(groupGuy) && groupGuy->CanLootWeeklyBoss(creature->GetEntry()))
+                                groupGuy->SetWeeklyBossLooted(creature->GetEntry(), true);
+                }
+                else if (creature->IsLFRBoss(player) && player->CanLootWeeklyBoss(creature->GetEntry()))
+                    player->SetWeeklyBossLooted(creature->GetEntry(), true);
+            }
+
             creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             loot->clear();
         }
