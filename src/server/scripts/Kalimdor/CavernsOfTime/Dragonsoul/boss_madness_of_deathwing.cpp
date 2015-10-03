@@ -77,9 +77,9 @@ enum Spells
     SPELL_REDUCE_DODGE_PARRY        = 110470,
 
     // Jump Pads
-    SPELL_CARRYING_WINDS            = 106664,
+    SPELL_CARRYING_WINDS_CAST       = 106673, // casted by Jump Pad
     SPELL_CARRYING_WINDS_EFFECT     = 106672,
-    SPELL_CARRYING_WINDS_JUMP       = 106664,
+    SPELL_CARRYING_WINDS            = 106664,
 };
 
 enum Events
@@ -148,6 +148,19 @@ Position const WingRightPos    = {-12097.8f, 12067.4f, 13.4888f, 2.21657f};
 Position const ArmLeftPos      = {-12005.8f, 12190.3f, -6.59399f, 2.1293f};
 Position const ArmRightPos     = {-12065.0f, 12127.2f, -3.2946f, 2.33874f};
 Position const ThrallTeleport = {-12128.3f, 12253.8f, 0.0450132f, 5.456824f};
+
+class CarryingWindsDistanceCheck
+{
+public:
+    CarryingWindsDistanceCheck(Unit* caster) : caster(caster) { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->GetDistance2d(caster) <= 10.0f);
+    }
+private:
+    Unit* caster;
+};
 
 class boss_madness_of_deathwing : public CreatureScript
 {
@@ -676,7 +689,7 @@ public:
 class spell_ds_carrying_winds_script : public SpellScriptLoader
 {
 public:
-    spell_ds_carrying_winds_script() : SpellScriptLoader("spell_ds_carrying_winds") { }
+    spell_ds_carrying_winds_script() : SpellScriptLoader("spell_ds_carrying_winds_script") { }
 
     class spell_ds_carrying_winds_script_SpellScript : public SpellScript
     {
@@ -684,17 +697,56 @@ public:
 
         void HandleScriptEffect(SpellEffIndex /*effIndex*/)
         {
+            if (Unit* target = GetHitUnit())
+                target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_0].BasePoints, true);
         }
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_ds_carrying_winds_script_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_ds_carrying_winds_script_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
     SpellScript* GetSpellScript() const
     {
         return new spell_ds_carrying_winds_script_SpellScript();
+    }
+};
+
+class spell_ds_carrying_winds : public SpellScriptLoader
+{
+public:
+    spell_ds_carrying_winds() : SpellScriptLoader("spell_ds_carrying_winds") { }
+
+    class spell_ds_carrying_winds_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_carrying_winds_SpellScript);
+
+        void SelectJumpTarget(WorldObject*& target)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                std::list<Creature*> units;
+                GetCreatureListWithEntryInGrid(units, caster, NPC_JUMP_PAD, 55.0f);
+
+                for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); itr++)
+                    if (caster->isInFront(*itr))
+                    {
+                        target = (*itr);
+                        break;
+                    }
+            }
+        }
+
+        void Register() override
+        {
+            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_ds_carrying_winds_SpellScript::SelectJumpTarget, EFFECT_0, TARGET_DEST_NEARBY_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_ds_carrying_winds_SpellScript();
     }
 };
 
@@ -705,7 +757,8 @@ class at_ds_carrying_winds : public AreaTriggerScript
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
         {
-
+            if (Creature* pad = player->FindNearestCreature(NPC_JUMP_PAD, 20.0f, true))
+                pad->CastSpell(player, SPELL_CARRYING_WINDS_CAST, true);
             return true;
         }
 };
@@ -719,5 +772,7 @@ void AddSC_boss_madness_of_deathwing()
     new spell_ds_assault_aspects();
     new spell_ds_concentration();
     new spell_ds_carrying_winds_script();
+    new spell_ds_carrying_winds();
     new at_ds_carrying_winds();
+
 }

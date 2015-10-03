@@ -393,8 +393,6 @@ void WorldSession::SendLfgPlayerLockInfo()
                 break;
         }
 
-        sLog->outError(LOG_FILTER_GENERAL, "mask = %u", player->GetKilledWeeklyBossEncounterMask());
-
         if (dungeonId != 300 && dungeonId != 416 && dungeonId != 417 && cta)
         {
             data << uint8(cta);                                             // Call to Arms eligible
