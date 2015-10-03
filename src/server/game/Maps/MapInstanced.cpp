@@ -142,15 +142,7 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
     }
     else
     {
-        uint32 BindDifficulty;
-        const MapEntry* mapEntry = sMapStore.LookupEntry(mapId);
-
-        if (mapEntry->IsDynamicDifficultyMap())
-            BindDifficulty = player->GetDifficulty(IsRaid()) >= RAID_DIFFICULTY_10MAN_HEROIC ? player->GetDifficulty(IsRaid()) - RAID_DIFFICULTY_10MAN_HEROIC : player->GetDifficulty(IsRaid());
-        else
-            BindDifficulty = player->GetDifficulty(IsRaid());
-
-        InstancePlayerBind* pBind = player->GetBoundInstance(GetId(), (Difficulty)BindDifficulty);
+        InstancePlayerBind* pBind = player->GetBoundInstance(GetId(), player->GetDifficulty(IsRaid()));
         InstanceSave* pSave = pBind ? pBind->save : NULL;
 
         // the player's permanent player bind is taken into consideration first
@@ -173,19 +165,28 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
             newInstanceId = pSave->GetInstanceId();
             map = FindInstanceMap(newInstanceId);
 
+            // Shared locks: create an instance to match the current player raid difficulty, if the save and player difficulties don't match.
+            // We must check for save difficulty going original diff -> new one, and map spawn mode going new -> original, to make sure all cases are handled.
+            // Although Heroic 10 / 25 Man also theoretically share a cooldown, if you kill a boss on 10 / 25 Heroic you cannot enter any other Heroic size version of the raid (cannot switch).
+            // Heroic size switching is already handled with no checks needed. The map is created on the save difficulty and you can only switch difficulty dynamically, from inside.
+            if (IsRaid() && (pSave->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || pSave->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL))
+            {
+                // Normal. The map is created on the player difficulty.
+                if (player->GetDifficulty(IsRaid()) != pSave->GetDifficulty() || map && map->GetSpawnMode() != player->GetDifficulty(IsRaid()))
+                    map = CreateInstance(newInstanceId, pSave, player->GetDifficulty(IsRaid()));
+            }
+
             // it is possible that the save exists but the map doesn't
             if (!map)
-                map = CreateInstance(newInstanceId, pSave, player->GetDifficulty(IsRaid()));
+                map = CreateInstance(newInstanceId, pSave, pSave->GetDifficulty());
         }
         else
         {
-            // if no instanceId via group members or instance saves is found
-            // the instance will be created for the first time
+            // If no instanceId via group members or instance saves is found, the instance will be created for the first time.
             newInstanceId = sMapMgr->GenerateInstanceId();
 
             Difficulty diff = player->GetGroup() ? player->GetGroup()->GetDifficulty(IsRaid()) : player->GetDifficulty(IsRaid());
-            //Seems it is now possible, but I do not know if it should be allowed
-            //ASSERT(!FindInstanceMap(NewInstanceId));
+
             map = FindInstanceMap(newInstanceId);
             if (!map)
                 map = CreateInstance(newInstanceId, NULL, diff);
