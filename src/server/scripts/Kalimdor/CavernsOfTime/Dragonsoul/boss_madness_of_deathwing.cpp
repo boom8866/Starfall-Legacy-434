@@ -79,7 +79,7 @@ enum Spells
     // Jump Pads
     SPELL_CARRYING_WINDS_CAST       = 106673, // casted by Jump Pad
     SPELL_CARRYING_WINDS_EFFECT     = 106672,
-    SPELL_CARRYING_WINDS            = 106664,
+    SPELL_CARRYING_WINDS_SPEED      = 106664,
 };
 
 enum Events
@@ -698,7 +698,10 @@ public:
         void HandleScriptEffect(SpellEffIndex /*effIndex*/)
         {
             if (Unit* target = GetHitUnit())
+            {
                 target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_0].BasePoints, true);
+                target->CastSpell(target, SPELL_CARRYING_WINDS_SPEED, true);
+            }
         }
 
         void Register()
