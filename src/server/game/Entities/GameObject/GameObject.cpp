@@ -203,6 +203,15 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         return false;
     }
 
+    if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+    {
+        if (sTransportAnimationsByEntry.find(goinfo->entry) == sTransportAnimationsByEntry.end())
+        {
+            sLog->outError(LOG_FILTER_SQL, "Gameobject Transport (GUID: %u Entry: %u) not created: non-existing frames in TransportAnimation.dbc. It will crash client if created.", guidlow, name_id);
+            return false;
+        }
+    }
+
     SetFloatValue(GAMEOBJECT_PARENTROTATION+0, rotation0);
     SetFloatValue(GAMEOBJECT_PARENTROTATION+1, rotation1);
 
@@ -247,6 +256,9 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         case GAMEOBJECT_TYPE_TRANSPORT:
         {
             SetUInt32Value(GAMEOBJECT_LEVEL, getMSTime());
+            // BWD Nef platform / HOO elevator / Deathwhisper elevator manual settings.
+            if (goinfo->entry == 207834 || goinfo->entry == 207547 || goinfo->entry == 202220 || goinfo->entry == 193182 || goinfo->entry == 193183 || goinfo->entry == 193184 || goinfo->entry == 193185)
+                SetManualAnim(true); // Set manual commands
             if (goinfo->transport.startOpen)
                 SetGoState(GO_STATE_ACTIVE);
             //SetGoAnimProgress(animprogress);
@@ -915,7 +927,7 @@ bool GameObject::IsDynTransport() const
     if (!gInfo)
         return false;
 
-    return gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT || (gInfo->type == GAMEOBJECT_TYPE_TRANSPORT && !gInfo->transport.startFrame);
+    return gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT || (gInfo->type == GAMEOBJECT_TYPE_TRANSPORT && !gInfo->transport.startFrame == 0);
 }
 
 bool GameObject::IsDestructibleBuilding() const
@@ -2096,6 +2108,7 @@ void GameObject::SetGoState(GOState state)
 
         EnableCollision(collision);
     }
+
     if (oldState != state && (m_updateFlag & UPDATEFLAG_TRANSPORT_ARR))
         SetUInt32Value(GAMEOBJECT_LEVEL, getMSTime() + CalculateAnimDuration(oldState, state));
 }
