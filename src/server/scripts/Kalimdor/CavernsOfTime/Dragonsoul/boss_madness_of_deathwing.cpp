@@ -89,25 +89,19 @@ enum Events
     EVENT_ASSAULT_ASPECTS,
     EVENT_ASSAULT_ASPECT,
     EVENT_SEND_FRAME,
-
-    EVENT_CATACLYSM,
-    EVENT_ELEMENTIUM_BOLT,
-    EVENT_MOVE_BOLT,
-    EVENT_SCHEDULE_ATTACK,
-    EVENT_FALL_DOWN,
-    EVENT_FALLEN,
-
-    EVENT_SUMMON_CORRUPTION,
+    
+    // Mutated Corruption
     EVENT_CRUSH_SUMMON,
-    EVENT_CRUSH,
     EVENT_IMPALE,
+
+    // Platform
+    EVENT_TRANSMIT_PLAYER_COUNT,
 };
 
 enum Actions
 {
     ACTION_BEGIN_BATTLE = 1,
     ACTION_RESET_ENCOUNTER,
-    ACTION_SELECT_TENTACLE,
     ACTION_TENTACLE_KILLED,
     ACTION_COUNT_PLAYER,
 };
@@ -243,10 +237,34 @@ public:
                 Talk(SAY_SLAY);
         }
 
-        void SelectPlatform(Creature* platform)
+        void SelectPlatform(Creature* platform, uint8 count)
         {
-            currentPlatform = platform;
-            events.ScheduleEvent(EVENT_ASSAULT_ASPECT, 500);
+            uint8 currentAlivePlayers = 0;
+            Map::PlayerList const &playerList = me->GetMap()->GetPlayers();
+            if (!playerList.isEmpty())
+            {
+                for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                    if (Player* plr = itr->getSource())
+                        if (plr->isAlive())
+                            currentAlivePlayers++;
+            }
+
+            if (currentAlivePlayers > 0)
+            {
+                sLog->outError(LOG_FILTER_GENERAL, "platform counted %u players!", count);
+                sLog->outError(LOG_FILTER_GENERAL, "counted %u alive players!", currentAlivePlayers);
+                if (count > (currentAlivePlayers / 2))
+                    currentPlatform = platform;
+                else
+                    SelectRandomPlatform();
+
+                events.ScheduleEvent(EVENT_ASSAULT_ASPECT, 500);
+            }
+        }
+
+        void SelectRandomPlatform()
+        {
+
         }
 
         void ResetTentacles()
@@ -382,28 +400,34 @@ public:
                         break;
                     case EVENT_ASSAULT_ASPECT:
                         if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_ARM_TENTACLE_1, 70.0f, true))
-                            if (tentacle->GetGUID() == armRight->GetGUID())
+                        {
+                            if (armRight && tentacle->GetGUID() == armRight->GetGUID())
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, armRight, 2);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_YSERA);
                             }
+                        }
                         else if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_ARM_TENTACLE_2, 70.0f, true))
-                            if (tentacle->GetGUID() == armLeft->GetGUID())
+                        {
+                            if (armLeft && tentacle->GetGUID() == armLeft->GetGUID())
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, armLeft, 2);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_NOZDORMU);
                             }
+                        }
                         else if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_WING_TENTACLE, 70.0f, true))
-                            if (tentacle->GetGUID() == wingRight->GetGUID())
+                        {
+                            if (wingRight && tentacle->GetGUID() == wingRight->GetGUID())
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, wingRight, 2);
-                                TalkToMap(SAY_ANNOUNCE_ATTACK_KALECGOS);
-                            }
-                            else if (tentacle->GetGUID() == wingLeft->GetGUID())
-                            {
-                                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, wingLeft, 2);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_ALEXSTRASZA);
                             }
+                            else if (wingLeft && tentacle->GetGUID() == wingLeft->GetGUID())
+                            {
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, wingLeft, 2);
+                                TalkToMap(SAY_ANNOUNCE_ATTACK_KALECGOS);
+                            }
+                        }
                         break;
                     case EVENT_SEND_FRAME:
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
@@ -461,7 +485,7 @@ class boss_tentacle : public CreatureScript
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 DoCast(me, SPELL_AGONIZING_PAIN, true);
-                if (Creature* deathwing = me->FindNearestCreature(BOSS_MADNESS_OF_DEATHWING, 200.0f, true))
+                if (Creature* deathwing = me->FindNearestCreature(BOSS_MADNESS_OF_DEATHWING, 500.0f, true))
                     deathwing->AI()->DoAction(ACTION_TENTACLE_KILLED);
             }
 
@@ -525,7 +549,7 @@ class npc_ds_mutated_corruption : public CreatureScript
             {
                 me->SetInCombatWithZone();
                 me->PlayOneShotAnimKit(ANIM_KIT_EMERGE_2);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
             }
 
             void UpdateAI(uint32 diff)
@@ -628,6 +652,62 @@ public:
     }
 };
 
+class npc_ds_platform : public CreatureScript
+{
+public:
+    npc_ds_platform() : CreatureScript("npc_ds_platform") { }
+
+    struct npc_ds_platformAI : public ScriptedAI
+    {
+        npc_ds_platformAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = me->GetInstanceScript();
+            playerCount = 0;
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+        uint8 playerCount;
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_COUNT_PLAYER:
+                    playerCount++;
+                    events.CancelEvent(EVENT_TRANSMIT_PLAYER_COUNT);
+                    events.ScheduleEvent(EVENT_TRANSMIT_PLAYER_COUNT, 100);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_TRANSMIT_PLAYER_COUNT:
+                        if (Creature* deathwing = me->FindNearestCreature(BOSS_MADNESS_OF_DEATHWING, 500.0f, true))
+                            CAST_AI(boss_madness_of_deathwing::boss_madness_of_deathwingAI, deathwing->AI())->SelectPlatform(me, playerCount);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ds_platformAI(creature);
+    }
+};
+
 class spell_ds_assault_aspects : public SpellScriptLoader
 {
 public:
@@ -640,30 +720,8 @@ public:
         void HandleHit(SpellEffIndex /*effIndex*/)
         {
             if (Player* target = GetHitPlayer())
-            {
                 if (Creature* platform = target->FindNearestCreature(NPC_PLATFORM_STALKER, 50.0f))
-                    if (Creature* deathwing = platform->FindNearestCreature(BOSS_MADNESS_OF_DEATHWING, 500.0f))
-                    {
-                        uint8 counter = 0;
-                        Map::PlayerList const& players = deathwing->GetMap()->GetPlayers();
-                        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                            if (Player* player = itr->getSource())
-                            {
-                                if (player->isAlive())
-                                {
-                                    sLog->outError(LOG_FILTER_SQL, "Player %u", player->GetName());
-                                    if (target->GetDistance(player) <= 55.0f) // Platform radius
-                                        ++counter;
-
-                                    if (counter > (players.getSize() > 1 ? players.getSize() / 2 - 1 : 0))
-                                    {
-                                        sLog->outError(LOG_FILTER_SQL, "Counted players. Lets trigger selection function");
-                                        CAST_AI(boss_madness_of_deathwing::boss_madness_of_deathwingAI, deathwing->AI())->SelectPlatform(platform);
-                                    }
-                                }
-                            }
-                    }
-            }
+                    platform->AI()->DoAction(ACTION_COUNT_PLAYER);
         }
 
         void Register()
@@ -772,6 +830,33 @@ public:
     }
 };
 
+class spell_ds_agonizing_pain : public SpellScriptLoader
+{
+public:
+    spell_ds_agonizing_pain() : SpellScriptLoader("spell_ds_agonizing_pain") { }
+
+    class spell_ds_agonizing_pain_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_agonizing_pain_SpellScript);
+
+        void CalculateDamage(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                SetHitDamage(target->GetMaxHealth() * 0.2f);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_ds_agonizing_pain_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ds_agonizing_pain_SpellScript();
+    }
+};
+
 class at_ds_carrying_winds : public AreaTriggerScript
 {
     public:
@@ -791,10 +876,12 @@ void AddSC_boss_madness_of_deathwing()
     new boss_tentacle();
     new npc_thrall_madness();
     new npc_ds_mutated_corruption();
+    new npc_ds_platform();
     new spell_ds_assault_aspects();
     new spell_ds_concentration();
     new spell_ds_carrying_winds_script();
     new spell_ds_carrying_winds();
-    new at_ds_carrying_winds();
+    new spell_ds_agonizing_pain();
 
+    new at_ds_carrying_winds();
 }
