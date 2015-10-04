@@ -31,6 +31,9 @@ enum Texts
     // Aspects
     SAY_ASSAULTED                   = 0,
     SAY_CATACLYSM                   = 1,
+
+    // Tentacles
+    SAY_ANNOUNCE_BLISTERING_TENTACLES = 0,
 };
 
 enum Spells
@@ -43,6 +46,8 @@ enum Spells
     SPELL_CATACLYSM                 = 106523,
     SPELL_AGONIZING_PAIN            = 106548,
     SPELL_TRIGGER_ASPECT_BUFFS      = 106943,
+    SPELL_REGENERATIVE_BLOOD        = 105932,
+    SPELL_REGENERATIVE_BLOOD_SCRIPT = 105934,
 
     SPELL_ELEMENTIUM_BOLT           = 105651,
     SPELL_ELEMENTIUM_BOLT_TRIGGERED = 105599,
@@ -53,6 +58,9 @@ enum Spells
     // Tentacles
     SPELL_LIMB_EMERGE_VISUAL        = 107991,
     SPELL_TRIGGER_CONCENTRATION     = 106940,
+    SPELL_HEMORRHAGE                = 105863, // deathwing casts 
+    SPELL_BURNING_BLOOD             = 105401,
+    SPELL_SPAWN_BLISTERING_TENTACLE = 105549,
 
     // Elementium Meteor
     SPELL_ELEMENTIUM_METEOR         = 106242, // Target Platform
@@ -67,6 +75,13 @@ enum Spells
     SPELL_CRUSH                     = 109628,
     SPELL_CRUSH_SUMMON_AOE          = 106382,
     SPELL_CRUSH_SUMMON_TRIGGERED    = 106384,
+
+    // Renegerative Blood
+    SPELL_DEGENERATIVE_BITE         = 105842,
+    SPELL_REGENERATIVE_BLOOD_HEAL   = 105937,
+
+    // Blistering Tentacles
+    SPELL_BLISTERING_HEAT           = 105444,
 
     // Ysera
     SPELL_THE_DREAMER               = 106463,
@@ -92,6 +107,8 @@ enum Spells
     SPELL_CONCENTRATION_YSERA       = 106643,
     SPELL_CONCENTRATION_NOZDORMU    = 106642,
     SPELL_CONCENTRATION_ALEXSTRASZA = 106641,
+
+    SPELL_PRESENCE_OF_THE_DRAGONSOUL = 109247,
     SPELL_CALM_MAELSTROM            = 109480,
     SPELL_RIDE_VEHICLE_HARDCODED    = 46598, 
     SPELL_REDUCE_DODGE_PARRY        = 110470,
@@ -112,6 +129,9 @@ enum Events
     EVENT_SUMMON_MUTATED_CORRUPTION,
     EVENT_CATACLYSM,
     
+    // Tentacles
+    EVENT_BURNING_BLOOD,
+
     // Dragon Aspects
     EVENT_SAY_CATACLYSM,
 
@@ -135,6 +155,9 @@ enum Actions
     ACTION_TENTACLE_KILLED,
     ACTION_COUNT_PLAYER,
 
+    // Tentacles
+    ACTION_PLATFORM_ENGAGED,
+
     // Dragon Aspects
     ACTION_ASSAULT_ASPECT,
     ACTION_CONCENTRATE_DEATHWING,
@@ -145,9 +168,6 @@ enum Sounds
 {
     SOUND_AGONY_1       = 26348,
     SOUND_AGONY_2       = 26349,
-
-    SOUND_CATACLYSM_1   = 26357,
-    SOUND_CATACLYSM_2   = 26358,
 };
 
 enum AnimKits
@@ -304,7 +324,7 @@ public:
             me->SetReactState(REACT_PASSIVE);
         }
 
-        void IsSummonedBy(Unit* summoner)
+        void IsSummonedBy(Unit* /*summoner*/)
         {
             me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
             me->SetInCombatWithZone();
@@ -509,6 +529,7 @@ public:
                             if (armRight && tentacle->GetGUID() == armRight->GetGUID())
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, armRight, 2);
+                                armRight->AI()->DoAction(ACTION_PLATFORM_ENGAGED);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_YSERA);
                                 if (Creature* ysera = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_YSERA_MADNESS)))
                                     ysera->AI()->DoAction(ACTION_ASSAULT_ASPECT);
@@ -519,6 +540,7 @@ public:
                             if (armLeft && tentacle->GetGUID() == armLeft->GetGUID())
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, armLeft, 2);
+                                armLeft->AI()->DoAction(ACTION_PLATFORM_ENGAGED);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_NOZDORMU);
                                 if (Creature* nozdormu = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_NOZDORMU_MADNESS)))
                                     nozdormu->AI()->DoAction(ACTION_ASSAULT_ASPECT);
@@ -529,6 +551,7 @@ public:
                             if (wingRight && tentacle->GetGUID() == wingRight->GetGUID())
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, wingRight, 2);
+                                wingRight->AI()->DoAction(ACTION_PLATFORM_ENGAGED);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_ALEXSTRASZA);
                                 if (Creature* alexstrasza = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ALEXSTRASZA_MADNESS)))
                                     alexstrasza->AI()->DoAction(ACTION_ASSAULT_ASPECT);
@@ -536,6 +559,7 @@ public:
                             else if (wingLeft && tentacle->GetGUID() == wingLeft->GetGUID())
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, wingLeft, 2);
+                                wingLeft->AI()->DoAction(ACTION_PLATFORM_ENGAGED);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_KALECGOS);
                                 if (Creature* kalecgos = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_KALECGOS_MADNESS)))
                                     kalecgos->AI()->DoAction(ACTION_ASSAULT_ASPECT);
@@ -578,13 +602,16 @@ class boss_tentacle : public CreatureScript
 
         struct boss_tentacleAI : public ScriptedAI
         {
-            boss_tentacleAI(Creature* creature) : ScriptedAI(creature)
+            boss_tentacleAI(Creature* creature) : ScriptedAI(creature), summons(me)
             {
                 instance = me->GetInstanceScript();
+                _blisteringCount = 0;
             }
 
             InstanceScript* instance;
             EventMap events;
+            SummonList summons;
+            uint8 _blisteringCount;
 
             void InitializeAI()
             {
@@ -596,11 +623,54 @@ class boss_tentacle : public CreatureScript
                 me->SetInCombatWithZone();
             }
 
+            void JustSummoned(Creature* summon)
+            {
+                switch (summon->GetEntry())
+                {
+                    case NPC_BLISTERING_TENTACLE:
+                        summon->SetReactState(REACT_PASSIVE);
+                        summon->SetInCombatWithZone();
+                        summon->CastSpell(summon, SPELL_PRESENCE_OF_THE_DRAGONSOUL, true);
+                        summon->CastSpell(summon, SPELL_BLISTERING_HEAT, true);
+                        summon->CastWithDelay(50, me, SPELL_RIDE_VEHICLE_HARDCODED, true);
+                        summons.Summon(summon);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            void DamageTaken(Unit* /*attacker*/, uint32& damage)
+            {
+                if (me->HealthBelowPct(75) && _blisteringCount == 0)
+                {
+                    TalkToMap(SAY_ANNOUNCE_BLISTERING_TENTACLES);
+                    _blisteringCount++;
+                    for (uint8 i = 0; i < 7; i++)
+                        DoCast(me, SPELL_SPAWN_BLISTERING_TENTACLE, true);
+                }
+                if (me->HealthBelowPct(50) && _blisteringCount == 1)
+                {
+                    TalkToMap(SAY_ANNOUNCE_BLISTERING_TENTACLES);
+                    _blisteringCount++;
+                    for (uint8 i = 0; i < 7; i++)
+                        DoCast(me, SPELL_SPAWN_BLISTERING_TENTACLE, true);
+                }
+                if (me->HealthBelowPct(25) && _blisteringCount == 2)
+                {
+                    TalkToMap(SAY_ANNOUNCE_BLISTERING_TENTACLES);
+                    _blisteringCount++;
+                    for (uint8 i = 0; i < 7; i++)
+                        DoCast(me, SPELL_SPAWN_BLISTERING_TENTACLE, true);
+                }
+            }
+
             void DoAction(int32 action)
             {
                 switch (action)
                 {
-                    case 0:
+                    case ACTION_PLATFORM_ENGAGED:
+                        events.ScheduleEvent(EVENT_BURNING_BLOOD, 10000);
                         break;
                     default:
                         break;
@@ -610,6 +680,7 @@ class boss_tentacle : public CreatureScript
             void JustDied(Unit* /*killer*/)
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                summons.DespawnAll();
                 DoCast(me, SPELL_AGONIZING_PAIN, true);
                 if (Creature* deathwing = me->FindNearestCreature(BOSS_MADNESS_OF_DEATHWING, 500.0f, true))
                     deathwing->AI()->DoAction(ACTION_TENTACLE_KILLED);
@@ -624,7 +695,8 @@ class boss_tentacle : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case 0:
+                        case EVENT_BURNING_BLOOD:
+                            DoCast(me, SPELL_BURNING_BLOOD, true);
                             break;
                         default:
                             break;
@@ -1371,6 +1443,36 @@ public:
     }
 };
 
+class spell_ds_burning_blood : public SpellScriptLoader
+{
+public:
+    spell_ds_burning_blood() : SpellScriptLoader("spell_ds_burning_blood") { }
+
+    class spell_ds_burning_blood_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_burning_blood_SpellScript);
+
+        void CalculateDamage(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                float health = (100.0f - caster->GetHealthPct());
+                SetHitDamage(GetHitDamage() * health);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_ds_burning_blood_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ds_burning_blood_SpellScript();
+    }
+};
+
 class at_ds_carrying_winds : public AreaTriggerScript
 {
     public:
@@ -1402,6 +1504,7 @@ void AddSC_boss_madness_of_deathwing()
     new spell_ds_agonizing_pain();
     new spell_ds_crush_summon();
     new spell_ds_trigger_concentration();
+    new spell_ds_burning_blood();
 
     new at_ds_carrying_winds();
 }

@@ -8,16 +8,21 @@
 23:27:54.734 -- alextrasza conc
 
 
--------
-23:31:05.212 -- i am deathwing
-23:31:05.087 -- con
-23:31:05.492 -- deathwing hp share npc engage
-23:31:05.056 -- 
-23:20:14.453 -- 
-23:20:14.453 trigger aspec buffs
-
 20:06:36.443 -- acestral recall
 20:06:41.887 -- trigger aspect buffs
+
+
+23:20:24.609 --
+
+23:21:42.844 -- regenerative blood deathwing trigger
+23:21:43.046 -- regenerative blood spawned
+23:21:43.842 -- deathwing cast degenerative blood scrip
+
+
+23:20:24.609 -- engage
+23:20:34.562 -- burning blood cast
+
+23:22:03.685 -- spawn blistering tentacles x7
 
 */
 
@@ -47,6 +52,11 @@ UPDATE `creature_template` SET `scriptname`= 'npc_ds_alexstrasza_madness' WHERE 
 UPDATE `creature_template` SET `flags_extra`= 131, `InhabitType`= 4 WHERE `entry` IN (56699, 56307, 57882, 57378);
 -- Mutated Corruption
 UPDATE `creature_template` SET `scriptname`= 'npc_ds_mutated_corruption', `InhabitType`= 4, `exp`= 3, `Minlevel`= 88, `Maxlevel`= 88, `faction`= 14, `unit_flags2`= 134217728 WHERE `entry`= 56471;
+-- Regenerative Blood
+UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction`= 14, `vehicleId`= 1857, `exp`= 3, `scriptname`= 'npc_ds_regenerative_blood' WHERE `entry`= 56263;
+-- Blistering Tentacle
+UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction`= 14, `unit_flags2`= 134217728, `exp`= 3 WHERE `entry`= 56188;
+
 
 -- Deathwing
 UPDATE `creature_template` SET `scriptname`= 'boss_madness_of_deathwing', `unit_flags2`= 134250496 WHERE `entry`= 56173;
@@ -83,7 +93,12 @@ REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `languag
 (56102, 1, 0, 'Hurry, heroes. In mere moments Deathwing''s Cataclysm will complete what he begun and end the world. Join me in the attack, now!', 14, 0, 100, 0, 0, 25951, 'Nozdormu - Cataclysm'),
 -- Alexstrasza
 (56099, 0, 0, 'I will cleanse whatever corruption I can; my fire will not harm you.', 14, 0, 100, 0, 0, 26498, 'Alexstrasza - Assaulted'),
-(56099, 1, 0, 'No! Such power! Deathwing''s summoning of the final Cataclysm will destroy all life on Azeroth. Quickly, we must interrupt him!', 14, 0, 100, 0, 0, 26500, 'Alexstrasza - Cataclysm');
+(56099, 1, 0, 'No! Such power! Deathwing''s summoning of the final Cataclysm will destroy all life on Azeroth. Quickly, we must interrupt him!', 14, 0, 100, 0, 0, 26500, 'Alexstrasza - Cataclysm'),
+-- Tentacles
+(56168, 0, 0, '|TInterface\\Icons\\ability_warrior_bloodnova.blp:20|tThe %s is injured and sprouts |cFFFE9A2EBlistering Tentacles|r!', 41, 0, 100, 0, 0, 0, 'Tentacle - Blistering'),
+(56167, 0, 0, '|TInterface\\Icons\\ability_warrior_bloodnova.blp:20|tThe %s is injured and sprouts |cFFFE9A2EBlistering Tentacles|r!', 41, 0, 100, 0, 0, 0, 'Tentacle - Blistering'),
+(56846, 0, 0, '|TInterface\\Icons\\ability_warrior_bloodnova.blp:20|tThe %s is injured and sprouts |cFFFE9A2EBlistering Tentacles|r!', 41, 0, 100, 0, 0, 0, 'Tentacle - Blistering');
+
 
 DELETE FROM `creature` WHERE `id` IN (56846, 56167, 56168, 56844, 56173);
 
@@ -125,7 +140,8 @@ INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, Sourc
 (13, 7, 109584, 0, 0, 31, 0, 3, 56168, 0, 0, 0, '', 'Expose Weakness Alexstrasza - Target Wing Tentacle');
 
 
-DELETE FROM `spell_script_names` WHERE spell_id IN (107018, 106644, 106643, 106642, 106641, 106664, 106673, 106672, 106548, 106382, 106940);
+DELETE FROM `spell_script_names` WHERE spell_id IN (107018, 106644, 106643, 106642, 106641, 106664, 106673, 106672, 106548, 106382, 106940,
+105408, 109612, 109613, 109614);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (107018, 'spell_ds_assault_aspects'),
 (106644, 'spell_ds_concentration'),
@@ -136,7 +152,11 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (106672, 'spell_ds_carrying_winds'),
 (106548, 'spell_ds_agonizing_pain'),
 (106382, 'spell_ds_crush_summon'),
-(106940, 'spell_ds_trigger_concentration');
+(106940, 'spell_ds_trigger_concentration'),
+(105408, 'spell_ds_burning_blood'),
+(109612, 'spell_ds_burning_blood'),
+(109613, 'spell_ds_burning_blood'),
+(109614, 'spell_ds_burning_blood');
 
 
 SET @ID := 5610100;

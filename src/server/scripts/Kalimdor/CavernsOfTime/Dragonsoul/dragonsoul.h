@@ -67,6 +67,7 @@ enum CreatureIds
     NPC_ELEMENTIUM_BOLT             = 56262,
     NPC_JUMP_PAD                    = 56699,
     NPC_COSMETIC_TENTACLE           = 57693,
+    NPC_BLISTERING_TENTACLE         = 56188,
 
     NPC_THRALL_MADNESS              = 56103,
     NPC_KALECGOS_MADNESS            = 56101,
