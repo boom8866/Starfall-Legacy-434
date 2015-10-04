@@ -32,23 +32,50 @@
 23:22:10.113 ... ysera
 23:22:09.910 ... deathwing
 
+20:06:36.677 -- aggro
+20:06:41.887 -- assault aspects
 
-23:20:09.461 -- aggro madness
-23:20:55.435 -- elementium bolt
-23:23:40.453
-23:20:14.672
+
+20:06:51.918 -- arm tentacte engage
+20:06:52.339 -- engage deathwing
+
+20:09:04.457 -- pain
+20:09:10.993
+
+20:09:21.258 -- assault nozdormu
+20:09:29.058 -- 8 seconds later mutated corruption
+20:09:34.627 -- crush #1
+20:09:35.033 -- crush cast
+
+
+20:06:58.080
+20:07:12.073
+
+20:07:03.587 
+20:07:38.952 -- impale 2
+
 */
 
 UPDATE `creature_template` SET `scale`= 1 WHERE `entry`= 57693; -- Cosmetic Tentacle
 DELETE FROM `vehicle_template_accessory` WHERE `accessory_entry`= 57693;
 DELETE FROM `creature_template_addon` WHERE `entry` IN (56167, 56168, 56846, 106641, 106642, 106643, 106644);
 
+-- Thrall
 UPDATE `creature_template` SET `scriptname`= 'npc_thrall_madness' WHERE `entry`= 56103;
+UPDATE `gossip_menu_option` SET `option_id`= 1, `npc_option_npcflag`= 1 WHERE `menu_id`= 13295; -- Thrall gossip
+-- Add trigger flag to several dummys
+UPDATE `creature_template` SET `flags_extra`= 131, `InhabitType`= 4 WHERE `entry` IN (56699, 56307, 57882, 57378);
+-- Mutated Corruption
+UPDATE `creature_template` SET `scriptname`= 'npc_ds_mutated_corruption', `InhabitType`= 4, `exp`= 3, `Minlevel`= 88, `Maxlevel`= 88, `faction`= 14, `unit_flags2`= 134217728 WHERE `entry`= 56471;
+
+-- Deathwing
 UPDATE `creature_template` SET `scriptname`= 'boss_madness_of_deathwing' WHERE `entry`= 56173;
 UPDATE `creature_template` SET `scriptname`= 'boss_tentacle' WHERE `entry` IN (56167, 56168, 56846);
-UPDATE `creature_template` SET `scriptname`= 'npc_ds_mutated_corruption', `InhabitType`= 4, `exp`= 3, `Minlevel`= 88, `Maxlevel`= 88 WHERE `entry`= 56471;
-UPDATE `gossip_menu_option` SET `option_id`= 1, `npc_option_npcflag`= 1 WHERE `menu_id`= 13295; -- Thrall gossip
 UPDATE `creature_template` SET `InhabitType`= 4, `minlevel`= 87, `maxlevel`= 87, `faction`= 16, `exp`= 3 WHERE `entry`= 56262;
+-- Deathwing Health Controller
+
+-- Platform
+UPDATE `creature_template` SET `scriptname`= 'npc_ds_platform' WHERE `entry`= 56307;
 
 REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (56173, 0, 0, 'You have done NOTHING. I will tear your world APART.', 14, 0, 100, 0, 0, 26527, 'Deathwing'),
@@ -78,9 +105,11 @@ REPLACE INTO `creature_template_addon` (`entry`, `mount`, `bytes1`, `bytes2`, `a
 UPDATE `creature_model_info` SET `combat_reach`= 15 WHERE `modelid`= 39405;
 
 -- 106548
-DELETE FROM conditions WHERE SourceEntry IN (106548, 106643, 106644, 106642, 106641, 105599);
+DELETE FROM conditions WHERE SourceEntry IN (106548, 106643, 106644, 106642, 106641, 105599, 109548, 109547);
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
 (13, 7, 106548, 0, 0, 31, 0, 3, 56173, 0, 0, 0, '', 'Agonizing Pain - Target Deathwing'),
+(13, 7, 109548, 0, 0, 31, 0, 3, 56173, 0, 0, 0, '', 'Share Health - Target Deathwing'),
+(13, 7, 109547, 0, 0, 31, 0, 3, 57962, 0, 0, 0, '', 'Share Health Damage - Target Deathwing'),
 (13, 7, 106643, 0, 0, 31, 0, 3, 57694, 0, 0, 0, '', 'Concentration - Target Right Arm'),
 (13, 7, 106642, 0, 0, 31, 0, 3, 57686, 0, 0, 0, '', 'Concentration - Target Left Arm'),
 (13, 7, 106644, 0, 0, 31, 0, 3, 57696, 0, 0, 0, '', 'Concentration - Target Right Wing'),
@@ -88,14 +117,18 @@ INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, Sourc
 (13, 7, 106641, 0, 0, 31, 0, 3, 57695, 0, 0, 0, '', 'Concentration - Target Left Wing');
 
 
-DELETE FROM `spell_script_names` WHERE spell_id IN (107018, 106644, 106643, 106642, 106641, 106664);
+DELETE FROM `spell_script_names` WHERE spell_id IN (107018, 106644, 106643, 106642, 106641, 106664, 106673, 106672, 106548, 106382);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (107018, 'spell_ds_assault_aspects'),
 (106644, 'spell_ds_concentration'),
 (106643, 'spell_ds_concentration'),
 (106642, 'spell_ds_concentration'),
 (106641, 'spell_ds_concentration'),
-(106664, 'spell_ds_carrying_winds');
+(106673, 'spell_ds_carrying_winds_script'),
+(106672, 'spell_ds_carrying_winds'),
+(106548, 'spell_ds_agonizing_pain'),
+(106382, 'spell_ds_crush_summon');
+
 
 SET @ID := 56101;
 DELETE FROM `waypoint_data` WHERE `id` BETWEEN @ID+0 AND @ID+2;
