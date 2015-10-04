@@ -87,6 +87,41 @@ public:
             if (!InstanceScript::SetBossState(data, state))
                 return false;
 
+            switch (data)
+            {
+                case DATA_MADNESS_OF_DEATHWING:
+                    if (state == FAIL)
+                    {
+                        if (Creature* ysera = instance->GetCreature(GetData64(DATA_YSERA_MADNESS)))
+                        {
+                            if (ysera->isDead())
+                                ysera->Respawn();
+                            ysera->AI()->EnterEvadeMode();
+                        }
+                        if (Creature* kalecgos = instance->GetCreature(GetData64(DATA_KALECGOS_MADNESS)))
+                        {
+                            if (kalecgos->isDead())
+                                kalecgos->Respawn();
+                            kalecgos->AI()->EnterEvadeMode();
+                        }
+                        if (Creature* alexstrasza = instance->GetCreature(GetData64(DATA_ALEXSTRASZA_MADNESS)))
+                        {
+                            if (alexstrasza->isDead())
+                                alexstrasza->Respawn();
+                            alexstrasza->AI()->EnterEvadeMode();
+                        }
+                        if (Creature* nozdormu = instance->GetCreature(GetData64(DATA_NOZDORMU_MADNESS)))
+                        {
+                            if (nozdormu->isDead())
+                                nozdormu->Respawn();
+                            nozdormu->AI()->EnterEvadeMode();
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+
             return true;
         }
 

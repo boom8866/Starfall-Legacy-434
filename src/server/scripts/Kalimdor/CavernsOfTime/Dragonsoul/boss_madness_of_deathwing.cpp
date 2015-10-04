@@ -42,6 +42,8 @@ enum Spells
     SPELL_SUMMON_TAIL               = 106240, // summons mutated corruption
     SPELL_CATACLYSM                 = 106523,
     SPELL_AGONIZING_PAIN            = 106548,
+    SPELL_TRIGGER_ASPECT_BUFFS      = 106943,
+
     SPELL_ELEMENTIUM_BOLT           = 105651,
     SPELL_ELEMENTIUM_BOLT_TRIGGERED = 105599,
 
@@ -72,15 +74,24 @@ enum Spells
     SPELL_EXPOSE_WEAKNESS_YSERA     = 109637,
 
     // Nozdormu
-    SPELL_NOZDORMUS_PRESENCE        = 105823,
     SPELL_TIME_ZONE                 = 106919,
+    SPELL_NOZDORMUS_PRESENCE        = 105823,
+    SPELL_EXPOSE_WEAKNESS_NOZDORMU  = 106600,
+
+    // Kalecgos
+    SPELL_SPELLWEAVER               = 106039,
+    SPELL_KALECGOS_PRESENCE         = 106026,
+    SPELL_EXPOSE_WEAKNESS_KALECGOS  = 106624,
+
+    // Alexstrasza
+    SPELL_ALEXSTRASZAS_PRESENCE     = 105825,
+    SPELL_EXPOSE_WEAKNESS_ALEXSTRASZA = 106588,
 
     // Generic Spells
     SPELL_CONCENTRATION_KALECGOS    = 106644,
     SPELL_CONCENTRATION_YSERA       = 106643,
     SPELL_CONCENTRATION_NOZDORMU    = 106642,
     SPELL_CONCENTRATION_ALEXSTRASZA = 106641,
-    SPELL_TRIGGER_ASPECT_BUFFS      = 106943,
     SPELL_CALM_MAELSTROM            = 109480,
     SPELL_RIDE_VEHICLE_HARDCODED    = 46598, 
     SPELL_REDUCE_DODGE_PARRY        = 110470,
@@ -111,6 +122,9 @@ enum Events
 
     // Platform
     EVENT_TRANSMIT_PLAYER_COUNT,
+
+    // Thrall
+
 };
 
 enum Actions
@@ -124,6 +138,7 @@ enum Actions
     // Dragon Aspects
     ACTION_ASSAULT_ASPECT,
     ACTION_CONCENTRATE_DEATHWING,
+    ACTION_PREPARE_ABILITY,
 };
 
 enum Sounds
@@ -276,20 +291,9 @@ public:
         {
             ResetTentacles();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->SetBossState(DATA_MADNESS_OF_DEATHWING, FAIL);
             if (Creature* thrall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THRALL_MADNESS)))
                 thrall->AI()->DoAction(ACTION_RESET_ENCOUNTER);
-
-            if (Creature* ysera = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_YSERA_MADNESS)))
-                ysera->AI()->EnterEvadeMode();
-
-            if (Creature* nozdormu = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_NOZDORMU_MADNESS)))
-                nozdormu->AI()->EnterEvadeMode();
-
-            if (Creature* kalecgos = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_KALECGOS_MADNESS)))
-                kalecgos->AI()->EnterEvadeMode();
-
-            if (Creature* alexstrasza = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ALEXSTRASZA_MADNESS)))
-                alexstrasza->AI()->EnterEvadeMode();
 
             _EnterEvadeMode();
             me->DespawnOrUnsummon(100);
@@ -327,8 +331,6 @@ public:
 
             if (currentAlivePlayers > 0)
             {
-                sLog->outError(LOG_FILTER_GENERAL, "platform counted %u players!", count);
-                sLog->outError(LOG_FILTER_GENERAL, "counted %u alive players!", currentAlivePlayers);
                 if (count > (currentAlivePlayers / 2))
                 {
                     if (platform->FindNearestCreature(NPC_ARM_TENTACLE_1, 70.0f, true))
@@ -518,6 +520,8 @@ public:
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, armLeft, 2);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_NOZDORMU);
+                                if (Creature* nozdormu = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_NOZDORMU_MADNESS)))
+                                    nozdormu->AI()->DoAction(ACTION_ASSAULT_ASPECT);
                             }
                         }
                         else if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_WING_TENTACLE, 70.0f, true))
@@ -526,11 +530,15 @@ public:
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, wingRight, 2);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_ALEXSTRASZA);
+                                if (Creature* alexstrasza = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ALEXSTRASZA_MADNESS)))
+                                    alexstrasza->AI()->DoAction(ACTION_ASSAULT_ASPECT);
                             }
                             else if (wingLeft && tentacle->GetGUID() == wingLeft->GetGUID())
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, wingLeft, 2);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_KALECGOS);
+                                if (Creature* kalecgos = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_KALECGOS_MADNESS)))
+                                    kalecgos->AI()->DoAction(ACTION_ASSAULT_ASPECT);
                             }
                         }
                         events.ScheduleEvent(EVENT_SUMMON_MUTATED_CORRUPTION, 8000);
@@ -540,9 +548,13 @@ public:
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
                         break;
                     case EVENT_SUMMON_MUTATED_CORRUPTION:
-                        if (Creature* tailTarget = currentPlatform->FindNearestCreature(NPC_TAIL_TENTACLE_TARGET, 30.0f, true))
+                    {
+                        std::list<Creature*> units;
+                        GetCreatureListWithEntryInGrid(units, currentPlatform, NPC_TAIL_TENTACLE_TARGET, 35.0f);
+                        if (Creature* tailTarget = Trinity::Containers::SelectRandomContainerElement(units))
                             tailTarget->CastSpell(me, SPELL_SUMMON_TAIL);
                         break;
+                    }
                     case EVENT_CATACLYSM:
                         DoCast(me, SPELL_CATACLYSM);
                         break;
@@ -801,12 +813,14 @@ public:
 
         void EnterEvadeMode()
         {
+            Reset();
             Position homePos = me->GetHomePosition();
             me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation());
         }
 
         void Reset()
         {
+            me->SetSpeed(MOVE_FLIGHT, 4.5f, true);
             DoCast(me, SPELL_YSERAS_PRESENCE, true);
             DoCast(me, SPELL_THE_DREAMER, true);
         }
@@ -818,6 +832,9 @@ public:
                 case ACTION_ASSAULT_ASPECT:
                     TalkToMap(SAY_ASSAULTED);
                     events.ScheduleEvent(EVENT_SAY_CATACLYSM, 105000);
+                    break;
+                case ACTION_TENTACLE_KILLED:
+                    events.CancelEvent(EVENT_SAY_CATACLYSM);
                     break;
                 default:
                     break;
@@ -866,12 +883,14 @@ public:
 
         void EnterEvadeMode()
         {
+            Reset();
             Position homePos = me->GetHomePosition();
             me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation());
         }
 
         void Reset()
         {
+            me->SetSpeed(MOVE_FLIGHT, 4.5f, true);
             DoCast(me, SPELL_NOZDORMUS_PRESENCE, true);
         }
 
@@ -879,7 +898,12 @@ public:
         {
             switch (action)
             {
-            case 0:
+            case ACTION_ASSAULT_ASPECT:
+                TalkToMap(SAY_ASSAULTED);
+                events.ScheduleEvent(EVENT_SAY_CATACLYSM, 105000);
+                break;
+            case ACTION_TENTACLE_KILLED:
+                events.CancelEvent(EVENT_SAY_CATACLYSM);
                 break;
             default:
                 break;
@@ -894,7 +918,9 @@ public:
             {
                 switch (eventId)
                 {
-                case 0:
+                case EVENT_SAY_CATACLYSM:
+                    TalkToMap(SAY_CATACLYSM);
+                    DoCast(me, SPELL_EXPOSE_WEAKNESS_NOZDORMU);
                     break;
                 default:
                     break;
@@ -926,20 +952,27 @@ public:
 
         void EnterEvadeMode()
         {
+            Reset();
             Position homePos = me->GetHomePosition();
             me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation());
         }
 
         void Reset()
         {
-
+            me->SetSpeed(MOVE_FLIGHT, 4.5f, true);
+            DoCast(me, SPELL_ALEXSTRASZAS_PRESENCE, true);
         }
 
         void DoAction(int32 action)
         {
             switch (action)
             {
-            case 0:
+            case ACTION_ASSAULT_ASPECT:
+                TalkToMap(SAY_ASSAULTED);
+                events.ScheduleEvent(EVENT_SAY_CATACLYSM, 105000);
+                break;
+            case ACTION_TENTACLE_KILLED:
+                events.CancelEvent(EVENT_SAY_CATACLYSM);
                 break;
             default:
                 break;
@@ -954,7 +987,9 @@ public:
             {
                 switch (eventId)
                 {
-                case 0:
+                case EVENT_SAY_CATACLYSM:
+                    TalkToMap(SAY_CATACLYSM);
+                    DoCast(me, SPELL_EXPOSE_WEAKNESS_ALEXSTRASZA);
                     break;
                 default:
                     break;
@@ -986,20 +1021,28 @@ public:
 
         void EnterEvadeMode()
         {
+            Reset();
             Position homePos = me->GetHomePosition();
             me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation());
         }
 
         void Reset()
         {
-
+            me->SetSpeed(MOVE_FLIGHT, 4.5f, true);
+            DoCast(me, SPELL_KALECGOS_PRESENCE, true);
+            DoCast(me, SPELL_SPELLWEAVER, true);
         }
 
         void DoAction(int32 action)
         {
             switch (action)
             {
-            case 0:
+            case ACTION_ASSAULT_ASPECT:
+                TalkToMap(SAY_ASSAULTED);
+                events.ScheduleEvent(EVENT_SAY_CATACLYSM, 105000);
+                break;
+            case ACTION_TENTACLE_KILLED:
+                events.CancelEvent(EVENT_SAY_CATACLYSM);
                 break;
             default:
                 break;
@@ -1014,7 +1057,9 @@ public:
             {
                 switch (eventId)
                 {
-                case 0:
+                case EVENT_SAY_CATACLYSM:
+                    TalkToMap(SAY_CATACLYSM);
+                    DoCast(me, SPELL_EXPOSE_WEAKNESS_KALECGOS);
                     break;
                 default:
                     break;
@@ -1293,7 +1338,7 @@ public:
 
         void HandleScript1(SpellEffIndex /*effIndex*/)
         {
-            if (Unit* target = GetHitUnit())
+            if (Creature* target = GetHitCreature())
             {
                 target->RemoveAllAuras();
                 if (target->GetEntry() == NPC_YSERA_MADNESS)
@@ -1309,6 +1354,7 @@ public:
                     target->CastSpell(target, SPELL_CONCENTRATION_ALEXSTRASZA, false);
 
                 target->GetMotionMaster()->MovePath((target->GetEntry() * 100), false);
+                target->AI()->DoAction(ACTION_TENTACLE_KILLED);
             }
         }
 

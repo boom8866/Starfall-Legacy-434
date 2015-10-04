@@ -3789,6 +3789,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 91957: // Ping Signal Flare
             case 89821: // Helcular's Rod
             case 89824: // Helcular's Ire
+            case 106466:
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
                 break;
             case 68376: // Infrared Heat Focals
