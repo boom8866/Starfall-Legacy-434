@@ -27,6 +27,10 @@ enum Texts
     SAY_ANNOUNCE_ELEMENTIUM_BOLT    = 9,
     SAY_ELEMENTIUM_BOLT             = 10,
     SAY_SLAY                        = 11,
+
+    // Aspects
+    SAY_ASSAULTED                   = 0,
+    SAY_CATACLYSM                   = 1,
 };
 
 enum Spells
@@ -46,6 +50,7 @@ enum Spells
 
     // Tentacles
     SPELL_LIMB_EMERGE_VISUAL        = 107991,
+    SPELL_TRIGGER_CONCENTRATION     = 106940,
 
     // Elementium Meteor
     SPELL_ELEMENTIUM_METEOR         = 106242, // Target Platform
@@ -64,13 +69,17 @@ enum Spells
     // Ysera
     SPELL_THE_DREAMER               = 106463,
     SPELL_YSERAS_PRESENCE           = 106456,
+    SPELL_EXPOSE_WEAKNESS_YSERA     = 109637,
 
+    // Nozdormu
+    SPELL_NOZDORMUS_PRESENCE        = 105823,
+    SPELL_TIME_ZONE                 = 106919,
 
     // Generic Spells
     SPELL_CONCENTRATION_KALECGOS    = 106644,
     SPELL_CONCENTRATION_YSERA       = 106643,
     SPELL_CONCENTRATION_NOZDORMU    = 106642,
-    SPELL_CONCENTRATION_ALEXTRASZA  = 106641,
+    SPELL_CONCENTRATION_ALEXSTRASZA = 106641,
     SPELL_TRIGGER_ASPECT_BUFFS      = 106943,
     SPELL_CALM_MAELSTROM            = 109480,
     SPELL_RIDE_VEHICLE_HARDCODED    = 46598, 
@@ -90,7 +99,11 @@ enum Events
     EVENT_ASSAULT_ASPECT,
     EVENT_SEND_FRAME,
     EVENT_SUMMON_MUTATED_CORRUPTION,
+    EVENT_CATACLYSM,
     
+    // Dragon Aspects
+    EVENT_SAY_CATACLYSM,
+
     // Mutated Corruption
     EVENT_CRUSH_SUMMON,
     EVENT_CRUSH_CAST,
@@ -102,10 +115,15 @@ enum Events
 
 enum Actions
 {
+    // Deathwing
     ACTION_BEGIN_BATTLE = 1,
     ACTION_RESET_ENCOUNTER,
     ACTION_TENTACLE_KILLED,
     ACTION_COUNT_PLAYER,
+
+    // Dragon Aspects
+    ACTION_ASSAULT_ASPECT,
+    ACTION_CONCENTRATE_DEATHWING,
 };
 
 enum Sounds
@@ -145,14 +163,57 @@ Position const ArmLeftPos = {-12005.8f, 12190.3f, -6.59399f, 2.1293f};
 Position const ArmRightPos = {-12065.0f, 12127.2f, -3.2946f, 2.33874f};
 Position const ThrallTeleport = {-12128.3f, 12253.8f, 0.0450132f, 5.456824f};
 
-class CarryingWindsDistanceCheck
+class AspectEntryCheck
 {
 public:
-    CarryingWindsDistanceCheck(Unit* caster) : caster(caster) { }
+    AspectEntryCheck() { }
 
     bool operator()(WorldObject* object)
     {
-        return (object->GetDistance2d(caster) <= 10.0f);
+        return (object->GetEntry() != NPC_YSERA_MADNESS
+            && object->GetEntry() != NPC_NOZDORMU_MADNESS
+            && object->GetEntry() != NPC_ALEXSTRASZA_MADNESS
+            && object->GetEntry() != NPC_KALECGOS_MADNESS);
+    }
+};
+
+class ConcentractioDistanceCheck
+{
+public:
+    ConcentractioDistanceCheck(Unit* caster) : caster(caster) { }
+
+    bool operator()(WorldObject* object)
+    {
+        if (caster->GetDistance2d(object)>= 120.0f)
+            return true;
+
+        return false;
+    }
+private:
+    Unit* caster;
+};
+
+class TentacleMatchCheck
+{
+public:
+    TentacleMatchCheck(Unit* caster) : caster(caster) { }
+
+    bool operator()(WorldObject* object)
+    {
+        if (caster->GetEntry() == NPC_WING_TENTACLE
+            && (object->GetEntry() == NPC_NOZDORMU_MADNESS
+            || object->GetEntry() == NPC_YSERA_MADNESS))
+            return true;
+
+        if (caster->GetEntry() == NPC_ARM_TENTACLE_1
+            && object->GetEntry() != NPC_YSERA_MADNESS)
+            return true;
+
+        if (caster->GetEntry() == NPC_ARM_TENTACLE_2
+            && object->GetEntry() != NPC_NOZDORMU_MADNESS)
+            return true;
+
+        return false;
     }
 private:
     Unit* caster;
@@ -217,6 +278,19 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             if (Creature* thrall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THRALL_MADNESS)))
                 thrall->AI()->DoAction(ACTION_RESET_ENCOUNTER);
+
+            if (Creature* ysera = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_YSERA_MADNESS)))
+                ysera->AI()->EnterEvadeMode();
+
+            if (Creature* nozdormu = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_NOZDORMU_MADNESS)))
+                nozdormu->AI()->EnterEvadeMode();
+
+            if (Creature* kalecgos = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_KALECGOS_MADNESS)))
+                kalecgos->AI()->EnterEvadeMode();
+
+            if (Creature* alexstrasza = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ALEXSTRASZA_MADNESS)))
+                alexstrasza->AI()->EnterEvadeMode();
+
             _EnterEvadeMode();
             me->DespawnOrUnsummon(100);
         }
@@ -404,6 +478,7 @@ public:
                     uint8 random = urand(0, 1);
                     DoPlaySoundToSet(me, random == 0 ? SOUND_AGONY_1 : SOUND_AGONY_2);
                     events.ScheduleEvent(EVENT_ASSAULT_ASPECTS, 6500);
+                    events.CancelEvent(EVENT_CATACLYSM);
                     break;
                 }
                 default:
@@ -433,6 +508,8 @@ public:
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, armRight, 2);
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_YSERA);
+                                if (Creature* ysera = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_YSERA_MADNESS)))
+                                    ysera->AI()->DoAction(ACTION_ASSAULT_ASPECT);
                             }
                         }
                         else if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_ARM_TENTACLE_2, 70.0f, true))
@@ -457,6 +534,7 @@ public:
                             }
                         }
                         events.ScheduleEvent(EVENT_SUMMON_MUTATED_CORRUPTION, 8000);
+                        events.ScheduleEvent(EVENT_CATACLYSM, 105000);
                         break;
                     case EVENT_SEND_FRAME:
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
@@ -464,6 +542,9 @@ public:
                     case EVENT_SUMMON_MUTATED_CORRUPTION:
                         if (Creature* tailTarget = currentPlatform->FindNearestCreature(NPC_TAIL_TENTACLE_TARGET, 30.0f, true))
                             tailTarget->CastSpell(me, SPELL_SUMMON_TAIL);
+                        break;
+                    case EVENT_CATACLYSM:
+                        DoCast(me, SPELL_CATACLYSM);
                         break;
                     default:
                         break;
@@ -520,6 +601,7 @@ class boss_tentacle : public CreatureScript
                 DoCast(me, SPELL_AGONIZING_PAIN, true);
                 if (Creature* deathwing = me->FindNearestCreature(BOSS_MADNESS_OF_DEATHWING, 500.0f, true))
                     deathwing->AI()->DoAction(ACTION_TENTACLE_KILLED);
+                DoCast(me, SPELL_TRIGGER_CONCENTRATION, true);
             }
 
             void UpdateAI(uint32 diff)
@@ -699,6 +781,251 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_thrall_madnessAI(creature);
+    }
+};
+
+class npc_ds_ysera_madness : public CreatureScript
+{
+public:
+    npc_ds_ysera_madness() : CreatureScript("npc_ds_ysera_madness") { }
+
+    struct npc_ds_ysera_madnessAI : public ScriptedAI
+    {
+        npc_ds_ysera_madnessAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = me->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+
+        void EnterEvadeMode()
+        {
+            Position homePos = me->GetHomePosition();
+            me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation());
+        }
+
+        void Reset()
+        {
+            DoCast(me, SPELL_YSERAS_PRESENCE, true);
+            DoCast(me, SPELL_THE_DREAMER, true);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_ASSAULT_ASPECT:
+                    TalkToMap(SAY_ASSAULTED);
+                    events.ScheduleEvent(EVENT_SAY_CATACLYSM, 105000);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SAY_CATACLYSM:
+                        TalkToMap(SAY_CATACLYSM);
+                        DoCast(me, SPELL_EXPOSE_WEAKNESS_YSERA);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ds_ysera_madnessAI(creature);
+    }
+};
+
+class npc_ds_nozdormu_madness : public CreatureScript
+{
+public:
+    npc_ds_nozdormu_madness() : CreatureScript("npc_ds_nozdormu_madness") { }
+
+    struct npc_ds_nozdormu_madnessAI : public ScriptedAI
+    {
+        npc_ds_nozdormu_madnessAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = me->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+
+        void EnterEvadeMode()
+        {
+            Position homePos = me->GetHomePosition();
+            me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation());
+        }
+
+        void Reset()
+        {
+            DoCast(me, SPELL_NOZDORMUS_PRESENCE, true);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+            case 0:
+                break;
+            default:
+                break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case 0:
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ds_nozdormu_madnessAI(creature);
+    }
+};
+
+class npc_ds_alexstrasza_madness : public CreatureScript
+{
+public:
+    npc_ds_alexstrasza_madness() : CreatureScript("npc_ds_alexstrasza_madness") { }
+
+    struct npc_ds_alexstrasza_madnessAI : public ScriptedAI
+    {
+        npc_ds_alexstrasza_madnessAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = me->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+
+        void EnterEvadeMode()
+        {
+            Position homePos = me->GetHomePosition();
+            me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation());
+        }
+
+        void Reset()
+        {
+
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+            case 0:
+                break;
+            default:
+                break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case 0:
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ds_alexstrasza_madnessAI(creature);
+    }
+};
+
+class npc_ds_kalecgos_madness : public CreatureScript
+{
+public:
+    npc_ds_kalecgos_madness() : CreatureScript("npc_ds_kalecgos_madness") { }
+
+    struct npc_ds_kalecgos_madnessAI : public ScriptedAI
+    {
+        npc_ds_kalecgos_madnessAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = me->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+
+        void EnterEvadeMode()
+        {
+            Position homePos = me->GetHomePosition();
+            me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation());
+        }
+
+        void Reset()
+        {
+
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+            case 0:
+                break;
+            default:
+                break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case 0:
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ds_kalecgos_madnessAI(creature);
     }
 };
 
@@ -936,6 +1263,68 @@ public:
     }
 };
 
+class spell_ds_trigger_concentration : public SpellScriptLoader
+{
+public:
+    spell_ds_trigger_concentration() : SpellScriptLoader("spell_ds_trigger_concentration") { }
+
+    class spell_ds_trigger_concentration_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_trigger_concentration_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(AspectEntryCheck());
+
+            if (targets.empty())
+                return;
+
+            targets.remove_if(ConcentractioDistanceCheck(GetCaster()));
+
+            if (targets.empty())
+                return;
+
+            targets.remove_if(TentacleMatchCheck(GetCaster()));
+
+        }
+
+        void HandleScript1(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+            {
+                target->RemoveAllAuras();
+                if (target->GetEntry() == NPC_YSERA_MADNESS)
+                    target->CastSpell(target, SPELL_CONCENTRATION_YSERA, false);
+
+                if (target->GetEntry() == NPC_NOZDORMU_MADNESS)
+                    target->CastSpell(target, SPELL_CONCENTRATION_NOZDORMU, false);
+
+                if (target->GetEntry() == NPC_KALECGOS_MADNESS)
+                    target->CastSpell(target, SPELL_CONCENTRATION_KALECGOS, false);
+
+                if (target->GetEntry() == NPC_ALEXSTRASZA_MADNESS)
+                    target->CastSpell(target, SPELL_CONCENTRATION_ALEXSTRASZA, false);
+
+                target->GetMotionMaster()->MovePath((target->GetEntry() * 100), false);
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ds_trigger_concentration_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnEffectHitTarget += SpellEffectFn(spell_ds_trigger_concentration_SpellScript::HandleScript1, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ds_trigger_concentration_SpellScript();
+    }
+};
+
 class at_ds_carrying_winds : public AreaTriggerScript
 {
     public:
@@ -954,6 +1343,10 @@ void AddSC_boss_madness_of_deathwing()
     new boss_madness_of_deathwing();
     new boss_tentacle();
     new npc_thrall_madness();
+    new npc_ds_ysera_madness();
+    new npc_ds_nozdormu_madness();
+    new npc_ds_alexstrasza_madness();
+    new npc_ds_kalecgos_madness();
     new npc_ds_mutated_corruption();
     new npc_ds_platform();
     new spell_ds_assault_aspects();
@@ -962,6 +1355,7 @@ void AddSC_boss_madness_of_deathwing()
     new spell_ds_carrying_winds();
     new spell_ds_agonizing_pain();
     new spell_ds_crush_summon();
+    new spell_ds_trigger_concentration();
 
     new at_ds_carrying_winds();
 }
