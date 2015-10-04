@@ -42,7 +42,7 @@ enum Spells
     SPELL_ELEMENTIUM_BOLT_TRIGGERED = 105599,
 
     // Arms
-    SPELL_SUMMON_CPSMETIC_TENTACLES = 108970,
+    SPELL_SUMMON_COSMETIC_TENTACLES = 108970,
 
     // Tentacles
     SPELL_LIMB_EMERGE_VISUAL        = 107991,
@@ -58,7 +58,7 @@ enum Spells
     SPELL_IGNORE_DODGE_PARRY        = 110470,
     SPELL_IMPALE                    = 106400,
     SPELL_CRUSH                     = 109628,
-    SPELL_CRUSH_SUMMON              = 106382,
+    SPELL_CRUSH_SUMMON_AOE          = 106382,
     SPELL_CRUSH_SUMMON_TRIGGERED    = 106384,
 
     // Ysera
@@ -89,9 +89,11 @@ enum Events
     EVENT_ASSAULT_ASPECTS,
     EVENT_ASSAULT_ASPECT,
     EVENT_SEND_FRAME,
+    EVENT_SUMMON_MUTATED_CORRUPTION,
     
     // Mutated Corruption
     EVENT_CRUSH_SUMMON,
+    EVENT_CRUSH_CAST,
     EVENT_IMPALE,
 
     // Platform
@@ -254,7 +256,16 @@ public:
                 sLog->outError(LOG_FILTER_GENERAL, "platform counted %u players!", count);
                 sLog->outError(LOG_FILTER_GENERAL, "counted %u alive players!", currentAlivePlayers);
                 if (count > (currentAlivePlayers / 2))
-                    currentPlatform = platform;
+                {
+                    if (platform->FindNearestCreature(NPC_ARM_TENTACLE_1, 70.0f, true))
+                        currentPlatform = platform;
+                    else if (platform->FindNearestCreature(NPC_ARM_TENTACLE_2, 70.0f, true))
+                        currentPlatform = platform;
+                    else if (platform->FindNearestCreature(NPC_WING_TENTACLE, 70.0f, true))
+                        currentPlatform = platform;
+                    else
+                        SelectRandomPlatform();
+                }
                 else
                     SelectRandomPlatform();
 
@@ -264,7 +275,24 @@ public:
 
         void SelectRandomPlatform()
         {
+            std::list<Creature*> units;
+            GetCreatureListWithEntryInGrid(units, me, NPC_ARM_TENTACLE_1, 500.0f);
+            GetCreatureListWithEntryInGrid(units, me, NPC_ARM_TENTACLE_2, 500.0f);
+            GetCreatureListWithEntryInGrid(units, me, NPC_WING_TENTACLE, 500.0f);
+            sLog->outError(LOG_FILTER_GENERAL, "called random platform selection function");
 
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                if ((*itr)->isDead())
+                    units.remove(*itr);
+
+            if (!units.empty())
+            {
+                if (Unit* tentacle = Trinity::Containers::SelectRandomContainerElement(units))
+                    if (Creature* platform = tentacle->FindNearestCreature(NPC_PLATFORM_STALKER, 70.0f, true))
+                        currentPlatform = platform;
+            }
+            else
+                me->AI()->EnterEvadeMode(); // because we don't like exploiters
         }
 
         void ResetTentacles()
@@ -428,9 +456,14 @@ public:
                                 TalkToMap(SAY_ANNOUNCE_ATTACK_KALECGOS);
                             }
                         }
+                        events.ScheduleEvent(EVENT_SUMMON_MUTATED_CORRUPTION, 8000);
                         break;
                     case EVENT_SEND_FRAME:
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
+                        break;
+                    case EVENT_SUMMON_MUTATED_CORRUPTION:
+                        if (Creature* tailTarget = currentPlatform->FindNearestCreature(NPC_TAIL_TENTACLE_TARGET, 30.0f, true))
+                            tailTarget->CastSpell(me, SPELL_SUMMON_TAIL);
                         break;
                     default:
                         break;
@@ -530,7 +563,7 @@ class npc_ds_mutated_corruption : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 events.ScheduleEvent(EVENT_CRUSH_SUMMON, 5500);
-                events.ScheduleEvent(EVENT_IMPALE, 11000);
+                events.ScheduleEvent(EVENT_IMPALE, 10500);
             }
 
             void JustDied(Unit* /*killer*/)
@@ -547,7 +580,9 @@ class npc_ds_mutated_corruption : public CreatureScript
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
+                SetCombatMovement(false);
                 me->SetInCombatWithZone();
+                DoCast(me, SPELL_REDUCE_DODGE_PARRY, true);
                 me->PlayOneShotAnimKit(ANIM_KIT_EMERGE_2);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
             }
@@ -563,7 +598,22 @@ class npc_ds_mutated_corruption : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case 0:
+                        case EVENT_CRUSH_SUMMON:
+                            DoCast(me, SPELL_CRUSH_SUMMON_AOE, true);
+                            events.ScheduleEvent(EVENT_CRUSH_CAST, 500);
+                            events.ScheduleEvent(EVENT_CRUSH_SUMMON, 14000);
+                            break;
+                        case EVENT_CRUSH_CAST:
+                            if (Creature* crush = me->FindNearestCreature(NPC_CRUSH_TARGET, 70.0f, true))
+                            {
+                                me->SetFacingToObject(crush);
+                                DoCast(crush, SPELL_CRUSH);
+                                me->PlayOneShotAnimKit(ANIM_KIT_CRUSH);
+                            }
+                            break;
+                        case EVENT_IMPALE:
+                            DoCastVictim(SPELL_IMPALE);
+                            events.ScheduleEvent(EVENT_IMPALE, 35000);
                             break;
                         default:
                             break;
@@ -720,7 +770,7 @@ public:
         void HandleHit(SpellEffIndex /*effIndex*/)
         {
             if (Player* target = GetHitPlayer())
-                if (Creature* platform = target->FindNearestCreature(NPC_PLATFORM_STALKER, 50.0f))
+                if (Creature* platform = target->FindNearestCreature(NPC_PLATFORM_STALKER, 70.0f))
                     platform->AI()->DoAction(ACTION_COUNT_PLAYER);
         }
 
@@ -857,6 +907,35 @@ public:
     }
 };
 
+class spell_ds_crush_summon : public SpellScriptLoader
+{
+public:
+    spell_ds_crush_summon() : SpellScriptLoader("spell_ds_crush_summon") { }
+
+    class spell_ds_crush_summon_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_crush_summon_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ds_crush_summon_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ds_crush_summon_SpellScript();
+    }
+};
+
 class at_ds_carrying_winds : public AreaTriggerScript
 {
     public:
@@ -882,6 +961,7 @@ void AddSC_boss_madness_of_deathwing()
     new spell_ds_carrying_winds_script();
     new spell_ds_carrying_winds();
     new spell_ds_agonizing_pain();
+    new spell_ds_crush_summon();
 
     new at_ds_carrying_winds();
 }

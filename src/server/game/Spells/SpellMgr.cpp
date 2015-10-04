@@ -5443,6 +5443,13 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 110045:
                 spellInfo->Effects[EFFECT_1].Effect = 0;
                 break;
+                // * Madness of Deathwing
+            case 106385: // Crush
+            case 109628:
+            case 109629:
+            case 109630:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
+                break;
             default:
                 break;
         }
