@@ -15,25 +15,25 @@
 enum Texts
 {
     // Deathwing
-    SAY_AGGRO                       = 0,
-    SAY_ANNOUNCE_ASSAULT            = 1,
-    SAY_ANNOUNCE_ATTACK_YSERA       = 2,
-    SAY_ANNOUNCE_ATTACK_NOZDORMU    = 3,
-    SAY_ANNOUNCE_ATTACK_KALECGOS    = 4,
-    SAY_ANNOUNCE_ATTACK_ALEXSTRASZA = 5,
-    SAY_ANNOUNCE_CATACLYSM          = 6,
-    SAY_PHASE_2                     = 7,
-    SAY_ANNOUNCE_PHASE_2            = 8,
-    SAY_ANNOUNCE_ELEMENTIUM_BOLT    = 9,
-    SAY_ELEMENTIUM_BOLT             = 10,
-    SAY_SLAY                        = 11,
+    SAY_AGGRO                           = 0,
+    SAY_ANNOUNCE_ASSAULT_ASPECTS        = 1,
+    SAY_ANNOUNCE_ASSAULT_YSERA          = 2,
+    SAY_ANNOUNCE_ASSAULT_NOZDORMU       = 3,
+    SAY_ANNOUNCE_ASSAULT_KALECGOS       = 4,
+    SAY_ANNOUNCE_ASSAULT_ALEXSTRASZA    = 5,
+    SAY_ANNOUNCE_CATACLYSM              = 6,
+    SAY_ANNOUNCE_ELEMENTIUM_BOLT        = 7,
+    SAY_ELEMENTIUM_BOLT                 = 8,
+    SAY_PHASE_2                         = 9,
+    SAY_ANNOUNCE_PHASE_2                = 10,
+    SAY_SLAY                            = 11,
 
     // Aspects
-    SAY_ASSAULTED                   = 0,
-    SAY_CATACLYSM                   = 1,
+    SAY_ASSAULTED                       = 0,
+    SAY_CATACLYSM                       = 1,
 
     // Tentacles
-    SAY_ANNOUNCE_BLISTERING_TENTACLES = 0,
+    SAY_ANNOUNCE_BLISTERING_TENTACLES   = 0,
 };
 
 enum Spells
@@ -48,9 +48,16 @@ enum Spells
     SPELL_TRIGGER_ASPECT_BUFFS      = 106943,
     SPELL_REGENERATIVE_BLOOD        = 105932,
     SPELL_REGENERATIVE_BLOOD_SCRIPT = 105934,
+    SPELL_CORRUPTED_BLOOD           = 106834,
+    SPELL_CORRUPTED_BLOOD_STACKER   = 106843, // casted by vehicle passenger
+
+    // Deathwing Health Controller
+    SPELL_DUMMY_NUKE                = 21912,
 
     SPELL_ELEMENTIUM_BOLT           = 105651,
     SPELL_ELEMENTIUM_BOLT_TRIGGERED = 105599,
+
+    SPELL_SLUMP                     = 106708,
 
     // Arms
     SPELL_SUMMON_COSMETIC_TENTACLES = 108970,
@@ -113,8 +120,8 @@ enum Spells
     SPELL_RIDE_VEHICLE_HARDCODED    = 46598, 
     SPELL_REDUCE_DODGE_PARRY        = 110470,
 
-    // Jump Pads
-    SPELL_CARRYING_WINDS_CAST       = 106673, // casted by Jump Pad
+    // Jump Pad
+    SPELL_CARRYING_WINDS_CAST       = 106673,
     SPELL_CARRYING_WINDS_EFFECT     = 106672,
     SPELL_CARRYING_WINDS_SPEED      = 106664,
 };
@@ -128,6 +135,8 @@ enum Events
     EVENT_SEND_FRAME,
     EVENT_SUMMON_MUTATED_CORRUPTION,
     EVENT_CATACLYSM,
+
+    EVENT_SLUMP,
     
     // Tentacles
     EVENT_BURNING_BLOOD,
@@ -154,6 +163,7 @@ enum Actions
     ACTION_RESET_ENCOUNTER,
     ACTION_TENTACLE_KILLED,
     ACTION_COUNT_PLAYER,
+    ACTION_PHASE_2,
 
     // Tentacles
     ACTION_PLATFORM_ENGAGED,
@@ -190,13 +200,13 @@ enum SpellVisualKits
     VISUAL_3 = 22446, // Win 2
 };
 
-Position const DeathwingPos = {-11903.9f, 11989.1f, -113.204f, 2.16421f};
-Position const TailPos = {-11857.0f, 11795.6f, -73.9549f, 2.23402f};
-Position const WingLeftPos = {-11941.2f, 12248.9f, 12.1499f, 1.98968f};
-Position const WingRightPos = {-12097.8f, 12067.4f, 13.4888f, 2.21657f};
-Position const ArmLeftPos = {-12005.8f, 12190.3f, -6.59399f, 2.1293f};
-Position const ArmRightPos = {-12065.0f, 12127.2f, -3.2946f, 2.33874f};
-Position const ThrallTeleport = {-12128.3f, 12253.8f, 0.0450132f, 5.456824f};
+Position const DeathwingPos     = {-11903.9f, 11989.1f, -113.204f, 2.16421f };
+Position const TailPos          = {-11857.0f, 11795.6f, -73.9549f, 2.23402f };
+Position const WingLeftPos      = {-11941.2f, 12248.9f, 12.1499f, 1.98968f  };
+Position const WingRightPos     = {-12097.8f, 12067.4f, 13.4888f, 2.21657f  };
+Position const ArmLeftPos       = {-12005.8f, 12190.3f, -6.59399f, 2.1293f  };
+Position const ArmRightPos      = {-12065.0f, 12127.2f, -3.2946f, 2.33874f  };
+Position const ThrallTeleport   = {-12128.3f, 12253.8f, 0.0450132f, 5.456824f};
 
 class AspectEntryCheck
 {
@@ -263,12 +273,13 @@ public:
     {
         boss_madness_of_deathwingAI(Creature* creature) : BossAI(creature, DATA_MADNESS_OF_DEATHWING), vehicle(creature->GetVehicleKit())
         {
-            _armCounter = 0;
+            _killedTentacles = 0;
             currentPlatform = NULL;
-            armRight = NULL;    // Ysera
-            armLeft = NULL;     // Nozdormu
-            wingRight = NULL;   // Kalecgos
-            wingLeft = NULL;    // Alextstrasza
+            armRight        = NULL; // Ysera
+            armLeft         = NULL; // Nozdormu
+            wingRight       = NULL; // Kalecgos
+            wingLeft        = NULL; // Alextstrasza
+            hpController    = NULL;
         }
 
         Vehicle* vehicle;
@@ -278,7 +289,7 @@ public:
         Creature* armRight;
         Creature* currentPlatform;
         Creature* hpController;
-        uint8 _armCounter;
+        uint8 _killedTentacles;
 
         void Reset()
         {
@@ -451,9 +462,6 @@ public:
                     break;
                 case BOSS_MADNESS_OF_DEATHWING_HP:
                     hpController = summon;
-                    summon->CastSpell(me, SPELL_RIDE_VEHICLE_HARDCODED, true);
-                    me->CastSpell(summon, SPELL_SHARE_HEALTH_1, true);
-                    summon->CastSpell(me, SPELL_SHARE_HEALTH_2, true);
                     break;
                 default:
                     summon->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_HOVER);
@@ -478,6 +486,9 @@ public:
                     else if (wingRight && wingRight->GetGUID() == summon->GetGUID())
                         wingRight = NULL;
                     break;
+                case BOSS_MADNESS_OF_DEATHWING_HP:
+                    hpController = NULL;
+                    break;
                 default:
                     break;
             }
@@ -497,12 +508,22 @@ public:
             {
                 case ACTION_TENTACLE_KILLED:
                 {
+                    _killedTentacles++;
+                    events.Reset();
                     uint8 random = urand(0, 1);
                     DoPlaySoundToSet(me, random == 0 ? SOUND_AGONY_1 : SOUND_AGONY_2);
-                    events.ScheduleEvent(EVENT_ASSAULT_ASPECTS, 6500);
-                    events.CancelEvent(EVENT_CATACLYSM);
+                    if (_killedTentacles < 4)
+                        events.ScheduleEvent(EVENT_ASSAULT_ASPECTS, 6500);
+                    else
+                        DoAction(ACTION_PHASE_2);
                     break;
                 }
+                case ACTION_PHASE_2:
+                    me->CastStop();
+                    me->RemoveAurasDueToSpell(SPELL_AGONIZING_PAIN);
+                    DoCast(me, SPELL_SLUMP);
+                    events.ScheduleEvent(EVENT_SLUMP, 200);
+                    break;
                 default:
                     break;
             }
@@ -520,7 +541,7 @@ public:
                 switch (eventId)
                 {
                     case EVENT_ASSAULT_ASPECTS:
-                        TalkToMap(SAY_ANNOUNCE_ASSAULT);
+                        TalkToMap(SAY_ANNOUNCE_ASSAULT_ASPECTS);
                         DoCast(SPELL_ASSAULT_ASPECTS);
                         break;
                     case EVENT_ASSAULT_ASPECT:
@@ -530,7 +551,7 @@ public:
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, armRight, 2);
                                 armRight->AI()->DoAction(ACTION_PLATFORM_ENGAGED);
-                                TalkToMap(SAY_ANNOUNCE_ATTACK_YSERA);
+                                TalkToMap(SAY_ANNOUNCE_ASSAULT_YSERA);
                                 if (Creature* ysera = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_YSERA_MADNESS)))
                                     ysera->AI()->DoAction(ACTION_ASSAULT_ASPECT);
                             }
@@ -541,7 +562,7 @@ public:
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, armLeft, 2);
                                 armLeft->AI()->DoAction(ACTION_PLATFORM_ENGAGED);
-                                TalkToMap(SAY_ANNOUNCE_ATTACK_NOZDORMU);
+                                TalkToMap(SAY_ANNOUNCE_ASSAULT_NOZDORMU);
                                 if (Creature* nozdormu = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_NOZDORMU_MADNESS)))
                                     nozdormu->AI()->DoAction(ACTION_ASSAULT_ASPECT);
                             }
@@ -552,7 +573,7 @@ public:
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, wingRight, 2);
                                 wingRight->AI()->DoAction(ACTION_PLATFORM_ENGAGED);
-                                TalkToMap(SAY_ANNOUNCE_ATTACK_ALEXSTRASZA);
+                                TalkToMap(SAY_ANNOUNCE_ASSAULT_ALEXSTRASZA);
                                 if (Creature* alexstrasza = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ALEXSTRASZA_MADNESS)))
                                     alexstrasza->AI()->DoAction(ACTION_ASSAULT_ASPECT);
                             }
@@ -560,7 +581,7 @@ public:
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, wingLeft, 2);
                                 wingLeft->AI()->DoAction(ACTION_PLATFORM_ENGAGED);
-                                TalkToMap(SAY_ANNOUNCE_ATTACK_KALECGOS);
+                                TalkToMap(SAY_ANNOUNCE_ASSAULT_KALECGOS);
                                 if (Creature* kalecgos = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_KALECGOS_MADNESS)))
                                     kalecgos->AI()->DoAction(ACTION_ASSAULT_ASPECT);
                             }
@@ -582,6 +603,28 @@ public:
                     case EVENT_CATACLYSM:
                         DoCast(me, SPELL_CATACLYSM);
                         break;
+                    case EVENT_SLUMP:
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        TalkToMap(SAY_ANNOUNCE_PHASE_2);
+                        TalkToMap(SAY_PHASE_2);
+
+                        if (Creature* alexstrasza = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ALEXSTRASZA_MADNESS)))
+                            alexstrasza->CastStop();
+                        if (Creature* kalecgos = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_KALECGOS_MADNESS)))
+                            kalecgos->CastStop();
+                        if (Creature* ysera = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_YSERA_MADNESS)))
+                            ysera->CastStop();
+                        if (Creature* nozdormu = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_NOZDORMU_MADNESS)))
+                            nozdormu->CastStop();
+                        if (hpController)
+                        {
+                            hpController->SetHealth(me->GetHealth());
+                            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, hpController, 1);
+                            hpController->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            hpController->CastSpell(me, SPELL_SHARE_HEALTH_2, true);
+                            hpController->SetReactState(REACT_AGGRESSIVE);
+                            hpController->SetInCombatWithZone();
+                        }
                     default:
                         break;
                 }
@@ -682,8 +725,6 @@ class boss_tentacle : public CreatureScript
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 summons.DespawnAll();
                 DoCast(me, SPELL_AGONIZING_PAIN, true);
-                if (Creature* deathwing = me->FindNearestCreature(BOSS_MADNESS_OF_DEATHWING, 500.0f, true))
-                    deathwing->AI()->DoAction(ACTION_TENTACLE_KILLED);
                 DoCast(me, SPELL_TRIGGER_CONCENTRATION, true);
             }
 
@@ -1251,6 +1292,27 @@ public:
         }
     };
 
+    class spell_ds_concentration_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_ds_concentration_AuraScript);
+
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget()->ToUnit())
+                target->SetHover(false);
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_ds_concentration_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_ds_concentration_AuraScript();
+    }
+
     SpellScript* GetSpellScript() const
     {
         return new spell_ds_concentration_SpellScript();
@@ -1339,9 +1401,16 @@ public:
                 SetHitDamage(target->GetMaxHealth() * 0.2f);
         }
 
+        void HandleDamageEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Creature* deathwing = GetHitCreature())
+                deathwing->AI()->DoAction(ACTION_TENTACLE_KILLED);
+        }
+
         void Register()
         {
             OnEffectHitTarget += SpellEffectFn(spell_ds_agonizing_pain_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            OnEffectHitTarget += SpellEffectFn(spell_ds_agonizing_pain_SpellScript::HandleDamageEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
