@@ -50,6 +50,8 @@ enum Spells
     SPELL_REGENERATIVE_BLOOD_SCRIPT = 105934,
     SPELL_CORRUPTED_BLOOD           = 106834,
     SPELL_CORRUPTED_BLOOD_STACKER   = 106843, // casted by vehicle passenger
+    SPELL_TRIGGER_ASPECT_YELL       = 109727,
+    SPELL_BERSERK                   = 64238,
 
     // Deathwing Health Controller
     SPELL_DUMMY_NUKE                = 21912,
@@ -108,6 +110,7 @@ enum Spells
     // Alexstrasza
     SPELL_ALEXSTRASZAS_PRESENCE     = 105825,
     SPELL_EXPOSE_WEAKNESS_ALEXSTRASZA = 106588,
+    SPELL_CAUTERIZE                 = 105565,
 
     // Generic Spells
     SPELL_CONCENTRATION_KALECGOS    = 106644,
@@ -691,6 +694,9 @@ class boss_tentacle : public CreatureScript
                     _blisteringCount++;
                     for (uint8 i = 0; i < 7; i++)
                         DoCast(me, SPELL_SPAWN_BLISTERING_TENTACLE, true);
+                    if (Creature* alexstrasza = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ALEXSTRASZA_MADNESS)))
+                        if (alexstrasza->HasAura(SPELL_ALEXSTRASZAS_PRESENCE))
+                            alexstrasza->AI()->DoCast(alexstrasza, SPELL_CAUTERIZE, true);
                 }
                 if (me->HealthBelowPct(50) && _blisteringCount == 1)
                 {
@@ -698,6 +704,9 @@ class boss_tentacle : public CreatureScript
                     _blisteringCount++;
                     for (uint8 i = 0; i < 7; i++)
                         DoCast(me, SPELL_SPAWN_BLISTERING_TENTACLE, true);
+                    if (Creature* alexstrasza = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ALEXSTRASZA_MADNESS)))
+                        if (alexstrasza->HasAura(SPELL_ALEXSTRASZAS_PRESENCE))
+                            alexstrasza->AI()->DoCast(alexstrasza, SPELL_CAUTERIZE, true);
                 }
                 if (me->HealthBelowPct(25) && _blisteringCount == 2)
                 {
@@ -705,6 +714,9 @@ class boss_tentacle : public CreatureScript
                     _blisteringCount++;
                     for (uint8 i = 0; i < 7; i++)
                         DoCast(me, SPELL_SPAWN_BLISTERING_TENTACLE, true);
+                    if (Creature* alexstrasza = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ALEXSTRASZA_MADNESS)))
+                        if (alexstrasza->HasAura(SPELL_ALEXSTRASZAS_PRESENCE))
+                            alexstrasza->AI()->DoCast(alexstrasza, SPELL_CAUTERIZE, true);
                 }
             }
 

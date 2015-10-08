@@ -13773,7 +13773,9 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
         }
     }
 
-    if (target->GetEntry() == 56188 && bySpell && bySpell->IsAffectingArea())
+    // Blistering Tentacles Special Handling
+    if (target->GetEntry() == 56188 && bySpell && bySpell->IsAffectingArea() && bySpell->Id != 105569 &&
+        bySpell->Id != 109576 && bySpell->Id != 109577 && bySpell->Id != 109578)
         return false;
 
     // can't attack invisible (ignore stealth for aoe spells) also if the area being looked at is from a spell use the dynamic object created instead of the casting unit.
