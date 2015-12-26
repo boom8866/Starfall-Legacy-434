@@ -1394,8 +1394,12 @@ struct LFGDungeonEntry
     uint32  grouptype;                                      // 15
     //char*   desc;                                         // 16 Description
     uint32  randomCategoryId;                               // 17 RandomDungeonID assigned for this dungeon
+    uint32  requiredTanks;                                  // 18
+    uint32  requiredHealers;                                // 19
+    uint32  requiredDPS;                                    // 20
     // Helpers
     uint32 Entry() const { return ID + (type << 24); }
+    bool IsLFR() const { return ID == 416 || ID == 417; }
 };
 
 struct LightEntry

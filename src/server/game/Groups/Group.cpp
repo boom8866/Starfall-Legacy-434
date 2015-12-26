@@ -238,12 +238,29 @@ void Group::LoadMemberFromDB(uint32 guidLow, uint8 memberFlags, uint8 subgroup, 
 
 void Group::ConvertToLFG(bool raid)
 {
-    if (!raid)
-        m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_UNK1);
-    else
-        m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_UNK1 | GROUPTYPE_RAID);
+    m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_LFG_RESTRICTED);
 
     m_lootMethod = NEED_BEFORE_GREED;
+    if (!isBGGroup() && !isBFGroup())
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GROUP_TYPE);
+
+        stmt->setUInt8(0, uint8(m_groupType));
+        stmt->setUInt32(1, m_dbStoreId);
+
+        CharacterDatabase.Execute(stmt);
+    }
+
+    SendUpdate();
+}
+
+void Group::ConvertToLFR()
+{
+    m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_LFG_RESTRICTED | GROUPTYPE_RAID);
+    m_lootMethod = NEED_BEFORE_GREED;
+
+    _initRaidSubGroupsCounter();
+
     if (!isBGGroup() && !isBFGroup())
     {
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GROUP_TYPE);
@@ -2242,6 +2259,11 @@ bool Group::IsFull() const
 bool Group::isLFGGroup() const
 {
     return m_groupType & GROUPTYPE_LFG;
+}
+
+bool Group::isLFRGroup() const
+{
+    return (m_groupType & GROUPTYPE_LFG) && (m_groupType & GROUPTYPE_RAID);
 }
 
 bool Group::isRaidGroup() const

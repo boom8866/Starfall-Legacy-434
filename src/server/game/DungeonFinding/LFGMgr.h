@@ -276,14 +276,15 @@ struct LfgPlayerBoot
 
 struct LFGDungeonData
 {
-    LFGDungeonData(): id(0), name(""), map(0), type(0), expansion(0), group(0), minlevel(0),
-        maxlevel(0), difficulty(REGULAR_DIFFICULTY), seasonal(false), x(0.0f), y(0.0f), z(0.0f), o(0.0f)
-        { }
-    LFGDungeonData(LFGDungeonEntry const* dbc): id(dbc->ID), name(dbc->name), map(dbc->map),
+    LFGDungeonData() = delete;
+
+    LFGDungeonData(LFGDungeonEntry const* dbc) : id(dbc->ID), name(dbc->name), map(dbc->map),
         type(dbc->type), expansion(dbc->expansion), group(dbc->grouptype),
         minlevel(dbc->minlevel), maxlevel(dbc->maxlevel), difficulty(Difficulty(dbc->difficulty)),
-        seasonal(dbc->flags & LFG_FLAG_SEASONAL), x(0.0f), y(0.0f), z(0.0f), o(0.0f)
-        { }
+        seasonal(dbc->flags & LFG_FLAG_SEASONAL), isLFR(dbc->IsLFR()),
+        x(0.0f), y(0.0f), z(0.0f), o(0.0f), requiredTanks(dbc->requiredTanks),
+        requiredHealers(dbc->requiredHealers), requiredDPS(dbc->requiredDPS)
+    { }
 
     uint32 id;
     std::string name;
@@ -295,10 +296,15 @@ struct LFGDungeonData
     uint8 maxlevel;
     Difficulty difficulty;
     bool seasonal;
+    bool isLFR;
     float x, y, z, o;
+    uint32 requiredTanks;
+    uint32 requiredHealers;
+    uint32 requiredDPS;
 
     // Helpers
     uint32 Entry() const { return id + (type << 24); }
+    uint32 GetMaxGroupSize() const { return requiredTanks + requiredHealers + requiredDPS; }
 };
 
 class LFGMgr
@@ -413,9 +419,6 @@ class LFGMgr
         void JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::string const& comment);
         /// Leaves lfg
         void LeaveLfg(uint64 guid);
-        /// Check if selected LFG Queue is for Raids
-        bool raidQueue = false;
-        bool isRaidQueue() const { return raidQueue; };
 
         // LfgQueue
         /// Get last lfg state (NONE, DUNGEON or FINISHED_DUNGEON)
@@ -433,11 +436,12 @@ class LFGMgr
         /// Gets queue join time
         time_t GetQueueJoinTime(uint64 guid);
         /// Checks if given roles match, modifies given roles map with new roles
-        static bool CheckGroupRoles(LfgRolesMap &groles);
+        static bool CheckGroupRoles(LfgRolesMap& groles, LFGDungeonData const* dungeon);
         /// Checks if given players are ignoring each other
         static bool HasIgnore(uint64 guid1, uint64 guid2);
         /// Sends queue status to player
         static void SendLfgQueueStatus(uint64 guid, LfgQueueStatusData const& data);
+        LFGDungeonData const* GetLFGDungeon(uint32 id);
 
     private:
         uint8 GetTeam(uint64 guid);
@@ -451,7 +455,6 @@ class LFGMgr
         void RemovePlayerData(uint64 guid);
         void GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& players, LfgLockPartyMap& lockMap);
         void _SaveToDB(uint64 guid, uint32 db_guid);
-        LFGDungeonData const* GetLFGDungeon(uint32 id);
 
         // Proposals
         void RemoveProposal(LfgProposalContainer::iterator itProposal, LfgUpdateType type);
