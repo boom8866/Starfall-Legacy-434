@@ -1005,7 +1005,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         if (victim->GetTypeId() == TYPEID_PLAYER && victim != this)
             victim->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_DAMAGE_RECEIVED, health);
 
-        Kill(victim, durabilityLoss);
+        PrepareKill(victim, durabilityLoss);
     }
     else
     {
@@ -17686,6 +17686,12 @@ void Unit::PlayOneShotAnimKit(uint16 animKitId)
     data.append(GetPackGUID());
     data << uint16(animKitId);
     SendMessageToSet(&data, true);
+}
+
+void Unit::PrepareKill(Unit* victim, bool durabilityLoss)
+{
+    victim->SetHealth(1);
+    Kill(victim, durabilityLoss);
 }
 
 void Unit::Kill(Unit* victim, bool durabilityLoss)
