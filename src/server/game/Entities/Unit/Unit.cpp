@@ -17688,10 +17688,30 @@ void Unit::PlayOneShotAnimKit(uint16 animKitId)
     SendMessageToSet(&data, true);
 }
 
+class KillUnitEvent : public BasicEvent
+{
+public:
+    KillUnitEvent(Unit* killer, Unit* victim, bool durabilityLoss) : _killer(killer), _victim(victim), _durabilityLoss(durabilityLoss)
+    {
+    }
+
+    bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
+    {
+        _killer->Kill(_victim, _durabilityLoss);
+        _killer->m_Events.KillAllEvents(true);
+        return true;
+    }
+
+private:
+    Unit* _killer;
+    Unit* _victim;
+    bool _durabilityLoss;
+};
+
 void Unit::PrepareKill(Unit* victim, bool durabilityLoss)
 {
     victim->SetHealth(1);
-    Kill(victim, durabilityLoss);
+    m_Events.AddEvent(new KillUnitEvent(this, victim, durabilityLoss), 0);
 }
 
 void Unit::Kill(Unit* victim, bool durabilityLoss)
