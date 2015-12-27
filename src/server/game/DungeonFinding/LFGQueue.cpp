@@ -94,8 +94,8 @@ void LfgQueueData::InitializeGroupSetup()
         if (LFGDungeonData const* dungeon = sLFGMgr->GetLFGDungeon(*dungeons.begin()))
         {
             tanks = dungeon->requiredTanks;
-            healers = dungeon->requiredHeals;
-            dps = dungeon->requiredDamagedealers;
+            healers = dungeon->requiredHealers;
+            dps = dungeon->requiredDPS;
         }
     }
 }

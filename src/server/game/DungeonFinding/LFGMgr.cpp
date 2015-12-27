@@ -815,6 +815,7 @@ void LFGMgr::GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& pl
 */
 bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles, LFGDungeonData const* dungeon)
 {
+    ASSERT(dungeon);
     if (groles.empty())
         return false;
     uint8 damage = 0;
@@ -831,7 +832,7 @@ bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles, LFGDungeonData const* dungeon)
             if (role != PLAYER_ROLE_DAMAGE)
             {
                 it->second -= PLAYER_ROLE_DAMAGE;
-                if (CheckGroupRoles(groles))
+                if (CheckGroupRoles(groles, dungeon))
                     return true;
                 it->second += PLAYER_ROLE_DAMAGE;
             }
@@ -845,7 +846,7 @@ bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles, LFGDungeonData const* dungeon)
             if (role != PLAYER_ROLE_HEALER)
             {
                 it->second -= PLAYER_ROLE_HEALER;
-                if (CheckGroupRoles(groles))
+                if (CheckGroupRoles(groles, dungeon))
                     return true;
                 it->second += PLAYER_ROLE_HEALER;
             }
@@ -859,7 +860,7 @@ bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles, LFGDungeonData const* dungeon)
             if (role != PLAYER_ROLE_TANK)
             {
                 it->second -= PLAYER_ROLE_TANK;
-                if (CheckGroupRoles(groles))
+                if (CheckGroupRoles(groles, dungeon))
                     return true;
                 it->second += PLAYER_ROLE_TANK;
             }
@@ -1619,8 +1620,6 @@ LfgLockMap const LFGMgr::GetLockedDungeons(uint64 guid)
         else if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, dungeon->map, player))
             lockData = LFG_LOCKSTATUS_RAID_LOCKED;
         else if (dungeon->difficulty > DUNGEON_DIFFICULTY_NORMAL && player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
-            lockData = LFG_LOCKSTATUS_RAID_LOCKED;
-        else if (dungeon->difficulty > DUNGEON_DIFFICULTY_NORMAL && player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty), dungeon->isLFR))
             lockData = LFG_LOCKSTATUS_RAID_LOCKED;
         else if (dungeon->minlevel > level)
             lockData = LFG_LOCKSTATUS_TOO_LOW_LEVEL;
