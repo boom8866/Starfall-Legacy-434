@@ -17697,8 +17697,8 @@ public:
 
     bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
     {
-        _killer->Kill(_victim, _durabilityLoss);
-        _killer->m_Events.KillAllEvents(true);
+        if (_victim && !_victim->isDead())
+            _killer->Kill(_victim, _durabilityLoss);
         return true;
     }
 
