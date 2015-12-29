@@ -138,8 +138,8 @@ enum Events
     EVENT_SEND_FRAME,
     EVENT_SUMMON_MUTATED_CORRUPTION,
     EVENT_CATACLYSM,
-
     EVENT_SLUMP,
+    EVENT_CHECK_AGGRO,
     
     // Tentacles
     EVENT_BURNING_BLOOD,
@@ -305,7 +305,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_SET_COMBAT_RES_LIMIT, 0, 0);
             events.ScheduleEvent(EVENT_ASSAULT_ASPECTS, 5000);
             events.ScheduleEvent(EVENT_SEND_FRAME, 16000);
-
+            events.ScheduleEvent(EVENT_CHECK_AGGRO, 500);
 
             me->SummonCreature(NPC_WING_TENTACLE, WingLeftPos, TEMPSUMMON_MANUAL_DESPAWN);
             me->SummonCreature(NPC_WING_TENTACLE, WingRightPos, TEMPSUMMON_MANUAL_DESPAWN);
@@ -418,6 +418,9 @@ public:
 
             if (wingRight)
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, wingRight);
+
+            if (hpController)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, hpController);
 
             summons.DespawnAll();
         }
@@ -1551,6 +1554,34 @@ public:
     SpellScript* GetSpellScript() const
     {
         return new spell_ds_burning_blood_SpellScript();
+    }
+};
+
+class spell_ds_elementium_bolt_script : public SpellScriptLoader
+{
+public:
+    spell_ds_elementium_bolt_script() : SpellScriptLoader("spell_ds_elementium_bolt_script") { }
+
+    class spell_ds_elementium_bolt_script_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_elementium_bolt_script_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+            {
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_ds_elementium_bolt_script_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ds_elementium_bolt_script_SpellScript();
     }
 };
 
