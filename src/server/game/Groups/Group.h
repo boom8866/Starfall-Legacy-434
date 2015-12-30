@@ -42,7 +42,6 @@ class WorldSession;
 struct MapEntry;
 
 #define MAXGROUPSIZE 5
-#define MAXLFRSIZE 25
 #define MAXRAIDSIZE 40
 #define MAX_RAID_SUBGROUPS MAXRAIDSIZE/MAXGROUPSIZE
 #define TARGETICONCOUNT 8
@@ -85,12 +84,12 @@ enum GroupMemberAssignment
 
 enum GroupType
 {
-    GROUPTYPE_NORMAL = 0x00,
-    GROUPTYPE_BG     = 0x01,
-    GROUPTYPE_RAID   = 0x02,
-    GROUPTYPE_BGRAID = GROUPTYPE_BG | GROUPTYPE_RAID,       // mask
-    GROUPTYPE_UNK1   = 0x04,
-    GROUPTYPE_LFG    = 0x08
+    GROUPTYPE_NORMAL            = 0x00,
+    GROUPTYPE_BG                = 0x01,
+    GROUPTYPE_RAID              = 0x02,
+    GROUPTYPE_BGRAID            = GROUPTYPE_BG | GROUPTYPE_RAID,       // mask
+    GROUPTYPE_LFG_RESTRICTED    = 0x04,
+    GROUPTYPE_LFG               = 0x08
     // 0x10, leave/change group?, I saw this flag when leaving group and after leaving BG while in group
 };
 
@@ -211,6 +210,7 @@ class Group
         // properties accessories
         bool IsFull() const;
         bool isLFGGroup()  const;
+        bool isLFRGroup()  const;
         bool isRaidGroup() const;
         bool isBGGroup()   const;
         bool isBFGroup()   const;
@@ -250,7 +250,8 @@ class Group
 
         uint8 GetMemberGroup(uint64 guid) const;
 
-        void ConvertToLFG(bool raid = false);
+        void ConvertToLFG();
+        void ConvertToLFR();
         void ConvertToRaid();
         void ConvertToGroup();
 

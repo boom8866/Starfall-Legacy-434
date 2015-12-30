@@ -1005,7 +1005,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         if (victim->GetTypeId() == TYPEID_PLAYER && victim != this)
             victim->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_DAMAGE_RECEIVED, health);
 
-        Kill(victim, durabilityLoss);
+        PrepareKill(victim, durabilityLoss);
     }
     else
     {
@@ -17686,6 +17686,32 @@ void Unit::PlayOneShotAnimKit(uint16 animKitId)
     data.append(GetPackGUID());
     data << uint16(animKitId);
     SendMessageToSet(&data, true);
+}
+
+class KillUnitEvent : public BasicEvent
+{
+public:
+    KillUnitEvent(Unit* killer, Unit* victim, bool durabilityLoss) : _killer(killer), _victim(victim), _durabilityLoss(durabilityLoss)
+    {
+    }
+
+    bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
+    {
+        if (_victim && !_victim->isDead())
+            _killer->Kill(_victim, _durabilityLoss);
+        return true;
+    }
+
+private:
+    Unit* _killer;
+    Unit* _victim;
+    bool _durabilityLoss;
+};
+
+void Unit::PrepareKill(Unit* victim, bool durabilityLoss)
+{
+    victim->SetHealth(1);
+    m_Events.AddEvent(new KillUnitEvent(this, victim, durabilityLoss), 0);
 }
 
 void Unit::Kill(Unit* victim, bool durabilityLoss)
