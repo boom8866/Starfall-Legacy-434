@@ -166,17 +166,23 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
     if (!instance)
         return false;
 
-    Difficulty targetDifficulty, requestedDifficulty;
-    targetDifficulty = requestedDifficulty = player->GetDifficulty(entry->IsRaid());
-    // Get the highest available difficulty if current setting is higher than the instance allows
-    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(entry->MapID, targetDifficulty);
+    Difficulty targetDifficulty = player->GetDifficulty(entry->IsRaid());
+    //The player has a heroic mode and tries to enter into instance which has no a heroic mode
+    MapDifficulty const* mapDiff = GetMapDifficultyData(entry->MapID, targetDifficulty);
     if (!mapDiff)
     {
-        player->SendTransferAborted(mapid, TRANSFER_ABORT_DIFFICULTY, requestedDifficulty);
-        return false;
+        // Send aborted message for dungeons
+        if (entry->IsNonRaidDungeon())
+        {
+            player->SendTransferAborted(mapid, TRANSFER_ABORT_DIFFICULTY, player->GetDungeonDifficulty());
+            return false;
+        }
+        else    // attempt to downscale
+            mapDiff = GetDownscaledMapDifficultyData(entry->MapID, targetDifficulty);
     }
+    // FIXME: mapDiff is never used
 
-    // Bypass checks for GMs
+    //Bypass checks for GMs
     if (player->isGameMaster())
         return true;
 
@@ -226,27 +232,6 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
             sLog->outDebug(LOG_FILTER_MAPS, "Map::CanPlayerEnter - player '%s' is dead but does not have a corpse!", player->GetName().c_str());
     }
 
-    // If the player or group leader defeats any bosses on Normal and goes out, switches diff and tries to enter on Heroic difficulty, he can't. Or the other way around.
-    // He can do it only by using Dynamic Difficulty, inside the instance.
-    uint32 boundDifficultyToCheck = 0;
-    switch (targetDifficulty)
-    {
-        case RAID_DIFFICULTY_10MAN_NORMAL:
-            boundDifficultyToCheck = RAID_DIFFICULTY_10MAN_HEROIC;
-            break;
-        case RAID_DIFFICULTY_25MAN_NORMAL:
-            boundDifficultyToCheck = RAID_DIFFICULTY_25MAN_HEROIC;
-            break;
-        case RAID_DIFFICULTY_10MAN_HEROIC:
-            boundDifficultyToCheck = RAID_DIFFICULTY_10MAN_NORMAL;
-            break;
-        case RAID_DIFFICULTY_25MAN_HEROIC:
-            boundDifficultyToCheck = RAID_DIFFICULTY_25MAN_NORMAL;
-            break;
-        default:
-            break;
-    }
-
     //Get instance where player's group is bound & its map
     if (group)
     {
@@ -255,16 +240,16 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
             if (Map* boundMap = sMapMgr->FindMap(mapid, boundInstance->save->GetInstanceId()))
                 if (!loginCheck && !boundMap->CanEnter(player))
                     return false;
-            /*
-                This check has to be moved to InstanceMap::CanEnter()
-                // Player permanently bounded to different instance than groups one
-                InstancePlayerBind* playerBoundedInstance = player->GetBoundInstance(mapid, player->GetDifficulty(entry->IsRaid()));
-                if (playerBoundedInstance && playerBoundedInstance->perm && playerBoundedInstance->save &&
-                    boundedInstance->save->GetInstanceId() != playerBoundedInstance->save->GetInstanceId())
-                {
-                    //TODO: send some kind of error message to the player
-                    return false;
-                }*/
+        /*
+        This check has to be moved to InstanceMap::CanEnter()
+        // Player permanently bounded to different instance than groups one
+        InstancePlayerBind* playerBoundedInstance = player->GetBoundInstance(mapid, player->GetDifficulty(entry->IsRaid()));
+        if (playerBoundedInstance && playerBoundedInstance->perm && playerBoundedInstance->save &&
+        boundedInstance->save->GetInstanceId() != playerBoundedInstance->save->GetInstanceId())
+        {
+        //TODO: send some kind of error message to the player
+        return false;
+        }*/
     }
 
     // players are only allowed to enter 5 instances per hour
@@ -280,6 +265,76 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
             player->SendTransferAborted(mapid, TRANSFER_ABORT_TOO_MANY_INSTANCES);
             return false;
         }
+    }
+
+    if (entry->IsRaid() && entry->addon == 3)
+    {
+        for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+        {
+            Player::BoundInstancesMap &binds = player->GetBoundInstances(Difficulty(i));
+            for (Player::BoundInstancesMap::const_iterator itr = binds.begin(); itr != binds.end(); ++itr)
+            {
+                InstanceSave* save = itr->second.save;
+                if (save->GetMapId() == mapid && save->GetDifficulty() != targetDifficulty)
+                {
+                    player->SendTransferAborted(mapid, TRANSFER_ABORT_LOCKED_TO_DIFFERENT_INSTANCE);
+                    return false;
+                }
+            }
+        }
+
+        if (group)
+            if (uint32 achievementId = GetMapDifficultySwitchAchievement(mapid, targetDifficulty))
+            {
+                if (Player *leader = ObjectAccessor::FindPlayer(group->GetLeaderGUID()))
+                {
+                    if (!leader->HasAchieved(achievementId))
+                    {
+                        if (MapDifficulty const* mapDiff = GetMapDifficultyData(mapid, targetDifficulty))
+                            if (mapDiff->hasErrorMessage)
+                                player->GetSession()->SendNotification("%s", mapDiff->_errorMessage.c_str());
+                        return false;
+                    }
+                    uint32 plId = 0;
+                    uint32 leId = 0;
+
+                    Player::BoundInstancesMap &binds = player->GetBoundInstances(targetDifficulty);
+                    for (Player::BoundInstancesMap::const_iterator itr = binds.begin(); itr != binds.end(); ++itr)
+                    {
+                        InstanceSave* plSave = itr->second.save;
+                        if (plSave->GetMapId() == mapid)
+                        {
+                            plId = plSave->GetInstanceId();
+                            break;
+                        }
+                    }
+
+                    Player::BoundInstancesMap &bind = leader->GetBoundInstances(targetDifficulty);
+                    for (Player::BoundInstancesMap::const_iterator itr = bind.begin(); itr != bind.end(); ++itr)
+                    {
+                        InstanceSave* leaderSave = itr->second.save;
+                        if (leaderSave->GetMapId() == mapid)
+                        {
+                            leId = leaderSave->GetInstanceId();
+                            break;
+                        }
+                    }
+
+                    if (leId != 0 && plId != 0 || leId == 0 && plId != 0)
+                    {
+                        if (plId != leId)
+                        {
+                            player->GetSession()->SendNotification("group leader is already bind to another instance id, impossible to enter");
+                            return false;
+                        }
+                    }
+                }
+                else if (targetDifficulty >= 2)
+                {
+                    player->GetSession()->SendNotification("Group leader not found, impossible to enter");
+                    return false;
+                }
+            }
     }
 
     //Other requirements

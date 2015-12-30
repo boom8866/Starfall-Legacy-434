@@ -2320,7 +2320,7 @@ void WorldObject::SetMap(Map* map)
     if (m_currMap)
     {
         sLog->outFatal(LOG_FILTER_GENERAL, "WorldObject::SetMap: obj %u new map %u %u, old map %u %u", (uint32)GetTypeId(), map->GetId(), map->GetInstanceId(), m_currMap->GetId(), m_currMap->GetInstanceId());
-        ASSERT(false);
+        // ASSERT(false);
     }
     m_currMap = map;
     m_mapId = map->GetId();

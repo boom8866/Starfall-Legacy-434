@@ -49,12 +49,13 @@ class InstanceSave
            - any new instance is being generated
            - the first time a player bound to InstanceId logs in
            - when a group bound to the instance is loaded */
-        InstanceSave(uint16 MapId, uint32 InstanceId, Difficulty difficulty, time_t resetTime, bool canReset);
+        InstanceSave(uint16 MapId, uint32 InstanceId, Difficulty difficulty, time_t resetTime, bool canReset, bool LFGid);
 
         /* Unloaded when m_playerList and m_groupList become empty
            or when the instance is reset */
         ~InstanceSave();
 
+        void UpdateDifficulty(uint8 diff);
         uint8 GetPlayerCount() const { return m_playerList.size(); }
         uint8 GetGroupCount() const { return m_groupList.size(); }
 
@@ -96,6 +97,7 @@ class InstanceSave
         /* currently it is possible to omit this information from this structure
            but that would depend on a lot of things that can easily change in future */
         Difficulty GetDifficulty() const { return m_difficulty; }
+        void SetDifficulty(Difficulty newDifficulty) { m_difficulty = newDifficulty; }
 
         typedef std::list<Player*> PlayerListType;
         typedef std::list<Group*> GroupListType;
@@ -111,6 +113,8 @@ class InstanceSave
         uint32 m_mapid;
         Difficulty m_difficulty;
         bool m_canReset;
+        bool m_toDelete;
+        bool m_LFGid;
 
         ACE_Thread_Mutex _lock;
 };
@@ -145,6 +149,7 @@ class InstanceSaveManager
         };
         typedef std::multimap<time_t /*resetTime*/, InstResetEvent> ResetTimeQueue;
 
+        void UpdateDifficulty(uint32 instanceId, Difficulty difficulty);
         void LoadInstances();
 
         struct InstanceEncounter
@@ -202,7 +207,7 @@ class InstanceSaveManager
         void Update();
 
         InstanceSave* AddInstanceSave(uint32 mapId, uint32 instanceId, Difficulty difficulty, time_t resetTime,
-            bool canReset, bool load = false);
+            bool canReset, bool load = false, bool isLFG = false);
         void RemoveInstanceSave(uint32 InstanceId);
         void UnloadInstanceSave(uint32 InstanceId);
         static void DeleteInstanceFromDB(uint32 instanceid);

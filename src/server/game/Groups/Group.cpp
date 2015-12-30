@@ -62,7 +62,7 @@ Loot* Roll::getLoot()
 Group::Group() : m_leaderGuid(0), m_leaderName(""), m_groupType(GROUPTYPE_NORMAL),
 m_dungeonDifficulty(DUNGEON_DIFFICULTY_NORMAL), m_raidDifficulty(RAID_DIFFICULTY_10MAN_NORMAL),
 m_bgGroup(NULL), m_bfGroup(NULL), m_lootMethod(FREE_FOR_ALL), m_lootThreshold(ITEM_QUALITY_UNCOMMON), m_looterGuid(0),
-m_subGroupsCounts(NULL), m_guid(0), m_counter(0), m_maxEnchantingLevel(0), m_dbStoreId(0)
+m_subGroupsCounts(NULL), m_guid(0), m_counter(0), m_maxEnchantingLevel(0), m_dbStoreId(0), m_boundSwitchCooldown(time(NULL))
 {
     for (uint8 i = 0; i < TARGETICONCOUNT; ++i)
         m_targetIcons[i] = 0;
@@ -1404,7 +1404,7 @@ void Group::CountTheRoll(Rolls::iterator rollI)
                     roll->getLoot()->NotifyItemRemoved(roll->itemSlot);
                     roll->getLoot()->unlootedCount--;
                     AllowedLooterSet looters = item->GetAllowedLooters();
-                    player->StoreNewItem(dest, roll->itemid, true, item->randomPropertyId, looters);
+                    player->StoreNewItem(dest, roll->itemid, true, item->randomPropertyId, looters, true);
                 }
                 else
                 {
@@ -1951,17 +1951,35 @@ void Group::SetDungeonDifficulty(Difficulty difficulty)
     }
 }
 
-void Group::SetRaidDifficulty(Difficulty difficulty)
+void Group::SetRaidDifficulty(Difficulty difficulty, uint32 raidId)
 {
     m_raidDifficulty = difficulty;
     if (!isBGGroup() && !isBFGroup())
     {
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GROUP_RAID_DIFFICULTY);
+        if (raidId)
+        {
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GROUP_RAID_DIFFICULTY);
+            stmt->setUInt8(0, uint8(m_raidDifficulty));
+            stmt->setUInt32(1, m_dbStoreId);
+            CharacterDatabase.Execute(stmt);
 
-        stmt->setUInt8(0, uint8(m_raidDifficulty));
-        stmt->setUInt32(1, m_dbStoreId);
+            PreparedStatement* stmt1 = CharacterDatabase.GetPreparedStatement(CHAR_UPD_RAID_DIFFICULTY);
+            stmt1->setUInt8(0, uint8(m_raidDifficulty));
+            stmt1->setUInt32(1, raidId);
+            CharacterDatabase.Execute(stmt1);
+        }
+        else
+        {
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GROUP_RAID_DIFFICULTY);
+            stmt->setUInt8(0, uint8(m_raidDifficulty));
+            stmt->setUInt32(1, m_dbStoreId);
+            CharacterDatabase.Execute(stmt);
 
-        CharacterDatabase.Execute(stmt);
+            PreparedStatement* stmt1 = CharacterDatabase.GetPreparedStatement(CHAR_UPD_RAID_DIFFICULTY_BY_GROUP);
+            stmt1->setUInt8(0, uint8(m_raidDifficulty));
+            stmt->setUInt32(1, m_dbStoreId);
+            CharacterDatabase.Execute(stmt1);
+        }
     }
 
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
@@ -1970,8 +1988,21 @@ void Group::SetRaidDifficulty(Difficulty difficulty)
         if (!player->GetSession())
             continue;
 
-        player->SetRaidDifficulty(difficulty);
-        player->SendRaidDifficulty(true);
+        for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+        {
+            for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
+            {
+                if (itr->first == player->GetMapId() && itr->second.save->GetInstanceId() == raidId)
+                {
+                    InstanceSave* p = itr->second.save;
+                    p->SetDifficulty(m_raidDifficulty);
+                }
+            }
+        }
+
+        player->SetRaidDifficulty(m_raidDifficulty);
+        player->SendRaidDifficulty(true, m_raidDifficulty);
+        player->SendRaidInfo();
     }
 }
 
@@ -2062,6 +2093,84 @@ void Group::ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo)
         else
             ++itr;
     }
+}
+
+void Group::ProcessBoundSwitch(InstanceSave *save, Difficulty previousDifficulty, Difficulty newDifficulty, std::list<uint32 > &mapToErase, Player *leader)
+{
+    uint32 mapid = save->GetMapId();
+
+    // some instances only have one difficulty
+    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapid, newDifficulty);
+    if (!mapDiff)
+        return;
+
+    if (!IsMapDifficultySwitchable(mapid))
+        return;
+
+    if (uint32 achievementId = GetMapDifficultySwitchAchievement(mapid, newDifficulty))
+        if (leader && !leader->HasAchieved(achievementId))
+        {
+            if (MapDifficulty const* newMapDiff = GetMapDifficultyData(mapid, newDifficulty))
+                if (newMapDiff->hasErrorMessage)
+                    leader->GetSession()->SendNotification("%s", newMapDiff->_errorMessage.c_str());
+            return;
+        }
+
+    if (save->GetDifficulty() != (Difficulty)newDifficulty)
+    {
+        SetRaidDifficulty((Difficulty)newDifficulty, save->GetInstanceId());
+        sInstanceSaveMgr->UpdateDifficulty(save->GetInstanceId(), (Difficulty)newDifficulty);
+    }
+
+    uint32 key = InstanceSaveKey::Create(mapid, save->isLfg());
+    m_boundInstances[newDifficulty][key] = m_boundInstances[previousDifficulty][key];
+    mapToErase.push_back(mapid);
+    Map* m = sMapMgr->FindBaseMap(mapid);
+
+    if (m == NULL)
+        m = sMapMgr->CreateBaseMap(mapid);
+
+    if (m == NULL)
+        return;
+
+    Map *map = sMapMgr->FindMap(mapid, save->GetInstanceId());
+    Map* newMap = ((MapInstanced*)m)->CreateInstance(save->GetInstanceId(), save, newDifficulty);
+
+    if (newMap == NULL)
+        return;
+
+    newMap->ChangeSpawnMode(newDifficulty);
+    for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player* member = itr->getSource();
+        if (!member || !member->GetSession())
+            continue;
+        member->SetRaidDifficulty((Difficulty)newDifficulty);
+        member->SwitchBoundInstance(mapid, (Difficulty)previousDifficulty, (Difficulty)newDifficulty);
+        member->SwitchRaidMap(mapid, (Difficulty)previousDifficulty, (Difficulty)newDifficulty, newMap);
+    }
+}
+
+void Group::SwitchBoundInstance(uint32 mapid, Difficulty previousDifficulty, Difficulty newDifficulty)
+{
+    if (Player* leader = ObjectAccessor::FindPlayer(GetLeaderGUID()))
+    {
+        std::list<uint32 > mapToErase;
+        for (BoundInstancesMap::iterator itr = m_boundInstances[previousDifficulty].begin(); itr != m_boundInstances[previousDifficulty].end(); ++itr)
+            if (InstanceSave* save = itr->second.save)
+                if (!save->IsLfg())
+                    ProcessBoundSwitch(save, previousDifficulty, newDifficulty, mapToErase, leader);
+
+
+        for (std::list<uint32 >::iterator itr = mapToErase.begin(); itr != mapToErase.end(); itr++)
+        {
+            BoundInstancesMap::iterator itr2 = m_boundInstances[previousDifficulty].find(*itr);
+            if (itr2 != m_boundInstances[previousDifficulty].end())
+                m_boundInstances[previousDifficulty].erase(itr2++);
+        }
+    }
+
+    SetRaidDifficulty(newDifficulty);
 }
 
 InstanceGroupBind* Group::GetBoundInstance(Player* player)
@@ -2598,7 +2707,7 @@ void Group::SetMarker(uint8 slot, const Position & destTarget, Unit* caster, Spe
 void Group::RemoveMarker(uint8 slot)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "Group::RemoveMarker");
-    if (m_markers[slot] != NULL)
+    if (m_markers[slot] != 0)
     {
         DynamicObject* dynGameobject = NULL;
         dynGameobject = ObjectAccessor::GetObjectInWorld(m_markers[slot], (DynamicObject*)NULL);

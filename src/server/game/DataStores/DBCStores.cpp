@@ -472,10 +472,10 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sMapStore,                    dbcPath, "Map.dbc");//14545
     LoadDBC(availableDbcLocales, bad_dbc_files, sMapDifficultyStore,          dbcPath, "MapDifficulty.dbc");//14545
     // fill data
-    sMapDifficultyMap[MAKE_PAIR32(0, 0)] = MapDifficulty(0, 0, false);//map 0 is missingg from MapDifficulty.dbc use this till its ported to sql
+    sMapDifficultyMap[MAKE_PAIR32(0, 0)] = MapDifficulty(0, 0, false, "");//map 0 is missingg from MapDifficulty.dbc use this till its ported to sql
     for (uint32 i = 0; i < sMapDifficultyStore.GetNumRows(); ++i)
         if (MapDifficultyEntry const* entry = sMapDifficultyStore.LookupEntry(i))
-            sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] > 0);
+            sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] > 0, entry->areaTriggerText);
     sMapDifficultyStore.Clear();
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sMountCapabilityStore,        dbcPath, "MountCapability.dbc");//14545
@@ -994,6 +994,67 @@ void Map2ZoneCoordinates(float& x, float& y, uint32 zone)
     x = (x-maEntry->x1)/((maEntry->x2-maEntry->x1)/100);
     y = (y-maEntry->y1)/((maEntry->y2-maEntry->y1)/100);    // client y coord from top to down
     std::swap(x, y);                                         // client have map coords swapped
+}
+
+bool IsMapDifficultySwitchable(uint32 mapId)
+{
+    switch (mapId)
+    {
+        case 967: // dragonsoul
+        case 720: // firelands
+        case 754: // throne of the four winds
+        case 671: // bastion of twilight
+        case 669: // blackwingDescent
+        case 649: // trial of the crusader
+        case 631: // icecrown citadel
+        case 724: // rubis sanctum
+            return true;
+    }
+    return false;
+}
+
+uint32 GetMapDifficultySwitchAchievement(uint32 mapId, Difficulty difficulty)
+{
+    switch (mapId)
+    {
+    case 967: // dragonsoul
+        if (difficulty == RAID_DIFFICULTY_10MAN_HEROIC || difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            return 6106;
+    case 720: // firelands
+        if (difficulty == RAID_DIFFICULTY_10MAN_HEROIC || difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            return 5802;
+    case 754: // throne of the four winds
+        if (difficulty == RAID_DIFFICULTY_10MAN_HEROIC || difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            return 4851;
+    case 671: // bastion of twilight
+        if (difficulty == RAID_DIFFICULTY_10MAN_HEROIC || difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            return 4850;
+    case 669: // blackwingDescent
+        if (difficulty == RAID_DIFFICULTY_10MAN_HEROIC || difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            return 4842;
+    case 649: // trial of the crusader
+    {
+        if (difficulty == RAID_DIFFICULTY_10MAN_HEROIC)
+            return 3917;
+        if (difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            return 3916;
+    }
+    case 631: // icecrown citadel
+    {
+        if (difficulty == RAID_DIFFICULTY_10MAN_HEROIC)
+            return 4532;
+        if (difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            return 4608;
+    }
+    case 724: // rubis sanctum
+    {
+        if (difficulty == RAID_DIFFICULTY_10MAN_HEROIC)
+            return 4817;
+        if (difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            return 4815;
+    }
+    }
+    return 0;
 }
 
 MapDifficulty const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty)

@@ -2538,11 +2538,12 @@ typedef std::map<uint32, VectorArray> NameGenVectorArraysMap;
 struct MapDifficulty
 {
     MapDifficulty() : resetTime(0), maxPlayers(0), hasErrorMessage(false) {}
-    MapDifficulty(uint32 _resetTime, uint32 _maxPlayers, bool _hasErrorMessage) : resetTime(_resetTime), maxPlayers(_maxPlayers), hasErrorMessage(_hasErrorMessage) {}
+    MapDifficulty(uint32 _resetTime, uint32 _maxPlayers, bool _hasErrorMessage, std::string errorMess) : resetTime(_resetTime), maxPlayers(_maxPlayers), hasErrorMessage(_hasErrorMessage), _errorMessage(errorMess) {}
 
     uint32 resetTime;
     uint32 maxPlayers;
     bool hasErrorMessage;
+    std::string _errorMessage;
 };
 
 struct TalentSpellPos

@@ -228,6 +228,7 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave* save,
     bool load_data = save != NULL;
     map->CreateInstanceData(load_data);
 
+    // memory LEAK here !!!
     m_InstancedMaps[InstanceId] = map;
     return map;
 }

@@ -56,6 +56,8 @@
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "DB2Stores.h" 
+#include "DisableMgr.h"
+#include "InstanceSaveMgr.h"
 
 void WorldSession::HandleRepopRequestOpcode(WorldPacket& recvData)
 {
@@ -1536,60 +1538,57 @@ void WorldSession::HandleResetInstancesOpcode(WorldPacket& /*recvData*/)
 
 void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recvData)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "MSG_SET_DUNGEON_DIFFICULTY");
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "MSG_SET_RAID_DIFFICULTY");
 
     uint32 mode;
     recvData >> mode;
 
-    if (mode >= MAX_DUNGEON_DIFFICULTY)
+    if (mode >= MAX_RAID_DIFFICULTY)
     {
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "WorldSession::HandleSetDungeonDifficultyOpcode: player %d sent an invalid instance mode %d!", _player->GetGUIDLow(), mode);
+        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSession::HandleSetRaidDifficultyOpcode: player %d sent an invalid instance mode %d!", _player->GetGUIDLow(), mode);
         return;
     }
-
-    if (Difficulty(mode) == _player->GetDungeonDifficulty())
-        return;
 
     // cannot reset while in an instance
     Map* map = _player->FindMap();
     if (map && map->IsDungeon())
     {
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "WorldSession::HandleSetDungeonDifficultyOpcode: player (Name: %s, GUID: %u) tried to reset the instance while player is inside!",
-            _player->GetName().c_str(), _player->GetGUIDLow());
+        sLog->outDebug(LOG_FILTER_NETWORKIO, "WorldSession::HandleSetRaidDifficultyOpcode: player %d tried to reset the instance while inside!", _player->GetGUIDLow());
         return;
     }
 
-    Group* group = _player->GetGroup();
-    if (group)
+    Difficulty oldDifficulty = _player->GetRaidDifficulty();
+    if (Difficulty(mode) == oldDifficulty)
+        return;
+
+    if (Group* group = _player->GetGroup())
+        if (group->IsLeader(_player->GetGUID()))
+            for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                Player* member = itr->getSource();
+                if (!member || !member->GetSession())
+                    continue;
+
+                if (member->GetMap()->IsRaid())
+                    return;
+            }
+
+
+    if (Group* group = _player->GetGroup())
     {
         if (group->IsLeader(_player->GetGUID()))
         {
+            group->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, true, _player);
+            group->SwitchBoundInstance(0, (Difficulty)oldDifficulty, (Difficulty)mode);
             for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             {
-                Player* groupGuy = itr->getSource();
-                if (!groupGuy)
+                Player* member = itr->getSource();
+                if (!member || !member->GetSession())
                     continue;
 
-                if (!groupGuy->IsInMap(groupGuy))
-                    return;
-
-                if (groupGuy->GetMap()->IsNonRaidDungeon())
-                {
-                    sLog->outDebug(LOG_FILTER_NETWORKIO, "WorldSession::HandleSetDungeonDifficultyOpcode: player %d tried to reset the instance while group member (Name: %s, GUID: %u) is inside!",
-                        _player->GetGUIDLow(), groupGuy->GetName().c_str(), groupGuy->GetGUIDLow());
-                    return;
-                }
+                member->SwitchBoundInstance(0, (Difficulty)oldDifficulty, (Difficulty)mode);
             }
-            // the difficulty is set even if the instances can't be reset
-            //_player->SendDungeonDifficulty(true);
-            group->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, false, _player);
-            group->SetDungeonDifficulty(Difficulty(mode));
         }
-    }
-    else
-    {
-        _player->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, false);
-        _player->SetDungeonDifficulty(Difficulty(mode));
     }
 }
 
@@ -1614,39 +1613,48 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recvData)
         return;
     }
 
-    if (Difficulty(mode) == _player->GetRaidDifficulty())
-        return;
-
-    Group* group = _player->GetGroup();
-    if (group)
+    Difficulty oldDifficulty = _player->GetRaidDifficulty();
+    if (Difficulty(mode) == oldDifficulty)
     {
+        std::cout << "same difficulty !!!" << std::endl;
+        return;
+    }
+
+    if (Group* group = _player->GetGroup())
         if (group->IsLeader(_player->GetGUID()))
-        {
             for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             {
-                Player* groupGuy = itr->getSource();
-                if (!groupGuy)
+                Player* member = itr->getSource();
+                if (!member || !member->GetSession())
                     continue;
 
-                if (!groupGuy->IsInMap(groupGuy))
-                    return;
-
-                if (groupGuy->GetMap()->IsRaid())
+                if (member->GetMap()->IsRaid())
                 {
-                    sLog->outDebug(LOG_FILTER_NETWORKIO, "WorldSession::HandleSetRaidDifficultyOpcode: player %d tried to reset the instance while inside!", _player->GetGUIDLow());
+                    member->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, false);
                     return;
                 }
             }
-            // the difficulty is set even if the instances can't be reset
-            //_player->SendDungeonDifficulty(true);
-            group->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, true, _player);
-            group->SetRaidDifficulty(Difficulty(mode));
+
+
+    if (Group* group = _player->GetGroup())
+    {
+        if (group->IsLeader(_player->GetGUID()))
+        {
+            group->SwitchBoundInstance(0, (Difficulty)oldDifficulty, (Difficulty)mode);
+            for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                Player* member = itr->getSource();
+                if (!member || !member->GetSession())
+                    continue;
+
+                member->SwitchBoundInstance(0, (Difficulty)oldDifficulty, (Difficulty)mode);
+            }
         }
     }
     else
     {
-        _player->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, true);
-        _player->SetRaidDifficulty(Difficulty(mode));
+        _player->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, false);
+        _player->SwitchBoundInstance(0, (Difficulty)oldDifficulty, (Difficulty)mode);
     }
 }
 
@@ -2222,64 +2230,6 @@ void WorldSession::SendLoadCUFProfiles()
     SendPacket(&data);
 }
 
-void WorldSession::HandleChangePlayerDifficulty(WorldPacket& recvData)
-{
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "Received CMSG_CHANGEPLAYER_DIFFICULTY");
-
-    uint32 difficulty;
-    recvData >> difficulty;
-
-    // GetPlayer()->SendDifficultyChanged(difficulty);
-
-    /*
-    switch(result)
-    {
-        case ERR_DIFFICULTY_CHANGE_COOLDOWN_S:
-        case ERR_DIFFICULTY_CHANGE_UPDATE_TIME:
-        case ERR_DIFFICULTY_CHANGE_UPDATE_MAP_DIFFICULTY_ENTRY:
-        {
-            uint32 time = 0;
-            uint32 difficultyMapId = 0;
-            uint32 cooldownTime = 0;
-            WorldPacket data(SMSG_PLAYER_DIFFICULTY_CHANGE, 8);
-
-            data << result;
-
-            if(result == ERR_DIFFICULTY_CHANGE_UPDATE_TIME)
-                data << time;
-            else if(result == ERR_DIFFICULTY_CHANGE_COOLDOWN_S)
-                data << cooldownTime;
-            else
-                data << difficultyMapId;
-            
-            SendPacket(&data);
-            break;
-        }
-        case ERR_DIFFICULTY_CHANGE_OTHER_HEROIC_S:
-        {
-            uint64 guid = 0;
-            WorldPacket data(SMSG_PLAYER_DIFFICULTY_CHANGE);
-
-            data << result;
-            data.appendPackGUID(guid); //guid of the player which is locked
-
-            SendPacket(&data);
-            break;
-        }
-        default:
-        {
-            WorldPacket data(SMSG_PLAYER_DIFFICULTY_CHANGE,4);
-
-            data << result;
-
-            SendPacket(&data);
-            break;
-        }
-    }
-    */
-    
-}
-
 void WorldSession::SendStreamingMovie()
 {
     uint8 count = 0;
@@ -2299,4 +2249,120 @@ void WorldSession::HandleRequestResearchHistory(WorldPacket & recv_data)
 {
     if (Player *player = GetPlayer())
         player->NotifyRequestResearchHistory();
+}
+
+void WorldSession::HandleChangeRaidDifficulty(WorldPacket& recvData)
+{
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_CHANGEPLAYER_DIFFICULTY");
+
+    uint8 difficulty;
+    recvData >> difficulty;
+
+    if (!_player || !_player->IsInWorld())
+        return;
+
+    // check the previous diff
+    if (Difficulty(difficulty) == _player->GetRaidDifficulty())
+        return;
+
+    // check instance in progress
+    if (_player->GetInstanceScript()->IsEncounterInProgress())
+    {
+        _player->SendTransferAborted(_player->GetMapId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
+        return;
+    }
+
+    Group* group = _player->GetGroup();
+
+    if (!group)
+        return;
+
+    if (group->isLFRGroup())
+    {
+        _player->SendTransferAborted(_player->GetMapId(), TRANSFER_ABORT_DIFFICULTY);
+        return;
+    }
+
+    if (!group->IsLeader(_player->GetGUID()))
+        return;
+
+
+    uint32 switchCoolDown = 60;
+
+    if (group->HasBoundSwitchCoolDown(switchCoolDown))
+        return;
+
+    group->AddBoundSwithCoolDown();
+
+    if (uint32 achievementId = GetMapDifficultySwitchAchievement(_player->GetMapId(), (Difficulty)difficulty))
+        if (!_player->HasAchieved(achievementId))
+        {
+            if (MapDifficulty const* mapDiff = GetMapDifficultyData(_player->GetMapId(), (Difficulty)difficulty))
+                if (mapDiff->hasErrorMessage)
+                    _player->GetSession()->SendNotification("%s", mapDiff->_errorMessage.c_str());
+            return;
+        }
+
+    for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player* member = itr->getSource();
+        if (!member || !member->GetSession())
+            continue;
+
+        if (!member->GetMap())
+        {
+            _player->GetSession()->SendNotification(LANG_ID_SWITCH_FAILED_PROBLEM_UNKNOW, member->GetName().c_str());
+            return;
+        }
+
+        if (!member->GetMap()->IsRaid())
+        {
+            _player->GetSession()->SendNotification(LANG_ID_SWITCH_FAILED_NOT_MAP_RAID, member->GetName().c_str());
+            return;
+        }
+
+        if (member->GetInstanceId() != _player->GetInstanceId())
+        {
+            _player->GetSession()->SendNotification(LANG_ID_SWITCH_FAILED_NOT_SAME_ID, member->GetName().c_str());
+            return;
+        }
+
+        if (member->GetMapId() != _player->GetMapId())
+        {
+            _player->GetSession()->SendNotification(LANG_ID_SWITCH_FAILED_NOT_SAME_MAP, member->GetName().c_str());
+            return;
+        }
+
+        if (!member->isAlive())
+        {
+            _player->GetSession()->SendNotification(LANG_ID_SWITCH_FAILED_IS_DEAD, member->GetName().c_str());
+            return;
+        }
+
+        if (member->isInCombat())
+        {
+            _player->GetSession()->SendNotification(LANG_ID_SWITCH_FAILED_IS_IN_FIGHT, member->GetName().c_str());
+            return;
+        }
+    }
+
+
+    uint32 mapid = _player->GetMapId();
+    Difficulty oldDifficulty = _player->GetRaidDifficulty();
+    // TODOO check disable difficulty here !
+
+    // send diff change
+    WorldPacket data(SMSG_PLAYER_DIFFICULTY_CHANGE, 6 * 6);
+    data << uint32(0);                                   // if player x has the cooldown spell print here the cooldown
+    data << uint32(switchCoolDown);                      // new cooldown time TODOO fix the cooldown req
+    data << uint32(difficulty);                          // map difficulty request?
+    data << uint64(_player->GetGUID());                  // player already locked to a other group? -> guid
+    data << uint32(mapid);                               // changed to: map
+    data << uint32(difficulty);                          // changed to: difficulty
+    SendPacket(&data);
+
+    // update diff create new map and switch bound and save datas
+    if (Group* group = _player->GetGroup())
+        if (group->IsLeader(_player->GetGUID()))
+            group->SwitchBoundInstance(mapid, (Difficulty)oldDifficulty, (Difficulty)difficulty);
 }

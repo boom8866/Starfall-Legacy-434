@@ -269,7 +269,7 @@ class Group
         Difficulty GetDungeonDifficulty() const;
         Difficulty GetRaidDifficulty() const;
         void SetDungeonDifficulty(Difficulty difficulty);
-        void SetRaidDifficulty(Difficulty difficulty);
+        void SetRaidDifficulty(Difficulty difficulty, uint32 raidId = NULL);
         uint16 InInstance();
         bool InCombatToInstance(uint32 instanceId);
         void ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo);
@@ -318,6 +318,8 @@ class Group
 
         InstanceGroupBind* BindToInstance(InstanceSave* save, bool permanent, bool load = false);
         void UnbindInstance(uint32 mapid, uint8 difficulty, bool unload = false);
+        void ProcessBoundSwitch(InstanceSave *save, Difficulty previousDifficulty, Difficulty newDifficulty, std::list<uint32>&mapToErase, Player* leader = NULL);
+        void SwitchBoundInstance(uint32 mapid, Difficulty previousDifficulty, Difficulty newDifficulty);
         InstanceGroupBind* GetBoundInstance(Player* player);
         InstanceGroupBind* GetBoundInstance(Map* aMap);
         InstanceGroupBind* GetBoundInstance(MapEntry const* mapEntry);
@@ -333,6 +335,9 @@ class Group
 
         // FG: evil hacks
         void BroadcastGroupUpdate(void);
+
+        void AddBoundSwithCoolDown() { m_boundSwitchCooldown = time(NULL); }
+        bool HasBoundSwitchCoolDown(uint32 t) { return ((time(NULL) - m_boundSwitchCooldown) < t); }
 
     protected:
         bool _setMembersGroup(uint64 guid, uint8 group);
@@ -367,5 +372,6 @@ class Group
         uint32              m_counter;                      // used only in SMSG_GROUP_LIST
         uint32              m_maxEnchantingLevel;
         uint32              m_dbStoreId;                    // Represents the ID used in database (Can be reused by other groups if group was disbanded)
+        time_t              m_boundSwitchCooldown;
 };
 #endif

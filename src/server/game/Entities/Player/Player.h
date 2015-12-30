@@ -929,10 +929,11 @@ struct InstancePlayerBind
 {
     InstanceSave* save;
     bool perm;
+    bool lfg;
     /* permanent PlayerInstanceBinds are created in Raid/Heroic instances for players
        that aren't already permanently bound when they are inside when a boss is killed
        or when they enter an instance that the group leader is permanently bound to. */
-    InstancePlayerBind() : save(NULL), perm(false) {}
+    InstancePlayerBind() : save(NULL), perm(false), lfg(false) {}
 };
 
 struct AccessRequirement
@@ -1439,7 +1440,7 @@ class Player : public Unit, public GridObject<Player>
         InventoryResult CanUseAmmo(uint32 item) const;
         InventoryResult CanRollForItemInLFG(ItemTemplate const* item, WorldObject const* lootedObject) const;
         Item* StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId = 0);
-        Item* StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId, AllowedLooterSet &allowedLooters);
+        Item* StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId, AllowedLooterSet &allowedLooters, bool isSoulBound = false);
         Item* StoreItem(ItemPosCountVec const& pos, Item* pItem, bool update, bool looted = false);
         Item* EquipNewItem(uint16 pos, uint32 item, bool update);
         Item* EquipItem(uint16 pos, Item* pItem, bool update);
@@ -2637,7 +2638,7 @@ class Player : public Unit, public GridObject<Player>
         bool m_InstanceValid;
         // permanent binds and solo binds by difficulty
         BoundInstancesMap m_boundInstances[MAX_DIFFICULTY];
-        InstancePlayerBind* GetBoundInstance(uint32 mapId, Difficulty difficulty);
+        InstancePlayerBind* GetBoundInstance(uint32 mapId, Difficulty difficulty, bool getLfgId = false);
         BoundInstancesMap& GetBoundInstances(Difficulty difficulty) { return m_boundInstances[difficulty]; }
         InstanceSave* GetInstanceSave(uint32 mapid, bool raid);
         void UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload = false);
@@ -2801,6 +2802,8 @@ class Player : public Unit, public GridObject<Player>
         VoidStorageItem* GetVoidStorageItem(uint64 id, uint8& slot) const;
         uint32 GetExtraFlags() { return m_ExtraFlags; }
         void ModExtraFlags(uint32 val, bool add) { add ? m_ExtraFlags |= val : m_ExtraFlags &= ~val; }
+        void SwitchRaidMap(uint32 raidId, Difficulty previousDifficulty, Difficulty newDifficulty, Map *map);
+        void SwitchBoundInstance(uint32 mapid, Difficulty previousDifficulty, Difficulty newDifficulty);
 
     protected:
         // Gamemaster whisper whitelist

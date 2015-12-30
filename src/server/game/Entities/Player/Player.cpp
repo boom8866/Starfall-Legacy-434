@@ -2406,7 +2406,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             {
                 // send transfer packets
                 WorldPacket data(SMSG_TRANSFER_PENDING, 4 + 4 + 4);
-                data.WriteBit(0);       // unknown
+                data.WriteBit(0);       // customLoadScreenSpell
                 if (Transport* transport = GetTransport())
                 {
                     data.WriteBit(1);   // has transport
@@ -12937,7 +12937,7 @@ Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update
 }
 
 // Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.
-Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update, int32 randomPropertyId, AllowedLooterSet& allowedLooters)
+Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update, int32 randomPropertyId, AllowedLooterSet& allowedLooters, bool isSoulBound)
 {
     uint32 count = 0;
     for (ItemPosCountVec::const_iterator itr = dest.begin(); itr != dest.end(); ++itr)
@@ -12958,8 +12958,11 @@ Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update
         else
             pItem = StoreItem(dest, pItem, update);
 
-        if (allowedLooters.size() > 1 && pItem->GetTemplate()->GetMaxStackSize() == 1 && pItem->IsSoulBound())
+        if (allowedLooters.size() > 1 && pItem->GetTemplate()->GetMaxStackSize() == 1 && (pItem->IsSoulBound() || pItem->GetTemplate()->Bonding == BIND_WHEN_EQUIPED && isSoulBound))
         {
+            if (!pItem->IsSoulBound())
+                pItem->SetBinding(true);
+
             pItem->SetSoulboundTradeable(allowedLooters);
             pItem->SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, GetTotalPlayedTime());
             AddTradeableItem(pItem);
@@ -20317,45 +20320,45 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
     }
 }
 
-InstancePlayerBind* Player::GetBoundInstance(uint32 mapId, Difficulty difficulty)
+InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty, bool getLfgId)
 {
-    // Some instances only have one difficulty.
-    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapId, difficulty);
+    // some instances only have one difficulty
+    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapid, difficulty);
     if (!mapDiff)
         return NULL;
 
-    // Since Cataclysm, 10 and 25 man raids share a lock.
-    uint32 retrievalDifficulty = 0;
-    switch (difficulty)
-    {
-        case RAID_DIFFICULTY_10MAN_NORMAL:
-            retrievalDifficulty = RAID_DIFFICULTY_25MAN_NORMAL;
-            break;
-        case RAID_DIFFICULTY_25MAN_NORMAL:
-            retrievalDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
-            break;
-        case RAID_DIFFICULTY_10MAN_HEROIC:
-            retrievalDifficulty = RAID_DIFFICULTY_25MAN_HEROIC;
-            break;
-        case RAID_DIFFICULTY_25MAN_HEROIC:
-            retrievalDifficulty = RAID_DIFFICULTY_10MAN_HEROIC;
-            break;
-        default:
-            break;
-    }
-
-    // Try to find an instance bind corresponding to the current difficulty.
-    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapId);
+    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
     if (itr != m_boundInstances[difficulty].end())
-        return &itr->second;
+        return ((getLfgId && &itr->second.lfg) || (!getLfgId && !&itr->second.lfg)) ? &itr->second : NULL;
     else
+        return NULL;
+}
+
+void Player::SwitchBoundInstance(uint32 mapid, Difficulty previousDifficulty, Difficulty newDifficulty)
+{
+    std::list<uint32 > mapToErase;
+    for (BoundInstancesMap::iterator itr = m_boundInstances[previousDifficulty].begin(); itr != m_boundInstances[previousDifficulty].end(); ++itr)
+        if (InstanceSave* save = itr->second.save)
+            if (mapid == save->GetMapId() && !save->IsLfg())
+            {
+                // some instances only have one difficulty
+                MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapid, newDifficulty);
+                if (!mapDiff)
+                    continue;
+
+                if (!IsMapDifficultySwitchable(mapid))
+                    continue;
+
+                uint32 key = InstanceSaveKey::Create(mapid, save->IsLfg());
+                m_boundInstances[newDifficulty][key] = m_boundInstances[previousDifficulty][key];
+                mapToErase.push_back(mapid);
+                break;
+            }
+    for (std::list<uint32 >::iterator itr = mapToErase.begin(); itr != mapToErase.end(); itr++)
     {
-        // If one doesn't exist and it's a raid, try to get the difficulty corresponding to the other version lock.
-        BoundInstancesMap::iterator itr2 = m_boundInstances[Difficulty(retrievalDifficulty)].find(mapId);
-        if (itr2 != m_boundInstances[Difficulty(retrievalDifficulty)].end())
-            return &itr2->second;
-        else
-            return NULL;
+        BoundInstancesMap::iterator itr2 = m_boundInstances[previousDifficulty].find(*itr);
+        if (itr2 != m_boundInstances[previousDifficulty].end())
+            m_boundInstances[previousDifficulty].erase(itr2++);
     }
 }
 
@@ -26234,7 +26237,7 @@ void Player::SetViewpoint(WorldObject* target, bool apply)
         // farsight dynobj or puppet may be very far away
         UpdateVisibilityOf(target);
 
-        if (target->isType(TYPEMASK_UNIT) && !GetVehicle())
+        if (target->isType(TYPEMASK_UNIT) && target != GetVehicleBase())
             ((Unit*)target)->AddPlayerToVision(this);
     }
     else
@@ -26247,7 +26250,7 @@ void Player::SetViewpoint(WorldObject* target, bool apply)
             return;
         }
 
-        if (target->isType(TYPEMASK_UNIT) && !GetVehicle())
+        if (target->isType(TYPEMASK_UNIT) && target != GetVehicleBase())
             ((Unit*)target)->RemovePlayerFromVision(this);
 
         //must immediately set seer back otherwise may crash
@@ -29664,4 +29667,126 @@ void Player::RemoveRestFlag(RestFlag restFlag)
         _restTime = 0;
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
     }
+}
+
+void Player::SwitchRaidMap(uint32 mapid, Difficulty previousDifficulty, Difficulty newDifficulty, Map* map = NULL)
+{
+    if (!IsInWorld())
+        return;
+
+    if (!GetSession())
+        return;
+
+    if (GetMapId() != mapid) // don't allow switch map is player isn't on raid map
+        return;
+
+    if (GetVehicle())
+        ExitVehicle();
+
+    // reset movement flags at teleport, because player will continue move with these flags after teleport
+    SetUnitMovementFlags(0);
+    DisableSpline();
+
+    if (m_transport)
+    {
+        m_transport->RemovePassenger(this);
+        m_transport = NULL;
+        m_movementInfo.t_pos.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
+        m_movementInfo.t_time = 0;
+        m_movementInfo.t_seat = -1;
+        m_movementInfo.t_guid = 0;
+    }
+
+    if (!m_transport && m_movementInfo.t_guid && GetMap())
+    {
+        GameObject* go = GetMap()->GetGameObject(m_movementInfo.t_guid);
+        if (go && go->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT)
+            m_movementInfo.t_guid = 0;
+    }
+
+    Map* oldmap = IsInWorld() ? GetMap() : NULL;
+    SetSelection(0);
+    CombatStop();
+    // remove pet on map change
+    TemporaryUnsummonPet();
+    // remove all dyn objects
+    RemoveAllDynObjects();
+    if (IsNonMeleeSpellCasted(true))
+        InterruptNonMeleeSpells(true);
+    RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CHANGE_MAP | AURA_INTERRUPT_FLAG_MOVE | AURA_INTERRUPT_FLAG_TURNING);
+    SetPower(POWER_ECLIPSE, 0);
+
+    if (!GetSession()->PlayerLogout())
+    {
+        // send transfer packets
+        WorldPacket data(SMSG_TRANSFER_PENDING, 4 + 4 + 4);
+        data.WriteBit(0);       // customLoadScreenSpell
+        data.WriteBit(0);       // has transport
+        data << uint32(mapid);
+        GetSession()->SendPacket(&data);
+    }
+
+    // new final coordinates
+    float final_x = GetPositionX();
+    float final_y = GetPositionY();
+    float final_z = GetPositionZ();
+    float final_o = GetOrientation();
+
+    if (oldmap)
+        oldmap->RemovePlayerFromMap(this, false);
+
+    SetFallInformation(0, final_z);
+
+    if (!GetSession()->PlayerLogout())
+    {
+        WorldPacket data(SMSG_NEW_WORLD, 4 + 4 + 4 + 4 + 4);
+        data << float(final_x);
+        data << float(final_o);
+        data << float(final_z);
+        data << uint32(mapid);
+        data << float(final_y);
+
+        GetSession()->SendPacket(&data);
+        SendSavedInstances();
+    }
+    //        SendSavedInstances();
+
+    // get the destination map entry, not the current one, this will fix homebind and reset greeting
+    MapEntry const* mEntry = sMapStore.LookupEntry(mapid);
+    InstanceTemplate const* mInstance = sObjectMgr->GetInstanceTemplate(mapid);
+
+    WorldLocation loc = WorldLocation(mapid, final_x, final_y, final_z, final_o);
+    SwitchBoundInstance(mapid, previousDifficulty, newDifficulty);
+    InstanceSave *instance = GetInstanceSave(mapid, true);
+
+    Map* m = sMapMgr->FindBaseMap(mapid);
+    if (m == NULL)
+        m = sMapMgr->CreateBaseMap(mapid);
+
+    // map should never be NULL here
+    Map* newMap = (map == NULL ? ((MapInstanced*)m)->CreateInstance(instance->GetInstanceId(), instance, newDifficulty) : map);
+    newMap->ChangeSpawnMode(newDifficulty);
+    Relocate(&loc);
+    ResetMap();
+    SetMap(newMap);
+    SendInitialPacketsBeforeAddToMap();
+
+    if (!GetMap()->AddPlayerToMap(this))
+    {
+        sLog->outError(LOG_FILTER_NETWORKIO, "WORLD: failed to change map id player %s (%d) to map %d because of unknown reason!",
+            GetName().c_str(), GetGUIDLow(), loc.GetMapId());
+        ResetMap();
+        SetMap(oldmap);
+        TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, GetOrientation());
+        return;
+    }
+
+    SendInitialPacketsAfterAddToMap();
+
+    // update zone immediately, otherwise leave channel will cause crash in mtmap
+    uint32 newzone, newarea;
+    GetZoneAndAreaId(newzone, newarea);
+    UpdateZone(newzone, newarea);
+    ResummonTemporaryUnsummonedPet();
+    ProcessDelayedOperations();
 }

@@ -240,6 +240,11 @@ i_scriptLock(false), _defaultLight(GetDefaultMapLight(id))
     sScriptMgr->OnCreateMap(this);
 }
 
+void Map::ChangeSpawnMode(uint8 difficulty)
+{
+    i_spawnMode = difficulty;
+}
+
 void Map::InitVisibilityDistance()
 {
     // Init visibility for continents
@@ -2147,6 +2152,10 @@ void Map::AddObjectToRemoveList(WorldObject* obj)
 void Map::AddObjectToSwitchList(WorldObject* obj, bool on)
 {
     ASSERT(obj->GetMapId() == GetId() && obj->GetInstanceId() == GetInstanceId());
+    // i_objectsToSwitch is iterated only in Map::RemoveAllObjectsInRemoveList() and it uses
+    // the contained objects only if GetTypeId() == TYPEID_UNIT , so we can return in all other cases
+    if (obj->GetTypeId() != TYPEID_UNIT && obj->GetTypeId() != TYPEID_GAMEOBJECT)
+        return;
 
     std::map<WorldObject*, bool>::iterator itr = i_objectsToSwitch.find(obj);
     if (itr == i_objectsToSwitch.end())
