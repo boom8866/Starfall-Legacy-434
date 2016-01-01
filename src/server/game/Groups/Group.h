@@ -156,9 +156,10 @@ struct InstanceGroupBind
 {
     InstanceSave* save;
     bool perm;
+    bool lfg;
     /* permanent InstanceGroupBinds exist if the leader has a permanent
-       PlayerInstanceBind for the same instance. */
-    InstanceGroupBind() : save(NULL), perm(false) {}
+    PlayerInstanceBind for the same instance. */
+    InstanceGroupBind() : save(NULL), perm(false), lfg(false) {}
 };
 
 /** request member stats checken **/
@@ -297,7 +298,7 @@ class Group
 
         bool isRollLootActive() const;
         void SendLootStartRoll(uint32 CountDown, uint32 mapid, const Roll &r);
-        void SendLootStartRollToPlayer(uint32 countDown, uint32 mapId, Player* p, bool canNeed, Roll const& r);
+        void SendLootStartRollToPlayer(uint32 countDown, uint32 mapId, Player* p, bool canNeed, Roll const& r, bool canLfrInteract);
         void SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint32 RollNumber, uint8 RollType, const Roll &r);
         void SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint32 RollNumber, uint8 RollType, const Roll &r);
         void SendLootAllPassed(Roll const& roll);
@@ -318,13 +319,14 @@ class Group
 
         InstanceGroupBind* BindToInstance(InstanceSave* save, bool permanent, bool load = false);
         void UnbindInstance(uint32 mapid, uint8 difficulty, bool unload = false);
-        void ProcessBoundSwitch(InstanceSave *save, Difficulty previousDifficulty, Difficulty newDifficulty, std::list<uint32>&mapToErase, Player* leader = NULL);
-        void SwitchBoundInstance(uint32 mapid, Difficulty previousDifficulty, Difficulty newDifficulty);
-        InstanceGroupBind* GetBoundInstance(Player* player);
-        InstanceGroupBind* GetBoundInstance(Map* aMap);
-        InstanceGroupBind* GetBoundInstance(MapEntry const* mapEntry);
-        InstanceGroupBind* GetBoundInstance(Difficulty difficulty, uint32 mapId);
+        void ProcessBoundSwitch(InstanceSave *save, Difficulty previousDifficulty, Difficulty newDifficulty, std::list<uint32 > &mapToErase, Player *leader = NULL);
+        void SwitchBoundInstance(uint32 /*mapid*/, Difficulty previousDifficulty, Difficulty newDifficulty);
+        InstanceGroupBind* GetBoundInstance(Player* player, bool isLfgId = false);
+        InstanceGroupBind* GetBoundInstance(Map* aMap, bool isLfgId = false);
+        InstanceGroupBind* GetBoundInstance(MapEntry const* mapEntry, bool isLfgId = false);
+        InstanceGroupBind* GetBoundInstance(Difficulty difficulty, uint32 mapId, bool isLfgId = false);
         BoundInstancesMap& GetBoundInstances(Difficulty difficulty);
+
 
         bool IsGuildGroup(uint32 const guildId, bool AllInSameMap = false, bool AllInSameInstanceId = false);
 

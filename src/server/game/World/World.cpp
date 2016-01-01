@@ -111,6 +111,7 @@ World::World()
     m_MaxPlayerCount = 0;
     m_NextDailyQuestReset = 0;
     m_NextWeeklyQuestReset = 0;
+    m_NextWeeklyLfrLootsReset = 0;
     m_NextCurrencyReset = 0;
 
     m_defaultDbcLocale = LOCALE_enUS;
@@ -1863,6 +1864,10 @@ void World::SetInitialWorldSettings()
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Calculate next weekly quest reset time...");
     InitWeeklyQuestResetTime();
 
+    sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Calculate next weekly LFR looted reset time...");
+    InitWeeklyLfrResetTime();
+
+
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Calculate next monthly quest reset time...");
     InitMonthlyQuestResetTime();
 
@@ -2042,6 +2047,11 @@ void World::Update(uint32 diff)
     /// Handle weekly quests reset time
     if (m_gameTime > m_NextWeeklyQuestReset)
         ResetWeeklyQuests();
+
+    /// Handle weekly quests reset time
+    if (m_gameTime > m_NextWeeklyLfrLootsReset)
+        ResetLfrLoots();
+
 
     /// Handle monthly quests reset time
     if (m_gameTime > m_NextMonthlyQuestReset)
@@ -2830,6 +2840,13 @@ void World::InitWeeklyQuestResetTime()
     m_NextWeeklyQuestReset = wstime < curtime ? curtime : time_t(wstime);
 }
 
+void World::InitWeeklyLfrResetTime()
+{
+    time_t wstime = uint64(sWorld->getWorldState(WS_WEEKLY_LFR_RESET_TIME));
+    time_t curtime = time(NULL);
+    m_NextWeeklyLfrLootsReset = wstime < curtime ? curtime : time_t(wstime);
+}
+
 void World::InitDailyQuestResetTime()
 {
     time_t mostRecentQuestTime;
@@ -3022,6 +3039,21 @@ void World::ResetWeeklyQuests()
 
     // change available weeklies
     sPoolMgr->ChangeWeeklyQuests();
+}
+
+void World::ResetLfrLoots()
+{
+    TC_LOG_INFO("misc", "Weekly lfr loot reset for all characters.");
+
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ALL_CHARACTER_LFRLOOTDATA);
+    CharacterDatabase.Execute(stmt);
+
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+        if (itr->second->GetPlayer())
+            itr->second->GetPlayer()->ResetLfrLoots();
+
+    m_NextWeeklyLfrLootsReset = time_t(m_NextWeeklyLfrLootsReset + WEEK);
+    sWorld->setWorldState(WS_WEEKLY_LFR_RESET_TIME, uint64(m_NextWeeklyLfrLootsReset));
 }
 
 void World::ResetMonthlyQuests()

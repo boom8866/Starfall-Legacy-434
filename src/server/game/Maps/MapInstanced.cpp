@@ -142,7 +142,7 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
     }
     else
     {
-        InstancePlayerBind* pBind = player->GetBoundInstance(GetId(), player->GetDifficulty(IsRaid()));
+        InstancePlayerBind* pBind = player->GetBoundInstance(GetId(), player->GetDifficulty(IsRaid()), player->GetGroup() ? player->GetGroup()->isLFGGroup() : false);
         InstanceSave* pSave = pBind ? pBind->save : NULL;
 
         // the player's permanent player bind is taken into consideration first
@@ -154,7 +154,7 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
             // use the player's difficulty setting (it may not be the same as the group's)
             if (group)
             {
-                groupBind = group->GetBoundInstance(this);
+                groupBind = group->GetBoundInstance(this, group->isLFGGroup());
                 if (groupBind)
                     pSave = groupBind->save;
             }

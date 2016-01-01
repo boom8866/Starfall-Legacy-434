@@ -907,6 +907,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_CURRENCY                = 34,
     PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES            = 35,
     PLAYER_LOGIN_QUERY_LOAD_RATEDBG_STATS           = 39,
+    PLAYER_LOGIN_QUERY_LOAD_LFR_LOOT_DATA           = 40,
     MAX_PLAYER_LOGIN_QUERY
 };
 
@@ -1439,6 +1440,13 @@ class Player : public Unit, public GridObject<Player>
         InventoryResult CanUseItem(ItemTemplate const* pItem) const;
         InventoryResult CanUseAmmo(uint32 item) const;
         InventoryResult CanRollForItemInLFG(ItemTemplate const* item, WorldObject const* lootedObject) const;
+
+        std::map<uint32, bool > _lfrLootMap;
+        bool HasLFRLootObject(uint32 objectEntry);
+        void AddLFRLoot(uint32 entry);
+        void RemoveLFRLoot(uint32 entry);
+        void ResetLfrLoots() { _lfrLootMap.clear(); }
+
         Item* StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId = 0);
         Item* StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId, AllowedLooterSet &allowedLooters, bool isSoulBound = false);
         Item* StoreItem(ItemPosCountVec const& pos, Item* pItem, bool update, bool looted = false);
@@ -2638,10 +2646,10 @@ class Player : public Unit, public GridObject<Player>
         bool m_InstanceValid;
         // permanent binds and solo binds by difficulty
         BoundInstancesMap m_boundInstances[MAX_DIFFICULTY];
-        InstancePlayerBind* GetBoundInstance(uint32 mapId, Difficulty difficulty, bool getLfgId = false);
+        InstancePlayerBind* GetBoundInstance(uint32 mapid, Difficulty difficulty, bool getLfgId = false);
         BoundInstancesMap& GetBoundInstances(Difficulty difficulty) { return m_boundInstances[difficulty]; }
         InstanceSave* GetInstanceSave(uint32 mapid, bool raid);
-        void UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload = false);
+        void UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload = false, bool isLfgId = false);
         void UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficulty, bool unload = false);
         InstancePlayerBind* BindToInstance(InstanceSave* save, bool permanent, bool load = false);
         void BindToInstance();
@@ -2802,8 +2810,9 @@ class Player : public Unit, public GridObject<Player>
         VoidStorageItem* GetVoidStorageItem(uint64 id, uint8& slot) const;
         uint32 GetExtraFlags() { return m_ExtraFlags; }
         void ModExtraFlags(uint32 val, bool add) { add ? m_ExtraFlags |= val : m_ExtraFlags &= ~val; }
+
         void SwitchRaidMap(uint32 raidId, Difficulty previousDifficulty, Difficulty newDifficulty, Map *map);
-        void SwitchBoundInstance(uint32 mapid, Difficulty previousDifficulty, Difficulty newDifficulty);
+        void SwitchBoundInstance(uint32 /*mapid*/, Difficulty previousDifficulty, Difficulty newDifficulty);
 
     protected:
         // Gamemaster whisper whitelist
@@ -2878,6 +2887,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadArenaTeamInfo(PreparedQueryResult result);
         void _LoadEquipmentSets(PreparedQueryResult result);
         void _LoadBGData(PreparedQueryResult result);
+        void _LoadLFRLootData(PreparedQueryResult result);
         void _LoadGlyphs(PreparedQueryResult result);
         void _LoadTalents(PreparedQueryResult result);
         void _LoadInstanceTimeRestrictions(PreparedQueryResult result);

@@ -34,6 +34,27 @@ struct MapEntry;
 class Player;
 class Group;
 
+/* Key builder for storing InstanceSave in map
+*/
+class InstanceSaveKey
+{
+public:
+    inline static uint32 Create(uint32 mapId, bool isLfg)
+    {
+        return (mapId & 0x00FFFFFF) | (isLfg << 24);
+    }
+
+    inline static uint32 GetMapId(uint32 key)
+    {
+        return key & 0x00FFFFFF;
+    }
+
+    inline static bool IsLFG(uint32 key)
+    {
+        return (key >> 24) & 1;
+    }
+};
+
 /*
     Holds the information necessary for creating a new map for an existing instance
     Is referenced in three cases:
@@ -99,6 +120,10 @@ class InstanceSave
         Difficulty GetDifficulty() const { return m_difficulty; }
         void SetDifficulty(Difficulty newDifficulty) { m_difficulty = newDifficulty; }
 
+        /* used to flag the InstanceSave as to be deleted, so the caller can delete it */
+        void SetToDelete(bool toDelete) { m_toDelete = toDelete; }
+
+        bool IsLfg() { return m_LFGid; }
         typedef std::list<Player*> PlayerListType;
         typedef std::list<Group*> GroupListType;
     private:

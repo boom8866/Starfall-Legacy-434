@@ -235,7 +235,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
     //Get instance where player's group is bound & its map
     if (group)
     {
-        InstanceGroupBind* boundInstance = group->GetBoundInstance(entry);
+        InstanceGroupBind* boundInstance = group->GetBoundInstance(entry, group->isLFGGroup());
         if (boundInstance && boundInstance->save)
             if (Map* boundMap = sMapMgr->FindMap(mapid, boundInstance->save->GetInstanceId()))
                 if (!loginCheck && !boundMap->CanEnter(player))

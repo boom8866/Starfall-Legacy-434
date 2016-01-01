@@ -2442,11 +2442,11 @@ bool InstanceMap::AddPlayerToMap(Player* player)
             if (!mapSave)
             {
                 sLog->outInfo(LOG_FILTER_MAPS, "InstanceMap::Add: creating instance save for map %d spawnmode %d with instance id %d", GetId(), GetSpawnMode(), GetInstanceId());
-                mapSave = sInstanceSaveMgr->AddInstanceSave(GetId(), GetInstanceId(), Difficulty(GetSpawnMode()), 0, true);
+                mapSave = sInstanceSaveMgr->AddInstanceSave(GetId(), GetInstanceId(), Difficulty(GetSpawnMode()), 0, true, false, (group && group->isLFGGroup()));
             }
 
             // check for existing instance binds
-            InstancePlayerBind* playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()));
+            InstancePlayerBind* playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()), (group && group->isLFGGroup()));
             if (playerBind && playerBind->perm)
             {
                 // cannot enter other instances if bound permanently
@@ -2461,7 +2461,7 @@ bool InstanceMap::AddPlayerToMap(Player* player)
                 if (group)
                 {
                     // solo saves should be reset when entering a group
-                    InstanceGroupBind* groupBind = group->GetBoundInstance(this);
+                    InstanceGroupBind* groupBind = group->GetBoundInstance(this, group->isLFGGroup());
                     if (playerBind && playerBind->save != mapSave)
                     {
                         sLog->outError(LOG_FILTER_MAPS, "InstanceMap::Add: player %s(%d) is being put into instance %d, %d, %d, %d, %d, %d but he is in group %d and is bound to instance %d, %d, %d, %d, %d, %d!", player->GetName().c_str(), player->GetGUIDLow(), mapSave->GetMapId(), mapSave->GetInstanceId(), mapSave->GetDifficulty(), mapSave->GetPlayerCount(), mapSave->GetGroupCount(), mapSave->CanReset(), GUID_LOPART(group->GetLeaderGUID()), playerBind->save->GetMapId(), playerBind->save->GetInstanceId(), playerBind->save->GetDifficulty(), playerBind->save->GetPlayerCount(), playerBind->save->GetGroupCount(), playerBind->save->CanReset());
@@ -2662,15 +2662,15 @@ void InstanceMap::PermBindAllPlayers(Player* source)
         Player* player = itr->getSource();
         // players inside an instance cannot be bound to other instances
         // some players may already be permanently bound, in this case nothing happens
-        InstancePlayerBind* bind = player->GetBoundInstance(save->GetMapId(), save->GetDifficulty());
+        InstancePlayerBind* bind = player->GetBoundInstance(save->GetMapId(), save->GetDifficulty(), save->IsLfg());
         if (!bind || !bind->perm)
         {
             player->BindToInstance(save, true);
             WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
             data << uint32(0);
             player->GetSession()->SendPacket(&data);
-
-            player->GetSession()->SendCalendarRaidLockout(save, true);
+            if (!save->IsLfg())
+                player->GetSession()->SendCalendarRaidLockout(save, true);
         }
 
         // if the leader is not in the instance the group will not get a perm bind

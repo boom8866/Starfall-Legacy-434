@@ -510,6 +510,7 @@ enum WorldStates
     WS_MONTHLY_QUEST_RESET_TIME = 20007,                     // Next monthly reset time
     // Cata specific custom worldstates
     WS_GUILD_WEEKLY_RESET_TIME  = 20050,                     // Next guild week reset time
+    WS_WEEKLY_LFR_RESET_TIME    = 20051,                     // Next lfr looted week reset time
 };
 
 /// Storage class for commands issued for delayed execution
@@ -636,6 +637,7 @@ class World
 
         /// Next daily quests and random bg reset time
         time_t GetNextDailyQuestsResetTime() const { return m_NextDailyQuestReset; }
+        time_t GetNextLfrLootsResetTime() const { return m_NextWeeklyLfrLootsReset; }
         time_t GetNextWeeklyQuestsResetTime() const { return m_NextWeeklyQuestReset; }
         time_t GetNextRandomBGResetTime() const { return m_NextRandomBGReset; }
 
@@ -783,6 +785,7 @@ class World
 
         void InitDailyQuestResetTime();
         void InitWeeklyQuestResetTime();
+        void InitWeeklyLfrResetTime();
         void InitMonthlyQuestResetTime();
         void InitRandomBGResetTime();
         void InitGuildResetTime();
@@ -793,6 +796,7 @@ class World
         void ResetRandomBG();
         void ResetGuildCap();
         void ResetCurrencyWeekCap();
+        void ResetLfrLoots();
     private:
         static ACE_Atomic_Op<ACE_Thread_Mutex, bool> m_stopEvent;
         static uint8 m_ExitCode;
@@ -852,6 +856,7 @@ class World
         // scheduled reset times
         time_t m_NextDailyQuestReset;
         time_t m_NextWeeklyQuestReset;
+        time_t m_NextWeeklyLfrLootsReset;
         time_t m_NextMonthlyQuestReset;
         time_t m_NextRandomBGReset;
         time_t m_NextGuildReset;

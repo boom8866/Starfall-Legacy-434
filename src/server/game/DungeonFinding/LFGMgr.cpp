@@ -786,7 +786,9 @@ void LFGMgr::UpdateRoleCheck(uint64 gguid, uint64 guid /* = 0 */, uint8 roles /*
 */
 void LFGMgr::GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& players, LfgLockPartyMap& lockMap)
 {
+    LfgDungeonSet dungeonsBackup = dungeons;
     lockMap.clear();
+
     for (LfgGuidSet::const_iterator it = players.begin(); it != players.end() && !dungeons.empty(); ++it)
     {
         uint64 guid = (*it);
@@ -797,13 +799,20 @@ void LFGMgr::GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& pl
             LfgDungeonSet::iterator itDungeon = dungeons.find(dungeonId);
             if (itDungeon != dungeons.end())
             {
-                dungeons.erase(itDungeon);
-                lockMap[guid][dungeonId] = it2->second;
+                // Don't remove the dungeon if team members are trying to continue a locked instance
+                if (!(it2->second.locktyp == LFG_LOCKSTATUS_RAID_LOCKED && isContinue))
+                {
+                    dungeons.erase(itDungeon);
+                    lockMap[guid][dungeonId] = it2->second;
+                }
             }
         }
     }
-    if (!dungeons.empty())
-        lockMap.clear();
+
+    if (dungeons.empty())
+        dungeons = dungeonsBackup; // character is bound to all id's reset all requirements
+
+    lockMap.clear();
 }
 
 /**
@@ -1367,9 +1376,26 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
 */
 void LFGMgr::FinishDungeon(uint64 gguid, const uint32 dungeonId)
 {
-
     uint32 gDungeonId = GetDungeon(gguid);
-    if (gDungeonId != dungeonId)
+
+    bool skipMapDungeonId = false;
+    if (gDungeonId == 416 || gDungeonId == 417) // Dragon Soul (LFR) have 3 different dungeon ids we need a extra check here
+    {
+        const LfgGuidSet& players = GetPlayers(gguid);
+        for (LfgGuidSet::const_iterator it = players.begin(); it != players.end(); ++it)
+        {
+            if (Player* player = ObjectAccessor::FindPlayer((*it)))
+            {
+                if (player->GetMapId() == 967)
+                {
+                    skipMapDungeonId = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!skipMapDungeonId && (gDungeonId != dungeonId))
     {
         sLog->outDebug(LOG_FILTER_LFG, "LFGMgr::FinishDungeon: [" UI64FMTD "] Finished dungeon %u but group queued for %u. Ignoring", gguid, dungeonId, gDungeonId);
         return;
@@ -1403,7 +1429,7 @@ void LFGMgr::FinishDungeon(uint64 gguid, const uint32 dungeonId)
         // Give rewards only if its a random dungeon
         LFGDungeonData const* dungeon = GetLFGDungeon(rDungeonId);
 
-        if (!dungeon || (dungeon->type != LFG_TYPE_RANDOM && !dungeon->seasonal))
+        if (!dungeon || !skipMapDungeonId && (dungeon->type != LFG_TYPE_RANDOM && !dungeon->seasonal))
         {
             sLog->outDebug(LOG_FILTER_LFG, "LFGMgr::FinishDungeon: [" UI64FMTD "] dungeon %u is not random or seasonal", guid, rDungeonId);
             continue;
@@ -1416,7 +1442,7 @@ void LFGMgr::FinishDungeon(uint64 gguid, const uint32 dungeonId)
             continue;
         }
 
-        LFGDungeonData const* dungeonDone = GetLFGDungeon(dungeonId);
+        LFGDungeonData const* dungeonDone = GetLFGDungeon(skipMapDungeonId ? gDungeonId : dungeonId);
         uint32 mapId = dungeonDone ? uint32(dungeonDone->map) : 0;
 
         if (player->GetMapId() != mapId)
@@ -1615,11 +1641,13 @@ LfgLockMap const LFGMgr::GetLockedDungeons(uint64 guid)
 
         uint32 lockData = 0;
 
+        bool isLFR = (dungeon->id == 416 || dungeon->id == 417);
+
         if (dungeon->expansion > expansion)
             lockData = LFG_LOCKSTATUS_INSUFFICIENT_EXPANSION;
         else if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, dungeon->map, player))
             lockData = LFG_LOCKSTATUS_RAID_LOCKED;
-        else if (dungeon->difficulty > DUNGEON_DIFFICULTY_NORMAL && player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
+        else if (!isLFR && dungeon->difficulty > DUNGEON_DIFFICULTY_NORMAL && player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
             lockData = LFG_LOCKSTATUS_RAID_LOCKED;
         else if (dungeon->minlevel > level)
             lockData = LFG_LOCKSTATUS_TOO_LOW_LEVEL;

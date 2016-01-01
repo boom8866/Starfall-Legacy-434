@@ -483,7 +483,7 @@ void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 credi
                     for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
                         if (Player* player = i->getSource())
                             if (Group* grp = player->GetGroup())
-                                if (grp->isLFGGroup())
+                                if (grp->isLFGGroup() || grp->isLFRGroup())
                                     sLFGMgr->FinishDungeon(grp->GetGUID(), dungeonId);
             }
             return;

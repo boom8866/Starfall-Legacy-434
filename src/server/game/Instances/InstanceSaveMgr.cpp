@@ -49,7 +49,7 @@ InstanceSaveManager::~InstanceSaveManager()
         for (InstanceSave::PlayerListType::iterator itr2 = save->m_playerList.begin(), next = itr2; itr2 != save->m_playerList.end(); itr2 = next)
         {
             ++next;
-            (*itr2)->UnbindInstance(save->GetMapId(), save->GetDifficulty(), true);
+            (*itr2)->UnbindInstance(save->GetMapId(), save->GetDifficulty(), true, save->IsLfg());
         }
         save->m_playerList.clear();
 
@@ -179,7 +179,7 @@ void InstanceSaveManager::UnloadInstanceSave(uint32 InstanceId)
 
 InstanceSave::InstanceSave(uint16 MapId, uint32 InstanceId, Difficulty difficulty, time_t resetTime, bool canReset, bool isLFGid)
     : m_resetTime(resetTime), m_instanceid(InstanceId), m_mapid(MapId),
-    m_difficulty(difficulty), m_canReset(canReset), m_toDelete(false), m_LFGid(false)
+    m_difficulty(difficulty), m_canReset(canReset), m_toDelete(false), m_LFGid(isLFGid)
 {
 }
 
@@ -195,6 +195,7 @@ void InstanceSave::UpdateDifficulty(uint8 diff)
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_INSTANCE_DIFFICULTY);
     stmt->setUInt8(0, diff);
     stmt->setUInt32(1, m_instanceid);
+    //    stmt->setBool(2, false);
     CharacterDatabase.Execute(stmt);
 }
 
@@ -227,6 +228,7 @@ void InstanceSave::SaveToDB()
     stmt->setUInt8(3, difficulty);
     stmt->setUInt32(4, completedEncounters);
     stmt->setString(5, data);
+    stmt->setBool(6, IsLfg());
     CharacterDatabase.Execute(stmt);
 
     // Update completed encounters cache when adding InstanceSave
@@ -572,7 +574,7 @@ void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
     while (!pList.empty())
     {
         Player* player = *(pList.begin());
-        player->UnbindInstance(itr->second->GetMapId(), itr->second->GetDifficulty(), true);
+        player->UnbindInstance(itr->second->GetMapId(), itr->second->GetDifficulty(), true, itr->second->IsLfg());
     }
 
     InstanceSave::GroupListType &gList = itr->second->m_groupList;

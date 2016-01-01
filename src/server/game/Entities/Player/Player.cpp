@@ -7485,7 +7485,7 @@ int32 Player::CalculateReputationGain(ReputationSource source, uint32 creatureOr
 //Calculates how many reputation points player gains in victim's enemy factions
 void Player::RewardOnKill(Unit* victim, float rate)
 {
-    if (!victim || victim->GetTypeId() == TYPEID_PLAYER)
+    if (!victim || victim->GetTypeId() == TYPEID_PLAYER || (GetGroup() && GetGroup()->isLFRGroup()))
         return;
 
     if (victim->ToCreature()->IsReputationGainDisabled())
@@ -12853,7 +12853,7 @@ InventoryResult Player::CanUseItem(ItemTemplate const* proto) const
     return EQUIP_ERR_OK;
 }
 
-InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObject const* lootedObject) const
+InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObject const* lootedObject)
 {
     if (!GetGroup() || !GetGroup()->isLFGGroup())
         return EQUIP_ERR_OK;    // not in LFG group
@@ -12866,6 +12866,9 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
     if (!proto)
         return EQUIP_ERR_ITEM_NOT_FOUND;
    // Used by group, function NeedBeforeGreed, to know if a prototype can be used by a player
+
+    //    if (isLFR && HasLFRLootObject(lootedObject->GetEntry()))
+    //    return EQUIP_ERR_ITEM_LOCKED;
 
     const static uint32 item_weapon_skills[MAX_ITEM_SUBCLASS_WEAPON] =
     {
@@ -12928,6 +12931,11 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
     }
 
     return EQUIP_ERR_OK;
+}
+
+bool Player::HasLFRLootObject(uint32 objectEntry)
+{
+    return _lfrLootMap[objectEntry];
 }
 
 Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update, int32 randomPropertyId)
@@ -18366,6 +18374,42 @@ void Player::_LoadBGData(PreparedQueryResult result)
     m_bgData.mountSpell   = fields[9].GetUInt32();
 }
 
+void Player::_LoadLFRLootData(PreparedQueryResult result)
+{
+    if (!result)
+        return;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        _lfrLootMap[fields[0].GetUInt32()] = true;
+    } while (result->NextRow());
+}
+
+void Player::AddLFRLoot(uint32 entry)
+{
+    if (!_lfrLootMap[entry])
+    {
+        _lfrLootMap[entry] = true;
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHARACTER_LFRLOOTDATA);
+        stmt->setUInt32(0, GetGUIDLow());
+        stmt->setUInt32(1, entry);
+        CharacterDatabase.Execute(stmt);
+    }
+}
+
+void Player::RemoveLFRLoot(uint32 entry)
+{
+    if (_lfrLootMap[entry])
+    {
+        _lfrLootMap[entry] = false;
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHARACTER_LFRLOOTDATA_BY_ENTRY);
+        stmt->setUInt32(0, GetGUIDLow());
+        stmt->setUInt32(1, entry);
+        CharacterDatabase.Execute(stmt);
+    }
+}
+
 bool Player::LoadPositionFromDB(uint32& mapid, float& x, float& y, float& z, float& o, bool& in_flight, uint64 guid)
 {
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_POSITION);
@@ -18609,6 +18653,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     _LoadBoundInstances(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BOUND_INSTANCES));
     _LoadInstanceTimeRestrictions(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_INSTANCE_LOCK_TIMES));
     _LoadBGData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BG_DATA));
+    _LoadLFRLootData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_LFR_LOOT_DATA));
+
 
     GetSession()->SetPlayer(this);
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
@@ -20268,6 +20314,8 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
             uint8 difficulty = fields[3].GetUInt8();
 
             time_t resetTime = time_t(fields[4].GetUInt32());
+            bool isLFG = fields[5].GetBool();
+
             // the resettime for normal instances is only saved when the InstanceSave is unloaded
             // so the value read from the DB may be wrong here but only if the InstanceSave is loaded
             // and in that case it is not used
@@ -20313,8 +20361,8 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
             }
 
             // since non permanent binds are always solo bind, they can always be reset
-            if (InstanceSave* save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, Difficulty(difficulty), resetTime, !perm, true))
-               BindToInstance(save, perm, true);
+            if (InstanceSave* save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, Difficulty(difficulty), resetTime, !perm, true, isLFG))
+                BindToInstance(save, perm, true);
         }
         while (result->NextRow());
     }
@@ -20326,32 +20374,33 @@ InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty
     MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapid, difficulty);
     if (!mapDiff)
         return NULL;
-
-    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
+    uint32 key = InstanceSaveKey::Create(mapid, getLfgId);
+    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(key);
     if (itr != m_boundInstances[difficulty].end())
-        return ((getLfgId && &itr->second.lfg) || (!getLfgId && !&itr->second.lfg)) ? &itr->second : NULL;
-    else
-        return NULL;
+        return &itr->second;
+
+    return NULL;
 }
 
-void Player::SwitchBoundInstance(uint32 mapid, Difficulty previousDifficulty, Difficulty newDifficulty)
+void Player::SwitchBoundInstance(uint32 mapId, Difficulty previousDifficulty, Difficulty newDifficulty)
 {
     std::list<uint32 > mapToErase;
     for (BoundInstancesMap::iterator itr = m_boundInstances[previousDifficulty].begin(); itr != m_boundInstances[previousDifficulty].end(); ++itr)
         if (InstanceSave* save = itr->second.save)
-            if (mapid == save->GetMapId() && !save->IsLfg())
+            if (mapId == save->GetMapId() && !save->IsLfg())
             {
                 // some instances only have one difficulty
-                MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapid, newDifficulty);
+                MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapId, newDifficulty);
                 if (!mapDiff)
                     continue;
 
-                if (!IsMapDifficultySwitchable(mapid))
+                if (!IsMapDifficultySwitchable(mapId))
                     continue;
 
-                uint32 key = InstanceSaveKey::Create(mapid, save->IsLfg());
+                uint32 key = InstanceSaveKey::Create(mapId, save->IsLfg());
                 m_boundInstances[newDifficulty][key] = m_boundInstances[previousDifficulty][key];
-                mapToErase.push_back(mapid);
+
+                mapToErase.push_back(mapId);
                 break;
             }
     for (std::list<uint32 >::iterator itr = mapToErase.begin(); itr != mapToErase.end(); itr++)
@@ -20362,21 +20411,23 @@ void Player::SwitchBoundInstance(uint32 mapid, Difficulty previousDifficulty, Di
     }
 }
 
-InstanceSave* Player::GetInstanceSave(uint32 mapid, bool raid)
+InstanceSave* Player::GetInstanceSave(uint32 mapId, bool raid)
 {
-    InstancePlayerBind* pBind = GetBoundInstance(mapid, GetDifficulty(raid));
+    bool isLfgId = GetGroup() && GetGroup()->IsNonPermanentLFGGroup();
+    InstancePlayerBind* pBind = GetBoundInstance(mapId, GetDifficulty(raid), isLfgId);
     InstanceSave* pSave = pBind ? pBind->save : NULL;
     if (!pBind || !pBind->perm)
         if (Group* group = GetGroup())
-            if (InstanceGroupBind* groupBind = group->GetBoundInstance(this))
+            if (InstanceGroupBind* groupBind = group->GetBoundInstance(this, isLfgId))
                 pSave = groupBind->save;
 
     return pSave;
 }
 
-void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
+void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload, bool isLfgId /*= false*/)
 {
-    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
+    uint32 key = InstanceSaveKey::Create(mapid, isLfgId);
+    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(key);
     UnbindInstance(itr, difficulty, unload);
 }
 
@@ -20406,7 +20457,8 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave* save, bool permanent, b
 {
     if (save)
     {
-        InstancePlayerBind& bind = m_boundInstances[save->GetDifficulty()][save->GetMapId()];
+        uint32 key = InstanceSaveKey::Create(save->GetMapId(), save->IsLfg());
+        InstancePlayerBind& bind = m_boundInstances[save->GetDifficulty()][key];
         if (!load)
         {
             if (bind.save)
@@ -20450,7 +20502,7 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave* save, bool permanent, b
         bind.perm = permanent;
         if (!load)
             sLog->outDebug(LOG_FILTER_MAPS, "Player::BindToInstance: %s(%d) is now bound to map %d, instance %d, difficulty %d", GetName().c_str(), GetGUIDLow(), save->GetMapId(), save->GetInstanceId(), save->GetDifficulty());
-        sScriptMgr->OnPlayerBindToInstance(this, save->GetDifficulty(), save->GetMapId(), permanent);
+        sScriptMgr->OnPlayerBindToInstance(this, save->GetDifficulty(), save->GetMapId(), permanent, save->IsLfg());
         return &bind;
     }
 
@@ -22032,7 +22084,7 @@ void Player::ResetInstances(uint8 method, bool isRaid)
     for (BoundInstancesMap::iterator itr = m_boundInstances[diff].begin(); itr != m_boundInstances[diff].end();)
     {
         InstanceSave* p = itr->second.save;
-        const MapEntry* entry = sMapStore.LookupEntry(itr->first);
+        MapEntry const* entry = p->GetMapEntry();
         if (!entry || entry->IsRaid() != isRaid || !p->CanReset())
         {
             ++itr;
