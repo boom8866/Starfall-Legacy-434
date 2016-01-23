@@ -495,17 +495,6 @@ void Creature::Update(uint32 diff)
             m_vehicleKit->Reset();
     }
 
-    if (IsInWater() || IsUnderWater())
-    {
-        if (canSwim())
-            AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-    }
-    else
-    {
-        if (canWalk())
-            RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-    }
-
     // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
     float ground = GetPositionZ();
     GetMap()->GetWaterOrGroundLevel(GetPositionX(), GetPositionY(), GetPositionZ(), &ground);
@@ -544,8 +533,20 @@ void Creature::Update(uint32 diff)
                 SetDisableGravity(true);
             else
             {
-                SetCanFly(false);
-                SetDisableGravity(false);
+                // Swimming packet!
+                if ((IsInWater() || IsUnderWater()) && !isInFlight() && canSwim())
+                {
+                    AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                    SetCanFly(true);
+                    SetDisableGravity(true);
+                    SendMovementFlagUpdate();
+                }
+                else
+                {
+                    SetCanFly(false);
+                    SetDisableGravity(false);
+                    ClearUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                }
             }
             break;
     }

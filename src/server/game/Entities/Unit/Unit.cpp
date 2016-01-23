@@ -21068,9 +21068,16 @@ void Unit::BuildMovementPacket(ByteBuffer *data) const
 void Unit::SetCanFly(bool apply)
 {
     if (apply)
+    {
         AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY);
+        if (IsUnderWater() || IsInWater())
+        {
+            AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+            RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+        }
+    }
     else
-        RemoveUnitMovementFlag(MOVEMENTFLAG_CAN_FLY);
+        RemoveUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_SWIMMING);
 }
 
 void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool casting /*= false*/)
@@ -22226,20 +22233,6 @@ void Unit::SendMovementGravityChange()
 
 void Unit::SendMovementCanFlyChange()
 {
-    /*!
-        if ( a3->MoveFlags & MOVEMENTFLAG_CAN_FLY )
-        {
-            v4->MoveFlags |= 0x1000000u;
-            result = 1;
-        }
-        else
-        {
-            if ( v4->MoveFlags & MOVEMENTFLAG_FLYING )
-                CMovement::DisableFlying(v4);
-            v4->MoveFlags &= 0xFEFFFFFFu;
-            result = 1;
-        }
-    */
     if (GetTypeId() == TYPEID_PLAYER)
         ToPlayer()->SendMovementSetCanFly(CanFly());
 
