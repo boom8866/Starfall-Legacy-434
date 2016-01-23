@@ -50,8 +50,7 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T* owner)
     _getPoint(owner, x, y, z);
 
     // Add LOS check for target point
-    Position mypos;
-    owner->GetPosition(&mypos);
+    Position mypos = owner->GetPosition();
 
     // For Dalaran Sewers
     if (owner->GetMapId() == 617 && mypos.m_positionZ >= 6.5f && z < 7.0f)
@@ -117,8 +116,7 @@ void FleeingMovementGenerator<T>::_getPoint(T* owner, float &x, float &y, float 
         angle = frand(0, 2*static_cast<float>(M_PI));
     }
 
-    Position pos;
-    owner->GetFirstCollisionPosition(pos, dist, angle);
+    Position pos = owner->GetFirstCollisionPosition(dist, angle);
     x = pos.m_positionX;
     y = pos.m_positionY;
     z = pos.m_positionZ;

@@ -188,7 +188,7 @@ void LFGMgr::LoadLFGDungeons(bool reload /* = false */)
             case LFG_TYPE_HEROIC:
             case LFG_TYPE_RAID:
             case LFG_TYPE_RANDOM:
-                LfgDungeonStore[dungeon->ID] = LFGDungeonData(dungeon);
+                LfgDungeonStore.insert(LFGDungeonContainer::value_type(dungeon->ID, LFGDungeonData(dungeon)));
                 break;
         }
     }
@@ -418,7 +418,6 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
     LfgGuidSet players;
     uint32 rDungeonId = 0;
     bool isContinue = grp && grp->isLFGGroup() && GetState(gguid) != LFG_STATE_FINISHED_DUNGEON;
-    uint8 groupSize = isRaidQueue() ? MAXLFRSIZE : MAXGROUPSIZE;
 
     // Do not allow to change dungeon in the middle of a current dungeon
     if (isContinue)
@@ -446,7 +445,8 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
         joinData.result = LFG_JOIN_NOT_MEET_REQS;
     else if (grp)
     {
-        if (grp->GetMembersCount() > groupSize)
+        // Raids are not allowed to joint the LFR queue
+        if (grp->GetMembersCount() > MAXGROUPSIZE)
             joinData.result = LFG_JOIN_TOO_MUCH_MEMBERS;
         else
         {
@@ -503,22 +503,6 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
                 default:
                     sLog->outError(LOG_FILTER_LFG, "Wrong dungeon type %u for dungeon %u", type, *it);
                     joinData.result = LFG_JOIN_DUNGEON_INVALID;
-                    break;
-            }
-        }
-
-        // Check if raid finder is used
-        for (LfgDungeonSet::const_iterator it = dungeons.begin(); it != dungeons.end() && joinData.result == LFG_JOIN_OK; ++it)
-        {
-            uint16 dungeonId = GetLFGDungeon(*it)->id;
-            switch (dungeonId)
-            {
-                case 416: // Siege of the Wyrmrest Temple
-                case 417: // The Fall of Deathwing
-                    raidQueue = true;
-                    break;
-                default:
-                    raidQueue = false;
                     break;
             }
         }
@@ -711,13 +695,22 @@ void LFGMgr::UpdateRoleCheck(uint64 gguid, uint64 guid /* = 0 */, uint8 roles /*
     if (!gguid)
         return;
 
-    LfgRolesMap check_roles;
     LfgRoleCheckContainer::iterator itRoleCheck = RoleChecksStore.find(gguid);
     if (itRoleCheck == RoleChecksStore.end())
         return;
 
     LfgRoleCheck& roleCheck = itRoleCheck->second;
     bool sendRoleChosen = roleCheck.state != LFG_ROLECHECK_DEFAULT && guid;
+
+    LfgDungeonSet dungeons;
+    if (roleCheck.rDungeonId)
+        dungeons.insert(roleCheck.rDungeonId);
+    else
+        dungeons = roleCheck.dungeons;
+
+    LFGDungeonData const* dungeon = nullptr;
+    if (!dungeons.empty())
+        dungeon = sLFGMgr->GetLFGDungeon(*dungeons.begin());
 
     if (!guid)
         roleCheck.state = LFG_ROLECHECK_ABORTED;
@@ -735,16 +728,9 @@ void LFGMgr::UpdateRoleCheck(uint64 gguid, uint64 guid /* = 0 */, uint8 roles /*
         if (itRoles == roleCheck.roles.end())
         {
             // use temporal var to check roles, CheckGroupRoles modifies the roles
-            check_roles = roleCheck.roles;
-            roleCheck.state = CheckGroupRoles(check_roles) ? LFG_ROLECHECK_FINISHED : LFG_ROLECHECK_WRONG_ROLES;
+            roleCheck.state = dungeon && CheckGroupRoles(LfgRolesMap(roleCheck.roles), dungeon) ? LFG_ROLECHECK_FINISHED : LFG_ROLECHECK_WRONG_ROLES;
         }
     }
-
-    LfgDungeonSet dungeons;
-    if (roleCheck.rDungeonId)
-        dungeons.insert(roleCheck.rDungeonId);
-    else
-        dungeons = roleCheck.dungeons;
 
     LfgJoinResult joinResult = LFG_JOIN_FAILED;
     if (roleCheck.state == LFG_ROLECHECK_MISSING_ROLE || roleCheck.state == LFG_ROLECHECK_WRONG_ROLES)
@@ -824,20 +810,17 @@ void LFGMgr::GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& pl
    Check if a group can be formed with the given group roles
 
    @param[in]     groles Map of roles to check
+   @param[in]     dungeon LFGDungeonData to check
    @return True if roles are compatible
 */
-bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles)
+bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles, LFGDungeonData const* dungeon)
 {
+    ASSERT(dungeon);
     if (groles.empty())
         return false;
     uint8 damage = 0;
     uint8 tank = 0;
     uint8 healer = 0;
-    bool raid = sLFGMgr->isRaidQueue();
-
-    uint8 reqDps = raid ? LFR_DPS_NEEDED : LFG_DPS_NEEDED;
-    uint8 reqHealers = raid ? LFR_HEALERS_NEEDED : LFG_HEALERS_NEEDED;
-    uint8 reqTanks = raid ? LFR_TANKS_NEEDED : LFG_TANKS_NEEDED;
 
     for (LfgRolesMap::iterator it = groles.begin(); it != groles.end(); ++it)
     {
@@ -849,11 +832,11 @@ bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles)
             if (role != PLAYER_ROLE_DAMAGE)
             {
                 it->second -= PLAYER_ROLE_DAMAGE;
-                if (CheckGroupRoles(groles))
+                if (CheckGroupRoles(groles, dungeon))
                     return true;
                 it->second += PLAYER_ROLE_DAMAGE;
             }
-            else if (damage == reqDps)
+            else if (damage == dungeon->requiredDPS)
                 return false;
             else
                 damage++;
@@ -863,11 +846,11 @@ bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles)
             if (role != PLAYER_ROLE_HEALER)
             {
                 it->second -= PLAYER_ROLE_HEALER;
-                if (CheckGroupRoles(groles))
+                if (CheckGroupRoles(groles, dungeon))
                     return true;
                 it->second += PLAYER_ROLE_HEALER;
             }
-            else if (healer == reqHealers)
+            else if (healer == dungeon->requiredHealers)
                 return false;
             else
                 healer++;
@@ -877,11 +860,11 @@ bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles)
             if (role != PLAYER_ROLE_TANK)
             {
                 it->second -= PLAYER_ROLE_TANK;
-                if (CheckGroupRoles(groles))
+                if (CheckGroupRoles(groles, dungeon))
                     return true;
                 it->second += PLAYER_ROLE_TANK;
             }
-            else if (tank == reqTanks)
+            else if (tank == dungeon->requiredTanks)
                 return false;
             else
                 tank++;
@@ -930,7 +913,10 @@ void LFGMgr::MakeNewGroup(LfgProposal const& proposal)
         if (!grp)
         {
             grp = new Group();
-            grp->ConvertToLFG(isRaidQueue());
+            if (dungeon->isLFR)
+                grp->ConvertToLFR();
+            else
+                grp->ConvertToLFG();
             grp->Create(player);
             uint64 gguid = grp->GetGUID();
             SetState(gguid, LFG_STATE_PROPOSAL);
@@ -946,10 +932,10 @@ void LFGMgr::MakeNewGroup(LfgProposal const& proposal)
             player->CastSpell(player, LFG_SPELL_DUNGEON_COOLDOWN, false);
     }
 
-    if (!isRaidQueue())
-        grp->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
+    if (dungeon->isLFR)
+        grp->SetRaidDifficulty(RAID_DIFFICULTY_25MAN_NORMAL);
     else
-        grp->SetRaidDifficulty(Difficulty(dungeon->difficulty));
+        grp->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
 
     uint64 gguid = grp->GetGUID();
     SetDungeon(gguid, dungeon->Entry());

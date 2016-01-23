@@ -21,6 +21,8 @@ public:
         uint64 _nozdormuMadnessGUID;
         uint64 _alexstraszaMadnessGUID;
         uint64 _thrallMadnessGUID;
+        
+        uint64 _lordAfrasastraszGUID;
 
         void Initialize()
         {
@@ -33,6 +35,8 @@ public:
             _nozdormuMadnessGUID = 0;
             _alexstraszaMadnessGUID = 0;
             _thrallMadnessGUID = 0;
+            _lordAfrasastraszGUID = 0;
+            SetBossState(DATA_HAGARA, DONE);
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -63,6 +67,9 @@ public:
                 case NPC_THRALL_MADNESS:
                     _thrallMadnessGUID = creature->GetGUID();
                     break;
+                case NPC_LORD_AFRASASTRASZ:
+                    _lordAfrasastraszGUID = creature->GetGUID();
+                    break;
                 default:
                     break;
             }
@@ -79,6 +86,41 @@ public:
         {
             if (!InstanceScript::SetBossState(data, state))
                 return false;
+
+            switch (data)
+            {
+                case DATA_MADNESS_OF_DEATHWING:
+                    if (state == FAIL)
+                    {
+                        if (Creature* ysera = instance->GetCreature(GetData64(DATA_YSERA_MADNESS)))
+                        {
+                            if (ysera->isDead())
+                                ysera->Respawn();
+                            ysera->AI()->EnterEvadeMode();
+                        }
+                        if (Creature* kalecgos = instance->GetCreature(GetData64(DATA_KALECGOS_MADNESS)))
+                        {
+                            if (kalecgos->isDead())
+                                kalecgos->Respawn();
+                            kalecgos->AI()->EnterEvadeMode();
+                        }
+                        if (Creature* alexstrasza = instance->GetCreature(GetData64(DATA_ALEXSTRASZA_MADNESS)))
+                        {
+                            if (alexstrasza->isDead())
+                                alexstrasza->Respawn();
+                            alexstrasza->AI()->EnterEvadeMode();
+                        }
+                        if (Creature* nozdormu = instance->GetCreature(GetData64(DATA_NOZDORMU_MADNESS)))
+                        {
+                            if (nozdormu->isDead())
+                                nozdormu->Respawn();
+                            nozdormu->AI()->EnterEvadeMode();
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
 
             return true;
         }
@@ -103,6 +145,8 @@ public:
                     return _nozdormuMadnessGUID;
                 case DATA_THRALL_MADNESS:
                     return _thrallMadnessGUID;
+                case DATA_LORD_AFRASASTRASZ:
+                    return _lordAfrasastraszGUID;
                 default:
                     break;
             }

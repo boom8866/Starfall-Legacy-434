@@ -98,12 +98,11 @@ public:
                 {
                     case EVENT_BOMB_SUMMON:
                         {
-                            Position pPosition;
-                            me->GetPosition(&pPosition);
+                            Position pPosition = me->GetPosition();
 
                             for (uint8 i = 0; i <= (postPull ? 3 : 0); i++)
                             {
-                                me->GetRandomNearPosition(pPosition, float(urand(0, 10)));
+                                pPosition = me->GetRandomNearPosition(float(urand(0, 10)));
                                 me->SummonCreature(NPC_UNSTABLE_SPHERE, pPosition);
                             }
                         }

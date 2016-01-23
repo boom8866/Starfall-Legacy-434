@@ -905,7 +905,7 @@ bool BfGraveyard::HasNpc(uint64 guid)
 
 Creature* Battlefield::SpawnCreature(uint32 entry, const Position& pos, TeamId team)
 {
-    return SpawnCreature(entry, pos.m_positionX, pos.m_positionY, pos.m_positionZ, pos.m_orientation, team);
+    return SpawnCreature(entry, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), team);
 }
 
 Creature* Battlefield::SpawnCreature(uint32 entry, float x, float y, float z, float o, TeamId team)

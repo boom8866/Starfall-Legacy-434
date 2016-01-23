@@ -20,6 +20,7 @@
 #define _OBJECT_H
 
 #include "Common.h"
+#include "Position.h"
 #include "UpdateMask.h"
 #include "UpdateData.h"
 #include "GridReference.h"
@@ -115,6 +116,7 @@ class CreatureAI;
 class ZoneScript;
 class Unit;
 class Transport;
+class WorldObject;
 
 typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
 
@@ -425,128 +427,6 @@ class Object
         Object& operator=(Object const&);                   // prevent generation assigment operator
 };
 
-struct Position
-{
-    struct PositionXYZStreamer
-    {
-        explicit PositionXYZStreamer(Position& pos) : m_pos(&pos) {}
-        Position* m_pos;
-    };
-
-    struct PositionXYZOStreamer
-    {
-        explicit PositionXYZOStreamer(Position& pos) : m_pos(&pos) {}
-        Position* m_pos;
-    };
-
-    float m_positionX;
-    float m_positionY;
-    float m_positionZ;
-// Better to limit access to m_orientation field, but this will be hard to achieve with many scripts using array initialization for this structure
-//private:
-    float m_orientation;
-//public:
-
-    void Relocate(float x, float y)
-        { m_positionX = x; m_positionY = y;}
-    void Relocate(float x, float y, float z)
-        { m_positionX = x; m_positionY = y; m_positionZ = z; }
-    void Relocate(float x, float y, float z, float orientation)
-        { m_positionX = x; m_positionY = y; m_positionZ = z; SetOrientation(orientation); }
-    void Relocate(const Position &pos)
-        { m_positionX = pos.m_positionX; m_positionY = pos.m_positionY; m_positionZ = pos.m_positionZ; SetOrientation(pos.m_orientation); }
-    void Relocate(const Position* pos)
-        { m_positionX = pos->m_positionX; m_positionY = pos->m_positionY; m_positionZ = pos->m_positionZ; SetOrientation(pos->m_orientation); }
-    void RelocateOffset(const Position &offset);
-    void SetOrientation(float orientation)
-    { m_orientation = NormalizeOrientation(orientation); }
-
-    float GetPositionX() const { return m_positionX; }
-    float GetPositionY() const { return m_positionY; }
-    float GetPositionZ() const { return m_positionZ; }
-    float GetOrientation() const { return m_orientation; }
-
-    void GetPosition(float &x, float &y) const
-        { x = m_positionX; y = m_positionY; }
-    void GetPosition(float &x, float &y, float &z) const
-        { x = m_positionX; y = m_positionY; z = m_positionZ; }
-    void GetPosition(float &x, float &y, float &z, float &o) const
-        { x = m_positionX; y = m_positionY; z = m_positionZ; o = m_orientation; }
-    void GetPosition(Position* pos) const
-    {
-        if (pos)
-            pos->Relocate(m_positionX, m_positionY, m_positionZ, m_orientation);
-    }
-
-    Position::PositionXYZStreamer PositionXYZStream()
-    {
-        return PositionXYZStreamer(*this);
-    }
-    Position::PositionXYZOStreamer PositionXYZOStream()
-    {
-        return PositionXYZOStreamer(*this);
-    }
-
-    bool IsPositionValid() const;
-
-    float GetExactDist2dSq(float x, float y) const
-        { float dx = m_positionX - x; float dy = m_positionY - y; return dx*dx + dy*dy; }
-    float GetExactDist2d(const float x, const float y) const
-        { return sqrt(GetExactDist2dSq(x, y)); }
-    float GetExactDist2dSq(const Position* pos) const
-        { float dx = m_positionX - pos->m_positionX; float dy = m_positionY - pos->m_positionY; return dx*dx + dy*dy; }
-    float GetExactDist2d(const Position* pos) const
-        { return sqrt(GetExactDist2dSq(pos)); }
-    float GetExactDistSq(float x, float y, float z) const
-        { float dz = m_positionZ - z; return GetExactDist2dSq(x, y) + dz*dz; }
-    float GetExactDist(float x, float y, float z) const
-        { return sqrt(GetExactDistSq(x, y, z)); }
-    float GetExactDistSq(const Position* pos) const
-        { float dx = m_positionX - pos->m_positionX; float dy = m_positionY - pos->m_positionY; float dz = m_positionZ - pos->m_positionZ; return dx*dx + dy*dy + dz*dz; }
-    float GetExactDist(const Position* pos) const
-        { return sqrt(GetExactDistSq(pos)); }
-
-    void GetPositionOffsetTo(const Position & endPos, Position & retOffset) const;
-
-    float GetAngle(const Position* pos) const;
-    float GetAngle(float x, float y) const;
-    float GetRelativeAngle(const Position* pos) const
-        { return GetAngle(pos) - m_orientation; }
-    float GetRelativeAngle(float x, float y) const { return GetAngle(x, y) - m_orientation; }
-    void GetSinCos(float x, float y, float &vsin, float &vcos) const;
-
-    bool IsInDist2d(float x, float y, float dist) const
-        { return GetExactDist2dSq(x, y) < dist * dist; }
-    bool IsInDist2d(const Position* pos, float dist) const
-        { return GetExactDist2dSq(pos) < dist * dist; }
-    bool IsInDist(float x, float y, float z, float dist) const
-        { return GetExactDistSq(x, y, z) < dist * dist; }
-    bool IsInDist(const Position* pos, float dist) const
-        { return GetExactDistSq(pos) < dist * dist; }
-    bool HasInArc(float arcangle, const Position* pos, float border = 2.0f) const;
-    bool HasInLine(WorldObject const* target, float width) const;
-    std::string ToString() const;
-
-    // modulos a radian orientation to the range of 0..2PI
-    static float NormalizeOrientation(float o)
-    {
-        // fmod only supports positive numbers. Thus we have
-        // to emulate negative numbers
-        if (o < 0)
-        {
-            float mod = o *-1;
-            mod = fmod(mod, 2.0f * static_cast<float>(M_PI));
-            mod = -mod + 2.0f * static_cast<float>(M_PI);
-            return mod;
-        }
-        return fmod(o, 2.0f * static_cast<float>(M_PI));
-    }
-};
-ByteBuffer& operator>>(ByteBuffer& buf, Position::PositionXYZOStreamer const& streamer);
-ByteBuffer& operator<<(ByteBuffer& buf, Position::PositionXYZStreamer const& streamer);
-ByteBuffer& operator>>(ByteBuffer& buf, Position::PositionXYZStreamer const& streamer);
-ByteBuffer& operator<<(ByteBuffer& buf, Position::PositionXYZOStreamer const& streamer);
-
 struct MovementInfo
 {
     // common
@@ -629,20 +509,6 @@ struct ExtraMovementInfo
 
 #define MAPID_INVALID 0xFFFFFFFF
 
-class WorldLocation : public Position
-{
-    public:
-        explicit WorldLocation(uint32 _mapid = MAPID_INVALID, float _x = 0, float _y = 0, float _z = 0, float _o = 0)
-            : m_mapId(_mapid) { Relocate(_x, _y, _z, _o); }
-        WorldLocation(const WorldLocation &loc) { WorldRelocate(loc); }
-
-        void WorldRelocate(const WorldLocation &loc)
-            { m_mapId = loc.GetMapId(); Relocate(loc); }
-        uint32 GetMapId() const { return m_mapId; }
-
-        uint32 m_mapId;
-};
-
 template<class T>
 class GridObject
 {
@@ -701,49 +567,20 @@ class WorldObject : public Object, public WorldLocation
 
         void GetNearPoint2D(float &x, float &y, float distance, float absAngle) const;
         void GetNearPoint(WorldObject const* searcher, float &x, float &y, float &z, float searcher_size, float distance2d, float absAngle) const;
-        void GetClosePoint(float &x, float &y, float &z, float size, float distance2d = 0, float angle = 0) const
-        {
-            // angle calculated from current orientation
-            GetNearPoint(NULL, x, y, z, size, distance2d, GetOrientation() + angle);
-        }
+        void GetClosePoint(float &x, float &y, float &z, float size, float distance2d = 0, float angle = 0) const;
         void MovePosition(Position &pos, float dist, float angle);
-        void GetNearPosition(Position &pos, float dist, float angle)
-        {
-            GetPosition(&pos);
-            MovePosition(pos, dist, angle);
-        }
+        Position GetNearPosition(float dist, float angle);
         void MovePositionToFirstCollision(Position &pos, float dist, float angle);
-        void GetFirstCollisionPosition(Position &pos, float dist, float angle)
-        {
-            GetPosition(&pos);
-            MovePositionToFirstCollision(pos, dist, angle);
-        }
-        void GetRandomNearPosition(Position &pos, float radius)
-        {
-            GetPosition(&pos);
-            MovePosition(pos, radius * (float)rand_norm(), (float)rand_norm() * static_cast<float>(2 * M_PI));
-        }
+        Position GetFirstCollisionPosition(float dist, float angle);
+        Position GetRandomNearPosition(float radius);
+        void GetContactPoint(WorldObject const* obj, float &x, float &y, float &z, float distance2d = CONTACT_DISTANCE) const;
 
-        void GetContactPoint(const WorldObject* obj, float &x, float &y, float &z, float distance2d = CONTACT_DISTANCE) const
-        {
-            // angle to face `obj` to `this` using distance includes size of `obj`
-            GetNearPoint(obj, x, y, z, obj->GetObjectSize(), distance2d, GetAngle(obj));
-        }
-
-        float GetObjectSize() const
-        {
-            return (m_valuesCount > UNIT_FIELD_COMBATREACH) ? m_floatValues[UNIT_FIELD_COMBATREACH] : DEFAULT_WORLD_OBJECT_SIZE;
-        }
+        float GetObjectSize() const;
         void UpdateGroundPositionZ(float x, float y, float &z) const;
         void UpdateAllowedPositionZ(float x, float y, float &z) const;
 
-        void GetRandomPoint(const Position &srcPos, float distance, float &rand_x, float &rand_y, float &rand_z) const;
-        void GetRandomPoint(const Position &srcPos, float distance, Position &pos) const
-        {
-            float x, y, z;
-            GetRandomPoint(srcPos, distance, x, y, z);
-            pos.Relocate(x, y, z, GetOrientation());
-        }
+        void GetRandomPoint(Position const &srcPos, float distance, float &rand_x, float &rand_y, float &rand_z) const;
+        Position GetRandomPoint(Position const &srcPos, float distance) const;
 
         uint32 GetInstanceId() const { return m_InstanceId; }
 

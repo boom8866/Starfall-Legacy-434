@@ -74,7 +74,7 @@ public:
         void Reset()
         {
             Position const& pos = me->GetHomePosition();
-            me->NearTeleportTo(pos.m_positionX, pos.m_positionY, pos.m_positionZ, pos.m_orientation);
+            me->NearTeleportTo(pos.m_positionX, pos.m_positionY, pos.m_positionZ, pos.GetOrientation());
         }
 
         void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)

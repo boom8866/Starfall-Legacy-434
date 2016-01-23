@@ -3982,6 +3982,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 91957: // Ping Signal Flare
             case 89821: // Helcular's Rod
             case 89824: // Helcular's Ire
+            case 106466:
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
                 break;
             case 68376: // Infrared Heat Focals
@@ -5624,6 +5625,24 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 94984: // Dark Simulacrum dummy aura
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
+                break;
+                // Dragon Soul
+                // * Morchok
+            case 103494: // Resonating Crystal - Trigger correct Target Selection spell
+                spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
+                break;
+            case 103821: // Earthen Vortex
+            case 110047:
+            case 110046:
+            case 110045:
+                spellInfo->Effects[EFFECT_1].Effect = 0;
+                break;
+                // * Madness of Deathwing
+            case 106385: // Crush
+            case 109628:
+            case 109629:
+            case 109630:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
                 break;
             default:
                 break;

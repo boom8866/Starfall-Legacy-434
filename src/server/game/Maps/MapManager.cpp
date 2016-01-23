@@ -226,6 +226,27 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
             sLog->outDebug(LOG_FILTER_MAPS, "Map::CanPlayerEnter - player '%s' is dead but does not have a corpse!", player->GetName().c_str());
     }
 
+    // If the player or group leader defeats any bosses on Normal and goes out, switches diff and tries to enter on Heroic difficulty, he can't. Or the other way around.
+    // He can do it only by using Dynamic Difficulty, inside the instance.
+    uint32 boundDifficultyToCheck = 0;
+    switch (targetDifficulty)
+    {
+        case RAID_DIFFICULTY_10MAN_NORMAL:
+            boundDifficultyToCheck = RAID_DIFFICULTY_10MAN_HEROIC;
+            break;
+        case RAID_DIFFICULTY_25MAN_NORMAL:
+            boundDifficultyToCheck = RAID_DIFFICULTY_25MAN_HEROIC;
+            break;
+        case RAID_DIFFICULTY_10MAN_HEROIC:
+            boundDifficultyToCheck = RAID_DIFFICULTY_10MAN_NORMAL;
+            break;
+        case RAID_DIFFICULTY_25MAN_HEROIC:
+            boundDifficultyToCheck = RAID_DIFFICULTY_25MAN_NORMAL;
+            break;
+        default:
+            break;
+    }
+
     //Get instance where player's group is bound & its map
     if (group)
     {

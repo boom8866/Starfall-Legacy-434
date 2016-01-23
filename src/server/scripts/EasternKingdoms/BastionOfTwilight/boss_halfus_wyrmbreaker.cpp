@@ -941,7 +941,7 @@ public:
         }
     };
 
-    SpellScript *GetSpellScript() const
+    SpellScript* GetSpellScript() const
     {
         return new spell_bot_fireball_SpellScript();
     }

@@ -1394,8 +1394,12 @@ struct LFGDungeonEntry
     uint32  grouptype;                                      // 15
     //char*   desc;                                         // 16 Description
     uint32  randomCategoryId;                               // 17 RandomDungeonID assigned for this dungeon
+    uint32  requiredTanks;                                  // 18
+    uint32  requiredHealers;                                // 19
+    uint32  requiredDPS;                                    // 20
     // Helpers
     uint32 Entry() const { return ID + (type << 24); }
+    bool IsLFR() const { return ID == 416 || ID == 417; }
 };
 
 struct LightEntry
@@ -2402,7 +2406,12 @@ struct VehicleSeatEntry
     uint32  m_flagsB;                                       // 45
                                                             // 46-57 added in 3.1, floats mostly
 
-    bool CanEnterOrExit() const { return m_flags & VEHICLE_SEAT_FLAG_CAN_ENTER_OR_EXIT; }
+    bool CanEnterOrExit() const
+    {
+        return ((m_flags & VEHICLE_SEAT_FLAG_CAN_ENTER_OR_EXIT) != 0 ||
+            //If it has anmation for enter/ride, means it can be entered/exited by logic
+            (m_flags & (VEHICLE_SEAT_FLAG_HAS_LOWER_ANIM_FOR_ENTER | VEHICLE_SEAT_FLAG_HAS_LOWER_ANIM_FOR_RIDE)) != 0);
+    }
     bool CanSwitchFromSeat() const { return m_flags & VEHICLE_SEAT_FLAG_CAN_SWITCH; }
     bool IsUsableByOverride() const { return (m_flags & (VEHICLE_SEAT_FLAG_UNCONTROLLED | VEHICLE_SEAT_FLAG_UNK18)
                                     || (m_flagsB & (VEHICLE_SEAT_FLAG_B_USABLE_FORCED | VEHICLE_SEAT_FLAG_B_USABLE_FORCED_2 |

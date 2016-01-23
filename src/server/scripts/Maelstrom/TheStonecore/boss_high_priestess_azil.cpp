@@ -535,8 +535,7 @@ public:
             me->SetDisableGravity(true);
             me->SetReactState(REACT_PASSIVE);
             me->AddAura(SPELL_SEISMIC_SHARD_VISUAL, me);
-            Position pos;
-            me->GetPosition(&pos);
+            Position pos = me->GetPosition();
             Movement::MoveSplineInit init(me);
             FillPath(pos, init.Path());
             init.SetFly();

@@ -879,8 +879,7 @@ public:
                 float x, y;
                 go->GetNearPoint2D(x, y, 10.0f, go->GetOrientation());
                 const Position src = {x, y, go->GetPositionZ(), 0};
-                Position dst;
-                go->GetRandomPoint(src, 5.0f, dst);
+                Position dst = go->GetRandomPoint(src, 5.0f);
                 npc_escort->AddWaypoint(2, dst.GetPositionX(), dst.GetPositionY(), z);
             }
 
@@ -1137,8 +1136,7 @@ public:
                 {
                     npc_escort->AddWaypoint(0, WorgenPosT2[id][0], WorgenPosT2[id][1], WorgenPosT2[id][2], 0, true);
                     const Position src = {WorgenPosT2[7][0], WorgenPosT2[7][1], WorgenPosT2[7][2], WorgenPosT2[7][3]};
-                    Position dst;
-                    worgen->GetRandomPoint(src, 5.0f, dst);
+                    Position dst = worgen->GetRandomPoint(src, 5.0f);
                     npc_escort->AddWaypoint(1, dst.GetPositionX(), dst.GetPositionY(), dst.GetPositionZ());
                     npc_escort->AddWaypoint(2, -1679.73f,1442.12f,52.3705f);
                     npc_escort->Start(true, true);

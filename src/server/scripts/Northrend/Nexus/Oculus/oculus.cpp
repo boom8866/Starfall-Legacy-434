@@ -345,8 +345,7 @@ public:
                 summoner->CastSpell(summoner, SPELL_RIDE_EMERALD_DRAKE_QUE);
             if (me->GetEntry() == NPC_AMBER_DRAKE_VEHICLE)
                 summoner->CastSpell(summoner, SPELL_RIDE_AMBER_DRAKE_QUE);
-            Position pos;
-            summoner->GetPosition(&pos);
+            Position pos = summoner->GetPosition();
             me->GetMotionMaster()->MovePoint(0, pos);
         }
 
@@ -436,8 +435,7 @@ public:
                         me->SetOrientation(2.5f);
                         me->SetSpeed(MOVE_FLIGHT, 1.0f, true);
                         Talk(SAY_DRAKES_TAKEOFF);
-                        Position pos;
-                        me->GetPosition(&pos);
+                        Position pos = me->GetPosition();
                         pos.m_positionX += 10.0f;
                         pos.m_positionY += 10.0f;
                         pos.m_positionZ += 12.0f;

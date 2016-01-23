@@ -305,7 +305,7 @@ public:
                     me->SetReactState(REACT_PASSIVE);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_IMMUNE_TO_NPC);
                     DoCastAOE(SPELL_TELEPORT);
-                    me->NearTeleportTo(Center);
+                    me->NearTeleportTo(Center.GetPositionX(), Center.GetPositionY(), Center.GetPositionZ(), Center.GetOrientation());
                     events.ScheduleEvent(EVENT_TALK_READY_1, 3800);
                     break;
                 case EVENT_TALK_READY_1:

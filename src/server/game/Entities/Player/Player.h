@@ -822,11 +822,11 @@ enum ArenaTeamInfoType
 
 class InstanceSave;
 
-enum RestType
+enum RestFlag
 {
-    REST_TYPE_NO        = 0,
-    REST_TYPE_IN_TAVERN = 1,
-    REST_TYPE_IN_CITY   = 2
+    REST_FLAG_IN_TAVERN         = 0x1,
+    REST_FLAG_IN_CITY           = 0x2,
+    REST_FLAG_IN_FACTION_AREA   = 0x4, // used with AREA_FLAG_REST_ZONE_*
 };
 
 enum TeleportToOptions
@@ -1283,13 +1283,14 @@ class Player : public Unit, public GridObject<Player>
 
         bool IsInWater() const { return m_isInWater; }
         bool IsUnderWater() const;
+        bool IsInAreaTriggerRadius(const AreaTriggerEntry* trigger) const;
         bool IsFallingToVoidDisabled() const;
         bool IsFalling() { return GetPositionZ() < m_lastFallZ; }
 
         void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
         void SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8 arg = 0);
-        void SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time);
+        void SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time, bool welcome);
 
         bool CanInteractWithQuestGiver(Object* questGiver);
         Creature* GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask);
@@ -1352,28 +1353,15 @@ class Player : public Unit, public GridObject<Player>
 
         void setDeathState(DeathState s);                   // overwrite Unit::setDeathState
 
-        void InnEnter (time_t time, uint32 mapid, float x, float y, float z)
-        {
-            inn_pos_mapid = mapid;
-            inn_pos_x = x;
-            inn_pos_y = y;
-            inn_pos_z = z;
-            time_inn_enter = time;
-        }
-
         float GetRestBonus() const { return m_rest_bonus; }
         void SetRestBonus(float rest_bonus_new);
 
-        RestType GetRestType() const { return rest_type; }
-        void SetRestType(RestType n_r_type) { rest_type = n_r_type; }
+        bool HasRestFlag(RestFlag restFlag) const { return (_restFlagMask & restFlag) != 0; }
+        void SetRestFlag(RestFlag restFlag, uint32 triggerId = 0);
+        void RemoveRestFlag(RestFlag restFlag);
 
-        uint32 GetInnPosMapId() const { return inn_pos_mapid; }
-        float GetInnPosX() const { return inn_pos_x; }
-        float GetInnPosY() const { return inn_pos_y; }
-        float GetInnPosZ() const { return inn_pos_z; }
-
-        time_t GetTimeInnEnter() const { return time_inn_enter; }
-        void UpdateInnerTime (time_t time) { time_inn_enter = time; }
+        uint32 GetXPRestBonus(uint32 xp);
+        uint32 GetInnTriggerId() const { return inn_triggerId; }
 
         PhaseMgr& GetPhaseMgr() { return phaseMgr; }
 
@@ -2552,15 +2540,6 @@ class Player : public Unit, public GridObject<Player>
         bool IsOutdoorPvPActive();
 
         /*********************************************************/
-        /***                    REST SYSTEM                    ***/
-        /*********************************************************/
-
-        bool isRested() const { return GetRestTime() >= 10*IN_MILLISECONDS; }
-        uint32 GetXPRestBonus(uint32 xp);
-        uint32 GetRestTime() const { return m_restTime;}
-        void SetRestTime(uint32 v) { m_restTime = v;}
-
-        /*********************************************************/
         /***              ENVIROMENTAL SYSTEM                  ***/
         /*********************************************************/
 
@@ -2668,7 +2647,7 @@ class Player : public Unit, public GridObject<Player>
         bool m_InstanceValid;
         // permanent binds and solo binds by difficulty
         BoundInstancesMap m_boundInstances[MAX_DIFFICULTY];
-        InstancePlayerBind* GetBoundInstance(uint32 mapid, Difficulty difficulty);
+        InstancePlayerBind* GetBoundInstance(uint32 mapId, Difficulty difficulty);
         BoundInstancesMap& GetBoundInstances(Difficulty difficulty) { return m_boundInstances[difficulty]; }
         InstanceSave* GetInstanceSave(uint32 mapid, bool raid);
         void UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload = false);
@@ -2734,6 +2713,15 @@ class Player : public Unit, public GridObject<Player>
         void ResetMap();
 
         bool isAllowedToLoot(const Creature* creature);
+
+        void UpdateWeeklyLFGRewardCount(uint32 questId);
+        uint8 GetWeeklyLFGRewardCount(uint32 questId) const;
+        uint8 m_lfg_reward_count;
+
+        bool CanLootWeeklyBoss(uint32 creatureEntry);
+        void SetWeeklyBossLooted(uint32 creatureEntry, bool looted);
+        std::list<uint32> GetKilledWeeklyBosses();
+        uint32 GetKilledWeeklyBossEncounterMask();
 
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
         uint8 GetRunesState() const { return m_runes->runeState; }
@@ -3059,8 +3047,6 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_deathTimer;
         time_t m_deathExpireTime;
 
-        uint32 m_restTime;
-
         uint32 m_WeaponProficiency;
         uint32 m_ArmorProficiency;
         bool m_canParry;
@@ -3069,13 +3055,10 @@ class Player : public Unit, public GridObject<Player>
         uint8 m_swingErrorMsg;
 
         ////////////////////Rest System/////////////////////
-        time_t time_inn_enter;
-        uint32 inn_pos_mapid;
-        float  inn_pos_x;
-        float  inn_pos_y;
-        float  inn_pos_z;
+        time_t _restTime;
+        uint32 inn_triggerId;
         float m_rest_bonus;
-        RestType rest_type;
+        uint32 _restFlagMask;
         ////////////////////Rest System/////////////////////
 
         // Social

@@ -562,6 +562,21 @@ void Map::Update(const uint32 t_diff)
         player->Update(t_diff);
 
         VisitNearbyCellsOf(player, grid_object_update, world_object_update);
+
+        // Handle updates for creatures in combat with player and are more than 60 yards away
+        if (player->isInCombat())
+        {
+            HostileReference* ref = player->getHostileRefManager().getFirst();
+
+            while (ref)
+            {
+                if (Unit* unit = ref->getSource()->getOwner())
+                    if (unit->GetTypeId() == TYPEID_UNIT && unit->GetMapId() == player->GetMapId() && !unit->IsWithinDistInMap(player, 60.0f, false))
+                        VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
+
+                ref = ref->next();
+            }
+        }
     }
 
     // non-player active objects, increasing iterator in the loop in case of object removal
@@ -2668,7 +2683,7 @@ void InstanceMap::UnloadAll()
 void InstanceMap::SendResetWarnings(uint32 timeLeft) const
 {
     for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-        itr->getSource()->SendInstanceResetWarning(GetId(), itr->getSource()->GetDifficulty(IsRaid()), timeLeft);
+        itr->getSource()->SendInstanceResetWarning(GetId(), itr->getSource()->GetDifficulty(IsRaid()), timeLeft, true);
 }
 
 void InstanceMap::SetResetSchedule(bool on)

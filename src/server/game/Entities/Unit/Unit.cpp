@@ -2831,6 +2831,9 @@ uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized, bool add
         }
     }
 
+    minDamage = std::max(0.f, minDamage);
+    maxDamage = std::max(0.f, maxDamage);
+
     if (minDamage > maxDamage)
         std::swap(minDamage, maxDamage);
 
@@ -13839,6 +13842,11 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
         }
     }
 
+    // Blistering Tentacles Special Handling
+    if (target->GetEntry() == 56188 && bySpell && bySpell->IsAffectingArea() && bySpell->Id != 105569 &&
+        bySpell->Id != 109576 && bySpell->Id != 109577 && bySpell->Id != 109578)
+        return false;
+
     // can't attack invisible (ignore stealth for aoe spells) also if the area being looked at is from a spell use the dynamic object created instead of the casting unit.
     if ((!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_CAN_TARGET_INVISIBLE)) && (obj ? !obj->canSeeOrDetect(target, bySpell && bySpell->IsAffectingArea()) : !canSeeOrDetect(target, bySpell && bySpell->IsAffectingArea())))
         return false;
@@ -13885,9 +13893,9 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
         || target->GetReactionTo(this) > REP_NEUTRAL)
         return false;
 
-    // Not all neutral creatures can be attacked
+    // Not all neutral creatures can be attacked (even some unfriendly faction does not react aggresive to you, like Sporaggar)
     if (GetReactionTo(target) == REP_NEUTRAL &&
-        target->GetReactionTo(this) == REP_NEUTRAL)
+        target->GetReactionTo(this) <= REP_NEUTRAL)
     {
         if  (!(target->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER) &&
             !(target->GetTypeId() == TYPEID_UNIT && GetTypeId() == TYPEID_UNIT))
@@ -15069,6 +15077,7 @@ Unit* Creature::SelectVictim()
                 case 48854: // Squall Line SW
                 case 48855: // Squall Line SE
                 case 42333: // High Priestess Azil
+				case 55723: // Earthen Vortex
                     return getVictim();
                     break;
                 default:
@@ -18985,6 +18994,22 @@ void Unit::SendPlaySpellVisualKit(uint32 id, uint32 unkParam)
     SendMessageToSet(&data, true);
 }
 
+void Unit::PlaySpellVisual(uint32 id, float positionX, float positionY, float positionZ, float orientation)
+{
+    WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 4 + 4 + 4 + 4 + 4 + 4 + 4 + 8 + 4 + 4);
+    data << float(positionZ);
+    data << uint32(id);
+    data << uint16(0); // Unknown
+    data << float(orientation);
+    data << float(positionX);
+    data << uint16(0); // Unknown
+    data << float(positionY);
+    data.WriteBit(1); // Unknown
+    data << uint64(GetGUID());
+    data << uint64(0); // Uknown GUID
+    SendMessageToSet(&data, true);
+}
+
 void Unit::ApplyResilience(Unit const* victim, int32* damage) const
 {
     // player mounted on multi-passenger mount is also classified as vehicle
@@ -19897,7 +19922,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
 
     Position pos;
     if (!exitPosition)                          // Exit position not specified
-        vehicle->GetBase()->GetPosition(&pos);  // This should use passenger's current position, leaving it as it is now
+        vehicle->GetBase()->GetPosition();      // This should use passenger's current position, leaving it as it is now
                                                 // because we calculate positions incorrect (sometimes under map)
     else
         pos = *exitPosition;
@@ -21734,7 +21759,7 @@ void Unit::SendChangeCurrentVictimOpcode(HostileReference* pHostileReference)
         for (ThreatContainer::StorageType::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
         {
             data.appendPackGUID((*itr)->getUnitGuid());
-            data << uint32((*itr)->getThreat());
+            data << uint32((*itr)->getThreat()*100);
         }
         SendMessageToSet(&data, false);
     }

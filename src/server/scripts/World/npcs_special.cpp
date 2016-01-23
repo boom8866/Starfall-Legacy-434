@@ -7986,9 +7986,10 @@ public:
             me->RemoveAurasDueToSpell(SPELL_ROLLING_VISUAL);
             me->RemoveAurasDueToSpell(SPELL_BOULDER_VISUAL);
             me->CastSpell(me, SPELL_BOULDER_VISUAL, true);
-            me->NearTeleportTo(me->GetHomePosition());
-            me->Relocate(me->GetHomePosition());
-            me->SetPosition(me->GetHomePosition());
+            Position homePos = me->GetHomePosition();
+            me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation());
+            me->Relocate(homePos);
+            me->SetPosition(homePos);
         }
 
         void PassengerBoarded(Unit* passenger, int8 SeatId, bool apply)
@@ -8066,9 +8067,10 @@ public:
                 {
                     me->RemoveAurasDueToSpell(SPELL_ROLLING_VISUAL);
                     me->RemoveAurasDueToSpell(SPELL_RIDE_BOULDER);
-                    me->NearTeleportTo(me->GetHomePosition());
-                    me->Relocate(me->GetHomePosition());
-                    me->SetPosition(me->GetHomePosition());
+                    Position homePos = me->GetHomePosition();
+                    me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation());
+                    me->Relocate(homePos);
+                    me->SetPosition(homePos);
                     break;
                 }
                 case POINT_FINISH:
@@ -8076,9 +8078,10 @@ public:
                     me->RemoveAurasDueToSpell(SPELL_ROLLING_VISUAL);
                     me->RemoveAurasDueToSpell(SPELL_RIDE_BOULDER);
                     me->RemoveAurasDueToSpell(SPELL_RIDE_BOULDER);
-                    me->NearTeleportTo(me->GetHomePosition());
-                    me->Relocate(me->GetHomePosition());
-                    me->SetPosition(me->GetHomePosition());
+                    Position homePos = me->GetHomePosition();
+                    me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation());
+                    me->Relocate(homePos);
+                    me->SetPosition(homePos);
                     break;
                 }
                 default:
@@ -9811,8 +9814,7 @@ public:
             // Fungal Growth
             if (AuraEffect* aurEff = owner->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2681, EFFECT_0))
             {
-                Position pos;
-                me->GetPosition(&pos);
+                Position pos = me->GetPosition();
 
                 if (owner->HasAura(78788))  // Fungal Growth Rank 1
                     owner->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 81291, false);

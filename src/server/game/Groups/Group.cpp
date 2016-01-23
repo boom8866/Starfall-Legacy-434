@@ -236,14 +236,30 @@ void Group::LoadMemberFromDB(uint32 guidLow, uint8 memberFlags, uint8 subgroup, 
     sLFGMgr->SetupGroupMember(member.guid, GetGUID());
 }
 
-void Group::ConvertToLFG(bool raid)
+void Group::ConvertToLFG()
 {
-    if (!raid)
-        m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_UNK1);
-    else
-        m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_UNK1 | GROUPTYPE_RAID);
+    m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_LFG_RESTRICTED);
 
     m_lootMethod = NEED_BEFORE_GREED;
+    if (!isBGGroup() && !isBFGroup())
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GROUP_TYPE);
+
+        stmt->setUInt8(0, uint8(m_groupType));
+        stmt->setUInt32(1, m_dbStoreId);
+
+        CharacterDatabase.Execute(stmt);
+    }
+    SendUpdate();
+}
+
+void Group::ConvertToLFR()
+{
+    m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_LFG_RESTRICTED | GROUPTYPE_RAID);
+    m_lootMethod = NEED_BEFORE_GREED;
+
+    _initRaidSubGroupsCounter();
+
     if (!isBGGroup() && !isBFGroup())
     {
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GROUP_TYPE);
@@ -2074,13 +2090,43 @@ InstanceGroupBind* Group::GetBoundInstance(MapEntry const* mapEntry)
 InstanceGroupBind* Group::GetBoundInstance(Difficulty difficulty, uint32 mapId)
 {
     // some instances only have one difficulty
-    GetDownscaledMapDifficultyData(mapId, difficulty);
+    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapId, difficulty);
+    if (!mapDiff)
+        return NULL;
 
+    // Since Cataclysm, 10 and 25 man raids share a lock.
+    uint32 retrievalDifficulty = 0;
+    switch (difficulty)
+    {
+        case RAID_DIFFICULTY_10MAN_NORMAL:
+            retrievalDifficulty = RAID_DIFFICULTY_25MAN_NORMAL;
+            break;
+        case RAID_DIFFICULTY_25MAN_NORMAL:
+            retrievalDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
+            break;
+        case RAID_DIFFICULTY_10MAN_HEROIC:
+            retrievalDifficulty = RAID_DIFFICULTY_25MAN_HEROIC;
+            break;
+        case RAID_DIFFICULTY_25MAN_HEROIC:
+            retrievalDifficulty = RAID_DIFFICULTY_10MAN_HEROIC;
+            break;
+        default:
+            break;
+    }
+
+    // Try to find an instance bind corresponding to the current difficulty.
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapId);
     if (itr != m_boundInstances[difficulty].end())
         return &itr->second;
     else
-        return NULL;
+    {
+        // If one doesn't exist and it's a raid, try to get the difficulty corresponding to the other version lock.
+        BoundInstancesMap::iterator itr2 = m_boundInstances[Difficulty(retrievalDifficulty)].find(mapId);
+        if (itr2 != m_boundInstances[Difficulty(retrievalDifficulty)].end())
+            return &itr2->second;
+        else
+            return NULL;
+    }
 }
 
 InstanceGroupBind* Group::BindToInstance(InstanceSave* save, bool permanent, bool load)
@@ -2212,6 +2258,11 @@ bool Group::IsFull() const
 bool Group::isLFGGroup() const
 {
     return m_groupType & GROUPTYPE_LFG;
+}
+
+bool Group::isLFRGroup() const
+{
+    return (m_groupType & GROUPTYPE_LFG) && (m_groupType & GROUPTYPE_RAID);
 }
 
 bool Group::isRaidGroup() const

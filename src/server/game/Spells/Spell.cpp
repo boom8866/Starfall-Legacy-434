@@ -1441,10 +1441,10 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
         case TARGET_DEST_CASTER_BACK_RIGHT:
         case TARGET_DEST_CASTER_FRONT_RIGHT:
         case TARGET_DEST_CASTER_FRONT:
-            m_caster->GetFirstCollisionPosition(pos, dist+2, angle);
+            pos = m_caster->GetFirstCollisionPosition(dist+2, angle);
             break;
         default:
-            m_caster->GetNearPosition(pos, dist+2, angle);
+            pos = m_caster->GetNearPosition(dist+2, angle);
             break;
     }
     m_targets.SetDst(*m_caster);
@@ -1475,8 +1475,7 @@ void Spell::SelectImplicitTargetDestTargets(SpellEffIndex effIndex, SpellImplici
     else if (targetType.GetTarget() == TARGET_DEST_TARGET_RANDOM)
         dist = objSize + (dist - objSize) * (float)rand_norm();
 
-    Position pos;
-    target->GetNearPosition(pos, dist, angle);
+    Position pos = target->GetNearPosition(dist, angle);
     m_targets.SetDst(*target);
     m_targets.ModDst(pos);
 }
@@ -8373,7 +8372,7 @@ bool WorldObjectSpellConeTargetCheck::operator()(WorldObject* target)
     }
     else if (_spellInfo->AttributesCu & SPELL_ATTR0_CU_CONE_LINE)
     {
-        if (!_caster->HasInLine(target, _caster->GetObjectSize()))
+        if (!_caster->HasInLine(target, _caster->GetObjectSize() + target->GetObjectSize()))
             return false;
     }
     else
@@ -8392,7 +8391,7 @@ WorldObjectSpellTrajTargetCheck::WorldObjectSpellTrajTargetCheck(float range, Po
 bool WorldObjectSpellTrajTargetCheck::operator()(WorldObject* target)
 {
     // return all targets on missile trajectory (0 - size of a missile)
-    if (!_caster->HasInLine(target, 0))
+    if (!_caster->HasInLine(target, target->GetObjectSize()))
         return false;
     return WorldObjectSpellAreaTargetCheck::operator ()(target);
 }

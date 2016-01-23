@@ -199,11 +199,13 @@ public:
             switch (summon->GetEntry())
             {
                 case NPC_OMEGA_STANCE:
+                {
                     Position pos;
                     pos.Relocate(summon);
                     pos.m_positionZ = me->GetPositionZ() + 30.0f;
-                    summon->NearTeleportTo(pos, false);
+                    summon->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), false);
                     break;
+                }
                 default:
                     break;
             }

@@ -44,6 +44,7 @@ enum GMTicketSystemStatus
 
 enum GMTicketStatus
 {
+    GMTICKET_STATUS_SURVEY                       = 0x03,
     GMTICKET_STATUS_HASTEXT                      = 0x06,
     GMTICKET_STATUS_DEFAULT                      = 0x0A
 };
@@ -221,6 +222,7 @@ public:
     void AddTicket(GmTicket* ticket);
     void CloseTicket(uint32 ticketId, int64 source = -1);
     void RemoveTicket(uint32 ticketId);
+    void SetTicketStatus(WorldSession* session, uint32 ticketId, GMTicketStatus status);
 
     bool GetStatus() const { return _status; }
     void SetStatus(bool status) { _status = status; }

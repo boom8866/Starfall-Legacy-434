@@ -170,8 +170,7 @@ public:
         {
             for (uint8 i = 0; i <= 2; ++i)
             {
-                Position pos;
-                me->GetRandomNearPosition(pos, frand(20.f, 30.f));
+                Position pos = me->GetRandomNearPosition(frand(20.f, 30.f));
                 pos.m_positionZ = me->GetPositionZ();
                 me->SummonCreature(i ? NPC_SUMMONED_WITCH : NPC_SUMMONED_GUARD, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
             }

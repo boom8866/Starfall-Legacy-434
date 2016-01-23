@@ -357,6 +357,16 @@ void TicketMgr::RemoveTicket(uint32 ticketId)
     }
 }
 
+void TicketMgr::SetTicketStatus(WorldSession* session, uint32 ticketId, GMTicketStatus status)
+{
+    if (GmTicket* ticket = GetTicket(ticketId))
+    {
+        WorldPacket data(SMSG_GM_TICKET_STATUS_UPDATE, 4);
+        data << uint32(status);
+        session->SendPacket(&data);
+    }
+}
+
 void TicketMgr::ShowList(ChatHandler& handler, bool onlineOnly) const
 {
     handler.SendSysMessage(onlineOnly ? LANG_COMMAND_TICKETSHOWONLINELIST : LANG_COMMAND_TICKETSHOWLIST);

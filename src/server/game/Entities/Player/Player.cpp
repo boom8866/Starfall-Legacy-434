@@ -879,7 +879,6 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(t
     m_MirrorTimerFlagsLast = UNDERWATER_NONE;
     m_isInWater = false;
     m_drunkTimer = 0;
-    m_restTime = 0;
     m_deathTimer = 0;
     m_deathExpireTime = 0;
 
@@ -901,13 +900,10 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(t
     m_canTitanGrip = false;
 
     ////////////////////Rest System/////////////////////
-    time_inn_enter=0;
-    inn_pos_mapid=0;
-    inn_pos_x=0;
-    inn_pos_y=0;
-    inn_pos_z=0;
-    m_rest_bonus=0;
-    rest_type=REST_TYPE_NO;
+    _restTime = 0;
+    inn_triggerId = 0;
+    m_rest_bonus = 0;
+    _restFlagMask = 0;
     ////////////////////Rest System/////////////////////
 
     m_mailsLoaded = false;
@@ -1830,15 +1826,20 @@ void Player::Update(uint32 p_time)
 
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
-        if (roll_chance_i(3) && GetTimeInnEnter() > 0)      // freeze update
+        if (roll_chance_i(3) && _restTime > 0)      // freeze update
         {
-            time_t time_inn = time(NULL)-GetTimeInnEnter();
-            if (time_inn >= 10)                             // freeze update
+            time_t currTime = time(nullptr);
+            time_t timeDiff = currTime - _restTime;
+            if (timeDiff >= 10)                               // freeze update
             {
-                float bubble = 0.125f*sWorld->getRate(RATE_REST_INGAME);
-                                                            // speed collect rest bonus (section/in hour)
-                SetRestBonus(GetRestBonus()+ time_inn*((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/72000)*bubble);
-                UpdateInnerTime(time(NULL));
+                _restTime = currTime;
+
+                float bubble = 0.125f * sWorld->getRate(RATE_REST_INGAME);
+                float extraPerSec = ((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 72000.0f) * bubble;
+
+                // speed collect rest bonus (section/in hour)
+                float currRestBonus = GetRestBonus();
+                SetRestBonus(currRestBonus + timeDiff * extraPerSec);
             }
         }
     }
@@ -1855,6 +1856,14 @@ void Player::Update(uint32 p_time)
     {
         if (p_time >= m_zoneUpdateTimer)
         {
+            // On zone update tick check if we are still in an inn if we are supposed to be in one
+            if (HasRestFlag(REST_FLAG_IN_TAVERN))
+            {
+                AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(GetInnTriggerId());
+                if (!atEntry || !IsInAreaTriggerRadius(atEntry))
+                    RemoveRestFlag(REST_FLAG_IN_TAVERN);
+            }
+
             uint32 newzone, newarea;
             GetZoneAndAreaId(newzone, newarea);
 
@@ -2363,8 +2372,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         // near teleport, triggering send CMSG_MOVE_TELEPORT_ACK from client at landing
         if (!GetSession()->PlayerLogout())
         {
-            Position oldPos;
-            GetPosition(&oldPos);
+            Position oldPos = GetPosition();
+            if (HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
+                z += GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
             Relocate(x, y, z, orientation);
             SendTeleportPacket(oldPos); // this automatically relocates to oldPos in order to broadcast the packet in the right place
         }
@@ -3217,6 +3227,28 @@ void Player::SendSpectatorAddonMsgToBG(SpectatorAddonMsg msg)
         return;
 
     GetBattleground()->SendSpectateAddonsMsg(msg);
+}
+
+bool Player::IsInAreaTriggerRadius(const AreaTriggerEntry* trigger) const
+{
+    if (!trigger || GetMapId() != trigger->mapid)
+        return false;
+
+    if (trigger->radius > 0.f)
+    {
+        // if we have radius check it
+        float dist = GetDistance(trigger->x, trigger->y, trigger->z);
+        if (dist > trigger->radius)
+            return false;
+    }
+    else
+    {
+        Position center(trigger->x, trigger->y, trigger->z, trigger->box_orientation);
+        if (!IsWithinBox(center, trigger->box_x / 2.f, trigger->box_y / 2.f, trigger->box_z / 2.f))
+            return false;
+    }
+
+    return true;
 }
 
 void Player::SetGameMaster(bool on)
@@ -8508,7 +8540,7 @@ void Player::UpdateArea(uint32 newArea)
 {
     // FFA_PVP flags are area and not zone id dependent
     // so apply them accordingly
-    m_areaUpdateId    = newArea;
+    m_areaUpdateId = newArea;
 
     phaseMgr.AddUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
 
@@ -8796,6 +8828,12 @@ void Player::UpdateArea(uint32 newArea)
     else
         RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
 
+    uint32 const areaRestFlag = (GetTeam() == ALLIANCE) ? AREA_FLAG_REST_ZONE_ALLIANCE : AREA_FLAG_REST_ZONE_HORDE;
+    if (area && area->flags & areaRestFlag)
+        SetRestFlag(REST_FLAG_IN_FACTION_AREA);
+    else
+        RemoveRestFlag(REST_FLAG_IN_FACTION_AREA);
+
     phaseMgr.RemoveUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
 }
 
@@ -8864,33 +8902,11 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     if (zone->flags & AREA_FLAG_CAPITAL)                     // Is in a capital city
     {
         if (!pvpInfo.IsHostile || zone->IsSanctuary())
-        {
-            SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-            SetRestType(REST_TYPE_IN_CITY);
-            InnEnter(time(0), GetMapId(), 0, 0, 0);
-        }
+            SetRestFlag(REST_FLAG_IN_CITY);
         pvpInfo.IsInNoPvPArea = true;
     }
     else
-    {
-        if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
-        {
-            if (GetRestType() == REST_TYPE_IN_TAVERN)        // Still inside a tavern or has recently left
-            {
-                // Remove rest state if we have recently left a tavern.
-                if (GetMapId() != GetInnPosMapId() || GetExactDist(GetInnPosX(), GetInnPosY(), GetInnPosZ()) > 1.0f)
-                {
-                    RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-                    SetRestType(REST_TYPE_NO);
-                }
-            }
-            else                                             // Recently left a capital city
-            {
-                RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-                SetRestType(REST_TYPE_NO);
-            }
-        }
-    }
+        RemoveRestFlag(REST_FLAG_IN_CITY);
 
     UpdatePvPState();
 
@@ -10063,6 +10079,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     PermissionTypes permission = ALL_PERMISSION;
 
     sLog->outDebug(LOG_FILTER_LOOT, "Player::SendLoot");
+
     if (IS_GAMEOBJECT_GUID(guid))
     {
         sLog->outDebug(LOG_FILTER_LOOT, "IS_GAMEOBJECT_GUID(guid)");
@@ -16725,6 +16742,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
                 }
                 else if (quest->IsDFQuest())
                 {
+
                     MailSender sender(MAIL_CREATURE, 34337 /* The Postmaster */);
                     MailDraft draft("Recovered Item", "We recovered a lost item in the twisting nether and noted that it was yours.$B$BPlease find said object enclosed.");
                     SQLTransaction trans = CharacterDatabase.BeginTransaction();
@@ -19400,6 +19418,9 @@ bool Player::isAllowedToLoot(const Creature* creature)
     if (HasPendingBind())
         return false;
 
+    if (!CanLootWeeklyBoss(creature->GetEntry()))
+        return false;
+
     const Loot* loot = &creature->loot;
     if (loot->isLooted()) // nothing to loot or everything looted.
         return false;
@@ -19451,6 +19472,123 @@ void Player::_SaveRBGStats(SQLTransaction& trans)
     stmt->setUInt32(2, ratedBGStats.WeeklyWins10vs10);
     stmt->setUInt32(3, ratedBGStats.PersonalRating);
     trans->Append(stmt);
+}
+
+void Player::UpdateWeeklyLFGRewardCount(uint32 questId)
+{
+    if (!GetWeeklyLFGRewardCount(questId)) // Check for existing quest counter. If not we're gonna create one
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_WEEKLY_LFG_REWARD);
+        stmt->setUInt32(0, GetGUIDLow());
+        stmt->setUInt32(1, questId);
+        CharacterDatabase.Execute(stmt);
+    }
+    else // Else we gonna update the existing counter
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_WEEKLY_LFG_REWARD);
+        stmt->setUInt32(0, GetGUIDLow());
+        stmt->setUInt32(1, questId);
+        CharacterDatabase.Execute(stmt);
+    }
+}
+
+uint8 Player::GetWeeklyLFGRewardCount(uint32 questId) const
+{
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_WEEKLY_LFG_REWARD_COUNT);
+    stmt->setUInt32(0, GetGUIDLow());
+    stmt->setUInt32(1, questId);
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
+
+    if (!result)
+        return 0;
+
+    Field* fields = result->Fetch();
+    return fields[0].GetUInt8();
+
+    return 0;
+}
+
+bool Player::CanLootWeeklyBoss(uint32 creatureEntry)
+{
+    if (!creatureEntry)
+        return true;
+
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_WEEKLY_BOSS_KILL);
+    stmt->setUInt32(0, GetGUIDLow());
+    stmt->setUInt32(1, creatureEntry);
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
+
+    if (!result)
+        return true;
+
+    Field* fields = result->Fetch();
+    bool weeklyBossLooted = fields[0].GetUInt8();
+
+    // The boss cannot be looted if the player has done it before this week.
+    if (weeklyBossLooted)
+        return false;
+
+    return true;
+}
+
+void Player::SetWeeklyBossLooted(uint32 creatureEntry, bool looted)
+{
+    if (!looted) // This is the first insertion when the player kills the boss and has not been looted yet.
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_WEEKLY_BOSS_KILL);
+        stmt->setUInt32(0, GetGUIDLow());
+        stmt->setUInt32(1, creatureEntry);
+        stmt->setUInt8(2, looted);
+        CharacterDatabase.Execute(stmt);
+    }
+    else // We call this once the boss has been looted to update set the field to true.
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_WEEKLY_BOSS_KILL);
+        stmt->setUInt8(0, looted);
+        stmt->setUInt32(1, GetGUIDLow());
+        stmt->setUInt32(2, creatureEntry);
+        CharacterDatabase.Execute(stmt);
+    }
+}
+
+std::list<uint32> Player::GetKilledWeeklyBosses()
+{
+    std::list<uint32> weeklyBossEntries;
+
+    // Get the entry of all the bosses the player looted, based on map and difficulty.
+    PreparedStatement* entryStmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_WEEKLY_BOSS_KILLS);
+    entryStmt->setUInt32(0, GetGUIDLow());
+
+    PreparedQueryResult entryResult = CharacterDatabase.Query(entryStmt);
+
+    if (entryResult)
+    {
+        do
+        {
+            Field* resultField = entryResult->Fetch();
+            uint32 weeklyBossEntry = resultField[0].GetUInt32();
+
+            weeklyBossEntries.push_back(weeklyBossEntry);
+        } while (entryResult->NextRow());
+    }
+
+    return weeklyBossEntries;
+}
+
+uint32 Player::GetKilledWeeklyBossEncounterMask()
+{
+    uint32 encounterMask = 0;
+
+    DungeonEncounterList const* encounters = sObjectMgr->GetDungeonEncounterList(967, Difficulty(RAID_DIFFICULTY_25MAN_NORMAL));
+    std::list<uint32> weeklyBossesKilled = GetKilledWeeklyBosses();
+
+    if (encounters && !weeklyBossesKilled.empty())
+        for (DungeonEncounterList::const_iterator itr = encounters->begin(); itr != encounters->end(); ++itr)
+            for (auto weeklyBossKilled : weeklyBossesKilled)
+                if ((*itr)->creditEntry == weeklyBossKilled)
+                    encounterMask |= 1 << (*itr)->dbcEntry->encounterIndex;
+
+    return encounterMask;
 }
 
 void Player::_LoadActions(PreparedQueryResult result)
@@ -20377,18 +20515,46 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
     }
 }
 
-InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty)
+InstancePlayerBind* Player::GetBoundInstance(uint32 mapId, Difficulty difficulty)
 {
-    // some instances only have one difficulty
-    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapid, difficulty);
+    // Some instances only have one difficulty.
+    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapId, difficulty);
     if (!mapDiff)
         return NULL;
 
-    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
+    // Since Cataclysm, 10 and 25 man raids share a lock.
+    uint32 retrievalDifficulty = 0;
+    switch (difficulty)
+    {
+        case RAID_DIFFICULTY_10MAN_NORMAL:
+            retrievalDifficulty = RAID_DIFFICULTY_25MAN_NORMAL;
+            break;
+        case RAID_DIFFICULTY_25MAN_NORMAL:
+            retrievalDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
+            break;
+        case RAID_DIFFICULTY_10MAN_HEROIC:
+            retrievalDifficulty = RAID_DIFFICULTY_25MAN_HEROIC;
+            break;
+        case RAID_DIFFICULTY_25MAN_HEROIC:
+            retrievalDifficulty = RAID_DIFFICULTY_10MAN_HEROIC;
+            break;
+        default:
+            break;
+    }
+
+    // Try to find an instance bind corresponding to the current difficulty.
+    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapId);
     if (itr != m_boundInstances[difficulty].end())
         return &itr->second;
     else
-        return NULL;
+    {
+        // If one doesn't exist and it's a raid, try to get the difficulty corresponding to the other version lock.
+        BoundInstancesMap::iterator itr2 = m_boundInstances[Difficulty(retrievalDifficulty)].find(mapId);
+        if (itr2 != m_boundInstances[Difficulty(retrievalDifficulty)].end())
+            return &itr2->second;
+        else
+            return NULL;
+    }
 }
 
 InstanceSave* Player::GetInstanceSave(uint32 mapid, bool raid)
@@ -24374,15 +24540,18 @@ void Player::UpdateVisibilityOf(WorldObject* target)
     {
         if (!canSeeOrDetect(target, false, true))
         {
-            if (target->GetTypeId() == TYPEID_UNIT)
-                BeforeVisibilityDestroy<Creature>(target->ToCreature(), this);
+            if (!(target->GetTypeId() == TYPEID_GAMEOBJECT && ((GameObject*)target)->GetGOInfo()->type == GAMEOBJECT_TYPE_TRANSPORT))
+            {
+                if (target->GetTypeId() == TYPEID_UNIT)
+                    BeforeVisibilityDestroy<Creature>(target->ToCreature(), this);
 
-            target->DestroyForPlayer(this);
-            m_clientGUIDs.erase(target->GetGUID());
+                target->DestroyForPlayer(this);
+                m_clientGUIDs.erase(target->GetGUID());
 
-            #ifdef TRINITY_DEBUG
-                sLog->outDebug(LOG_FILTER_MAPS, "Object %u (Type: %u) out of range for player %u. Distance = %f", target->GetGUIDLow(), target->GetTypeId(), GetGUIDLow(), GetDistance(target));
-            #endif
+                #ifdef TRINITY_DEBUG
+                    sLog->outDebug(LOG_FILTER_MAPS, "Object %u (Type: %u) out of range for player %u. Distance = %f", target->GetGUIDLow(), target->GetTypeId(), GetGUIDLow(), GetDistance(target));
+                #endif
+            }
         }
     }
     else
@@ -24393,16 +24562,19 @@ void Player::UpdateVisibilityOf(WorldObject* target)
             //    UpdateVisibilityOf(((Unit*)target)->m_Vehicle);
 
             target->SendUpdateToPlayer(this);
-            m_clientGUIDs.insert(target->GetGUID());
+            if (!(target->GetTypeId() == TYPEID_GAMEOBJECT && ((GameObject*)target)->GetGOInfo()->type == GAMEOBJECT_TYPE_TRANSPORT))
+            {
+                m_clientGUIDs.insert(target->GetGUID());
 
-            #ifdef TRINITY_DEBUG
-                sLog->outDebug(LOG_FILTER_MAPS, "Object %u (Type: %u) is visible now for player %u. Distance = %f", target->GetGUIDLow(), target->GetTypeId(), GetGUIDLow(), GetDistance(target));
-            #endif
+                #ifdef TRINITY_DEBUG
+                    sLog->outDebug(LOG_FILTER_MAPS, "Object %u (Type: %u) is visible now for player %u. Distance = %f", target->GetGUIDLow(), target->GetTypeId(), GetGUIDLow(), GetDistance(target));
+                #endif
 
-            // target aura duration for caster show only if target exist at caster client
-            // send data at target visibility change (adding to client)
-            if (target->isType(TYPEMASK_UNIT))
-                SendInitialVisiblePackets((Unit*)target);
+                // target aura duration for caster show only if target exist at caster client
+                // send data at target visibility change (adding to client)
+                if (target->isType(TYPEMASK_UNIT))
+                    SendInitialVisiblePackets((Unit*)target);
+            }
         }
     }
 }
@@ -24861,18 +25033,20 @@ void Player::SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8
     GetSession()->SendPacket(&data);
 }
 
-void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time)
+void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time, bool welcome)
 {
-    // type of warning, based on the time remaining until reset
-    uint32 type;
-    if (time > 3600)
-        type = RAID_INSTANCE_WELCOME;
-    else if (time > 900 && time <= 3600)
-        type = RAID_INSTANCE_WARNING_HOURS;
-    else if (time > 300 && time <= 900)
-        type = RAID_INSTANCE_WARNING_MIN;
-    else
-        type = RAID_INSTANCE_WARNING_MIN_SOON;
+	// type of warning, based on the time remaining until reset
+	uint32 type;
+	if (welcome)
+		type = RAID_INSTANCE_WELCOME;
+	else if (time > 21600)
+		type = RAID_INSTANCE_WELCOME;
+	else if (time > 3600)
+		type = RAID_INSTANCE_WARNING_HOURS;
+	else if (time > 300)
+		type = RAID_INSTANCE_WARNING_MIN;
+	else
+		type = RAID_INSTANCE_WARNING_MIN_SOON;
 
     WorldPacket data(SMSG_RAID_INSTANCE_MESSAGE, 4+4+4+4);
     data << uint32(type);
@@ -25190,6 +25364,9 @@ void Player::SetDailyQuestStatus(uint32 quest_id)
             m_lastDailyQuestTime = time(NULL);
             m_DailyQuestChanged = true;
         }
+
+        if (qQuest->IsDFQuest() && qQuest->IsRepeatable())
+            UpdateWeeklyLFGRewardCount(quest_id);
     }
 }
 
@@ -25710,6 +25887,23 @@ bool Player::GetsRecruitAFriendBonus(bool forXP)
 
 void Player::RewardPlayerAndGroupAtKill(Unit* victim, bool isBattleGround)
 {
+    // Check for boss loot quests and add them as completed for the player / group.
+    if (victim->GetTypeId() == TYPEID_UNIT)
+        if (Creature* deadCreature = victim->ToCreature())
+        {
+            if (Group* group = GetGroup()) // Group case.
+            {
+                for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+                {
+                    if (Player* groupGuy = itr->getSource())
+                        if (IsInMap(groupGuy) && CanLootWeeklyBoss(deadCreature->GetEntry()), deadCreature->IsLFRBoss(groupGuy))
+                            groupGuy->SetWeeklyBossLooted(deadCreature->GetEntry(), false);
+                }
+            }
+            else if (CanLootWeeklyBoss(deadCreature->GetEntry()))
+                SetWeeklyBossLooted(deadCreature->GetEntry(), false);
+        }
+
     KillRewarder(this, victim, isBattleGround).Reward();
 }
 
@@ -29198,6 +29392,12 @@ void Player::SendMovementSetFeatherFall(bool apply)
 
 void Player::SendMovementSetCollisionHeight(float height)
 {
+    CreatureDisplayInfoEntry const* mountDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID));
+
+    bool hasMountDisplayInfoScale = mountDisplayInfo ? true : false;
+    float mountDisplayScale = GetObjectScale();
+
+
     ObjectGuid guid = GetGUID();
     WorldPacket data(SMSG_MOVE_SET_COLLISION_HEIGHT, 2 + 8 + 4 + 4);
     data.WriteBits(0, 2);
@@ -29697,4 +29897,31 @@ void Player::SetGuildGroupMember(bool guildGroupMember)
        m_isGuildGroupMember = true;
     else
        m_isGuildGroupMember = false;
+}
+
+void Player::SetRestFlag(RestFlag restFlag, uint32 triggerId /*= 0*/)
+{
+    uint32 oldRestMask = _restFlagMask;
+    _restFlagMask |= restFlag;
+
+    if (!oldRestMask && _restFlagMask) // only set flag/time on the first rest state
+    {
+        _restTime = time(nullptr);
+        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+    }
+
+    if (triggerId)
+        inn_triggerId = triggerId;
+}
+
+void Player::RemoveRestFlag(RestFlag restFlag)
+{
+    uint32 oldRestMask = _restFlagMask;
+    _restFlagMask &= ~restFlag;
+
+    if (oldRestMask && !_restFlagMask) // only remove flag/time on the last rest state remove
+    {
+        _restTime = 0;
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+    }
 }
