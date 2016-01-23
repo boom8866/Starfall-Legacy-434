@@ -27,7 +27,7 @@ UPDATE `creature_template` SET `DamageModifier`= 16 WHERE `entry`= 49334;
 
 -- DamageModifier update for Neferset Plaguebringer (id: 49324)
 UPDATE `creature_template` SET `DamageModifier`= 16 WHERE `entry`= 49324;
-+
+
 -- DamageModifier update for Venomfang Crocolisk (id: 44260)
 UPDATE `creature_template` SET `DamageModifier`= 16 WHERE `entry`= 44260;
 
