@@ -722,6 +722,10 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             return 0;
     }
 
+    // For half second delay death
+    if (victim && victim->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_PLAY_DEATH_ANIM))
+        return 0;
+
     // Signal the pet it was attacked so the AI can respond if needed
     if (victim->GetTypeId() == TYPEID_UNIT && this != victim && victim->isPet() && victim->isAlive())
         victim->ToPet()->AI()->AttackedBy(this);
@@ -1074,7 +1078,10 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         if (victim->GetTypeId() == TYPEID_PLAYER && victim != this)
             victim->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_DAMAGE_RECEIVED, health);
 
-        Kill(victim, durabilityLoss);
+        if (GetTypeId() == TYPEID_PLAYER && victim->GetTypeId() == TYPEID_PLAYER)
+            PrepareKill(victim);
+        else
+            PrepareKill(victim, true);
     }
     else
     {
@@ -1534,7 +1541,8 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
     if (!victim)
         return;
 
-    if (!victim->isAlive() || victim->HasUnitState(UNIT_STATE_IN_FLIGHT) || (victim->GetTypeId() == TYPEID_UNIT && victim->ToCreature()->IsInEvadeMode()))
+    if (!victim->isAlive() || victim->HasUnitState(UNIT_STATE_IN_FLIGHT) || (victim->GetTypeId() == TYPEID_UNIT && victim->ToCreature()->IsInEvadeMode())
+        || victim->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_PLAY_DEATH_ANIM))
         return;
 
     SpellInfo const* spellProto = sSpellMgr->GetSpellInfo(damageInfo->SpellID);
@@ -17804,6 +17812,44 @@ void Unit::PlayOneShotAnimKit(uint16 animKitId)
     data.append(GetPackGUID());
     data << uint16(animKitId);
     SendMessageToSet(&data, true);
+}
+
+class KillUnitEvent : public BasicEvent
+{
+public:
+    KillUnitEvent(Unit* killer, Unit* victim, bool durabilityLoss) : _killer(killer), _victim(victim), _durabilityLoss(durabilityLoss)
+    {
+    }
+
+    bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
+    {
+        if (_victim && !_victim->isDead())
+        {
+            if (_killer)    // Because we don't wanna crash
+            {
+                _killer->Kill(_victim, _durabilityLoss);
+                _victim->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_PLAY_DEATH_ANIM);
+            }
+            else
+                _victim->Kill(_victim, false);
+        }
+        return true;
+    }
+
+private:
+    Unit* _killer;
+    Unit* _victim;
+    bool _durabilityLoss;
+};
+
+void Unit::PrepareKill(Unit* victim, bool durabilityLoss)
+{
+    if (victim)
+    {
+        victim->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_PLAY_DEATH_ANIM);
+        victim->SetHealth(1);
+        m_Events.AddEvent(new KillUnitEvent(this, victim, durabilityLoss), m_Events.CalculateTime(1000)); // One second (blizzlike)
+    }
 }
 
 void Unit::Kill(Unit* victim, bool durabilityLoss)
