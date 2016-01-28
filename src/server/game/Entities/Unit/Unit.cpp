@@ -17848,7 +17848,7 @@ void Unit::PrepareKill(Unit* victim, bool durabilityLoss)
     {
         victim->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_PLAY_DEATH_ANIM);
         victim->SetHealth(1);
-        m_Events.AddEvent(new KillUnitEvent(this, victim, durabilityLoss), m_Events.CalculateTime(1000)); // One second (blizzlike)
+        m_Events.AddEvent(new KillUnitEvent(this, victim, durabilityLoss), m_Events.CalculateTime(500)); // Half second
     }
 }
 
